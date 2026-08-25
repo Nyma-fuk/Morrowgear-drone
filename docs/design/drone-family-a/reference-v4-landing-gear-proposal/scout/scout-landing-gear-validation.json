@@ -1,0 +1,9 @@
+{
+  "pass": true,
+  "role": "scout",
+  "landingGearObjects": 9,
+  "legacyGearRemoved": true,
+  "deploymentDirection": "outward from centerline",
+  "contactSurfaces": "level",
+  "designStatus": "proposal awaiting approval"
+}

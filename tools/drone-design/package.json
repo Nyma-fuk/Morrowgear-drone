@@ -1,0 +1,13 @@
+{
+  "name": "morrowgear-drone-design",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "validate": "node validate.mjs",
+    "render": "node render.cjs",
+    "build": "node validate.mjs && node render.cjs"
+  },
+  "dependencies": {
+    "three": "0.180.0"
+  }
+}

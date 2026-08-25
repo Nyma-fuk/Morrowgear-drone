@@ -1,0 +1,111 @@
+{
+  "generatedAt": "2026-08-22T06:45:54.048Z",
+  "method": "single numeric mesh model; mirrored parts generated from one side; orthographic views rendered from identical geometry",
+  "pass": true,
+  "results": [
+    {
+      "role": "scout",
+      "pass": true,
+      "failures": [],
+      "partCount": 42,
+      "mirrorPairCount": 14,
+      "bounds": {
+        "min": [
+          -20.9019572237426,
+          -6.825,
+          -13.05
+        ],
+        "max": [
+          20.9019572237426,
+          7.931957223742601,
+          12.5
+        ],
+        "size": [
+          41.8039144474852,
+          14.756957223742601,
+          25.55
+        ]
+      },
+      "dockClearance": 6.196085552514802,
+      "modelSha256": "56d1b43e4f7b15fcb030a3a2a9844bb37282a404e5e3c92df1918c3d7c3a74ce"
+    },
+    {
+      "role": "engineer",
+      "pass": true,
+      "failures": [],
+      "partCount": 46,
+      "mirrorPairCount": 15,
+      "bounds": {
+        "min": [
+          -20.9019572237426,
+          -7.625,
+          -13.05
+        ],
+        "max": [
+          20.9019572237426,
+          7.931957223742601,
+          12.5
+        ],
+        "size": [
+          41.8039144474852,
+          15.5569572237426,
+          25.55
+        ]
+      },
+      "dockClearance": 6.196085552514802,
+      "modelSha256": "8fd0598e960109a8498e73d87e8755f9740c38c19a36d16c96e304530ece41c7"
+    },
+    {
+      "role": "field",
+      "pass": true,
+      "failures": [],
+      "partCount": 43,
+      "mirrorPairCount": 15,
+      "bounds": {
+        "min": [
+          -20.9019572237426,
+          -6.825,
+          -13.05
+        ],
+        "max": [
+          20.9019572237426,
+          7.931957223742601,
+          12.5
+        ],
+        "size": [
+          41.8039144474852,
+          14.756957223742601,
+          25.55
+        ]
+      },
+      "dockClearance": 6.196085552514802,
+      "modelSha256": "1912c34e29be41894b68e85ba1e0c40b2600e5aa521e39075a6db652606fa5c9"
+    },
+    {
+      "role": "guard",
+      "pass": true,
+      "failures": [],
+      "partCount": 47,
+      "mirrorPairCount": 17,
+      "bounds": {
+        "min": [
+          -20.9019572237426,
+          -6.825,
+          -13.05
+        ],
+        "max": [
+          20.9019572237426,
+          7.931957223742601,
+          12.5
+        ],
+        "size": [
+          41.8039144474852,
+          14.756957223742601,
+          25.55
+        ]
+      },
+      "dockClearance": 6.196085552514802,
+      "modelSha256": "3096d4bbfb6109b1e78af8fb296b47c56c0380da5ba77f6981825ed6b95dc1a4"
+    }
+  ]
+}

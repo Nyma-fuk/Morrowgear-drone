@@ -1,0 +1,5 @@
+{"parent":"minecraft:block/block","ambientocclusion":false,"textures":{"side":"morrowgear_drone:block/dock_side","particle":"morrowgear_drone:block/dock_side"},"elements":[
+{"from":[0,0,0],"to":[16,2,16],"faces":{"down":{"texture":"#side"},"up":{"texture":"#top","uv":[0,0,16,16]},"north":{"texture":"#side"},"south":{"texture":"#side"},"west":{"texture":"#side"},"east":{"texture":"#side"}}},
+{"from":[1.2,2,3.2],"to":[14.8,4.35,12.8],"faces":{"up":{"texture":"#top","uv":[1.2,3.2,14.8,12.8]},"north":{"texture":"#side"},"south":{"texture":"#side"},"west":{"texture":"#side"},"east":{"texture":"#side"}}},
+{"from":[3.2,2,1.2],"to":[12.8,4.35,3.2],"faces":{"up":{"texture":"#top","uv":[3.2,1.2,12.8,3.2]},"north":{"texture":"#side"},"south":{"texture":"#side"},"west":{"texture":"#side"},"east":{"texture":"#side"}}},
+{"from":[3.2,2,12.8],"to":[12.8,4.35,14.8],"faces":{"up":{"texture":"#top","uv":[3.2,12.8,12.8,14.8]},"north":{"texture":"#side"},"south":{"texture":"#side"},"west":{"texture":"#side"},"east":{"texture":"#side"}}}]}

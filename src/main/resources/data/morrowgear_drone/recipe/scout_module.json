@@ -1,0 +1,1 @@
+{"type":"minecraft:crafting_shaped","category":"equipment","pattern":["ASA","CBC"," F "],"key":{"A":"minecraft:amethyst_shard","S":"minecraft:spyglass","C":"minecraft:compass","B":"morrowgear_drone:basic_control_board","F":"morrowgear_drone:lightweight_frame"},"result":{"id":"morrowgear_drone:scout_module","count":1}}

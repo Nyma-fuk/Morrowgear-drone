@@ -1,0 +1,1388 @@
+{
+  "schemaVersion": 2,
+  "family": "A",
+  "role": "guard",
+  "frontAxis": "-Z",
+  "unitsPerBlock": 16,
+  "parts": [
+    {
+      "id": "fuselage_lower",
+      "shape": "extruded",
+      "center": [
+        0,
+        -0.9,
+        0
+      ],
+      "size": [
+        10,
+        2.2,
+        25
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": "mechanism",
+      "group": "common",
+      "outline": [
+        [
+          -4.6,
+          8.8
+        ],
+        [
+          -5,
+          3.5
+        ],
+        [
+          -4.4,
+          -4.8
+        ],
+        [
+          -3,
+          -10.8
+        ],
+        [
+          0,
+          -13
+        ],
+        [
+          3,
+          -10.8
+        ],
+        [
+          4.4,
+          -4.8
+        ],
+        [
+          5,
+          3.5
+        ],
+        [
+          4.6,
+          8.8
+        ],
+        [
+          2.6,
+          12
+        ],
+        [
+          -2.6,
+          12
+        ]
+      ],
+      "holes": [],
+      "height": 2.2
+    },
+    {
+      "id": "fuselage_mid",
+      "shape": "extruded",
+      "center": [
+        0,
+        1,
+        0
+      ],
+      "size": [
+        8.5,
+        3.2,
+        22.9
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": "armor",
+      "group": "common",
+      "outline": [
+        [
+          -3.9,
+          8.5
+        ],
+        [
+          -4.25,
+          2.5
+        ],
+        [
+          -3.6,
+          -5.1
+        ],
+        [
+          -2.35,
+          -10.5
+        ],
+        [
+          0,
+          -12
+        ],
+        [
+          2.35,
+          -10.5
+        ],
+        [
+          3.6,
+          -5.1
+        ],
+        [
+          4.25,
+          2.5
+        ],
+        [
+          3.9,
+          8.5
+        ],
+        [
+          2.2,
+          10.9
+        ],
+        [
+          -2.2,
+          10.9
+        ]
+      ],
+      "holes": [],
+      "height": 3.2
+    },
+    {
+      "id": "fuselage_top",
+      "shape": "extruded",
+      "center": [
+        0,
+        3,
+        -0.4
+      ],
+      "size": [
+        6,
+        1.1,
+        19
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": "armorMid",
+      "group": "common",
+      "outline": [
+        [
+          -2.65,
+          7
+        ],
+        [
+          -3,
+          1.5
+        ],
+        [
+          -2.5,
+          -5
+        ],
+        [
+          -1.55,
+          -9
+        ],
+        [
+          0,
+          -10
+        ],
+        [
+          1.55,
+          -9
+        ],
+        [
+          2.5,
+          -5
+        ],
+        [
+          3,
+          1.5
+        ],
+        [
+          2.65,
+          7
+        ],
+        [
+          1.6,
+          9
+        ],
+        [
+          -1.6,
+          9
+        ]
+      ],
+      "holes": [],
+      "height": 1.1
+    },
+    {
+      "id": "top_panel_front",
+      "shape": "box",
+      "center": [
+        0,
+        3.72,
+        -5
+      ],
+      "size": [
+        3.7,
+        0.22,
+        5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": "armorMid",
+      "group": "common"
+    },
+    {
+      "id": "top_panel_mid",
+      "shape": "box",
+      "center": [
+        0,
+        3.72,
+        0.8
+      ],
+      "size": [
+        4.4,
+        0.22,
+        4.6
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": "armorMid",
+      "group": "common"
+    },
+    {
+      "id": "top_panel_rear",
+      "shape": "box",
+      "center": [
+        0,
+        3.72,
+        6
+      ],
+      "size": [
+        3.7,
+        0.22,
+        3.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": "armorMid",
+      "group": "common"
+    },
+    {
+      "id": "sensor_visor",
+      "shape": "box",
+      "center": [
+        0,
+        1,
+        -12.55
+      ],
+      "size": [
+        5.2,
+        1.15,
+        0.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": "cyan",
+      "group": "common"
+    },
+    {
+      "id": "sensor_chin",
+      "shape": "box",
+      "center": [
+        0,
+        -0.65,
+        -12.25
+      ],
+      "size": [
+        2.4,
+        1.8,
+        1.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": "mechanism",
+      "group": "common"
+    },
+    {
+      "id": "sensor_core",
+      "shape": "box",
+      "center": [
+        0,
+        -0.65,
+        -12.9
+      ],
+      "size": [
+        1.45,
+        1.2,
+        0.3
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": "cyanCore",
+      "group": "common"
+    },
+    {
+      "id": "rear_service_hatch",
+      "shape": "box",
+      "center": [
+        0,
+        0.8,
+        12.05
+      ],
+      "size": [
+        4.2,
+        2.5,
+        0.35
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": "mechanism",
+      "group": "common"
+    },
+    {
+      "id": "module_bay",
+      "shape": "box",
+      "center": [
+        0,
+        -2.25,
+        1.2
+      ],
+      "size": [
+        5.8,
+        1,
+        9.6
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": "mechanism",
+      "group": "common"
+    },
+    {
+      "id": "maintenance_latch_front",
+      "shape": "box",
+      "center": [
+        0,
+        3.93,
+        -2
+      ],
+      "size": [
+        1,
+        0.22,
+        1.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": "orange",
+      "group": "common"
+    },
+    {
+      "id": "maintenance_latch_rear",
+      "shape": "box",
+      "center": [
+        0,
+        3.93,
+        6
+      ],
+      "size": [
+        1,
+        0.22,
+        1.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": "orange",
+      "group": "common"
+    },
+    {
+      "id": "rotor_duct_left",
+      "shape": "extruded",
+      "center": [
+        -13.45,
+        0.05,
+        0
+      ],
+      "size": [
+        13.1,
+        1.2,
+        17.8
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": "armorMid",
+      "group": "common",
+      "outline": [
+        [
+          -6,
+          -6.8
+        ],
+        [
+          -2.4,
+          -9
+        ],
+        [
+          4.2,
+          -8.4
+        ],
+        [
+          7.1,
+          -5.8
+        ],
+        [
+          7,
+          6.8
+        ],
+        [
+          2.8,
+          8.8
+        ],
+        [
+          -5.7,
+          6.2
+        ]
+      ],
+      "holes": [
+        {
+          "center": [
+            0.3,
+            -0.2
+          ],
+          "radius": 5.35,
+          "segments": 32
+        }
+      ],
+      "height": 1.2,
+      "mirrorKey": "rotor_duct",
+      "side": "left",
+      "mirrorX": true
+    },
+    {
+      "id": "rotor_duct_right",
+      "shape": "extruded",
+      "center": [
+        13.45,
+        0.05,
+        0
+      ],
+      "size": [
+        13.1,
+        1.2,
+        17.8
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": "armorMid",
+      "group": "common",
+      "outline": [
+        [
+          -6,
+          -6.8
+        ],
+        [
+          -2.4,
+          -9
+        ],
+        [
+          4.2,
+          -8.4
+        ],
+        [
+          7.1,
+          -5.8
+        ],
+        [
+          7,
+          6.8
+        ],
+        [
+          2.8,
+          8.8
+        ],
+        [
+          -5.7,
+          6.2
+        ]
+      ],
+      "holes": [
+        {
+          "center": [
+            0.3,
+            -0.2
+          ],
+          "radius": 5.35,
+          "segments": 32
+        }
+      ],
+      "height": 1.2,
+      "mirrorKey": "rotor_duct",
+      "side": "right",
+      "mirrorX": false
+    },
+    {
+      "id": "duct_outer_edge_left",
+      "shape": "box",
+      "center": [
+        -20.15,
+        0.5,
+        0.4
+      ],
+      "size": [
+        0.7,
+        1.1,
+        12.7
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": "edge",
+      "group": "common",
+      "mirrorKey": "duct_outer_edge",
+      "side": "left",
+      "mirrorX": true
+    },
+    {
+      "id": "duct_outer_edge_right",
+      "shape": "box",
+      "center": [
+        20.15,
+        0.5,
+        0.4
+      ],
+      "size": [
+        0.7,
+        1.1,
+        12.7
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": "edge",
+      "group": "common",
+      "mirrorKey": "duct_outer_edge",
+      "side": "right",
+      "mirrorX": false
+    },
+    {
+      "id": "rotor_arm_front_left",
+      "shape": "box",
+      "center": [
+        -7,
+        -0.1,
+        -3.6
+      ],
+      "size": [
+        7,
+        1.2,
+        1.5
+      ],
+      "rotation": [
+        0,
+        8,
+        0
+      ],
+      "material": "mechanism",
+      "group": "common",
+      "mirrorKey": "rotor_arm_front",
+      "side": "left",
+      "mirrorX": true
+    },
+    {
+      "id": "rotor_arm_front_right",
+      "shape": "box",
+      "center": [
+        7,
+        -0.1,
+        -3.6
+      ],
+      "size": [
+        7,
+        1.2,
+        1.5
+      ],
+      "rotation": [
+        0,
+        -8,
+        0
+      ],
+      "material": "mechanism",
+      "group": "common",
+      "mirrorKey": "rotor_arm_front",
+      "side": "right",
+      "mirrorX": false
+    },
+    {
+      "id": "rotor_arm_rear_left",
+      "shape": "box",
+      "center": [
+        -7,
+        -0.1,
+        3.5
+      ],
+      "size": [
+        7,
+        1.2,
+        1.5
+      ],
+      "rotation": [
+        0,
+        -8,
+        0
+      ],
+      "material": "mechanism",
+      "group": "common",
+      "mirrorKey": "rotor_arm_rear",
+      "side": "left",
+      "mirrorX": true
+    },
+    {
+      "id": "rotor_arm_rear_right",
+      "shape": "box",
+      "center": [
+        7,
+        -0.1,
+        3.5
+      ],
+      "size": [
+        7,
+        1.2,
+        1.5
+      ],
+      "rotation": [
+        0,
+        8,
+        0
+      ],
+      "material": "mechanism",
+      "group": "common",
+      "mirrorKey": "rotor_arm_rear",
+      "side": "right",
+      "mirrorX": false
+    },
+    {
+      "id": "rotor_hub_left",
+      "shape": "cylinder",
+      "center": [
+        -13.75,
+        0.72,
+        -0.2
+      ],
+      "size": [
+        2.9,
+        1.2,
+        2.9
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": "edge",
+      "group": "common",
+      "radius": 1.45,
+      "height": 1.2,
+      "segments": 24,
+      "mirrorKey": "rotor_hub",
+      "side": "left",
+      "mirrorX": true
+    },
+    {
+      "id": "rotor_hub_right",
+      "shape": "cylinder",
+      "center": [
+        13.75,
+        0.72,
+        -0.2
+      ],
+      "size": [
+        2.9,
+        1.2,
+        2.9
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": "edge",
+      "group": "common",
+      "radius": 1.45,
+      "height": 1.2,
+      "segments": 24,
+      "mirrorKey": "rotor_hub",
+      "side": "right",
+      "mirrorX": false
+    },
+    {
+      "id": "rotor_blade_0_left",
+      "shape": "box",
+      "center": [
+        -13.75,
+        0.65,
+        -0.2
+      ],
+      "size": [
+        10.4,
+        0.24,
+        0.75
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": "rotor",
+      "group": "common",
+      "mirrorKey": "rotor_blade_0",
+      "side": "left",
+      "mirrorX": true
+    },
+    {
+      "id": "rotor_blade_0_right",
+      "shape": "box",
+      "center": [
+        13.75,
+        0.65,
+        -0.2
+      ],
+      "size": [
+        10.4,
+        0.24,
+        0.75
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": "rotor",
+      "group": "common",
+      "mirrorKey": "rotor_blade_0",
+      "side": "right",
+      "mirrorX": false
+    },
+    {
+      "id": "rotor_blade_60_left",
+      "shape": "box",
+      "center": [
+        -13.75,
+        0.65,
+        -0.2
+      ],
+      "size": [
+        10.4,
+        0.24,
+        0.75
+      ],
+      "rotation": [
+        0,
+        -60,
+        0
+      ],
+      "material": "rotor",
+      "group": "common",
+      "mirrorKey": "rotor_blade_60",
+      "side": "left",
+      "mirrorX": true
+    },
+    {
+      "id": "rotor_blade_60_right",
+      "shape": "box",
+      "center": [
+        13.75,
+        0.65,
+        -0.2
+      ],
+      "size": [
+        10.4,
+        0.24,
+        0.75
+      ],
+      "rotation": [
+        0,
+        60,
+        0
+      ],
+      "material": "rotor",
+      "group": "common",
+      "mirrorKey": "rotor_blade_60",
+      "side": "right",
+      "mirrorX": false
+    },
+    {
+      "id": "rotor_blade_120_left",
+      "shape": "box",
+      "center": [
+        -13.75,
+        0.65,
+        -0.2
+      ],
+      "size": [
+        10.4,
+        0.24,
+        0.75
+      ],
+      "rotation": [
+        0,
+        -120,
+        0
+      ],
+      "material": "rotor",
+      "group": "common",
+      "mirrorKey": "rotor_blade_120",
+      "side": "left",
+      "mirrorX": true
+    },
+    {
+      "id": "rotor_blade_120_right",
+      "shape": "box",
+      "center": [
+        13.75,
+        0.65,
+        -0.2
+      ],
+      "size": [
+        10.4,
+        0.24,
+        0.75
+      ],
+      "rotation": [
+        0,
+        120,
+        0
+      ],
+      "material": "rotor",
+      "group": "common",
+      "mirrorKey": "rotor_blade_120",
+      "side": "right",
+      "mirrorX": false
+    },
+    {
+      "id": "rotor_light_arc_left",
+      "shape": "torus",
+      "center": [
+        -13.75,
+        0.78,
+        -0.2
+      ],
+      "size": [
+        11.16,
+        0.26,
+        11.16
+      ],
+      "rotation": [
+        90,
+        0,
+        -20
+      ],
+      "material": "cyan",
+      "group": "common",
+      "radius": 5.45,
+      "tube": 0.13,
+      "radialSegments": 8,
+      "tubularSegments": 32,
+      "arc": 145,
+      "mirrorKey": "rotor_light_arc",
+      "side": "left",
+      "mirrorX": true
+    },
+    {
+      "id": "rotor_light_arc_right",
+      "shape": "torus",
+      "center": [
+        13.75,
+        0.78,
+        -0.2
+      ],
+      "size": [
+        11.16,
+        0.26,
+        11.16
+      ],
+      "rotation": [
+        90,
+        0,
+        20
+      ],
+      "material": "cyan",
+      "group": "common",
+      "radius": 5.45,
+      "tube": 0.13,
+      "radialSegments": 8,
+      "tubularSegments": 32,
+      "arc": 145,
+      "mirrorKey": "rotor_light_arc",
+      "side": "right",
+      "mirrorX": false
+    },
+    {
+      "id": "rear_cooling_vent_left",
+      "shape": "box",
+      "center": [
+        -2.65,
+        0.6,
+        11.8
+      ],
+      "size": [
+        1,
+        2.7,
+        0.4
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": "mechanism",
+      "group": "common",
+      "mirrorKey": "rear_cooling_vent",
+      "side": "left",
+      "mirrorX": true
+    },
+    {
+      "id": "rear_cooling_vent_right",
+      "shape": "box",
+      "center": [
+        2.65,
+        0.6,
+        11.8
+      ],
+      "size": [
+        1,
+        2.7,
+        0.4
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": "mechanism",
+      "group": "common",
+      "mirrorKey": "rear_cooling_vent",
+      "side": "right",
+      "mirrorX": false
+    },
+    {
+      "id": "rear_nav_light_left",
+      "shape": "box",
+      "center": [
+        -3.25,
+        -0.4,
+        11.82
+      ],
+      "size": [
+        0.55,
+        0.55,
+        0.25
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": "cyan",
+      "group": "common",
+      "mirrorKey": "rear_nav_light",
+      "side": "left",
+      "mirrorX": true
+    },
+    {
+      "id": "rear_nav_light_right",
+      "shape": "box",
+      "center": [
+        3.25,
+        -0.4,
+        11.82
+      ],
+      "size": [
+        0.55,
+        0.55,
+        0.25
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": "cyan",
+      "group": "common",
+      "mirrorKey": "rear_nav_light",
+      "side": "right",
+      "mirrorX": false
+    },
+    {
+      "id": "landing_strut_left",
+      "shape": "box",
+      "center": [
+        -4.1,
+        -4,
+        -4.7
+      ],
+      "size": [
+        0.8,
+        5.3,
+        0.8
+      ],
+      "rotation": [
+        0,
+        0,
+        -20
+      ],
+      "material": "mechanism",
+      "group": "common",
+      "mirrorKey": "landing_strut",
+      "side": "left",
+      "mirrorX": true
+    },
+    {
+      "id": "landing_strut_right",
+      "shape": "box",
+      "center": [
+        4.1,
+        -4,
+        -4.7
+      ],
+      "size": [
+        0.8,
+        5.3,
+        0.8
+      ],
+      "rotation": [
+        0,
+        0,
+        20
+      ],
+      "material": "mechanism",
+      "group": "common",
+      "mirrorKey": "landing_strut",
+      "side": "right",
+      "mirrorX": false
+    },
+    {
+      "id": "landing_skid_left",
+      "shape": "box",
+      "center": [
+        -4.9,
+        -6.5,
+        -4.2
+      ],
+      "size": [
+        4.8,
+        0.65,
+        1
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": "edge",
+      "group": "common",
+      "mirrorKey": "landing_skid",
+      "side": "left",
+      "mirrorX": true
+    },
+    {
+      "id": "landing_skid_right",
+      "shape": "box",
+      "center": [
+        4.9,
+        -6.5,
+        -4.2
+      ],
+      "size": [
+        4.8,
+        0.65,
+        1
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": "edge",
+      "group": "common",
+      "mirrorKey": "landing_skid",
+      "side": "right",
+      "mirrorX": false
+    },
+    {
+      "id": "guard_shoulder_left",
+      "shape": "extruded",
+      "center": [
+        -5.4,
+        0.5,
+        -5.6
+      ],
+      "size": [
+        3.8,
+        3,
+        8.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": "armorMid",
+      "group": "guard",
+      "outline": [
+        [
+          -1.8,
+          -4.2
+        ],
+        [
+          1.5,
+          -3.5
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          0.7,
+          4
+        ],
+        [
+          -1.8,
+          3.3
+        ]
+      ],
+      "holes": [],
+      "height": 3,
+      "mirrorKey": "guard_shoulder",
+      "side": "left",
+      "mirrorX": true
+    },
+    {
+      "id": "guard_shoulder_right",
+      "shape": "extruded",
+      "center": [
+        5.4,
+        0.5,
+        -5.6
+      ],
+      "size": [
+        3.8,
+        3,
+        8.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": "armorMid",
+      "group": "guard",
+      "outline": [
+        [
+          -1.8,
+          -4.2
+        ],
+        [
+          1.5,
+          -3.5
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          0.7,
+          4
+        ],
+        [
+          -1.8,
+          3.3
+        ]
+      ],
+      "holes": [],
+      "height": 3,
+      "mirrorKey": "guard_shoulder",
+      "side": "right",
+      "mirrorX": false
+    },
+    {
+      "id": "guard_hardpoint_cover_left",
+      "shape": "box",
+      "center": [
+        -5.25,
+        -1.6,
+        0.8
+      ],
+      "size": [
+        2.4,
+        1.8,
+        5.6
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": "mechanism",
+      "group": "guard",
+      "mirrorKey": "guard_hardpoint_cover",
+      "side": "left",
+      "mirrorX": true
+    },
+    {
+      "id": "guard_hardpoint_cover_right",
+      "shape": "box",
+      "center": [
+        5.25,
+        -1.6,
+        0.8
+      ],
+      "size": [
+        2.4,
+        1.8,
+        5.6
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": "mechanism",
+      "group": "guard",
+      "mirrorKey": "guard_hardpoint_cover",
+      "side": "right",
+      "mirrorX": false
+    },
+    {
+      "id": "guard_forward_sensor_left",
+      "shape": "box",
+      "center": [
+        -3.15,
+        -0.3,
+        -10.8
+      ],
+      "size": [
+        1,
+        1,
+        0.45
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": "cyanCore",
+      "group": "guard",
+      "mirrorKey": "guard_forward_sensor",
+      "side": "left",
+      "mirrorX": true
+    },
+    {
+      "id": "guard_forward_sensor_right",
+      "shape": "box",
+      "center": [
+        3.15,
+        -0.3,
+        -10.8
+      ],
+      "size": [
+        1,
+        1,
+        0.45
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": "cyanCore",
+      "group": "guard",
+      "mirrorKey": "guard_forward_sensor",
+      "side": "right",
+      "mirrorX": false
+    },
+    {
+      "id": "guard_oblique_sensor_left",
+      "shape": "box",
+      "center": [
+        -5.5,
+        -0.2,
+        -7.3
+      ],
+      "size": [
+        0.45,
+        0.9,
+        1.1
+      ],
+      "rotation": [
+        0,
+        8,
+        0
+      ],
+      "material": "cyan",
+      "group": "guard",
+      "mirrorKey": "guard_oblique_sensor",
+      "side": "left",
+      "mirrorX": true
+    },
+    {
+      "id": "guard_oblique_sensor_right",
+      "shape": "box",
+      "center": [
+        5.5,
+        -0.2,
+        -7.3
+      ],
+      "size": [
+        0.45,
+        0.9,
+        1.1
+      ],
+      "rotation": [
+        0,
+        -8,
+        0
+      ],
+      "material": "cyan",
+      "group": "guard",
+      "mirrorKey": "guard_oblique_sensor",
+      "side": "right",
+      "mirrorX": false
+    }
+  ]
+}

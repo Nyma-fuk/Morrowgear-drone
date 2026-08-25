@@ -1,0 +1,30 @@
+{
+	"schemaVersion": 1,
+	"id": "morrowgear_drone",
+	"version": "${version}",
+	"name": "Morrowgear: Drone Command",
+	"description": "Persistent field drones and an integrated tactical command interface.",
+	"authors": [
+		"Morrowgear"
+	],
+	"contact": {
+		"homepage": "https://morrowgear.local/"
+	},
+	"license": "ARR",
+	"icon": "assets/morrowgear_drone/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"jp.morrowgear.drone.MorrowgearDrone"
+		],
+		"client": [
+			"jp.morrowgear.drone.client.MorrowgearDroneClient"
+		]
+	},
+	"depends": {
+		"fabricloader": ">=0.19.3",
+		"minecraft": "~26.2",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}

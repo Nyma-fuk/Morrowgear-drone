@@ -1,0 +1,172 @@
+plugins {
+	id 'net.fabricmc.fabric-loom' version "${loom_version}"
+	id 'maven-publish'
+}
+
+version = project.mod_version
+group = project.maven_group
+
+repositories {
+	// Add repositories to retrieve artifacts from in here.
+	// You should only use this when depending on other mods because
+	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
+	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
+	// for more information about repositories.
+}
+
+loom {
+	splitEnvironmentSourceSets()
+
+	mods {
+		"morrowgear_drone" {
+			sourceSet sourceSets.main
+			sourceSet sourceSets.client
+		}
+	}
+}
+
+dependencies {
+	// To change the versions see the gradle.properties file
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+
+	// Fabric API. This is technically optional, but you probably want it anyway.
+	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+	testImplementation platform("org.junit:junit-bom:5.13.4")
+	testImplementation "org.junit.jupiter:junit-jupiter"
+	testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+}
+
+tasks.withType(Test).configureEach {
+	useJUnitPlatform()
+}
+
+processResources {
+	def version = project.version
+	inputs.property "version", version
+
+	filesMatching("fabric.mod.json") {
+		expand "version": version
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.release = 25
+}
+
+def launcherGameDir = providers.environmentVariable("APPDATA")
+	.map { new File(it, ".minecraft/morrowgear") }
+def launcherModsDir = launcherGameDir.map { new File(it, "mods") }
+
+tasks.register("syncLauncherMod") {
+	group = "morrowgear"
+	description = "Installs the current Morrowgear JAR into the official Launcher profile."
+	dependsOn tasks.named("jar")
+	inputs.file(tasks.named("jar").flatMap { it.archiveFile })
+	outputs.file(launcherModsDir.map { new File(it, "morrowgear-drone-latest.jar") })
+	outputs.upToDateWhen {
+		File modsDir = launcherModsDir.get()
+		File targetJar = new File(modsDir, "morrowgear-drone-latest.jar")
+		File pendingJar = new File(modsDir, ".morrowgear-drone-pending.jar.tmp")
+		File sourceJar = tasks.named("jar").get().archiveFile.get().asFile
+		return !pendingJar.exists() && targetJar.exists() && sourceJar.exists()
+			&& java.nio.file.Files.mismatch(sourceJar.toPath(), targetJar.toPath()) == -1L
+	}
+	doLast {
+		File modsDir = launcherModsDir.get()
+		modsDir.mkdirs()
+		File sourceJar = tasks.named("jar").get().archiveFile.get().asFile
+		File targetJar = new File(modsDir, "morrowgear-drone-latest.jar")
+		File pendingJar = new File(modsDir, ".morrowgear-drone-pending.jar.tmp")
+		if (targetJar.exists()
+			&& java.nio.file.Files.mismatch(sourceJar.toPath(), targetJar.toPath()) == -1L) {
+			java.nio.file.Files.deleteIfExists(pendingJar.toPath())
+			logger.lifecycle("Morrowgear Launcher mod is already current: ${targetJar}")
+			return
+		}
+		File stagedJar = new File(modsDir, ".morrowgear-drone-${UUID.randomUUID()}.jar.tmp")
+		boolean installed = false
+		try {
+			java.nio.file.Files.copy(sourceJar.toPath(), stagedJar.toPath(),
+				java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+			new java.util.zip.ZipFile(stagedJar).withCloseable { zip ->
+				byte[] buffer = new byte[8192]
+				zip.entries().each { entry ->
+					if (!entry.directory) zip.getInputStream(entry).withCloseable { stream ->
+						while (stream.read(buffer) >= 0) { /* Verify every local entry. */ }
+					}
+				}
+			}
+			try {
+				try {
+					java.nio.file.Files.move(stagedJar.toPath(), targetJar.toPath(),
+						java.nio.file.StandardCopyOption.ATOMIC_MOVE,
+						java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+				} catch (java.nio.file.AtomicMoveNotSupportedException ignored) {
+					java.nio.file.Files.move(stagedJar.toPath(), targetJar.toPath(),
+						java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+				}
+				installed = true
+			} catch (java.nio.file.AccessDeniedException inUse) {
+				java.nio.file.Files.move(stagedJar.toPath(), pendingJar.toPath(),
+					java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+				logger.warn("Minecraft is using the current Morrowgear JAR. "
+					+ "The verified update was deferred until Minecraft exits: ${pendingJar}")
+			}
+		} finally {
+			java.nio.file.Files.deleteIfExists(stagedJar.toPath())
+		}
+		if (!installed) return
+		java.nio.file.Files.deleteIfExists(pendingJar.toPath())
+		fileTree(modsDir) {
+			include "morrowgear-drone-*.jar"
+			exclude "morrowgear-drone-latest.jar"
+		}.files.each { legacy ->
+			try { java.nio.file.Files.deleteIfExists(legacy.toPath()) }
+			catch (java.nio.file.FileSystemException ignored) {
+				logger.warn("Morrowgear legacy JAR is still in use and was retained: ${legacy}")
+			}
+		}
+		logger.lifecycle("Morrowgear Launcher mod synchronized atomically: ${targetJar}")
+	}
+}
+
+tasks.named("build") {
+	finalizedBy tasks.named("syncLauncherMod")
+}
+
+java {
+	// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
+	// if it is present.
+	// If you remove this line, sources will not be generated.
+	withSourcesJar()
+
+	sourceCompatibility = JavaVersion.VERSION_25
+	targetCompatibility = JavaVersion.VERSION_25
+}
+
+jar {
+	def projectName = project.name
+	inputs.property "projectName", projectName
+
+	from("LICENSE") {
+		rename { "${it}_$projectName"}
+	}
+}
+
+// configure the maven publication
+publishing {
+	publications {
+		create("mavenJava", MavenPublication) {
+			from components.java
+		}
+	}
+
+	// See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
+	repositories {
+		// Add repositories to publish to here.
+		// Notice: This block does NOT have the same function as the block in the top level.
+		// The repositories here will be used for publishing your artifact, not for
+		// retrieving dependencies.
+	}
+}

@@ -1,0 +1,160 @@
+C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\tools\drone-design\blender\build_family_a_scout_v2.py:31: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  m.use_nodes = True
+00:01.969  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\drone-family-a\reference-v2\scout-hero.png'
+00:02.344  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\drone-family-a\reference-v2\scout-front.png'
+00:02.703  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\drone-family-a\reference-v2\scout-rear.png'
+00:03.250  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\drone-family-a\reference-v2\scout-top.png'
+00:03.657  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\drone-family-a\reference-v2\scout-bottom.png'
+00:04.063  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\drone-family-a\reference-v2\scout-left.png'
+00:04.485  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\drone-family-a\reference-v2\scout-right.png'
+Info: Saved as "morrowgear-family-a-scout-reference-v2.blend"
+INFO Draco is available, use library at C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\work\blender-portable\blender-5.2.0-windows-x64\5.2\scripts\addons_core\io_scene_gltf2\bf_intern_draco_bridge.dll
+INFO MeshOptimizer is available, use library at C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\work\blender-portable\blender-5.2.0-windows-x64\5.2\scripts\addons_core\io_scene_gltf2\bf_intern_meshopt_bridge.dll
+17:55:27 | INFO: Starting glTF 2.0 export
+17:55:27 | INFO: Extracting primitive: F01_Fuselage_Mesh
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.004
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.001
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.002
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.003
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: F02_UpperArmor_Mesh
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.051
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.052
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.050
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.049
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.021
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.022
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.020
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.032
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.031
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.033
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.034
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.029
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.030
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.028
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: L02_CyanRing.R
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.005
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.006
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.019
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.012
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.013
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.014
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.015
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.016
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cylinder.001
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cylinder.002
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cylinder
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.027
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.026
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: S01_EmbeddedVisor_Mesh
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: S01_SideVisor.R_Mesh
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: S01_SideVisorRecess.R_Mesh
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: S01_VisorRecess_Mesh
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.023
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.025
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.024
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Plane
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: T02_CenterFin.R_Mesh
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: T02_CenterFinEdge.R
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.036
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.044
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.035
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.037
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.039
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.038
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.045
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.040
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.041
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.042
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.043
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.048
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.047
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.046
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.007
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.008
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.009
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.010
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.011
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: W02_DuctWing.R_Mesh
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.017
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: W02_OuterAlloyEdge.R
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: Cube.018
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: W02_ServiceSeam.R
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: W04_RearTipFairing.R_Mesh
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Extracting primitive: W04_RearTipSeam.R
+17:55:27 | INFO: Primitives created: 1
+17:55:27 | INFO: Finished glTF 2.0 export in 0.0914907455444336 s
+
+Blender 5.2.0 LTS (hash fbe6228777e7 built 2026-07-14 01:35:40)
+
+Blender quit

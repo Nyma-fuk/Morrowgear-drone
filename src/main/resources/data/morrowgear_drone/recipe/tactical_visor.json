@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": ["NEN", "GTG", "CRC"],
+  "key": {
+    "N": "minecraft:netherite_scrap",
+    "E": "minecraft:echo_shard",
+    "G": "minecraft:tinted_glass",
+    "T": "morrowgear_drone:basic_control_board",
+    "C": "minecraft:copper_ingot",
+    "R": "minecraft:redstone_block"
+  },
+  "result": {
+    "id": "morrowgear_drone:tactical_visor",
+    "count": 1
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "pass": true,
+  "role": "salvage",
+  "meshObjects": 211,
+  "mirroredObjects": 170,
+  "missingRequired": [],
+  "sharedScoutV2Base": true,
+  "roleSilhouetteV3": true,
+  "frontAxis": "-Y",
+  "upAxis": "+Z",
+  "gameImplementationApproved": false,
+  "salvageProportions": {
+    "overallWidth": 6.52,
+    "overallLength": 5.28,
+    "widthToLength": 1.235,
+    "targetWidthToLength": [
+      1.2,
+      1.27
+    ],
+    "rotorOuterDiameter": 1.88,
+    "rotorOpenDiameter": 1.43,
+    "rotorOpenRatio": 0.761,
+    "openDuct": true,
+    "bladeCountPerRotor": 8,
+    "rotorCount": 4
+  },
+  "salvageRotorAssembly": {
+    "bladeBodyZ": [
+      0.175,
+      0.305
+    ],
+    "upperInsetZ": [
+      0.294,
+      0.32
+    ],
+    "lowerInsetZ": [
+      0.16,
+      0.186
+    ],
+    "statorZ": [
+      0.06,
+      0.11
+    ],
+    "statorToBladeClearance": 0.065,
+    "insetEmbeddedDepth": 0.011,
+    "separateRotorAndStatorPlanes": true,
+    "mirroredFromSharedCoordinates": true
+  }
+}

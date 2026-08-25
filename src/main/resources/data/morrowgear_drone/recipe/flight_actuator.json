@@ -1,0 +1,1 @@
+{"type":"minecraft:crafting_shaped","category":"misc","pattern":["ICI","RFR","ICI"],"key":{"I":"minecraft:iron_ingot","C":"minecraft:copper_ingot","R":"minecraft:redstone","F":"morrowgear_drone:lightweight_frame"},"result":{"id":"morrowgear_drone:flight_actuator","count":1}}

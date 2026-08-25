@@ -1,0 +1,12 @@
+{
+  "pass": true,
+  "role": "engineer",
+  "meshObjects": 83,
+  "mirroredObjects": 43,
+  "missingRequired": [],
+  "sharedScoutV2Base": true,
+  "roleSilhouetteV3": true,
+  "frontAxis": "-Y",
+  "upAxis": "+Z",
+  "gameImplementationApproved": false
+}

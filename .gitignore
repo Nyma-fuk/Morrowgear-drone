@@ -1,0 +1,57 @@
+# gradle
+
+.gradle/
+build/
+out/
+classes/
+
+# eclipse
+
+*.launch
+
+# idea
+
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# vscode
+
+.settings/
+.vscode/
+bin/
+.classpath
+.project
+
+# macos
+
+*.DS_Store
+
+# fabric
+
+run/
+
+# java
+
+hs_err_*.log
+replay_*.log
+*.hprof
+*.jfr
+
+# generated local state
+
+logs/
+work/
+node_modules/
+__pycache__/
+*.py[cod]
+*.blend1
+*.tmp
+*.bak
+
+# local secrets
+
+.env
+.env.*
+!.env.example

@@ -1,0 +1,1 @@
+{"type":"minecraft:crafting_shaped","category":"equipment","pattern":["HLH","PBP","FCF"],"key":{"H":"minecraft:tripwire_hook","L":"minecraft:lead","P":"minecraft:piston","B":"morrowgear_drone:basic_control_board","F":"morrowgear_drone:lightweight_frame","C":"morrowgear_drone:power_cell"},"result":{"id":"morrowgear_drone:salvage_module","count":1}}

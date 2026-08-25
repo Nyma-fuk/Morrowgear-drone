@@ -1,0 +1,1 @@
+{"type":"minecraft:crafting_shaped","category":"equipment","pattern":["ETE","FOF","CBC"],"key":{"E":"minecraft:ender_eye","T":"minecraft:tnt","F":"minecraft:firework_rocket","O":"minecraft:observer","C":"morrowgear_drone:basic_control_board","B":"minecraft:diamond"},"result":{"id":"morrowgear_drone:missile_module","count":1}}

@@ -1,0 +1,9 @@
+{
+  "pass": true,
+  "role": "field",
+  "landingGearObjects": 10,
+  "legacyGearRemoved": true,
+  "deploymentDirection": "outward from centerline",
+  "contactSurfaces": "level",
+  "designStatus": "proposal awaiting approval"
+}

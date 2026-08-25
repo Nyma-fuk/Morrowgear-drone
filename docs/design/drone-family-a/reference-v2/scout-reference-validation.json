@@ -1,0 +1,17 @@
+{
+  "pass": true,
+  "reference": "exec-a2e4ec83-d18d-4cca-82e1-b39d7e6c2221.png",
+  "meshObjects": 65,
+  "mirroredObjects": 36,
+  "missingRequired": [],
+  "frontAxis": "-Y",
+  "upAxis": "+Z",
+  "geometrySymmetry": "exact mirror modifiers",
+  "asymmetryPolicy": "surface wear and maintenance markings only",
+  "states": {
+    "rotors": "flight rotating / dock stopped",
+    "landingGear": "deployed",
+    "visor": "emissive",
+    "fins": "fixed"
+  }
+}

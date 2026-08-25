@@ -1,0 +1,47 @@
+{
+  "pass": true,
+  "role": "guard",
+  "frontAxis": "-Y",
+  "upAxis": "+Z",
+  "noseExtensionModelUnits": 0.35,
+  "noseExtensionPercent": 6,
+  "deformationAnchorY": -1.45,
+  "changedObjects": [
+    "F01_Fuselage",
+    "F02_UpperArmor",
+    "F02_TopPanel_0",
+    "F02_TopPanel_1",
+    "F02_TopPanel_2",
+    "F02_TopPanel_3",
+    "F02_CenterSpine",
+    "M01_FrontLatch",
+    "F04_ShoulderHousing.R",
+    "F04_ShoulderFace.R",
+    "F04_ShoulderFastener.R",
+    "S01_VisorRecess",
+    "S01_EmbeddedVisor",
+    "S01_SideVisorRecess.R",
+    "S01_SideVisor.R",
+    "S02_ChinHousing",
+    "S02_ChinLensBezel",
+    "S02_ChinLens",
+    "S01_CheekSensor.R",
+    "S01_CheekAmber.R"
+  ],
+  "rotorSourceObjects": 5,
+  "rotorRenderedCount": 10,
+  "bounds": {
+    "minX": -3.949195623397827,
+    "maxX": 3.949195623397827,
+    "minY": -3.688089370727539,
+    "maxY": 3.85029673576355,
+    "minZ": -2.3586769104003906,
+    "maxZ": 1.2933201789855957
+  },
+  "unchangedSystems": [
+    "duct wings",
+    "turbines",
+    "landing gear",
+    "role equipment"
+  ]
+}

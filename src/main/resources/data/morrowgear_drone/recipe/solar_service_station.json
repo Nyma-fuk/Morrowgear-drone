@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": ["SCS", "BDB", "APA"],
+  "key": {
+    "S": "minecraft:daylight_detector",
+    "C": "morrowgear_drone:basic_control_board",
+    "B": "morrowgear_drone:reinforced_battery_pack",
+    "D": "morrowgear_drone:dock_item",
+    "A": "morrowgear_drone:flight_actuator",
+    "P": "morrowgear_drone:power_cell"
+  },
+  "result": { "id": "morrowgear_drone:solar_service_station", "count": 1 }
+}

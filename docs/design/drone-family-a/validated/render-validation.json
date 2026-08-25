@@ -1,0 +1,181 @@
+{
+  "pass": true,
+  "results": [
+    {
+      "role": "scout",
+      "pass": true,
+      "screenshot": "C:\\Users\\fukud\\Documents\\Codex\\2026-08-13\\referenced-chatgpt-conversation-this-is-an\\morrowgear-drone-java\\docs\\design\\drone-family-a\\validated\\family-a-scout-validated.png",
+      "partCount": 42,
+      "sideMirrorMismatchRatio": 0.00010595658702872154,
+      "stats": [
+        {
+          "id": "hero",
+          "occupiedPixels": 441665,
+          "mirrorMismatchRatio": 0.44326129532564273
+        },
+        {
+          "id": "top",
+          "occupiedPixels": 287760,
+          "mirrorMismatchRatio": 0.0007714762301918265
+        },
+        {
+          "id": "bottom",
+          "occupiedPixels": 287760,
+          "mirrorMismatchRatio": 0.0007714762301918265
+        },
+        {
+          "id": "front",
+          "occupiedPixels": 71631,
+          "mirrorMismatchRatio": 0.00034901090310061287
+        },
+        {
+          "id": "rear",
+          "occupiedPixels": 71064,
+          "mirrorMismatchRatio": 0.0003940110323089047
+        },
+        {
+          "id": "left",
+          "occupiedPixels": 136838,
+          "mirrorMismatchRatio": 0.13114778058726378
+        },
+        {
+          "id": "right",
+          "occupiedPixels": 136859,
+          "mirrorMismatchRatio": 0.13125187236498878
+        }
+      ]
+    },
+    {
+      "role": "engineer",
+      "pass": true,
+      "screenshot": "C:\\Users\\fukud\\Documents\\Codex\\2026-08-13\\referenced-chatgpt-conversation-this-is-an\\morrowgear-drone-java\\docs\\design\\drone-family-a\\validated\\family-a-engineer-validated.png",
+      "partCount": 46,
+      "sideMirrorMismatchRatio": 0.000028574081879031625,
+      "stats": [
+        {
+          "id": "hero",
+          "occupiedPixels": 443496,
+          "mirrorMismatchRatio": 0.42923047783970997
+        },
+        {
+          "id": "top",
+          "occupiedPixels": 292781,
+          "mirrorMismatchRatio": 0.0007548304022460474
+        },
+        {
+          "id": "bottom",
+          "occupiedPixels": 292781,
+          "mirrorMismatchRatio": 0.0007548304022460474
+        },
+        {
+          "id": "front",
+          "occupiedPixels": 77009,
+          "mirrorMismatchRatio": 0.00032463738004648806
+        },
+        {
+          "id": "rear",
+          "occupiedPixels": 76277,
+          "mirrorMismatchRatio": 0.0003539730193898554
+        },
+        {
+          "id": "left",
+          "occupiedPixels": 139986,
+          "mirrorMismatchRatio": 0.13654222565113655
+        },
+        {
+          "id": "right",
+          "occupiedPixels": 139988,
+          "mirrorMismatchRatio": 0.13652598794182358
+        }
+      ]
+    },
+    {
+      "role": "field",
+      "pass": true,
+      "screenshot": "C:\\Users\\fukud\\Documents\\Codex\\2026-08-13\\referenced-chatgpt-conversation-this-is-an\\morrowgear-drone-java\\docs\\design\\drone-family-a\\validated\\family-a-field-validated.png",
+      "partCount": 43,
+      "sideMirrorMismatchRatio": 0.00003070734366123658,
+      "stats": [
+        {
+          "id": "hero",
+          "occupiedPixels": 434240,
+          "mirrorMismatchRatio": 0.43973839351510685
+        },
+        {
+          "id": "top",
+          "occupiedPixels": 296974,
+          "mirrorMismatchRatio": 0.0007273363998195129
+        },
+        {
+          "id": "bottom",
+          "occupiedPixels": 296974,
+          "mirrorMismatchRatio": 0.0007273363998195129
+        },
+        {
+          "id": "front",
+          "occupiedPixels": 69450,
+          "mirrorMismatchRatio": 0.00037437005039596833
+        },
+        {
+          "id": "rear",
+          "occupiedPixels": 69136,
+          "mirrorMismatchRatio": 0.0004339273316361953
+        },
+        {
+          "id": "left",
+          "occupiedPixels": 130261,
+          "mirrorMismatchRatio": 0.08727861754477549
+        },
+        {
+          "id": "right",
+          "occupiedPixels": 130263,
+          "mirrorMismatchRatio": 0.08726192395384721
+        }
+      ]
+    },
+    {
+      "role": "guard",
+      "pass": true,
+      "screenshot": "C:\\Users\\fukud\\Documents\\Codex\\2026-08-13\\referenced-chatgpt-conversation-this-is-an\\morrowgear-drone-java\\docs\\design\\drone-family-a\\validated\\family-a-guard-validated.png",
+      "partCount": 47,
+      "sideMirrorMismatchRatio": 0.00003070734366123658,
+      "stats": [
+        {
+          "id": "hero",
+          "occupiedPixels": 443429,
+          "mirrorMismatchRatio": 0.4165920587061288
+        },
+        {
+          "id": "top",
+          "occupiedPixels": 315955,
+          "mirrorMismatchRatio": 0.0006994666962067384
+        },
+        {
+          "id": "bottom",
+          "occupiedPixels": 315955,
+          "mirrorMismatchRatio": 0.0006994666962067384
+        },
+        {
+          "id": "front",
+          "occupiedPixels": 76283,
+          "mirrorMismatchRatio": 0.0003539451778246792
+        },
+        {
+          "id": "rear",
+          "occupiedPixels": 76120,
+          "mirrorMismatchRatio": 0.0003678402522333158
+        },
+        {
+          "id": "left",
+          "occupiedPixels": 130261,
+          "mirrorMismatchRatio": 0.08727861754477549
+        },
+        {
+          "id": "right",
+          "occupiedPixels": 130263,
+          "mirrorMismatchRatio": 0.08726192395384721
+        }
+      ]
+    }
+  ]
+}

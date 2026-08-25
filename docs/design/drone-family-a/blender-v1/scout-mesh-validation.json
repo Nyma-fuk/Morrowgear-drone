@@ -1,0 +1,10 @@
+{
+  "pass": true,
+  "meshObjects": 27,
+  "mirrorModifierObjects": 14,
+  "verticesBeforeModifiers": 598,
+  "facesBeforeModifiers": 414,
+  "tailFinLeansRearward": true,
+  "frontAxis": "-Y",
+  "rearAxis": "+Y"
+}

@@ -1,0 +1,12 @@
+{
+  "pass": true,
+  "role": "scout",
+  "meshObjects": 65,
+  "mirroredObjects": 36,
+  "missingRequired": [],
+  "sharedScoutV2Base": true,
+  "roleSilhouetteV3": true,
+  "frontAxis": "-Y",
+  "upAxis": "+Z",
+  "gameImplementationApproved": false
+}

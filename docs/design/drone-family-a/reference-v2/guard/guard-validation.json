@@ -1,0 +1,11 @@
+{
+  "pass": true,
+  "role": "guard",
+  "meshObjects": 76,
+  "mirroredObjects": 45,
+  "missingRequired": [],
+  "sharedScoutV2Base": true,
+  "frontAxis": "-Y",
+  "upAxis": "+Z",
+  "gameImplementationApproved": false
+}

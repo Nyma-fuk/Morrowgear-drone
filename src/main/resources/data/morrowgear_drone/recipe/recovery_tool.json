@@ -1,0 +1,1 @@
+{"type":"minecraft:crafting_shaped","category":"equipment","pattern":["HAH","CBC"," I "],"key":{"H":"minecraft:tripwire_hook","A":"morrowgear_drone:morrow_alloy","C":"minecraft:copper_ingot","B":"morrowgear_drone:basic_control_board","I":"minecraft:iron_ingot"},"result":{"id":"morrowgear_drone:recovery_tool","count":1}}

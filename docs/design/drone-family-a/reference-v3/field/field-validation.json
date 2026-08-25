@@ -1,0 +1,12 @@
+{
+  "pass": true,
+  "role": "field",
+  "meshObjects": 79,
+  "mirroredObjects": 44,
+  "missingRequired": [],
+  "sharedScoutV2Base": true,
+  "roleSilhouetteV3": true,
+  "frontAxis": "-Y",
+  "upAxis": "+Z",
+  "gameImplementationApproved": false
+}

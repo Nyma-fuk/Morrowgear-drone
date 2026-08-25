@@ -1,0 +1,9 @@
+{
+  "flight_idle":{"subtitle":"subtitles.morrowgear_drone.flight_idle","sounds":["morrowgear_drone:flight_idle"]},
+  "flight_cruise":{"subtitle":"subtitles.morrowgear_drone.flight_cruise","sounds":["morrowgear_drone:flight_cruise"]},
+  "autocannon_burst":{"subtitle":"subtitles.morrowgear_drone.autocannon_burst","sounds":["morrowgear_drone:autocannon_burst"]},
+  "laser_charge":{"subtitle":"subtitles.morrowgear_drone.laser_charge","sounds":["morrowgear_drone:laser_charge"]},
+  "laser_fire":{"subtitle":"subtitles.morrowgear_drone.laser_fire","sounds":["morrowgear_drone:laser_fire"]},
+  "laser_hit":{"subtitle":"subtitles.morrowgear_drone.laser_hit","sounds":["morrowgear_drone:laser_hit"]},
+  "laser_shutdown":{"subtitle":"subtitles.morrowgear_drone.laser_shutdown","sounds":["morrowgear_drone:laser_shutdown"]}
+}

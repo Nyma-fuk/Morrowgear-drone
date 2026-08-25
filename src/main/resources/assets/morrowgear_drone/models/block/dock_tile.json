@@ -1,0 +1,20 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "textures": { "dock": "morrowgear_drone:block/dock_atlas", "particle": "morrowgear_drone:block/dock_atlas" },
+  "elements": [
+    { "from": [0, 0, 0], "to": [16, 2, 16], "faces": {
+      "down": { "texture": "#dock", "uv": [0, 0, 2, 2] }, "up": { "texture": "#dock", "uv": [0, 0, 2, 2] },
+      "north": { "texture": "#dock", "uv": [0, 0, 2, 0.25] }, "south": { "texture": "#dock", "uv": [0, 0, 2, 0.25] },
+      "west": { "texture": "#dock", "uv": [0, 0, 2, 0.25] }, "east": { "texture": "#dock", "uv": [0, 0, 2, 0.25] }
+    }},
+    { "from": [1, 2, 1], "to": [15, 3, 15], "faces": {
+      "up": { "texture": "#dock", "uv": [2, 0, 4, 2] }, "north": { "texture": "#dock", "uv": [2, 0, 4, 0.25] },
+      "south": { "texture": "#dock", "uv": [2, 0, 4, 0.25] }, "west": { "texture": "#dock", "uv": [2, 0, 4, 0.25] }, "east": { "texture": "#dock", "uv": [2, 0, 4, 0.25] }
+    }},
+    { "from": [3, 3, 3], "to": [13, 4.25, 13], "faces": {
+      "up": { "texture": "#dock", "uv": [4, 0, 6, 2] }, "north": { "texture": "#dock", "uv": [4, 0, 6, 0.25] },
+      "south": { "texture": "#dock", "uv": [4, 0, 6, 0.25] }, "west": { "texture": "#dock", "uv": [4, 0, 6, 0.25] }, "east": { "texture": "#dock", "uv": [4, 0, 6, 0.25] }
+    }}
+  ]
+}

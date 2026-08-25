@@ -1,0 +1,15 @@
+{
+  "pass": true,
+  "items": [
+    "field_drone_unit",
+    "scout_module",
+    "cargo_module",
+    "engineer_module",
+    "security_module",
+    "dock_item",
+    "controller"
+  ],
+  "dock": "pillarless low-profile 3x3 platform",
+  "controller": "shared icon and held-model source",
+  "designStatus": "proposal awaiting approval"
+}
