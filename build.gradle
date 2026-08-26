@@ -57,6 +57,7 @@ tasks.withType(JavaCompile).configureEach {
 def launcherGameDir = providers.environmentVariable("APPDATA")
 	.map { new File(it, ".minecraft/morrowgear") }
 def launcherModsDir = launcherGameDir.map { new File(it, "mods") }
+def launcherSyncAvailable = launcherModsDir.isPresent()
 
 tasks.register("syncLauncherMod") {
 	group = "morrowgear"
@@ -132,7 +133,9 @@ tasks.register("syncLauncherMod") {
 }
 
 tasks.named("build") {
-	finalizedBy tasks.named("syncLauncherMod")
+	if (launcherSyncAvailable) {
+		finalizedBy tasks.named("syncLauncherMod")
+	}
 }
 
 java {
