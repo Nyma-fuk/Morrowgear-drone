@@ -1,5 +1,7 @@
 # Morrowgear: Drone Command
 
+制御アーキテクチャ、Waypoint/Wing同期、通信断時の挙動、および実ドローンへ展開する場合の設計差分は、[Morrowgear Drone 制御アーキテクチャ・実機化設計指針](docs/architecture/MORROWGEAR_DRONE_CONTROL_ARCHITECTURE.md)を参照してください。
+
 ## v0.18.1 Lifecycle and Logistics
 
 - Dockを3段27枠へ拡張し、既存9枠、回収バッファ9枠、共通補給バッファ9枠を一つのサービス拠点として運用する。

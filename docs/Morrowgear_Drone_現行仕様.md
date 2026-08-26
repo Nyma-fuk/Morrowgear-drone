@@ -1,5 +1,7 @@
 # Morrowgear: Drone Command 現行仕様
 
+> **参照先:** 本書はv0.11.1時点の機能概要です。v0.18.1時点の個体制御、Waypoint、Wing/Cohort、同期、障害回避、電力、および実ドローン向け設計差分は、[Morrowgear Drone 制御アーキテクチャ・実機化設計指針](architecture/MORROWGEAR_DRONE_CONTROL_ARCHITECTURE.md)を正本として参照してください。
+
 ## 1. 文書情報
 
 | 項目 | 内容 |
