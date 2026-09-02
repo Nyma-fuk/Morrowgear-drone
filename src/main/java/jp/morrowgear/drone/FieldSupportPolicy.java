@@ -18,4 +18,9 @@ final class FieldSupportPolicy {
 		if (!engineersComplete || !cargoComplete) return FieldOperationState.FIELD_MISSION_SUPPORT;
 		return FieldOperationState.COMPLETE;
 	}
+
+	static boolean surveyReady(boolean scanComplete, boolean scoutPresent,
+		boolean engineerPresent, boolean engineersComplete) {
+		return scanComplete || (!scoutPresent && engineerPresent && engineersComplete);
+	}
 }

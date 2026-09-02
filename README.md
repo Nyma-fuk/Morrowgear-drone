@@ -2,13 +2,14 @@
 
 制御アーキテクチャ、Waypoint/Wing同期、通信断時の挙動、および実ドローンへ展開する場合の設計差分は、[Morrowgear Drone 制御アーキテクチャ・実機化設計指針](docs/architecture/MORROWGEAR_DRONE_CONTROL_ARCHITECTURE.md)を参照してください。
 
-## v0.19.0 Autonomous Operations
+## v0.19.1 Autonomous Operations
 
 - 戦術画面へ`AUTO OPS`を追加した。作業種別と地点だけを指定すると、serverが待機・着艦中の適格機から最大8機の一時Task Forceを編成する。
 - 自動編成はEngineer、Scout、Cargo、Security、Fieldを任務規模に応じて組み合わせる。Engineerが存在しない場合は完遂不能な孤立任務を作らず、開始を拒否する。
 - 戦闘、迎撃、補給帰還、Recovery、既存Field、Guard、Cargo輸送、Salvage中の機体は自動編成で奪わない。恒久Wingと`groupId`も変更しない。
 - 機体不足時は利用可能な役割で縮退編成し、割当数と不足能力をゲーム内へ表示する。
 - Dock一覧へ蓄電率と`READY`、`CHARGE`、`WAIT POWER`、`WAIT AMMO`、`WAIT REPAIR`を表示し、出撃不能理由を一覧から判別できるようにした。
+- Scout不在の縮退編成では、Engineerの局所走査と作業が完了した時点でField支援も完了する。不要な広域走査を続けて電力を消費しない。
 - 詳細契約は[自律運用・Task Force仕様](docs/design/MORROWGEAR_AUTONOMOUS_OPERATIONS_SPEC.md)を参照する。
 
 ## v0.18.1 Lifecycle and Logistics

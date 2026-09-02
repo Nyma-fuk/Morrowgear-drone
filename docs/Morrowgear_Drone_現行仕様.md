@@ -1,12 +1,12 @@
 # Morrowgear: Drone Command 現行仕様
 
-> **参照先:** 個体制御、Waypoint、Wing/Cohort、同期、障害回避、電力、および実ドローン向け設計差分は、[Morrowgear Drone 制御アーキテクチャ・実機化設計指針](architecture/MORROWGEAR_DRONE_CONTROL_ARCHITECTURE.md)を参照してください。v0.19.0で追加した自動編成の判断契約は、[自律運用・Task Force仕様](design/MORROWGEAR_AUTONOMOUS_OPERATIONS_SPEC.md)を正本とします。
+> **参照先:** 個体制御、Waypoint、Wing/Cohort、同期、障害回避、電力、および実ドローン向け設計差分は、[Morrowgear Drone 制御アーキテクチャ・実機化設計指針](architecture/MORROWGEAR_DRONE_CONTROL_ARCHITECTURE.md)を参照してください。v0.19系の自動編成に関する判断契約は、[自律運用・Task Force仕様](design/MORROWGEAR_AUTONOMOUS_OPERATIONS_SPEC.md)を正本とします。
 
 ## 1. 文書情報
 
 | 項目 | 内容 |
 |---|---|
-| 対象版 | Morrowgear: Drone Command v0.19.0 |
+| 対象版 | Morrowgear: Drone Command v0.19.1 |
 | Minecraft | Java Edition 26.2 |
 | Mod基盤 | Fabric Loader 0.19.3 / Fabric API 0.156.0+26.2 |
 | Java | 25以上 |
@@ -507,9 +507,9 @@ Engineer単独任務では水平半径3～4ブロックの局所調査だけを�
 - 機体間隔と高度差を使った円形隊列
 - 追従、Dock帰投、着艦、ローター停止
 - 所有権、機体情報、Dock情報、任務情報、Cargo、役割のワールド保存とMinecraft再起動後の復元
-- v0.19.0ではJUnit 1,773件が全件合格。自動Task Force編成、全排他状態、縮退編成、Dock運用表示、既存のDock資源消費、浮遊充電、基地防衛状態遷移を含む
+- v0.19.1ではJUnit 1,776件が全件合格。自動Task Force編成、全排他状態、縮退編成、Dock運用表示、既存のDock資源消費、浮遊充電、基地防衛状態遷移を含む
 - Minecraft実機では基地生成、CONTACT 24体、ASSAULT 48体、SIEGE 76体、HUD戦線表示、弾切れ機のDock帰投、再武装、戦線復帰を確認済み
-- v0.19.0 JARの生成とLauncherプロファイル`Morrowgear Drone (Latest)`への原子的な差し替えを確認済み。Minecraft実起動はLauncherのXbox Liveサインインエラー`0x80004005`により未確認
+- v0.19.1 JARの生成とLauncherプロファイル`Morrowgear Drone (Latest)`への原子的な差し替えを確認済み。Minecraft 26.2の開発クライアントでv0.19.1を実起動し、AUTO OPSのEngineer必須ブロック、Scout不在のEngineer 1機＋Field 1機の縮退編成、不足Role警告、Dockの`READY`と蓄電率表示を確認した。固定試験床での再試験では、Engineerの局所走査・作業完了後に両機が`COMPLETE -> RETURN -> FOLLOW`へ遷移し、Fieldが不要な広域走査を継続しないことを実ゲーム処理で確認した
 - 最新の観点、前提条件、合格基準は`Morrowgear_Drone_v0.16.12_テスト妥当性監査.md`を参照する
 ### 任務編隊の適用範囲
 

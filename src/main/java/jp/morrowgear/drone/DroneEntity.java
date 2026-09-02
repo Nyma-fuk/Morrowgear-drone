@@ -1826,17 +1826,21 @@ public final class DroneEntity extends PathfinderMob {
 	private void tickFieldSupport(ServerLevel level, FieldOperationRegistry.Operation operation,
 		List<DroneEntity> members) {
 		boolean scoutPresent = members.stream().anyMatch(member -> member.role() == DroneRole.SCOUT);
+		boolean engineerPresent = members.stream().anyMatch(member -> member.role() == DroneRole.ENGINEER);
+		boolean engineersComplete = engineeringWorkComplete(members);
 		FieldOperationRegistry.Snapshot snapshot = operation.snapshot(level.getGameTime());
-		if (!snapshot.scanComplete() && !scoutPresent && tickCount % 4 == 0) {
+		if (!snapshot.scanComplete() && !scoutPresent && !engineerPresent && tickCount % 4 == 0) {
 			scanFieldTargets(level, operation, 64);
 			snapshot = operation.snapshot(level.getGameTime());
 		}
-		boolean engineersComplete = engineeringWorkComplete(members);
+		boolean surveyReady = FieldSupportPolicy.surveyReady(snapshot.scanComplete(), scoutPresent,
+			engineerPresent, engineersComplete);
 		boolean cargoComplete = roleComplete(members, DroneRole.CARGO);
-		entityData.set(FIELD_STATE, FieldSupportPolicy.state(snapshot.scanComplete(),
+		entityData.set(FIELD_STATE, FieldSupportPolicy.state(surveyReady,
 			engineersComplete, cargoComplete).id());
-		entityData.set(DATA_LINK_STATUS, snapshot.scanComplete()
-			? "FIELD RELAY / MISSION SUPPORT" : "FIELD RELAY / LOCAL SURVEY");
+		entityData.set(DATA_LINK_STATUS, surveyReady
+			? (snapshot.scanComplete() ? "FIELD RELAY / MISSION SUPPORT" : "FIELD RELAY / LOCAL COMPLETE")
+			: "FIELD RELAY / LOCAL SURVEY");
 		if (tickCount % 20 != 0) return;
 		DroneEntity receiver = members.stream().filter(member -> member != this && !member.isDocked()
 			&& !member.isPowerLost())

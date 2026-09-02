@@ -4,7 +4,7 @@
 
 | 項目 | 内容 |
 |---|---|
-| 対象 | Morrowgear: Drone Command v0.19.0 |
+| 対象 | Morrowgear: Drone Command v0.19.1 |
 | 機能 | `AUTO OPS`による目的ベースの一時編成 |
 | 基準日 | 2026-09-02 |
 | 正本 | 現行Java実装と本書 |
@@ -70,7 +70,7 @@ Engineerは作業対象を処理する必須能力である。利用可能なEng
 
 Scout、Cargo、Security、Fieldが不足する場合は縮退編成を許可する。
 
-- Scout不足: Engineerは局所走査へfallbackし、作業範囲と効率が低下する。
+- Scout不足: Engineerは局所走査へfallbackし、作業範囲と効率が低下する。Engineerの局所作業完了をField支援の走査完了として扱い、Fieldに不要な広域走査を継続させない。
 - Cargo不足: dropは現場へ残り、自動搬送されない。
 - Security不足: 作業は続くが専属護衛を持たない。
 - Field不足: 電力融通と複合任務支援を持たない。

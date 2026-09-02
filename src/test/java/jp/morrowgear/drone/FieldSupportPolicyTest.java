@@ -18,4 +18,19 @@ final class FieldSupportPolicyTest {
 		assertFalse(FieldSupportPolicy.mayTransfer(70, 20));
 		assertFalse(FieldSupportPolicy.mayTransfer(70, 0));
 	}
+
+	@Test void scoutlessEngineerLocalSurveyCanCompleteFieldSupport() {
+		assertTrue(FieldSupportPolicy.surveyReady(false, false, true, true));
+		assertFalse(FieldSupportPolicy.surveyReady(false, false, true, false));
+	}
+
+	@Test void linkedScoutStillOwnsTheWideAreaSurveyContract() {
+		assertFalse(FieldSupportPolicy.surveyReady(false, true, true, true));
+		assertTrue(FieldSupportPolicy.surveyReady(true, true, true, true));
+	}
+
+	@Test void fieldOnlyOperationMustFinishItsOwnSurvey() {
+		assertFalse(FieldSupportPolicy.surveyReady(false, false, false, true));
+		assertTrue(FieldSupportPolicy.surveyReady(true, false, false, true));
+	}
 }
