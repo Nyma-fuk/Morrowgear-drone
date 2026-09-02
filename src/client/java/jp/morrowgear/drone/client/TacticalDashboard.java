@@ -13,6 +13,7 @@ import java.util.Set;
 import jp.morrowgear.drone.DroneEntity;
 import jp.morrowgear.drone.DroneMode;
 import jp.morrowgear.drone.DroneRole;
+import jp.morrowgear.drone.DockOperationalPolicy;
 import jp.morrowgear.drone.FieldOperationType;
 import jp.morrowgear.drone.MissionAssignmentPolicy;
 import jp.morrowgear.drone.PatrolRoutePolicy;
@@ -22,6 +23,7 @@ import jp.morrowgear.drone.TacticalUiPolicy;
 import jp.morrowgear.drone.WingMembershipPolicy;
 import jp.morrowgear.drone.block.DockBlockEntity;
 import jp.morrowgear.drone.network.DroneCommandPayload;
+import jp.morrowgear.drone.network.FleetOperationPayload;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -80,6 +82,7 @@ public final class TacticalDashboard extends AbstractWidget {
 	private int cargoScroll;
 	private int wingBoardScroll;
 	private FieldOperationType armedWork = FieldOperationType.NONE;
+	private boolean autoOperations;
 	private boolean armedGuard;
 	private boolean armedRoute;
 	private final List<BlockPos> routeDraft = new ArrayList<>();
@@ -259,8 +262,16 @@ public final class TacticalDashboard extends AbstractWidget {
 			g.fill(row.x, row.y, row.right(), row.bottom(), hover ? 0xFF1B343A : PANEL_ALT);
 			g.outline(row.x, row.y, row.w, row.h, hover ? CYAN : BORDER);
 			g.text(client.font, dock.id, row.x + 7, row.y + 7, TEXT);
-			String state = dock.occupant == null ? "READY" : shortId(dock.occupant.unitId());
-			g.text(client.font, state, row.right() - client.font.width(state) - 7, row.y + 7, dock.occupant == null ? GREEN : CYAN);
+			String state = dock.status.label() + " / P" + dock.status.powerPercent() + "%";
+			int stateColor = switch (dock.status.severity()) {
+				case READY -> GREEN;
+				case SERVICING -> CYAN;
+				case CAUTION -> AMBER;
+				case BLOCKED -> RED;
+			};
+			g.text(client.font, fitText(state, row.w - client.font.width(dock.id) - 22),
+				row.right() - client.font.width(fitText(state, row.w - client.font.width(dock.id) - 22)) - 7,
+				row.y + 7, stateColor);
 		}
 		drawScrollCounter(g, l.leftWidth - 145, l.bottomTop - 11, dockScroll, docks.size(), dockCapacity);
 		if (docks.size() > dockCapacity) drawPageButtons(g, dockFirstRect(l), dockUpRect(l), dockDownRect(l), dockLastRect(l));
@@ -291,7 +302,9 @@ public final class TacticalDashboard extends AbstractWidget {
 		if (client.player == null) return;
 		Set<String> fieldMarkers = new LinkedHashSet<>();
 		for (DroneEntity drone : drones) {
-			if (!drone.hasFieldOperation() || !selected.contains(drone.getId())
+			boolean visibleOperation = selected.contains(drone.getId())
+				|| drone.fieldOrderId().startsWith("AUTO-");
+			if (!drone.hasFieldOperation() || !visibleOperation
 				|| !fieldMarkers.add(drone.fieldOrderId())) continue;
 			MapPoint point = mapPoint(map, drone.fieldAnchor().getX() + 0.5, drone.fieldAnchor().getZ() + 0.5);
 			if (point == null) continue;
@@ -662,7 +675,7 @@ public final class TacticalDashboard extends AbstractWidget {
 			Rect button = workRect(l, i);
 			boolean armed = armedWork == WORK_TYPES[i];
 			boolean hover = button.contains(mouseX, mouseY);
-			boolean enabled = availability.workEnabled(WORK_TYPES[i]);
+			boolean enabled = autoOperations ? !drones.isEmpty() : availability.workEnabled(WORK_TYPES[i]);
 			g.fill(button.x, button.y, button.right(), button.bottom(), armed ? 0xFF174139 : enabled && hover ? PANEL_RAISED : PANEL_ALT);
 			g.outline(button.x, button.y, button.w, button.h, enabled ? armed ? GREEN : BLUE : BORDER);
 			g.centeredText(client.font, WORK_LABELS[i], button.x + button.w / 2, button.y + 8,
@@ -675,6 +688,12 @@ public final class TacticalDashboard extends AbstractWidget {
 		g.outline(guard.x, guard.y, guard.w, guard.h, guardEnabled ? armedGuard ? RED : AMBER : BORDER);
 		g.centeredText(client.font, "GUARD", guard.x + guard.w / 2, guard.y + 8,
 			guardEnabled ? armedGuard ? RED : TEXT : MUTED);
+		Rect auto = autoOperationsRect(l);
+		g.fill(auto.x, auto.y, auto.right(), auto.bottom(), autoOperations ? 0xFF174139
+			: auto.contains(mouseX, mouseY) ? PANEL_RAISED : PANEL_ALT);
+		g.outline(auto.x, auto.y, auto.w, auto.h, autoOperations ? GREEN : BORDER);
+		g.centeredText(client.font, autoOperations ? "AUTO OPS ON" : "AUTO OPS",
+			auto.x + auto.w / 2, auto.y + 4, autoOperations ? GREEN : TEXT);
 
 		int missionY = infoY + 214;
 		g.text(client.font, "MISSION STATUS", right.x + 9, missionY, MUTED);
@@ -806,7 +825,8 @@ public final class TacticalDashboard extends AbstractWidget {
 			color = RED;
 		} else if (armedWork != FieldOperationType.NONE) {
 			int radius = armedWork == FieldOperationType.ORE ? 24 : armedWork == FieldOperationType.EXCAVATE ? 4 : 12;
-			message = WORK_LABELS[workIndex(armedWork)] + ": 地図上の作業中心をダブルクリック / "
+			String assignment = autoOperations ? "AUTO OPS" : "選択ユニット";
+			message = assignment + " / " + WORK_LABELS[workIndex(armedWork)] + ": 地図上の作業中心をダブルクリック / "
 				+ TacticalUiPolicy.radiusLabel(radius);
 			color = GREEN;
 		} else if (client.level != null && client.level.getGameTime() < transientNoticeUntil) {
@@ -996,12 +1016,19 @@ public final class TacticalDashboard extends AbstractWidget {
 		}
 		for (int i = 0; i < WORK_TYPES.length; i++) {
 			if (!workRect(l, i).contains(mouseX, mouseY)) continue;
-			if (!availability.workEnabled(WORK_TYPES[i])) {
+			if (!autoOperations && !availability.workEnabled(WORK_TYPES[i])) {
 				notifyAction(availability.workBlockReason(WORK_TYPES[i]));
 				return;
 			}
 			armedWork = armedWork == WORK_TYPES[i] ? FieldOperationType.NONE : WORK_TYPES[i];
 			armedGuard = false;
+			return;
+		}
+		if (autoOperationsRect(l).contains(mouseX, mouseY)) {
+			autoOperations = !autoOperations;
+			notifyAction(autoOperations
+				? "AUTO OPS: 待機中の適格機から一時Task Forceを自動編成します"
+				: "AUTO OPSを解除しました。選択中ユニットへ任務を割り当てます");
 			return;
 		}
 		if (workRect(l, WORK_TYPES.length).contains(mouseX, mouseY)) {
@@ -1153,7 +1180,7 @@ public final class TacticalDashboard extends AbstractWidget {
 	}
 
 	private void issueFieldOperation(Layout layout, double mouseX, double mouseY) {
-		if (client.player == null || client.level == null || selected.isEmpty()
+		if (client.player == null || client.level == null || (!autoOperations && selected.isEmpty())
 			|| armedWork == FieldOperationType.NONE) return;
 		int centerX = layout.map.x + layout.map.w / 2;
 		int centerY = layout.map.y + layout.map.h / 2;
@@ -1166,6 +1193,12 @@ public final class TacticalDashboard extends AbstractWidget {
 			: armedWork == FieldOperationType.EXCAVATE ? 4 : 12;
 		String orderId = Long.toString(client.level.getGameTime(), 36).toUpperCase()
 			+ "-" + armedWork.id().toUpperCase() + "-" + worldX + "-" + worldZ;
+		if (autoOperations) {
+			ClientPlayNetworking.send(new FleetOperationPayload(armedWork.id(), worldX, worldZ, radius));
+			notifyAction("AUTO OPS / " + armedWork.label() + " / Task Force編成を要求しました");
+			armedWork = FieldOperationType.NONE;
+			return;
+		}
 		for (DroneEntity drone : drones()) {
 			if (!selected.contains(drone.getId()) || !MissionAssignmentPolicy.allows(drone.role(),
 				MissionAssignmentPolicy.MissionKind.FIELD_OPERATION)) continue;
@@ -1502,7 +1535,11 @@ public final class TacticalDashboard extends AbstractWidget {
 					if (!(blockEntity instanceof DockBlockEntity dock)
 						|| !dock.matchesOwner(client.player.getUUID(), client.player.getScoreboardName())) continue;
 					DroneEntity occupant = drones.stream().filter(drone -> drone.hasDock() && drone.dockPos().equals(dock.getBlockPos())).findFirst().orElse(null);
-					result.add(new DockInfo(dock.dockId(), dock.getBlockPos().asLong(), occupant));
+					DockOperationalPolicy.Status status = DockOperationalPolicy.status(occupant != null,
+						occupant == null ? 0 : occupant.batteryPercent(),
+						occupant == null ? "" : occupant.dataLinkStatus(), dock.storedPower(), dock.powerCapacity(),
+						dock.hasPowerSupply(), dock.hasRepairMaterial());
+					result.add(new DockInfo(dock.dockId(), dock.getBlockPos().asLong(), occupant, status));
 				}
 			}
 		}
@@ -1629,6 +1666,9 @@ public final class TacticalDashboard extends AbstractWidget {
 		int w = available / columns;
 		int x = l.right.x + 9 + index * (w + gap);
 		return new Rect(x, l.right.y + 220, index == columns - 1 ? l.right.right() - 9 - x : w, 23);
+	}
+	private Rect autoOperationsRect(Layout l) {
+		return new Rect(l.right.right() - 94, l.right.y + 202, 85, 16);
 	}
 
 	private boolean modulePanelVisible(Layout l) { return l.right.h >= 330; }
@@ -1815,7 +1855,7 @@ public final class TacticalDashboard extends AbstractWidget {
 	private enum SelectionMode { UNIT, GROUP, ALL }
 	private record Rect(int x, int y, int w, int h) { int right() { return x + w; } int bottom() { return y + h; } boolean contains(double px, double py) { return px >= x && px < right() && py >= y && py < bottom(); } }
 	private record Layout(int header, int bottomTop, int leftWidth, int dockHeaderY, Rect map, Rect right) {}
-	private record DockInfo(String id, long pos, DroneEntity occupant) {}
+	private record DockInfo(String id, long pos, DroneEntity occupant, DockOperationalPolicy.Status status) {}
 	private record ContainerInfo(String label, long pos, int distance, String coordinate) {}
 	private record MapPoint(int x, int y) {}
 	private record WingCard(String groupId, List<DroneEntity> members, DroneEntity leader,

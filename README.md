@@ -2,6 +2,15 @@
 
 制御アーキテクチャ、Waypoint/Wing同期、通信断時の挙動、および実ドローンへ展開する場合の設計差分は、[Morrowgear Drone 制御アーキテクチャ・実機化設計指針](docs/architecture/MORROWGEAR_DRONE_CONTROL_ARCHITECTURE.md)を参照してください。
 
+## v0.19.0 Autonomous Operations
+
+- 戦術画面へ`AUTO OPS`を追加した。作業種別と地点だけを指定すると、serverが待機・着艦中の適格機から最大8機の一時Task Forceを編成する。
+- 自動編成はEngineer、Scout、Cargo、Security、Fieldを任務規模に応じて組み合わせる。Engineerが存在しない場合は完遂不能な孤立任務を作らず、開始を拒否する。
+- 戦闘、迎撃、補給帰還、Recovery、既存Field、Guard、Cargo輸送、Salvage中の機体は自動編成で奪わない。恒久Wingと`groupId`も変更しない。
+- 機体不足時は利用可能な役割で縮退編成し、割当数と不足能力をゲーム内へ表示する。
+- Dock一覧へ蓄電率と`READY`、`CHARGE`、`WAIT POWER`、`WAIT AMMO`、`WAIT REPAIR`を表示し、出撃不能理由を一覧から判別できるようにした。
+- 詳細契約は[自律運用・Task Force仕様](docs/design/MORROWGEAR_AUTONOMOUS_OPERATIONS_SPEC.md)を参照する。
+
 ## v0.18.1 Lifecycle and Logistics
 
 - Dockを3段27枠へ拡張し、既存9枠、回収バッファ9枠、共通補給バッファ9枠を一つのサービス拠点として運用する。
@@ -153,7 +162,7 @@
 - 信頼度0.45未満、または5秒を超えた古い報告は航行判断に使いません。
 - `PROBING`、`HAZARDOUS`、`BLOCKED`では巡航高度へ余裕を加え、編隊リーダーだけを段階的に減速します。
 - 合流中の追従機、直接脅威への防御、回避行動はScout情報より優先されます。
-- 役割モジュールのアイテムと外観は未実装です。既存機は引き続き`FIELD`として読み込まれます。
+- この版では役割モジュールの物理アイテムと外観は未実装でした。現在はv0.8.0以降のモジュール交換、専用アイコン、レシピへ移行済みです。
 
 ## v0.7.0 役割モジュールとWing間データリンク基盤
 

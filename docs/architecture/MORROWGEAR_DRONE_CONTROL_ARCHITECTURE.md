@@ -5,16 +5,16 @@
 | 項目 | 内容 |
 |---|---|
 | 対象 | Morrowgear: Drone Command Java Mod |
-| 実装版 | v0.18.1 |
+| 実装版 | v0.19.0 |
 | Minecraft | Java Edition 26.2 |
-| 基準日 | 2026-08-26 |
+| 基準日 | 2026-09-02 |
 | 文書状態 | 現行コードから抽出した実装仕様 + 実機化する場合の推奨設計 |
 
 本書は、Morrowgearのドローンが「どの情報を受け取り、どの処理を通り、どう移動するか」をコード単位で説明する。後半では、同じ製品概念を実ドローンへ移植する場合に必要な制御、通信、安全設計を分離して記載する。
 
 表記は次のように区別する。
 
-- **現行実装**: v0.18.1のJavaコードから確認できる事実。
+- **現行実装**: v0.19.0のJavaコードから確認できる事実。
 - **推奨**: 実機化する場合の設計案。現行Modに実装済みであることを意味しない。
 - **禁止**: Mod上の兵器・攻撃機能を実機へ移植することは本書の対象外とする。実機のSecurity roleは監視、通報、照明、退避支援等の非武装用途へ限定する。
 
@@ -25,6 +25,7 @@
 - [複数戦域仕様](../design/MORROWGEAR_COMBAT_THEATER_SPEC.md)
 - [サービス帰還ポリシー](../design/AUTO_COMBAT_SERVICE_POLICY.md)
 - [ライフサイクル・物流仕様](../design/MORROWGEAR_LIFECYCLE_LOGISTICS_SPEC.md)
+- [自律運用・Task Force仕様](../design/MORROWGEAR_AUTONOMOUS_OPERATIONS_SPEC.md)
 
 ### 目次
 

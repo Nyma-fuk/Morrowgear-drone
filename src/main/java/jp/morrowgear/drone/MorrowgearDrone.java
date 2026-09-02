@@ -18,6 +18,7 @@ import jp.morrowgear.drone.item.DroneUnitItem;
 import jp.morrowgear.drone.item.RecoveryToolItem;
 import jp.morrowgear.drone.item.SolarServiceStationItem;
 import jp.morrowgear.drone.network.DroneCommandPayload;
+import jp.morrowgear.drone.network.FleetOperationPayload;
 import jp.morrowgear.drone.network.PowerLostBeaconPayload;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
@@ -183,6 +184,7 @@ public final class MorrowgearDrone implements ModInitializer {
 		});
 
 		PayloadTypeRegistry.serverboundPlay().register(DroneCommandPayload.TYPE, DroneCommandPayload.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(FleetOperationPayload.TYPE, FleetOperationPayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(PowerLostBeaconPayload.TYPE, PowerLostBeaconPayload.CODEC);
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
 			ServerPlayer player = handler.getPlayer();
@@ -191,6 +193,8 @@ public final class MorrowgearDrone implements ModInitializer {
 					beacon.x(), beacon.y(), beacon.z(), true, beacon.tick()));
 			}
 		});
+		ServerPlayNetworking.registerGlobalReceiver(FleetOperationPayload.TYPE, (payload, context) ->
+			dispatchFleetOperation(context.player(), payload));
 		ServerPlayNetworking.registerGlobalReceiver(DroneCommandPayload.TYPE, (payload, context) -> {
 			ServerPlayer player = context.player();
 			if (!DroneCommandPolicy.acceptablePayload(payload.action())) return;
@@ -390,6 +394,55 @@ public final class MorrowgearDrone implements ModInitializer {
 		MorrowgearBaseGenerator.register();
 
 		LOGGER.info("Morrowgear Drone Command initialized for Minecraft 26.2");
+	}
+
+	private static void dispatchFleetOperation(ServerPlayer player, FleetOperationPayload payload) {
+		FieldOperationType type = FieldOperationType.byId(payload.operationType());
+		if (type == FieldOperationType.NONE || !DroneCommandPolicy.validFieldRadius(type, payload.radius())
+			|| Math.abs(payload.x() - player.getBlockX()) > 512
+			|| Math.abs(payload.z() - player.getBlockZ()) > 512) return;
+		ServerLevel level = player.level();
+		int surfaceY = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, payload.x(), payload.z());
+		int anchorY = switch (type) {
+			case ORE -> surfaceY - 16;
+			case EXCAVATE, FORESTRY -> surfaceY - 1;
+			case NONE -> surfaceY;
+		};
+		BlockPos anchor = new BlockPos(payload.x(), anchorY, payload.z());
+		List<DroneEntity> fleet = ownedDrones(level, player, 512);
+		List<AutonomousTaskForcePolicy.Candidate> candidates = fleet.stream()
+			.map(drone -> automaticCandidate(drone, anchor)).toList();
+		AutonomousTaskForcePolicy.Plan plan = AutonomousTaskForcePolicy.plan(type, payload.radius(), candidates);
+		if (!plan.executable()) {
+			player.sendSystemMessage(Component.literal("[MORROWGEAR] AUTO OPS BLOCKED / " + plan.status()));
+			return;
+		}
+		Map<Integer, DroneEntity> byId = new HashMap<>();
+		fleet.forEach(drone -> byId.put(drone.getId(), drone));
+		String orderId = "AUTO-" + Long.toString(level.getGameTime(), 36).toUpperCase()
+			+ "-" + type.id().toUpperCase() + "-" + payload.x() + "-" + payload.z();
+		for (AutonomousTaskForcePolicy.Candidate selected : plan.selected()) {
+			DroneEntity drone = byId.get(selected.entityId());
+			if (drone == null) continue;
+			drone.clearSecurityPatrol();
+			if (drone.role() == DroneRole.CARGO) drone.pauseCargoRoute();
+			drone.assignFieldOperation(type, anchor, payload.radius(), orderId);
+		}
+		player.sendSystemMessage(Component.literal("[MORROWGEAR] AUTO OPS / " + type.label()
+			+ " / " + plan.selected().size() + " UNITS / " + plan.rosterLabel()));
+		player.sendSystemMessage(Component.literal("[MORROWGEAR] " + plan.missingLabel()));
+	}
+
+	private static AutonomousTaskForcePolicy.Candidate automaticCandidate(DroneEntity drone, BlockPos anchor) {
+		boolean cargoRouteActive = drone.role() == DroneRole.CARGO && drone.hasCargoSource()
+			&& drone.hasCargoTarget() && !drone.cargoPaused();
+		boolean idle = AutonomousTaskForcePolicy.operationallyIdle(drone.isPowerLost(),
+			drone.serviceReturnActive(), drone.combatActive(), drone.emergencyInterceptActive(),
+			drone.recoveryLevel(), drone.hasActiveFieldOperation(), drone.hasSecurityPatrol(),
+			drone.salvageTargetEntityId() >= 0, cargoRouteActive, drone.mode(), drone.isDocked());
+		int health = Math.round(drone.getHealth() * 100.0f / Math.max(1.0f, drone.getMaxHealth()));
+		return new AutonomousTaskForcePolicy.Candidate(drone.getId(), drone.unitId(), drone.role(), idle,
+			drone.isDocked(), drone.batteryPercent(), health, drone.distanceToSqr(Vec3.atCenterOf(anchor)));
 	}
 
 	private static void moveToWing(ServerPlayer player, DroneEntity drone, String targetGroup) {

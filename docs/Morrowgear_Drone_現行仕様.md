@@ -1,16 +1,16 @@
 # Morrowgear: Drone Command 現行仕様
 
-> **参照先:** 本書はv0.11.1時点の機能概要です。v0.18.1時点の個体制御、Waypoint、Wing/Cohort、同期、障害回避、電力、および実ドローン向け設計差分は、[Morrowgear Drone 制御アーキテクチャ・実機化設計指針](architecture/MORROWGEAR_DRONE_CONTROL_ARCHITECTURE.md)を正本として参照してください。
+> **参照先:** 個体制御、Waypoint、Wing/Cohort、同期、障害回避、電力、および実ドローン向け設計差分は、[Morrowgear Drone 制御アーキテクチャ・実機化設計指針](architecture/MORROWGEAR_DRONE_CONTROL_ARCHITECTURE.md)を参照してください。v0.19.0で追加した自動編成の判断契約は、[自律運用・Task Force仕様](design/MORROWGEAR_AUTONOMOUS_OPERATIONS_SPEC.md)を正本とします。
 
 ## 1. 文書情報
 
 | 項目 | 内容 |
 |---|---|
-| 対象版 | Morrowgear: Drone Command v0.11.1 |
+| 対象版 | Morrowgear: Drone Command v0.19.0 |
 | Minecraft | Java Edition 26.2 |
 | Mod基盤 | Fabric Loader 0.19.3 / Fabric API 0.156.0+26.2 |
 | Java | 25以上 |
-| 文書基準日 | 2026年8月20日 |
+| 文書基準日 | 2026年9月2日 |
 
 本書は、現在のJava版Modに実装されている機能と内部制御をまとめた現行仕様である。将来構想と実装済み機能を混同しないため、未実装項目は第12章に分離する。
 
@@ -486,7 +486,7 @@ Engineer単独任務では水平半径3～4ブロックの局所調査だけを�
 
 ## 12. 現時点の未実装・暫定項目
 
-- 飛行用バッテリーと兵装用電力の消費、通常Dockと浮遊サービス充電Dockでの充電、0%時の飛行／攻撃停止、旧機体の移行を実装済み。交換式バッテリーアイテムとレシピは未実装
+- 飛行用バッテリーと兵装用電力の消費、通常Dockと浮遊サービス充電Dockでの充電、0%時の飛行／攻撃停止、旧機体の移行を実装済み。標準、強化、高密度の交換式バッテリー、Dock着艦中の交換、製作レシピも実装済み
 - Cargoインベントリ、チェスト／樽走査、搬出元・搬入先指定、コンテナ間輸送は実装済み。輸送量と上位機種差は今後のバランス調整対象
 - Scoutの全域走査、Engineerの局所／データリンク作業、Cargo回収、GUARD護衛、植林は実装済み
 - 耕作、収穫、田植えは未実装
@@ -496,6 +496,7 @@ Engineer単独任務では水平半径3～4ブロックの局所調査だけを�
 - Dockの電力消費、修理材、弾薬補給、資源不足待機を実装済み。浮遊サービス充電Dockは最大3機の充電枠、低残量優先の待機列、充電子機を実装済み
 - ローター回転表示は実装済みだが、常時ローター音は未実装
 - 画面下部のコンテナ走査欄は実コンテナを表示し、Cargoの搬出元・搬入先へ指定できる
+- `AUTO OPS`は作業種別と地点だけを受け取り、待機・着艦中の適格機から最大8機を自動編成する。既存任務、戦闘、補給、Recovery、Cargo輸送、Salvage中の機体と恒久Wingは変更しない
 
 ## 13. 検証済み範囲
 
@@ -506,9 +507,9 @@ Engineer単独任務では水平半径3～4ブロックの局所調査だけを�
 - 機体間隔と高度差を使った円形隊列
 - 追従、Dock帰投、着艦、ローター停止
 - 所有権、機体情報、Dock情報、任務情報、Cargo、役割のワールド保存とMinecraft再起動後の復元
-- v0.18.0ではJUnit 1,718件が全件合格。Dockの資源消費、端数電力からの追加入力、浮遊充電枠と待機列、基地防衛状態遷移を含む
+- v0.19.0ではJUnit 1,773件が全件合格。自動Task Force編成、全排他状態、縮退編成、Dock運用表示、既存のDock資源消費、浮遊充電、基地防衛状態遷移を含む
 - Minecraft実機では基地生成、CONTACT 24体、ASSAULT 48体、SIEGE 76体、HUD戦線表示、弾切れ機のDock帰投、再武装、戦線復帰を確認済み
-- 最終JAR差し替え後にLauncherプロファイル`Morrowgear Drone (Latest)`でMinecraft 26.2とMorrowgear Drone 0.18.0の起動を確認済み
+- v0.19.0 JARの生成とLauncherプロファイル`Morrowgear Drone (Latest)`への原子的な差し替えを確認済み。Minecraft実起動はLauncherのXbox Liveサインインエラー`0x80004005`により未確認
 - 最新の観点、前提条件、合格基準は`Morrowgear_Drone_v0.16.12_テスト妥当性監査.md`を参照する
 ### 任務編隊の適用範囲
 
