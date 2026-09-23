@@ -1,0 +1,35 @@
+{
+  "checked_on": "2026-09-22",
+  "license": "CC0-1.0",
+  "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "acquisition": "Public HQ MP3 preview links from each sound page; not the login-restricted original masters.",
+  "sources": {
+    "gunshot": {
+      "file": "427595_3094998-hq.mp3",
+      "title": "20 gauge shotgun gunshot",
+      "author": "michorvath",
+      "page": "https://freesound.org/people/michorvath/sounds/427595/",
+      "download": "https://cdn.freesound.org/previews/427/427595_3094998-hq.mp3",
+      "sha256": "97a8f4893b910e3f43f3ccfcc5ea872af1da917937346f14b4114a74f1974c46",
+      "provenance": "Uploader describes a recorded 20 gauge shotgun being fired. Sound page explicitly offers CC0."
+    },
+    "rocket": {
+      "file": "162379_71257-hq.mp3",
+      "title": "Tomahawk Missile Rocket Launch 2",
+      "author": "qubodup",
+      "page": "https://freesound.org/people/qubodup/sounds/162379/",
+      "download": "https://cdn.freesound.org/previews/162/162379_71257-hq.mp3",
+      "sha256": "712d0910dc76f1b9ef7600ba2e55d80f2bfa062d74ef2bf08fec8c9247ebd6f9",
+      "provenance": "Uploader reports extraction from US-government video. Sound page explicitly offers CC0; original government authorship has not been independently traced."
+    },
+    "explosion": {
+      "file": "182429_71257-hq.mp3",
+      "title": "Explosion",
+      "author": "qubodup",
+      "page": "https://freesound.org/people/qubodup/sounds/182429/",
+      "download": "https://cdn.freesound.org/previews/182/182429_71257-hq.mp3",
+      "sha256": "0ee238ddce34c47d1ee216a2a682fb1cef2325a11c76da459f33b1088fad83a9",
+      "provenance": "Uploader reports US-government video source data. Sound page explicitly offers CC0; original government authorship has not been independently traced."
+    }
+  }
+}

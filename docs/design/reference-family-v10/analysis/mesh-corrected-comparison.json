@@ -1,0 +1,25 @@
+{
+  "silhouetteIoU": 0.9381968633088221,
+  "meanContourErrorPx": 7.563701629638672,
+  "p95ContourErrorPx": 25.78759765625,
+  "landmarkRmsErrorPx": 26.105987635823833,
+  "landmarkErrorPx": {
+    "fan_left": 5.508163128967114,
+    "fan_right": 5.6464903288717565,
+    "tip_left_front": 67.07710060321168,
+    "tip_left_rear": 11.762645694797333,
+    "tip_right_front": 14.92819624210866,
+    "tip_right_rear": 17.438427428347076,
+    "chin_sensor": 7.237648760813481,
+    "rear_crown": 13.150186180000887
+  },
+  "interpretation": "Image-space diagnostics only, not a percentage of 3D fidelity. Hull silhouette excludes small sensor protrusions.",
+  "cameraRefitted": false,
+  "referenceMaskReviewed": false,
+  "gate": {
+    "silhouetteIoU": 0.95,
+    "meanContourErrorPx": 8,
+    "landmarkRmsErrorPx": 12
+  },
+  "passed": false
+}

@@ -5,10 +5,16 @@ public final class TacticalLayoutPolicy {
 	}
 
 	public static Metrics calculate(int physicalWidth, int physicalHeight) {
+		return calculateForGui(physicalWidth, physicalHeight, 1.0);
+	}
+
+	public static Metrics calculateForGui(int physicalWidth, int physicalHeight, double guiScale) {
 		float scale = Math.min(1.0f, Math.min(physicalWidth / 960.0f, physicalHeight / 540.0f));
+		// Glyph strokes must land on framebuffer pixels, independent of Minecraft GUI scale.
+		if (scale * guiScale >= 1) scale = (float)(Math.floor(scale * guiScale + 1e-6) / guiScale);
 		int width = Math.max(960, (int)(physicalWidth / scale));
 		int height = Math.max(540, (int)(physicalHeight / scale));
-		int header = 44;
+		int header = 70;
 		int bottomHeight = Math.max(138, Math.min(180, height / 4));
 		int bottomTop = height - bottomHeight;
 		int left = Math.max(210, Math.min(270, width / 5));
@@ -16,7 +22,7 @@ public final class TacticalLayoutPolicy {
 		int dockHeader = header + 56 + Math.max(112, (bottomTop - header - 56) * 60 / 100);
 		int mapWidth = width - left - right;
 		int mapHeight = bottomTop - header;
-		int unitCapacity = Math.max(1, (dockHeader - (header + 57) - 8) / 34);
+		int unitCapacity = Math.max(1, (dockHeader - (header + 81) - 20) / 34);
 		int dockCapacity = Math.max(1, (bottomTop - (dockHeader + 17) - 8) / 26);
 		int missionCapacity = Math.max(1, (height - (bottomTop + 55)) / 25);
 		int cargoCapacity = Math.max(1, (height - (bottomTop + 38)) / 27);

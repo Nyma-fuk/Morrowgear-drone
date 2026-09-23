@@ -1,0 +1,14 @@
+// Exercises the real install gate while replacing every installer action with a log only.
+gradle.projectsEvaluated {
+    rootProject.tasks.named("syncLauncherMod").configure {
+        actions.clear()
+        outputs.upToDateWhen { false }
+        doLast { logger.lifecycle("MORROWGEAR_SYNC_PROBE_ALLOWED_NO_INSTALL") }
+    }
+    if (rootProject.providers.gradleProperty("morrowgearProbeFailure").isPresent()) {
+        def failure = rootProject.tasks.register("morrowgearVerificationProbeFailure") {
+            doLast { throw new GradleException("Expected launcher verification gate probe failure") }
+        }
+        rootProject.tasks.named("build").configure { dependsOn failure }
+    }
+}

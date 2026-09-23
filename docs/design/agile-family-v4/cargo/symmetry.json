@@ -1,0 +1,10 @@
+{
+  "role": "cargo",
+  "verticesChecked": 7946,
+  "tolerance": 1e-05,
+  "geometrySymmetryPass": true,
+  "errors": [],
+  "visualApproval": false,
+  "gameVerified": false,
+  "animationVerified": false
+}

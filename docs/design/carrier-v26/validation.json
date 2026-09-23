@@ -1,0 +1,110 @@
+{
+  "stage": "MODERATE_DETAIL_PROPOSAL_NOT_APPROVED",
+  "bounds": [
+    -23.0,
+    -34.0,
+    0.0,
+    23.0,
+    34.0,
+    11.0
+  ],
+  "dimensions": [
+    46.0,
+    68.0,
+    11.0
+  ],
+  "mirrorError": 0.0,
+  "units": "blocks",
+  "blenderFront": "-Y",
+  "runtimeFront": "-Z",
+  "runtimeDimensions": {
+    "widthX": 46,
+    "lengthZ": 68,
+    "heightY": 11
+  },
+  "dedicatedBayCount": 4,
+  "serviceBayCoordinates": "unchanged from V24/V25",
+  "contractDelta": {
+    "fromV25": {
+      "width": [
+        48,
+        46
+      ],
+      "length": [
+        32,
+        68
+      ],
+      "height": [
+        14,
+        11
+      ]
+    },
+    "origin": "unchanged belly zero",
+    "beamOffset": [
+      0,
+      -0.1,
+      0
+    ],
+    "backend": "NOT MODIFIED"
+  },
+  "deckExhibitionCount": 6,
+  "dockedWitnessCount": 4,
+  "limitations": [
+    "No moving mechanism, arbitrary flight collision or runtime validation.",
+    "Deck witnesses are display only, not six new backend slots.",
+    "No runtime changes."
+  ],
+  "bays": [
+    {
+      "slot": 0,
+      "runtimeXYZ": [
+        -7.15,
+        2.4,
+        -5.2
+      ],
+      "rays": 169,
+      "blockedRays": []
+    },
+    {
+      "slot": 1,
+      "runtimeXYZ": [
+        7.15,
+        2.4,
+        -5.2
+      ],
+      "rays": 169,
+      "blockedRays": []
+    },
+    {
+      "slot": 2,
+      "runtimeXYZ": [
+        -3.6,
+        2.4,
+        7.8
+      ],
+      "rays": 169,
+      "blockedRays": []
+    },
+    {
+      "slot": 3,
+      "runtimeXYZ": [
+        3.6,
+        2.4,
+        7.8
+      ],
+      "rays": 169,
+      "blockedRays": []
+    }
+  ],
+  "passed": true,
+  "budget": {
+    "vertices": 1039437,
+    "triangles": 1787642,
+    "witnessTriangles": 1768040,
+    "objects": 1199,
+    "carrierOnlyTriangles": 19602,
+    "glbBytes": 57972424
+  },
+  "blendSha256": "45d36abf06697a2fe6e1e1f929b89853353f1fd3022c393c2c5cd37cd0a6c14a",
+  "glbSha256": "676a9ddea4c45116b13b9efd916390b922419c22915f9141ce26a1ed4396327b"
+}

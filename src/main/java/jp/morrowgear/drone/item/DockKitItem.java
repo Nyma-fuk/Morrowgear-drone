@@ -21,17 +21,17 @@ public final class DockKitItem extends Item {
 		if (!(context.getLevel() instanceof ServerLevel level)) return InteractionResult.SUCCESS;
 		if (!(context.getPlayer() instanceof ServerPlayer player)) return InteractionResult.FAIL;
 
-		for (int i = 0; i < MorrowgearDrone.DOCK_PARTS.length; i++) {
-			BlockPos part = center.offset(i % 3 - 1, 0, i / 3 - 1);
+		for (int i = 0; i < MorrowgearDrone.WIDE_DOCK_PARTS.length; i++) {
+			BlockPos part = center.offset(i % 5 - 2, 0, i / 5 - 2);
 			if (!level.getBlockState(part).isAir()) {
-				player.sendSystemMessage(Component.literal("[MORROWGEAR] Dockの設置には3×3の空間が必要です。"));
+				player.sendSystemMessage(Component.literal("[MORROWGEAR] Dockの設置には5×5の空間が必要です。"));
 				return InteractionResult.FAIL;
 			}
 		}
 
-		for (int i = 0; i < MorrowgearDrone.DOCK_PARTS.length; i++) {
-			BlockPos part = center.offset(i % 3 - 1, 0, i / 3 - 1);
-			level.setBlockAndUpdate(part, MorrowgearDrone.DOCK_PARTS[i].defaultBlockState());
+		for (int i = 0; i < MorrowgearDrone.WIDE_DOCK_PARTS.length; i++) {
+			BlockPos part = center.offset(i % 5 - 2, 0, i / 5 - 2);
+			level.setBlockAndUpdate(part, MorrowgearDrone.WIDE_DOCK_PARTS[i].defaultBlockState());
 		}
 		if (level.getBlockEntity(center) instanceof DockBlockEntity dock) dock.initialize(player);
 		if (!player.isCreative()) context.getItemInHand().shrink(1);

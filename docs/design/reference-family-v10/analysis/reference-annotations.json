@@ -1,0 +1,181 @@
+{
+  "source": "docs\\design\\blended-wing-v5\\concept.png",
+  "size": [
+    1681,
+    936
+  ],
+  "method": "Manual contour seeds plus GrabCut; visible landmarks are human image annotations.",
+  "manualPolygon": [
+    [
+      211,
+      62
+    ],
+    [
+      198,
+      115
+    ],
+    [
+      246,
+      171
+    ],
+    [
+      485,
+      214
+    ],
+    [
+      714,
+      207
+    ],
+    [
+      817,
+      199
+    ],
+    [
+      869,
+      228
+    ],
+    [
+      934,
+      241
+    ],
+    [
+      978,
+      244
+    ],
+    [
+      1027,
+      252
+    ],
+    [
+      1042,
+      283
+    ],
+    [
+      1080,
+      313
+    ],
+    [
+      1402,
+      455
+    ],
+    [
+      1518,
+      448
+    ],
+    [
+      1578,
+      402
+    ],
+    [
+      1644,
+      521
+    ],
+    [
+      1628,
+      539
+    ],
+    [
+      1527,
+      591
+    ],
+    [
+      1164,
+      619
+    ],
+    [
+      833,
+      666
+    ],
+    [
+      645,
+      701
+    ],
+    [
+      556,
+      720
+    ],
+    [
+      481,
+      730
+    ],
+    [
+      373,
+      710
+    ],
+    [
+      346,
+      667
+    ],
+    [
+      330,
+      612
+    ],
+    [
+      319,
+      548
+    ],
+    [
+      41,
+      231
+    ],
+    [
+      36,
+      214
+    ],
+    [
+      43,
+      141
+    ]
+  ],
+  "landmarks": {
+    "nose_visor": [
+      413,
+      634
+    ],
+    "nose_right_corner": [
+      480,
+      650
+    ],
+    "chin_sensor": [
+      398,
+      687
+    ],
+    "fan_left": [
+      400,
+      293
+    ],
+    "fan_right": [
+      1034,
+      451
+    ],
+    "tip_left_front": [
+      37,
+      215
+    ],
+    "tip_left_rear": [
+      211,
+      62
+    ],
+    "tip_right_front": [
+      1642,
+      522
+    ],
+    "tip_right_rear": [
+      1577,
+      402
+    ],
+    "rear_crown": [
+      882,
+      246
+    ]
+  },
+  "shadingIsNotDepth": true,
+  "otsuThreshold": 83.0,
+  "luminanceQuartiles": [
+    39.0,
+    65.0,
+    87.0
+  ],
+  "annotationReviewed": false,
+  "silhouetteUncertaintyPixels": 6
+}

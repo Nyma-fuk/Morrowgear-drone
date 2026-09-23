@@ -1,0 +1,57 @@
+{
+  "id": "basic_control_board",
+  "status": "design candidate / not installed",
+  "checks": [
+    {
+      "frame": 1,
+      "vertices": 4656,
+      "bounds": [
+        -0.4699999988079071,
+        -0.4050000011920929,
+        0.0,
+        0.4699999988079071,
+        0.4050000011920929,
+        0.11650000512599945
+      ],
+      "mirrorError": 0.0,
+      "passed": true
+    },
+    {
+      "frame": 40,
+      "vertices": 4656,
+      "bounds": [
+        -0.4699999988079071,
+        -0.4050000011920929,
+        0.0,
+        0.4699999988079071,
+        0.4050000011920929,
+        0.11650000512599945
+      ],
+      "mirrorError": 0.0,
+      "passed": true
+    },
+    {
+      "frame": 80,
+      "vertices": 4656,
+      "bounds": [
+        -0.4699999988079071,
+        -0.4050000011920929,
+        0.0,
+        0.4699999988079071,
+        0.4050000011920929,
+        0.11650000512599945
+      ],
+      "mirrorError": 0.0,
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "axis": {
+    "symmetry": "X=0",
+    "front": "-Y",
+    "up": "+Z"
+  },
+  "legacy": false,
+  "blendSha256": "aecf665b382529d31669494ed4fae2bccf364cb895a3a353b27c917130291137",
+  "glbSha256": "840c1c471574b02bb4aa5e5b908850c5ec66e9bb79e350ccea319b48c543bbf9"
+}

@@ -44,6 +44,19 @@ final class DroneNavigator {
 		return true;
 	}
 
+	static Vec3 strategicCacheGoal(boolean fixedMissionTransit, Vec3 missionDestination, Vec3 requested) {
+		return fixedMissionTransit && missionDestination != null ? missionDestination : requested;
+	}
+
+	static Vec3 preferredClearTarget(Vec3 cachedStrategic, Vec3 directTarget, boolean directCorridorClear) {
+		if (cachedStrategic != null) return cachedStrategic;
+		return directCorridorClear ? directTarget : null;
+	}
+
+	static boolean strategicCorridorClear(ServerLevel level, DroneEntity drone, Vec3 from, Vec3 to) {
+		return corridorClear(level, drone, from, to);
+	}
+
 	static Vec3 nextPathPoint(ServerLevel level, DroneEntity drone, Path path) {
 		if (path == null || path.isDone()) return null;
 		while (!path.isDone() && drone.position().distanceTo(path.getNextEntityPos(drone)) < 1.6) path.advance();
@@ -161,13 +174,21 @@ final class DroneNavigator {
 		return List.of(backward, backward.add(right).normalize(), backward.subtract(right).normalize());
 	}
 
+	static int strategicHoldTicks(Vec3 current, Vec3 waypoint, boolean directExit) {
+		double distance = current == null || waypoint == null ? 0.0 : current.distanceTo(waypoint);
+		// Route steering accelerates and turns below its nominal cruise speed. Budget
+		// for that effective speed so a high clearance waypoint is not discarded mid-climb.
+		int travel = (int) Math.ceil(distance / 0.14) + 80;
+		return Math.clamp(travel, directExit ? 160 : 120, 720);
+	}
+
 	private static void addStrategicCandidate(ServerLevel level, DroneEntity drone, Vec3 target,
 		List<StrategicCandidate> candidates, Vec3 candidate, int side, int preferredSide) {
 		BlockPos pos = BlockPos.containing(candidate);
 		if (pos.getY() <= level.getMinY() + 2 || pos.getY() >= level.getMaxY() - 2
 			|| !level.hasChunk(pos.getX() >> 4, pos.getZ() >> 4)
-			|| !corridorClear(level, drone, drone.position(), candidate)) return;
-		boolean directExit = corridorClear(level, drone, candidate, target);
+			|| !strategicCorridorClear(level, drone, drone.position(), candidate)) return;
+		boolean directExit = strategicCorridorClear(level, drone, candidate, target);
 		double score = candidate.distanceTo(target) + drone.position().distanceTo(candidate) * 0.16;
 		if (directExit) score -= 1000.0;
 		if (preferredSide != 0 && side == preferredSide) score -= 12.0;

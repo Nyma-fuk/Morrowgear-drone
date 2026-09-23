@@ -1,1 +1,6 @@
-{"model":{"type":"minecraft:model","model":"morrowgear_drone:item/high_density_battery_pack"}}
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "morrowgear_drone:item/high_density_battery_pack"
+  }
+}

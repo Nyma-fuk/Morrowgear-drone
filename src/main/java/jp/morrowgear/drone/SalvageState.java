@@ -6,7 +6,8 @@ public enum SalvageState {
 	HOOK,
 	HOIST,
 	RETURN,
-	DELIVER;
+	DELIVER,
+	SERVICE;
 
 	public static SalvageState byId(int id) {
 		return values()[Math.max(0, Math.min(values().length - 1, id))];

@@ -1,0 +1,14 @@
+{
+  "meshObjects": 630,
+  "evaluatedVertices": 443819,
+  "triangles": 769654,
+  "witnessTriangles": 707216,
+  "carrierOnlyTriangles": 62438,
+  "blendBytes": 6191332,
+  "glbBytes": 26669056,
+  "glbVertices": 659371,
+  "glbTriangles": 769654,
+  "glbPrimitives": 636,
+  "glbMaterials": 27,
+  "status": "Design proposal, not a runtime budget approval"
+}

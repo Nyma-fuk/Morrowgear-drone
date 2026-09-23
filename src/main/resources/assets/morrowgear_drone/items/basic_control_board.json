@@ -1,1 +1,6 @@
-{"model":{"type":"minecraft:model","model":"morrowgear_drone:item/basic_control_board"}}
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "morrowgear_drone:item/basic_control_board"
+  }
+}

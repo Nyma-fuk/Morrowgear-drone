@@ -1,0 +1,57 @@
+{
+  "id": "missile_module",
+  "status": "design candidate / not installed",
+  "checks": [
+    {
+      "frame": 1,
+      "vertices": 3680,
+      "bounds": [
+        -0.5184999704360962,
+        -0.5590000152587891,
+        0.0,
+        0.5184999704360962,
+        0.41999998688697815,
+        0.5649999976158142
+      ],
+      "mirrorError": 0.0,
+      "passed": true
+    },
+    {
+      "frame": 40,
+      "vertices": 3680,
+      "bounds": [
+        -0.5184999704360962,
+        -0.5590000152587891,
+        0.0,
+        0.5184999704360962,
+        0.41999998688697815,
+        0.5649999976158142
+      ],
+      "mirrorError": 0.0,
+      "passed": true
+    },
+    {
+      "frame": 80,
+      "vertices": 3680,
+      "bounds": [
+        -0.5184999704360962,
+        -0.5590000152587891,
+        0.0,
+        0.5184999704360962,
+        0.41999998688697815,
+        0.5649999976158142
+      ],
+      "mirrorError": 0.0,
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "axis": {
+    "symmetry": "X=0",
+    "front": "-Y",
+    "up": "+Z"
+  },
+  "legacy": true,
+  "blendSha256": "1bde3e0c0a881bd40995c55f5c46692f010059099b264dc14bb5da3f403bbec9",
+  "glbSha256": "f3418b6a217c0097bb60ff71de3acde06ca8dfd9eab850ae33eb9bf8d43dd08f"
+}

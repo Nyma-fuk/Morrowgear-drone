@@ -1,0 +1,7 @@
+{
+  "tests": 9,
+  "failures": 0,
+  "errors": 0,
+  "passed": true,
+  "scope": "Mesh, sections, exports and comparison regressions; not visual approval or aerodynamics."
+}

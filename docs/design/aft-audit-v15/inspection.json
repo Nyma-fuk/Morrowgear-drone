@@ -1,0 +1,233 @@
+{
+  "sourceSha256": "1ce203295bdb7ed8398584022bbac656d8d3ffe32bfb48d18b90cf5bb898a526",
+  "modelEdited": false,
+  "frontProbes": [
+    {
+      "label": "intake_centerline",
+      "origin": [
+        0.55,
+        1.7,
+        0.19
+      ],
+      "hits": {
+        "H09_AftFairing": {
+          "point": [
+            0.550000011920929,
+            1.7799999713897705,
+            0.1899999976158142
+          ],
+          "distance": 0.07999992370605469,
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        "H10_AftOpening": {
+          "point": [
+            0.550000011920929,
+            1.7620000839233398,
+            0.1899999976158142
+          ],
+          "distance": 0.06200003623962402,
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ]
+        },
+        "H10_AftInternalLouver": {
+          "point": [
+            0.550000011920929,
+            1.7445000410079956,
+            0.1899999976158142
+          ],
+          "distance": 0.044499993324279785,
+          "normal": [
+            0.0,
+            -0.9999999403953552,
+            0.0
+          ]
+        },
+        "H10_AftInternalLouver.001": null
+      }
+    },
+    {
+      "label": "intake_centerline",
+      "origin": [
+        0.55,
+        1.7,
+        0.23
+      ],
+      "hits": {
+        "H09_AftFairing": {
+          "point": [
+            0.550000011920929,
+            1.7799999713897705,
+            0.23000000417232513
+          ],
+          "distance": 0.07999991625547409,
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        "H10_AftOpening": {
+          "point": [
+            0.550000011920929,
+            1.7620000839233398,
+            0.23000000417232513
+          ],
+          "distance": 0.06200003623962402,
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ]
+        },
+        "H10_AftInternalLouver": null,
+        "H10_AftInternalLouver.001": {
+          "point": [
+            0.550000011920929,
+            1.7445000410079956,
+            0.23000000417232513
+          ],
+          "distance": 0.044499997049570084,
+          "normal": [
+            0.0,
+            -0.9238831996917725,
+            0.3826744258403778
+          ]
+        }
+      }
+    },
+    {
+      "label": "intake_centerline",
+      "origin": [
+        0.55,
+        1.7,
+        0.27
+      ],
+      "hits": {
+        "H09_AftFairing": {
+          "point": [
+            0.550000011920929,
+            1.7799999713897705,
+            0.27000001072883606
+          ],
+          "distance": 0.07999993115663528,
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        "H10_AftOpening": {
+          "point": [
+            0.550000011920929,
+            1.7620000839233398,
+            0.27000001072883606
+          ],
+          "distance": 0.06200003623962402,
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ]
+        },
+        "H10_AftInternalLouver": null,
+        "H10_AftInternalLouver.001": null
+      }
+    }
+  ],
+  "rearFairingCapHit": {
+    "point": [
+      0.550000011920929,
+      2.380000114440918,
+      0.10000000149011612
+    ],
+    "distance": 0.4199998676776886,
+    "normal": [
+      0.0,
+      -1.0,
+      1.2690053097230702e-07
+    ]
+  },
+  "undersidePanelGaps": [
+    {
+      "object": "B01_ServicePanel_0",
+      "samples": 33,
+      "worst": {
+        "xy": [
+          -0.25,
+          -1.4816666444142659
+        ],
+        "gap": -0.0028029680252075195,
+        "hullBottom": -0.3956211805343628,
+        "panelTop": -0.3928182125091553
+      }
+    },
+    {
+      "object": "B01_ServicePanel_1",
+      "samples": 33,
+      "worst": {
+        "xy": [
+          -0.25,
+          -0.2383333295583725
+        ],
+        "gap": 0.006277799606323242,
+        "hullBottom": -0.3644554615020752,
+        "panelTop": -0.37073326110839844
+      }
+    },
+    {
+      "object": "B01_ServicePanel_2",
+      "samples": 33,
+      "worst": {
+        "xy": [
+          0,
+          0.5616666798790296
+        ],
+        "gap": 0.016936898231506348,
+        "hullBottom": -0.3164633512496948,
+        "panelTop": -0.33340024948120117
+      }
+    },
+    {
+      "object": "B01_ServicePanel_3",
+      "samples": 33,
+      "worst": {
+        "xy": [
+          0,
+          1.2916665871938071
+        ],
+        "gap": 0.04804873466491699,
+        "hullBottom": -0.156219482421875,
+        "panelTop": -0.204268217086792
+      }
+    }
+  ],
+  "aftObjects": [
+    "H09_AftFairing",
+    "H10_AftOpening",
+    "H10_AftInternalLouver",
+    "H10_AftInternalLouver.001",
+    "H11_AftMark",
+    "H14_AftBlendedCheek",
+    "H14_AftBlendedCheek.001",
+    "H12_RearServiceOpening",
+    "H13_RearLouver",
+    "H13_RearLouver.001",
+    "H13_RearLouver.002",
+    "H12_RearServiceOpening.001",
+    "H13_RearLouver.003",
+    "H13_RearLouver.004",
+    "H13_RearLouver.005"
+  ],
+  "explicitNozzleNamedObjects": [],
+  "interpretation": "Front apertures and aft outlets are assessed from geometry and builder code, not names alone.",
+  "referenceRearViewAvailable": false,
+  "aerodynamicsAssessed": false,
+  "sourceUnchanged": true
+}

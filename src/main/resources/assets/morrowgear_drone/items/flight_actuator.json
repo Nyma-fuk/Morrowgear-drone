@@ -1,1 +1,6 @@
-{"model":{"type":"minecraft:model","model":"morrowgear_drone:item/flight_actuator"}}
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "morrowgear_drone:item/flight_actuator"
+  }
+}

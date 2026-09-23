@@ -1,0 +1,46 @@
+{
+  "passed": true,
+  "errors": [],
+  "boundsBlender": [
+    -13.0,
+    -25.0,
+    0.0,
+    13.0,
+    25.0,
+    11.0
+  ],
+  "mirrorError": 0.0,
+  "triangles": 24188,
+  "meshObjects": 385,
+  "bays": [
+    {
+      "slot": 0,
+      "rays": 169,
+      "blocked": []
+    },
+    {
+      "slot": 1,
+      "rays": 169,
+      "blocked": []
+    },
+    {
+      "slot": 2,
+      "rays": 169,
+      "blocked": []
+    },
+    {
+      "slot": 3,
+      "rays": 169,
+      "blocked": []
+    }
+  ],
+  "reference": "C:\\Users\\fukud\\.codex\\generated_images\\019ff8b6-65ab-7b61-9327-249478654bda\\exec-0f667897-253c-40df-8bf5-f0e636268628.png",
+  "referenceSha256": "3ba1db98f8bdab73c79c0887a475c6d7ecb387be03bb2e559f04af9c626f5eb4",
+  "boardingReceiver": {
+    "rays": 169,
+    "blocked": [],
+    "clearTop": 4.4
+  },
+  "revision": "V27_FUNCTIONAL_DETAIL_01",
+  "scope": "Native geometry, 676 service + 169 boarding entry rays; no moving mechanism claim"
+}

@@ -1,0 +1,89 @@
+{
+  "id": "micro_missile_pack",
+  "status": "PROPOSAL_AWAITING_SHOWN_USER_APPROVAL",
+  "passed": true,
+  "displayName": "Micro Missile Pack",
+  "errors": [],
+  "axis": {
+    "front": "-Y",
+    "up": "+Z",
+    "symmetry": "X=0",
+    "units": "blocks"
+  },
+  "states": [
+    {
+      "frame": 1,
+      "state": "closed",
+      "bounds": [
+        -0.44300001859664917,
+        -0.6614999771118164,
+        0.11500000953674316,
+        0.44300001859664917,
+        0.6250000596046448,
+        0.8824999928474426
+      ],
+      "dimensions": [
+        0.8860000371932983,
+        1.2865000367164612,
+        0.7674999833106995
+      ],
+      "mirrorError": 0.0,
+      "vertices": 6328
+    },
+    {
+      "frame": 40,
+      "state": "service",
+      "bounds": [
+        -0.44300001859664917,
+        -0.6614999771118164,
+        0.11500000953674316,
+        0.44300001859664917,
+        0.6250000596046448,
+        0.8824999928474426
+      ],
+      "dimensions": [
+        0.8860000371932983,
+        1.2865000367164612,
+        0.7674999833106995
+      ],
+      "mirrorError": 0.0,
+      "vertices": 6328
+    },
+    {
+      "frame": 80,
+      "state": "active",
+      "bounds": [
+        -0.44300001859664917,
+        -0.6614999771118164,
+        0.11500000953674316,
+        0.44300001859664917,
+        0.6250000596046448,
+        0.8824999928474426
+      ],
+      "dimensions": [
+        0.8860000371932983,
+        1.2865000367164612,
+        0.7674999833106995
+      ],
+      "mirrorError": 0.0,
+      "vertices": 6328
+    }
+  ],
+  "meshObjects": 23,
+  "sharedMirrorObjects": 23,
+  "contacts": {
+    "mode": "loose inventory supply",
+    "landingGearCount": 0
+  },
+  "capacity": [
+    5,
+    "missiles"
+  ],
+  "limitations": [
+    "No runtime, launcher, installation or in-game validation.",
+    "Static GLB state exports; animated RuntimeDroneMesh adaptation is deferred.",
+    "No flight physics or arbitrary attitude collision proof."
+  ],
+  "blendSha256": "6344d9f23c942202e812cf6e0f4725ae7817a9bbed8a20b8de98be09291b79d6",
+  "glbSha256": "6d1ab43652505cc99432b6b4cdb6607f7d7de7197d395bcfc4bcf7aaafdcfeb6"
+}

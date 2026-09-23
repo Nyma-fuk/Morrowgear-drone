@@ -1,0 +1,125 @@
+{
+  "revision": "V27_FUNCTIONAL_DETAIL_01",
+  "runtimeBounds": [
+    -13,
+    0,
+    -25,
+    13,
+    11,
+    25
+  ],
+  "runtimeAxes": {
+    "up": "+Y",
+    "front": "-Z",
+    "right": "+X"
+  },
+  "blenderToRuntime": "(x,z,y), winding reversed",
+  "beam": [
+    0,
+    -0.1,
+    0
+  ],
+  "boardingProjection": [
+    0,
+    0,
+    18
+  ],
+  "bays": [
+    {
+      "slot": 0,
+      "xyz": [
+        -7.15,
+        2.4,
+        -5.2
+      ],
+      "approach": [
+        -7.15,
+        -2,
+        -5.2
+      ],
+      "clearSize": [
+        3,
+        0.95,
+        3
+      ]
+    },
+    {
+      "slot": 1,
+      "xyz": [
+        7.15,
+        2.4,
+        -5.2
+      ],
+      "approach": [
+        7.15,
+        -2,
+        -5.2
+      ],
+      "clearSize": [
+        3,
+        0.95,
+        3
+      ]
+    },
+    {
+      "slot": 2,
+      "xyz": [
+        -3.6,
+        2.4,
+        7.8
+      ],
+      "approach": [
+        -3.6,
+        -2,
+        7.8
+      ],
+      "clearSize": [
+        3,
+        0.95,
+        3
+      ]
+    },
+    {
+      "slot": 3,
+      "xyz": [
+        3.6,
+        2.4,
+        7.8
+      ],
+      "approach": [
+        3.6,
+        -2,
+        7.8
+      ],
+      "clearSize": [
+        3,
+        0.95,
+        3
+      ]
+    }
+  ],
+  "mesh": "models/runtime/carrier.mgm",
+  "atlas": "textures/runtime/carrier.png",
+  "scale": 1,
+  "format": "MGM4",
+  "rotorGroups": 0,
+  "poses": "all three identical",
+  "runtimeWitnesses": 0,
+  "boardingReceiver": {
+    "center": [
+      0,
+      0,
+      18
+    ],
+    "visualClearSize": [
+      3,
+      4.4,
+      3
+    ],
+    "groundMarkerOwner": "server-safe-pad renderer; not this asset"
+  },
+  "triangleBudget": {
+    "near": 25000,
+    "far": 15000
+  }
+}

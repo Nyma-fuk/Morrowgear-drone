@@ -1,0 +1,126 @@
+{
+  "passed": true,
+  "boundsBlender": [
+    -0.9850000143051147,
+    -0.5,
+    0.02499999850988388,
+    0.9850000143051147,
+    0.5099999904632568,
+    2.190000057220459
+  ],
+  "triangles": 15740,
+  "mirrorError": 0.0,
+  "functionalAsymmetry": null,
+  "referenceSha256": "118e33e3393d3ad6d7154752dfdee17e1ee177f926f294309c5cad3b8f6db11f",
+  "sourceSha256": "9c93a19b54ae50e7af80f18b08ea6b60b95275e90ef6e801b4e815e9ebacfa4a",
+  "glbSha256": "d826954e49d3e9bb186cd539821c24cca40f74efaad180a86668e7f756882a8a",
+  "capacity": 5,
+  "missileLayout": [
+    3,
+    2
+  ],
+  "icons": {
+    "16": {
+      "size": [
+        16,
+        16
+      ],
+      "occupiedPixels": 102,
+      "clipped": false,
+      "rgba": true
+    },
+    "32": {
+      "size": [
+        32,
+        32
+      ],
+      "occupiedPixels": 487,
+      "clipped": false,
+      "rgba": true
+    },
+    "64": {
+      "size": [
+        64,
+        64
+      ],
+      "occupiedPixels": 1845,
+      "clipped": false,
+      "rgba": true
+    },
+    "128": {
+      "size": [
+        128,
+        128
+      ],
+      "occupiedPixels": 7181,
+      "clipped": false,
+      "rgba": true
+    }
+  },
+  "capsuleProfile": {
+    "source": "src\\client\\java\\jp\\morrowgear\\drone\\client\\MissileRenderState.java",
+    "sourceSha256": "60e1d4da4883683e77a086d38050c624fe804faa9b9af7466c6b01933b80e4e2",
+    "sides": 8,
+    "length": 0.8,
+    "diameter": 0.38,
+    "rings": [
+      [
+        -0.4,
+        0.1,
+        3160640
+      ],
+      [
+        -0.34,
+        0.1,
+        5464940
+      ],
+      [
+        -0.34,
+        0.16,
+        6715264
+      ],
+      [
+        -0.28,
+        0.19,
+        8754846
+      ],
+      [
+        -0.1,
+        0.19,
+        4608860
+      ],
+      [
+        -0.1,
+        0.165,
+        2239024
+      ],
+      [
+        -0.02,
+        0.165,
+        4608860
+      ],
+      [
+        -0.02,
+        0.19,
+        10924986
+      ],
+      [
+        0.24,
+        0.19,
+        7899537
+      ],
+      [
+        0.34,
+        0.16,
+        6649727
+      ],
+      [
+        0.4,
+        0.11,
+        12240331
+      ]
+    ],
+    "nativeFrontY": -0.5,
+    "storedState": "no exhaust; non-flashing red identification band"
+  }
+}

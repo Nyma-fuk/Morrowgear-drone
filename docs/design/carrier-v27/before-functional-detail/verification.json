@@ -1,0 +1,252 @@
+{
+  "passed": true,
+  "errors": [],
+  "native": {
+    "passed": true,
+    "errors": [],
+    "boundsBlender": [
+      -13.0,
+      -25.0,
+      0.0,
+      13.0,
+      25.0,
+      11.0
+    ],
+    "mirrorError": 0.0,
+    "triangles": 18948,
+    "meshObjects": 323,
+    "bays": [
+      {
+        "slot": 0,
+        "rays": 169,
+        "blocked": []
+      },
+      {
+        "slot": 1,
+        "rays": 169,
+        "blocked": []
+      },
+      {
+        "slot": 2,
+        "rays": 169,
+        "blocked": []
+      },
+      {
+        "slot": 3,
+        "rays": 169,
+        "blocked": []
+      }
+    ],
+    "reference": "C:\\Users\\fukud\\.codex\\generated_images\\019ff8b6-65ab-7b61-9327-249478654bda\\exec-0f667897-253c-40df-8bf5-f0e636268628.png",
+    "referenceSha256": "3ba1db98f8bdab73c79c0887a475c6d7ecb387be03bb2e559f04af9c626f5eb4",
+    "scope": "Native geometry, 676 entry rays, no runtime game session or moving mechanism test"
+  },
+  "states": [
+    {
+      "frame": 1,
+      "bounds": [
+        -13.0,
+        -25.0,
+        0.0,
+        13.0,
+        25.0,
+        11.0
+      ]
+    },
+    {
+      "frame": 40,
+      "bounds": [
+        -13.0,
+        -25.0,
+        0.0,
+        13.0,
+        25.0,
+        11.0
+      ]
+    },
+    {
+      "frame": 80,
+      "bounds": [
+        -13.0,
+        -25.0,
+        0.0,
+        13.0,
+        25.0,
+        11.0
+      ]
+    }
+  ],
+  "glb": {
+    "boundsBlender": [
+      -13.0,
+      -25.0,
+      0.0,
+      13.0,
+      25.0,
+      11.0
+    ],
+    "mirrorError": 0.0,
+    "sha256": "4844a72a970f07be4f980c4d844043555e056965a3054baeae098358f7ba9a13"
+  },
+  "runtime": [
+    {
+      "passed": true,
+      "errors": [],
+      "format": "MGM4",
+      "vertices": 56064,
+      "triangles": 18688,
+      "byteLength": 4821540,
+      "sha256": "f3fdc0331fb8297626a8836e78648b2d1079076a72f7618240610721e5636189",
+      "runtimeBounds": [
+        -13.0,
+        0.0,
+        -25.0,
+        13.0,
+        11.0,
+        25.0
+      ],
+      "mirrorError": 0.0,
+      "rotorCenters": 2,
+      "groups": [
+        0
+      ],
+      "posesIdentical": true,
+      "luminousVertices": {
+        "0": 51600,
+        "1": 2112,
+        "2": 2352
+      }
+    },
+    {
+      "passed": true,
+      "errors": [],
+      "format": "MGM4",
+      "vertices": 29136,
+      "triangles": 9712,
+      "byteLength": 2505732,
+      "sha256": "201ca15416a46eec0d2058fca3e5def2f6cbd7d8a9d99d7abae23ccc4daac674",
+      "runtimeBounds": [
+        -13.0,
+        0.0,
+        -25.0,
+        13.0,
+        11.0,
+        25.0
+      ],
+      "mirrorError": 0.0,
+      "rotorCenters": 2,
+      "groups": [
+        0
+      ],
+      "posesIdentical": true,
+      "luminousVertices": {
+        "0": 24672,
+        "1": 2112,
+        "2": 2352
+      }
+    }
+  ],
+  "images": [
+    {
+      "path": "hero.png",
+      "size": [
+        1280,
+        1024
+      ],
+      "nonblank": true,
+      "occupiedPixels": 1310720
+    },
+    {
+      "path": "front.png",
+      "size": [
+        1280,
+        1024
+      ],
+      "nonblank": true,
+      "occupiedPixels": 87964
+    },
+    {
+      "path": "rear.png",
+      "size": [
+        1280,
+        1024
+      ],
+      "nonblank": true,
+      "occupiedPixels": 87964
+    },
+    {
+      "path": "top.png",
+      "size": [
+        1280,
+        1024
+      ],
+      "nonblank": true,
+      "occupiedPixels": 358630
+    },
+    {
+      "path": "bottom.png",
+      "size": [
+        1280,
+        1024
+      ],
+      "nonblank": true,
+      "occupiedPixels": 358630
+    },
+    {
+      "path": "left.png",
+      "size": [
+        1280,
+        1024
+      ],
+      "nonblank": true,
+      "occupiedPixels": 154273
+    },
+    {
+      "path": "right.png",
+      "size": [
+        1280,
+        1024
+      ],
+      "nonblank": true,
+      "occupiedPixels": 154256
+    },
+    {
+      "path": "carrier-unit-16.png",
+      "size": [
+        16,
+        16
+      ],
+      "nonblank": true,
+      "occupiedPixels": 81
+    },
+    {
+      "path": "carrier-unit-128.png",
+      "size": [
+        128,
+        128
+      ],
+      "nonblank": true,
+      "occupiedPixels": 3802
+    },
+    {
+      "path": "carrier-mgm-readback.png",
+      "size": [
+        1280,
+        1024
+      ],
+      "nonblank": true,
+      "occupiedPixels": 1310720
+    },
+    {
+      "path": "carrier_lod-mgm-readback.png",
+      "size": [
+        1280,
+        1024
+      ],
+      "nonblank": true,
+      "occupiedPixels": 1310720
+    }
+  ],
+  "sourceSha256": "dfebb069bb28330a81f4c4df80bdd14cb8a193e2ee4236f779fd3048e8f16947",
+  "scope": "Static native and MGM geometry, atlas and image readback; no game launch or moving mechanism claim"
+}

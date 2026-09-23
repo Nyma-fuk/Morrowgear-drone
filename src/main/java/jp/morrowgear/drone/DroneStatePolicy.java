@@ -23,14 +23,14 @@ public final class DroneStatePolicy {
 	public static int fieldRadius(FieldOperationType type, int value) {
 		if (type == null) return 0;
 		return switch (type) {
-			case ORE -> Math.max(12, Math.min(48, value));
-			case FORESTRY -> Math.max(6, Math.min(24, value));
+			case ORE -> Math.max(12, Math.min(64, value));
+			case FORESTRY -> Math.max(6, Math.min(40, value));
 			case EXCAVATE -> Math.max(2, Math.min(8, value));
 			case NONE -> 0;
 		};
 	}
 
 	public static int securityRadius(int value) {
-		return Math.max(6, Math.min(32, value));
+		return Math.max(6, Math.min(64, value));
 	}
 }

@@ -1,0 +1,138 @@
+{
+  "proposalOnly": true,
+  "axes": {
+    "front": "-Y",
+    "up": "+Z",
+    "mirror": "X=0"
+  },
+  "bounds": [
+    [
+      -25.0,
+      25.0
+    ],
+    [
+      -16.028892517089844,
+      14.897500038146973
+    ],
+    [
+      -0.10000000149011612,
+      7.150000095367432
+    ]
+  ],
+  "dimensions": [
+    50.0,
+    30.926392555236816,
+    7.250000096857548
+  ],
+  "symmetryMaxError": 0.0,
+  "evaluatedVertices": 13715,
+  "polygons": 10894,
+  "nonManifoldEdgesByObject": {},
+  "bayApproachChecks": [
+    {
+      "centerX": -15,
+      "approachSamplesClear": true,
+      "samples": 9
+    },
+    {
+      "centerX": -10,
+      "approachSamplesClear": true,
+      "samples": 9
+    },
+    {
+      "centerX": 10,
+      "approachSamplesClear": true,
+      "samples": 9
+    },
+    {
+      "centerX": 15,
+      "approachSamplesClear": true,
+      "samples": 9
+    }
+  ],
+  "beamOrigin": [
+    0,
+    0,
+    -0.1
+  ],
+  "bayClearEnvelope": [
+    3.5999999046325684,
+    4.400000095367432,
+    2.4000000953674316
+  ],
+  "revision": "V30_CONTINUOUS_ARMORED_SPAN_01",
+  "functionalArmorPanelCount": 16,
+  "rearNozzleCount": 8,
+  "maximumCenterHullThickness": 4.33,
+  "topCenterClosed": true,
+  "lowerFrontIntake": {
+    "exists": true,
+    "objectCount": 8,
+    "bounds": [
+      [
+        -4.800000190734863,
+        4.800000190734863
+      ],
+      [
+        -13.295000076293945,
+        -4.449999809265137
+      ],
+      [
+        1.8200000524520874,
+        4.179999828338623
+      ]
+    ],
+    "distinctFromServiceBays": true,
+    "approachSamplesClear": true,
+    "samples": 6,
+    "bayCentersX": [
+      -15,
+      -10,
+      10,
+      15
+    ]
+  },
+  "exhaustDuctChecks": [
+    {
+      "centerX": -4.0,
+      "ductSamplesClear": true,
+      "samples": 2
+    },
+    {
+      "centerX": 4.0,
+      "ductSamplesClear": true,
+      "samples": 2
+    },
+    {
+      "centerX": -9.2,
+      "ductSamplesClear": true,
+      "samples": 2
+    },
+    {
+      "centerX": 9.2,
+      "ductSamplesClear": true,
+      "samples": 2
+    },
+    {
+      "centerX": -14.7,
+      "ductSamplesClear": true,
+      "samples": 2
+    },
+    {
+      "centerX": 14.7,
+      "ductSamplesClear": true,
+      "samples": 2
+    },
+    {
+      "centerX": -20.0,
+      "ductSamplesClear": true,
+      "samples": 2
+    },
+    {
+      "centerX": 20.0,
+      "ductSamplesClear": true,
+      "samples": 2
+    }
+  ],
+  "passed": true
+}

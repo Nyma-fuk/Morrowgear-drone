@@ -10,6 +10,8 @@ import java.util.Properties;
 import net.fabricmc.loader.api.FabricLoader;
 
 final class VisorClientConfig {
+	private static VisorClientConfig shared;
+	static VisorClientConfig current() { if (shared == null) shared = load(); return shared; }
 	private static final Path FILE = FabricLoader.getInstance().getConfigDir()
 		.resolve("morrowgear-visor.properties");
 

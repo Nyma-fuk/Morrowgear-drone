@@ -1,0 +1,14 @@
+// Scoped tests without compiling unrelated, in-progress test sources.
+allprojects {
+    plugins.withId('java') {
+        afterEvaluate {
+            sourceSets.test.compileClasspath += sourceSets.client.compileClasspath
+            sourceSets.test.runtimeClasspath += sourceSets.client.compileClasspath
+        }
+        tasks.named('compileTestJava', JavaCompile) {
+            setSource(fileTree('src/test/java') {
+                include 'jp/morrowgear/drone/DockGeometry*Test.java'
+            })
+        }
+    }
+}

@@ -1,0 +1,4 @@
+// Keep concurrent parent/agent builds from sharing carrier verification outputs.
+allprojects {
+    layout.buildDirectory = layout.projectDirectory.dir('build/carrier-verification')
+}

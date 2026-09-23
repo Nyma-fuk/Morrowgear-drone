@@ -42,13 +42,13 @@ final class DroneStatePolicyTest {
 	@Test
 	void clampsSavedOperationRadiiToSupportedContracts() {
 		assertEquals(12, DroneStatePolicy.fieldRadius(FieldOperationType.ORE, -1));
-		assertEquals(48, DroneStatePolicy.fieldRadius(FieldOperationType.ORE, 999));
+		assertEquals(64, DroneStatePolicy.fieldRadius(FieldOperationType.ORE, 999));
 		assertEquals(6, DroneStatePolicy.fieldRadius(FieldOperationType.FORESTRY, -1));
-		assertEquals(24, DroneStatePolicy.fieldRadius(FieldOperationType.FORESTRY, 999));
+		assertEquals(40, DroneStatePolicy.fieldRadius(FieldOperationType.FORESTRY, 999));
 		assertEquals(2, DroneStatePolicy.fieldRadius(FieldOperationType.EXCAVATE, -1));
 		assertEquals(8, DroneStatePolicy.fieldRadius(FieldOperationType.EXCAVATE, 999));
 		assertEquals(0, DroneStatePolicy.fieldRadius(FieldOperationType.NONE, 999));
 		assertEquals(6, DroneStatePolicy.securityRadius(-1));
-		assertEquals(32, DroneStatePolicy.securityRadius(999));
+		assertEquals(64, DroneStatePolicy.securityRadius(999));
 	}
 }

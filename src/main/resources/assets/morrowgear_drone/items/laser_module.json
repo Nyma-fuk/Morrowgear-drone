@@ -1,1 +1,6 @@
-{"model":{"type":"minecraft:model","model":"morrowgear_drone:item/laser_module"}}
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "morrowgear_drone:item/laser_module"
+  }
+}

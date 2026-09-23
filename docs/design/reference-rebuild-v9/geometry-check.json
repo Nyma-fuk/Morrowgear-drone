@@ -1,0 +1,17 @@
+{
+  "asset": "security_v9",
+  "vertices": 12945,
+  "mirrorError": 0.08000002056360245,
+  "symmetryPass": false,
+  "boundsHeight": 1.9277865886688232,
+  "gameVerified": false,
+  "referenceFidelityApproved": false,
+  "visualMatchApproved": false,
+  "inferredRatios": {
+    "wingSpan": 8.5,
+    "bodyLength": 5.2,
+    "ductDiameter": 1.95,
+    "centralBodyMaxWidth": 1.92,
+    "domeDiameter": 0.6
+  }
+}

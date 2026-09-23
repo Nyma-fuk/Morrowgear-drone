@@ -1,0 +1,28 @@
+{
+  "scope": "Geometry and packaging only; mass, thrust, aerodynamics and flight stability are not simulated.",
+  "span": 9.48,
+  "length": 4.58,
+  "spanToLength": 2.069868995633188,
+  "fanDiameterToSpan": 0.18987341772151897,
+  "crownWidthToSpan": 0.15400843881856538,
+  "fanLipBelowSkinMinimum": 0.008000000000000007,
+  "bladeTipRadialClearance": 0.016,
+  "bodyVolume": 13.24250252644296,
+  "uniformBodyVolumeCentroid": [
+    -1.4109504320458655e-07,
+    -0.10947471857070923,
+    0.11333757638931274
+  ],
+  "liftLineY": 0.01826677,
+  "nonmanifoldEdgesAfterWelding": 0,
+  "checks": {
+    "symmetricProfile": true,
+    "allInletsInsideAirframe": true,
+    "fanLipBelowSkin": true,
+    "bladeTipClearance": true,
+    "watertightBodyAfterWelding": true,
+    "positiveVolume": true,
+    "lateralVolumeBalance": true
+  },
+  "passed": true
+}

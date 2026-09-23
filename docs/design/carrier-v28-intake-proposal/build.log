@@ -1,0 +1,1208 @@
+00:00.922  blend            | Read blend: "C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v27\carrier-v27.blend"
+00:10.906  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v28-intake-proposal\before-front-belly.png'
+00:17.563  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v28-intake-proposal\before-front.png'
+Info: Saved as "carrier-v28-intake-proposal.blend"
+INFO Draco is available, use library at C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\work\blender-portable\blender-5.2.0-windows-x64\5.2\scripts\addons_core\io_scene_gltf2\bf_intern_draco_bridge.dll
+INFO MeshOptimizer is available, use library at C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\work\blender-portable\blender-5.2.0-windows-x64\5.2\scripts\addons_core\io_scene_gltf2\bf_intern_meshopt_bridge.dll
+18:50:52 | INFO: Starting glTF 2.0 export
+18:50:52 | INFO: Extracting primitive: AmberExhaustCore.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: AmberExhaustCore.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: AmberExhaustCore.006
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: BellyEquipmentBusCover.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: BellyEquipmentBusCover.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: BellyEquipmentBusSeal.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: BellyEquipmentBusSeal.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: BoardingAftDirection.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: BoardingCeilingHandrail.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: BoardingCeilingLight.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: BoardingLateralBeacon.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: BoardingLateralBeacon.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: BoardingPowerConduit.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: BoardingReceiverBeacon.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: BoardingReceiverBeacon.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: BoardingReceiverCeiling.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: BoardingReceiverFrame.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: BoardingReceiverSeal.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: BoardingRoofServicePanel.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: BoardingRoofServiceSeal.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: BoardingVerticalGuide.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: CarrierContinuousHull.002
+18:50:52 | INFO: Primitives created: 2
+18:50:52 | INFO: Extracting primitive: CitadelButtress.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: CitadelButtress.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: CitadelButtress.006
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: CitadelNoseLight.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: CitadelNoseRecess.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: CitadelSensorTerrace.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: CitadelTerraceServicePlate.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: CitadelTerraceServicePlate.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: CitadelTerraceServicePlate.003
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: CitadelTerraceServicePlate.008
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: CitadelTerraceServiceSeal.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: CitadelTerraceServiceSeal.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: CitadelTerraceServiceSeal.003
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: CitadelTerraceServiceSeal.008
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckCenterDrain.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckCenterDrain.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckCenterDrain.003
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckCenterDrain.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckCenterDrain.010
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckExpansionJoint.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckExpansionJoint.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckExpansionJoint.006
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckMaintenanceLid.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckMaintenanceLid.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckMaintenanceSeal.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckMaintenanceSeal.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckPanelPlate.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckPanelPlate.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckPanelPlate.003
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckPanelPlate.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckPanelPlate.005
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckPanelPlate.006
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckPanelPlate.007
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckPanelPlate.008
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckPanelPlate.009
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckPanelPlate.020
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckPanelSeal.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckPanelSeal.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckPanelSeal.003
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckPanelSeal.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckPanelSeal.005
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckPanelSeal.006
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckPanelSeal.007
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckPanelSeal.008
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckPanelSeal.009
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckPanelSeal.020
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckThreshold.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckThreshold.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckWallBrace.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckWallBrace.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckWallBrace.003
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckWallBrace.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckWallBrace.005
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckWallBrace.006
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckWallBrace.007
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckWallBrace.008
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckWallBrace.009
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckWallBrace.020
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckWorklight.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckWorklight.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckWorklight.003
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckWorklight.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckWorklight.005
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckWorklight.006
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckWorklight.007
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckWorklight.008
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckWorklight.009
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeckWorklight.020
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeepHangarJamb.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: DeepHangarJamb.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EmitterArmoredRing.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EmitterBellyDatum.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EmitterCoolantManifold.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EmitterCoolantReturn.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EmitterCoolantReturn.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EmitterCyanSegment.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EmitterCyanSegment.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EmitterCyanSegment.003
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EmitterCyanSegment.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EmitterCyanSegment.005
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EmitterCyanSegment.006
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EmitterCyanSegment.007
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EmitterFocusClamp.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EmitterFocusClamp.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EmitterFocusClamp.003
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EmitterFocusClamp.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EmitterFocusClamp.005
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EmitterFocusClamp.006
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EmitterFocusClamp.007
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EmitterFocusSeat.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EmitterLoadBearingSaddle.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EmitterLoadBearingSaddle.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EmitterOpticalRetainer.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EmitterPowerBus.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EmitterPowerBus.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EmitterPowerCoupler.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EmitterPowerCoupler.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EngineExhaustBack.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EngineHeatExchangerManifold.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EngineHeatExchangerManifold.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EngineIntakeLouver.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EngineIntakeLouver.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EngineIntakeLouver.003
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EngineIntakeLouver.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EngineIntakeLouver.005
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EngineIntakeLouver.006
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EngineIntakeLouver.007
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EngineIntakeLouver.008
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EngineIntakeLouver.009
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EngineIntakeLouver.010
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EngineIntakeLouver.022
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EngineLongArmorRail.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EngineLongArmorRail.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EngineOuterReinforcement.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EngineOuterReinforcement.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EngineOuterReinforcement.006
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EngineRampAccess.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EngineRampAccess.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EngineRampAccessSeal.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EngineRampAccessSeal.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EngineTopVentBed.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: EngineVentAmberHeader.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ExhaustVerticalFrame.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ExhaustVerticalFrame.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: FlankArmoredFrame.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: FlankArmoredFrame.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: FlankArmoredFrame.003
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: FlankArmoredFrame.008
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: FlankCyanLight.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: FlankCyanLight.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: FlankCyanLight.006
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: FlankSensorBed.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: FlankSensorBed.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: FlankSensorBed.006
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: FlankServiceRecess.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: FlankServiceRecess.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: FlankServiceRecess.003
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: FlankServiceRecess.008
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: FlightDeckServicePipe.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: FlightDeckServicePipe.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: FlightDeckServicePipe.003
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: FlightDeckServicePipe.008
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ForwardChineInlay.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ForwardShoulderArmor.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ForwardShoulderRecess.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: HangarArmoredLintel.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: HangarEntryLight.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: HangarFloor.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: HangarRearWall.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: HangarRoofRib.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: HangarRoofRib.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: HangarRoofRib.006
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: HeatExchangerHeader.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: HeatExchangerHeader.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: IntakeAftFlowStraightener.003
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: IntakeAftFlowStraightener.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: IntakeAftFlowStraightener.005
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: IntakeAftHeatMatrix.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: IntakeBellyTransition.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: IntakeCentralDivider.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: IntakeDuctWalls.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: IntakeIntegratedArmorLip.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: IntakeRecessedGuideVane.003
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: IntakeRecessedGuideVane.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: IntakeRecessedGuideVane.005
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: IntakeServiceIsolationBulkhead.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: IntegratedEmitterHousing.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: IntegratedEmitterLens.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: InterBayPowerDatum.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: InterBayPowerDatum.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: InterBayPowerServiceTrunk.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: InterBayTrunkClamp.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: InterBayTrunkClamp.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: LaneOneStroke.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: LaneZeroStroke.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: LaneZeroStroke.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: LaneZeroStroke.003
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: LaneZeroStroke.008
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: LaunchCenterDash.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: LaunchCenterDash.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: LaunchCenterDash.003
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: LaunchCenterDash.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: LaunchCenterDash.010
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: LaunchLane.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: LaunchLane.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: LaunchThresholdStripe.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: LaunchThresholdStripe.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: LaunchThresholdStripe.003
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: LaunchThresholdStripe.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: LaunchThresholdStripe.005
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: LaunchThresholdStripe.006
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: LaunchThresholdStripe.007
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: LaunchThresholdStripe.008
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: LaunchThresholdStripe.009
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: LaunchThresholdStripe.010
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: LaunchThresholdStripe.011
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: LaunchThresholdStripe.024
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: LongArmoredCentralCitadel.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: MassiveAftEnginePod.002
+18:50:52 | INFO: Primitives created: 2
+18:50:52 | INFO: Extracting primitive: NavigationSensorHousing.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: NavigationSensorHousing.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: NavigationSensorOptic.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: NavigationSensorOptic.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: NavigationSensorOptic.003
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: NavigationSensorOptic.008
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: NavigationSensorRecess.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: NavigationSensorRecess.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: NavigationSensorSeat.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: NavigationSensorSeat.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: OuterRecessedServiceArmor.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: OuterRecessedServiceArmor.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: OuterRecessedServiceArmor.003
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: OuterRecessedServiceArmor.008
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: PipeSupport.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: PipeSupport.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: PipeSupport.003
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: PipeSupport.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: PipeSupport.005
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: PipeSupport.006
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: PipeSupport.007
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: PipeSupport.008
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: PipeSupport.009
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: PipeSupport.010
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: PipeSupport.011
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: PipeSupport.024
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: PropulsionExhaustStator.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: PropulsionExhaustStator.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: PropulsionNozzleJamb.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: PropulsionNozzleJamb.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: PropulsionNozzleJamb.003
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: PropulsionNozzleJamb.008
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: PropulsionNozzleLip.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: PropulsionNozzleLip.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: PropulsionNozzleLip.003
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: PropulsionNozzleLip.008
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: RearSpinePanel.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: RearSpinePanel.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: RearSpinePanel.003
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: RearSpinePanel.008
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: RearSpineSeal.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: RearSpineSeal.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: RearSpineSeal.003
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: RearSpineSeal.008
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: RecessedFlightDeck.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: RecessedVentHousing.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: RecessedVentHousing.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: RecessedVentHousing.006
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: SensorCyanDatum.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: SensorGlass.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: SensorMast.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: SensorMastBase.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: SensorRadome.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: SensorRadome.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: SensorRadomeCap.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: SensorRadomeCap.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: SensorRecess.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceAmmoTransferLatchAft.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceAmmoTransferLatchAft.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceAmmoTransferLatchForward.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceAmmoTransferLatchForward.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceAmmoTransferPortAft.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceAmmoTransferPortAft.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceAmmoTransferPortForward.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceAmmoTransferPortForward.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceCaptureRailAft.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceCaptureRailAft.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceCaptureRailForward.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceCaptureRailForward.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceCaptureStopAft.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceCaptureStopAft.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceCaptureStopAft.003
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceCaptureStopAft.008
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceCaptureStopForward.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceCaptureStopForward.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceCaptureStopForward.003
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceCaptureStopForward.008
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceCeilingAft.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceCeilingForward.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceCeilingLampAft.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceCeilingLampForward.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceContactAft.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceContactAft.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceContactAft.003
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceContactAft.008
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceContactForward.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceContactForward.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceContactForward.003
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceContactForward.008
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceGuideLampAft.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceGuideLampAft.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceGuideLampAft.003
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceGuideLampAft.008
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceGuideLampForward.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceGuideLampForward.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceGuideLampForward.003
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceGuideLampForward.008
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceMouthArmorAft.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceMouthArmorForward.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceMouthSealAft.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceMouthSealForward.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceOverheadUtilityTrunkAft.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceOverheadUtilityTrunkForward.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServicePowerCoolantLineAft.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServicePowerCoolantLineAft.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServicePowerCoolantLineForward.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServicePowerCoolantLineForward.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServicePowerSocketAft.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServicePowerSocketAft.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServicePowerSocketForward.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServicePowerSocketForward.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceThresholdHazardAft.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceThresholdHazardAft.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceThresholdHazardForward.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceThresholdHazardForward.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceThresholdNotchAft.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceThresholdNotchAft.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceThresholdNotchAft.003
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceThresholdNotchAft.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceThresholdNotchAft.005
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceThresholdNotchAft.006
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceThresholdNotchAft.007
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceThresholdNotchAft.008
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceThresholdNotchAft.009
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceThresholdNotchAft.020
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceThresholdNotchForward.001
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceThresholdNotchForward.002
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceThresholdNotchForward.003
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceThresholdNotchForward.004
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceThresholdNotchForward.005
+18:50:52 | INFO: Primitives created: 1
+18:50:52 | INFO: Extracting primitive: ServiceThresholdNotchForward.006
+18:50:53 | INFO: Primitives created: 1
+18:50:53 | INFO: Extracting primitive: ServiceThresholdNotchForward.007
+18:50:53 | INFO: Primitives created: 1
+18:50:53 | INFO: Extracting primitive: ServiceThresholdNotchForward.008
+18:50:53 | INFO: Primitives created: 1
+18:50:53 | INFO: Extracting primitive: ServiceThresholdNotchForward.009
+18:50:53 | INFO: Primitives created: 1
+18:50:53 | INFO: Extracting primitive: ServiceThresholdNotchForward.020
+18:50:53 | INFO: Primitives created: 1
+18:50:53 | INFO: Extracting primitive: ServiceWallUtilityCabinetAft.001
+18:50:53 | INFO: Primitives created: 1
+18:50:53 | INFO: Extracting primitive: ServiceWallUtilityCabinetAft.004
+18:50:53 | INFO: Primitives created: 1
+18:50:53 | INFO: Extracting primitive: ServiceWallUtilityCabinetForward.001
+18:50:53 | INFO: Primitives created: 1
+18:50:53 | INFO: Extracting primitive: ServiceWallUtilityCabinetForward.004
+18:50:53 | INFO: Primitives created: 1
+18:50:53 | INFO: Extracting primitive: SideCoolingFin.001
+18:50:53 | INFO: Primitives created: 1
+18:50:53 | INFO: Extracting primitive: SideCoolingFin.002
+18:50:53 | INFO: Primitives created: 1
+18:50:53 | INFO: Extracting primitive: SideCoolingFin.003
+18:50:53 | INFO: Primitives created: 1
+18:50:53 | INFO: Extracting primitive: SideCoolingFin.004
+18:50:53 | INFO: Primitives created: 1
+18:50:53 | INFO: Extracting primitive: SideCoolingFin.005
+18:50:53 | INFO: Primitives created: 1
+18:50:53 | INFO: Extracting primitive: SideCoolingFin.006
+18:50:53 | INFO: Primitives created: 1
+18:50:53 | INFO: Extracting primitive: SideCoolingFin.007
+18:50:53 | INFO: Primitives created: 1
+18:50:53 | INFO: Extracting primitive: SideCoolingFin.008
+18:50:53 | INFO: Primitives created: 1
+18:50:53 | INFO: Extracting primitive: SideCoolingFin.009
+18:50:53 | INFO: Primitives created: 1
+18:50:53 | INFO: Extracting primitive: SideCoolingFin.010
+18:50:53 | INFO: Primitives created: 1
+18:50:53 | INFO: Extracting primitive: SideCoolingFin.011
+18:50:53 | INFO: Primitives created: 1
+18:50:53 | INFO: Extracting primitive: SideCoolingFin.012
+18:50:53 | INFO: Primitives created: 1
+18:50:53 | INFO: Extracting primitive: SideCoolingFin.013
+18:50:53 | INFO: Primitives created: 1
+18:50:53 | INFO: Extracting primitive: SideCoolingFin.014
+18:50:53 | INFO: Primitives created: 1
+18:50:53 | INFO: Extracting primitive: SideCoolingFin.015
+18:50:53 | INFO: Primitives created: 1
+18:50:53 | INFO: Extracting primitive: SideCoolingFin.016
+18:50:53 | INFO: Primitives created: 1
+18:50:53 | INFO: Extracting primitive: SideCoolingFin.017
+18:50:53 | INFO: Primitives created: 1
+18:50:53 | INFO: Extracting primitive: SideCoolingFin.036
+18:50:53 | INFO: Primitives created: 1
+18:50:53 | INFO: Extracting primitive: SideSensorAperture.001
+18:50:53 | INFO: Primitives created: 1
+18:50:53 | INFO: Extracting primitive: SideSensorAperture.002
+18:50:53 | INFO: Primitives created: 1
+18:50:53 | INFO: Extracting primitive: SideSensorAperture.006
+18:50:53 | INFO: Primitives created: 1
+18:50:53 | INFO: Extracting primitive: SideSensorFace.002
+18:50:53 | INFO: Primitives created: 1
+18:50:53 | INFO: Extracting primitive: TelemetryCrossbar.001
+18:50:53 | INFO: Primitives created: 1
+18:50:53 | INFO: Extracting primitive: TelemetryCrossbar.004
+18:50:53 | INFO: Primitives created: 1
+18:50:53 | INFO: Extracting primitive: TelemetryPillar.001
+18:50:53 | INFO: Primitives created: 1
+18:50:53 | INFO: Extracting primitive: TelemetryPillar.004
+18:50:53 | INFO: Primitives created: 1
+18:50:53 | INFO: Extracting primitive: TieDown.001
+18:50:53 | INFO: Primitives created: 1
+18:50:53 | INFO: Extracting primitive: TieDown.002
+18:50:53 | INFO: Primitives created: 1
+18:50:53 | INFO: Extracting primitive: TieDown.003
+18:50:53 | INFO: Primitives created: 1
+18:50:53 | INFO: Extracting primitive: TieDown.004
+18:50:53 | INFO: Primitives created: 1
+18:50:53 | INFO: Extracting primitive: TieDown.005
+18:50:53 | INFO: Primitives created: 1
+18:50:53 | INFO: Extracting primitive: TieDown.012
+18:50:53 | INFO: Primitives created: 1
+18:50:53 | INFO: Extracting primitive: UncrewedSensorCrown.002
+18:50:53 | INFO: Primitives created: 1
+18:50:53 | INFO: Finished glTF 2.0 export in 0.5588338375091553 s
+00:28.578  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v28-intake-proposal\front-belly-hero.png'
+
+FIRST_INTAKE_RENDER_READY
+00:43.344  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v28-intake-proposal\intake-detail.png'
+00:52.266  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v28-intake-proposal\hero.png'
+00:58.875  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v28-intake-proposal\front.png'
+01:05.969  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v28-intake-proposal\rear.png'
+01:15.344  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v28-intake-proposal\top.png'
+01:23.985  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v28-intake-proposal\bottom.png'
+01:31.344  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v28-intake-proposal\left.png'
+01:38.266  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v28-intake-proposal\right.png'
+01:49.297  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v28-intake-proposal\belly-overview.png'
+18:52:23 | INFO: Data are loaded, start creating Blender stuff
+18:52:23 | INFO: Blender create Mesh node AmberExhaustCore.001
+18:52:23 | INFO: Blender create Mesh node AmberExhaustCore.002
+18:52:23 | INFO: Blender create Mesh node AmberExhaustCore.006
+18:52:23 | INFO: Blender create Mesh node BellyEquipmentBusCover.001
+18:52:23 | INFO: Blender create Mesh node BellyEquipmentBusCover.002
+18:52:23 | INFO: Blender create Mesh node BellyEquipmentBusSeal.001
+18:52:23 | INFO: Blender create Mesh node BellyEquipmentBusSeal.002
+18:52:23 | INFO: Blender create Mesh node BoardingAftDirection.002
+18:52:23 | INFO: Blender create Mesh node BoardingCeilingHandrail.001
+18:52:23 | INFO: Blender create Mesh node BoardingCeilingLight.002
+18:52:23 | INFO: Blender create Mesh node BoardingLateralBeacon.001
+18:52:23 | INFO: Blender create Mesh node BoardingLateralBeacon.004
+18:52:23 | INFO: Blender create Mesh node BoardingPowerConduit.002
+18:52:23 | INFO: Blender create Mesh node BoardingReceiverBeacon.001
+18:52:23 | INFO: Blender create Mesh node BoardingReceiverBeacon.004
+18:52:23 | INFO: Blender create Mesh node BoardingReceiverCeiling.002
+18:52:23 | INFO: Blender create Mesh node BoardingReceiverFrame.002
+18:52:23 | INFO: Blender create Mesh node BoardingReceiverSeal.002
+18:52:23 | INFO: Blender create Mesh node BoardingRoofServicePanel.002
+18:52:23 | INFO: Blender create Mesh node BoardingRoofServiceSeal.002
+18:52:23 | INFO: Blender create Mesh node BoardingVerticalGuide.002
+18:52:23 | INFO: Blender create Mesh node CarrierContinuousHull.002
+18:52:23 | INFO: Blender create Mesh node CitadelButtress.001
+18:52:23 | INFO: Blender create Mesh node CitadelButtress.002
+18:52:23 | INFO: Blender create Mesh node CitadelButtress.006
+18:52:23 | INFO: Blender create Mesh node CitadelNoseLight.002
+18:52:23 | INFO: Blender create Mesh node CitadelNoseRecess.002
+18:52:23 | INFO: Blender create Mesh node CitadelSensorTerrace.002
+18:52:23 | INFO: Blender create Mesh node CitadelTerraceServicePlate.001
+18:52:23 | INFO: Blender create Mesh node CitadelTerraceServicePlate.002
+18:52:23 | INFO: Blender create Mesh node CitadelTerraceServicePlate.003
+18:52:23 | INFO: Blender create Mesh node CitadelTerraceServicePlate.008
+18:52:23 | INFO: Blender create Mesh node CitadelTerraceServiceSeal.001
+18:52:23 | INFO: Blender create Mesh node CitadelTerraceServiceSeal.002
+18:52:23 | INFO: Blender create Mesh node CitadelTerraceServiceSeal.003
+18:52:23 | INFO: Blender create Mesh node CitadelTerraceServiceSeal.008
+18:52:23 | INFO: Blender create Mesh node DeckCenterDrain.001
+18:52:23 | INFO: Blender create Mesh node DeckCenterDrain.002
+18:52:23 | INFO: Blender create Mesh node DeckCenterDrain.003
+18:52:23 | INFO: Blender create Mesh node DeckCenterDrain.004
+18:52:23 | INFO: Blender create Mesh node DeckCenterDrain.010
+18:52:23 | INFO: Blender create Mesh node DeckExpansionJoint.001
+18:52:23 | INFO: Blender create Mesh node DeckExpansionJoint.002
+18:52:23 | INFO: Blender create Mesh node DeckExpansionJoint.006
+18:52:23 | INFO: Blender create Mesh node DeckMaintenanceLid.001
+18:52:23 | INFO: Blender create Mesh node DeckMaintenanceLid.004
+18:52:23 | INFO: Blender create Mesh node DeckMaintenanceSeal.001
+18:52:23 | INFO: Blender create Mesh node DeckMaintenanceSeal.004
+18:52:23 | INFO: Blender create Mesh node DeckPanelPlate.001
+18:52:23 | INFO: Blender create Mesh node DeckPanelPlate.002
+18:52:23 | INFO: Blender create Mesh node DeckPanelPlate.003
+18:52:23 | INFO: Blender create Mesh node DeckPanelPlate.004
+18:52:23 | INFO: Blender create Mesh node DeckPanelPlate.005
+18:52:23 | INFO: Blender create Mesh node DeckPanelPlate.006
+18:52:23 | INFO: Blender create Mesh node DeckPanelPlate.007
+18:52:23 | INFO: Blender create Mesh node DeckPanelPlate.008
+18:52:23 | INFO: Blender create Mesh node DeckPanelPlate.009
+18:52:23 | INFO: Blender create Mesh node DeckPanelPlate.020
+18:52:23 | INFO: Blender create Mesh node DeckPanelSeal.001
+18:52:23 | INFO: Blender create Mesh node DeckPanelSeal.002
+18:52:23 | INFO: Blender create Mesh node DeckPanelSeal.003
+18:52:23 | INFO: Blender create Mesh node DeckPanelSeal.004
+18:52:23 | INFO: Blender create Mesh node DeckPanelSeal.005
+18:52:23 | INFO: Blender create Mesh node DeckPanelSeal.006
+18:52:23 | INFO: Blender create Mesh node DeckPanelSeal.007
+18:52:23 | INFO: Blender create Mesh node DeckPanelSeal.008
+18:52:23 | INFO: Blender create Mesh node DeckPanelSeal.009
+18:52:23 | INFO: Blender create Mesh node DeckPanelSeal.020
+18:52:23 | INFO: Blender create Mesh node DeckThreshold.001
+18:52:23 | INFO: Blender create Mesh node DeckThreshold.004
+18:52:23 | INFO: Blender create Mesh node DeckWallBrace.001
+18:52:23 | INFO: Blender create Mesh node DeckWallBrace.002
+18:52:23 | INFO: Blender create Mesh node DeckWallBrace.003
+18:52:23 | INFO: Blender create Mesh node DeckWallBrace.004
+18:52:23 | INFO: Blender create Mesh node DeckWallBrace.005
+18:52:23 | INFO: Blender create Mesh node DeckWallBrace.006
+18:52:23 | INFO: Blender create Mesh node DeckWallBrace.007
+18:52:23 | INFO: Blender create Mesh node DeckWallBrace.008
+18:52:23 | INFO: Blender create Mesh node DeckWallBrace.009
+18:52:23 | INFO: Blender create Mesh node DeckWallBrace.020
+18:52:23 | INFO: Blender create Mesh node DeckWorklight.001
+18:52:23 | INFO: Blender create Mesh node DeckWorklight.002
+18:52:23 | INFO: Blender create Mesh node DeckWorklight.003
+18:52:23 | INFO: Blender create Mesh node DeckWorklight.004
+18:52:23 | INFO: Blender create Mesh node DeckWorklight.005
+18:52:23 | INFO: Blender create Mesh node DeckWorklight.006
+18:52:23 | INFO: Blender create Mesh node DeckWorklight.007
+18:52:23 | INFO: Blender create Mesh node DeckWorklight.008
+18:52:23 | INFO: Blender create Mesh node DeckWorklight.009
+18:52:23 | INFO: Blender create Mesh node DeckWorklight.020
+18:52:23 | INFO: Blender create Mesh node DeepHangarJamb.001
+18:52:23 | INFO: Blender create Mesh node DeepHangarJamb.004
+18:52:23 | INFO: Blender create Mesh node EmitterArmoredRing.002
+18:52:23 | INFO: Blender create Mesh node EmitterBellyDatum.002
+18:52:23 | INFO: Blender create Mesh node EmitterCoolantManifold.002
+18:52:23 | INFO: Blender create Mesh node EmitterCoolantReturn.001
+18:52:23 | INFO: Blender create Mesh node EmitterCoolantReturn.004
+18:52:23 | INFO: Blender create Mesh node EmitterCyanSegment.001
+18:52:23 | INFO: Blender create Mesh node EmitterCyanSegment.002
+18:52:23 | INFO: Blender create Mesh node EmitterCyanSegment.003
+18:52:23 | INFO: Blender create Mesh node EmitterCyanSegment.004
+18:52:23 | INFO: Blender create Mesh node EmitterCyanSegment.005
+18:52:23 | INFO: Blender create Mesh node EmitterCyanSegment.006
+18:52:23 | INFO: Blender create Mesh node EmitterCyanSegment.007
+18:52:23 | INFO: Blender create Mesh node EmitterFocusClamp.001
+18:52:23 | INFO: Blender create Mesh node EmitterFocusClamp.002
+18:52:23 | INFO: Blender create Mesh node EmitterFocusClamp.003
+18:52:23 | INFO: Blender create Mesh node EmitterFocusClamp.004
+18:52:23 | INFO: Blender create Mesh node EmitterFocusClamp.005
+18:52:23 | INFO: Blender create Mesh node EmitterFocusClamp.006
+18:52:23 | INFO: Blender create Mesh node EmitterFocusClamp.007
+18:52:23 | INFO: Blender create Mesh node EmitterFocusSeat.002
+18:52:23 | INFO: Blender create Mesh node EmitterLoadBearingSaddle.001
+18:52:23 | INFO: Blender create Mesh node EmitterLoadBearingSaddle.004
+18:52:23 | INFO: Blender create Mesh node EmitterOpticalRetainer.002
+18:52:23 | INFO: Blender create Mesh node EmitterPowerBus.001
+18:52:23 | INFO: Blender create Mesh node EmitterPowerBus.004
+18:52:23 | INFO: Blender create Mesh node EmitterPowerCoupler.001
+18:52:23 | INFO: Blender create Mesh node EmitterPowerCoupler.004
+18:52:23 | INFO: Blender create Mesh node EngineExhaustBack.002
+18:52:23 | INFO: Blender create Mesh node EngineHeatExchangerManifold.001
+18:52:23 | INFO: Blender create Mesh node EngineHeatExchangerManifold.004
+18:52:23 | INFO: Blender create Mesh node EngineIntakeLouver.001
+18:52:23 | INFO: Blender create Mesh node EngineIntakeLouver.002
+18:52:23 | INFO: Blender create Mesh node EngineIntakeLouver.003
+18:52:23 | INFO: Blender create Mesh node EngineIntakeLouver.004
+18:52:23 | INFO: Blender create Mesh node EngineIntakeLouver.005
+18:52:23 | INFO: Blender create Mesh node EngineIntakeLouver.006
+18:52:23 | INFO: Blender create Mesh node EngineIntakeLouver.007
+18:52:23 | INFO: Blender create Mesh node EngineIntakeLouver.008
+18:52:23 | INFO: Blender create Mesh node EngineIntakeLouver.009
+18:52:23 | INFO: Blender create Mesh node EngineIntakeLouver.010
+18:52:23 | INFO: Blender create Mesh node EngineIntakeLouver.022
+18:52:23 | INFO: Blender create Mesh node EngineLongArmorRail.001
+18:52:23 | INFO: Blender create Mesh node EngineLongArmorRail.004
+18:52:23 | INFO: Blender create Mesh node EngineOuterReinforcement.001
+18:52:23 | INFO: Blender create Mesh node EngineOuterReinforcement.002
+18:52:23 | INFO: Blender create Mesh node EngineOuterReinforcement.006
+18:52:23 | INFO: Blender create Mesh node EngineRampAccess.001
+18:52:23 | INFO: Blender create Mesh node EngineRampAccess.004
+18:52:23 | INFO: Blender create Mesh node EngineRampAccessSeal.001
+18:52:23 | INFO: Blender create Mesh node EngineRampAccessSeal.004
+18:52:23 | INFO: Blender create Mesh node EngineTopVentBed.002
+18:52:23 | INFO: Blender create Mesh node EngineVentAmberHeader.002
+18:52:23 | INFO: Blender create Mesh node ExhaustVerticalFrame.001
+18:52:23 | INFO: Blender create Mesh node ExhaustVerticalFrame.004
+18:52:23 | INFO: Blender create Mesh node FlankArmoredFrame.001
+18:52:23 | INFO: Blender create Mesh node FlankArmoredFrame.002
+18:52:23 | INFO: Blender create Mesh node FlankArmoredFrame.003
+18:52:23 | INFO: Blender create Mesh node FlankArmoredFrame.008
+18:52:23 | INFO: Blender create Mesh node FlankCyanLight.001
+18:52:23 | INFO: Blender create Mesh node FlankCyanLight.002
+18:52:23 | INFO: Blender create Mesh node FlankCyanLight.006
+18:52:23 | INFO: Blender create Mesh node FlankSensorBed.001
+18:52:23 | INFO: Blender create Mesh node FlankSensorBed.002
+18:52:23 | INFO: Blender create Mesh node FlankSensorBed.006
+18:52:23 | INFO: Blender create Mesh node FlankServiceRecess.001
+18:52:23 | INFO: Blender create Mesh node FlankServiceRecess.002
+18:52:23 | INFO: Blender create Mesh node FlankServiceRecess.003
+18:52:23 | INFO: Blender create Mesh node FlankServiceRecess.008
+18:52:23 | INFO: Blender create Mesh node FlightDeckServicePipe.001
+18:52:23 | INFO: Blender create Mesh node FlightDeckServicePipe.002
+18:52:23 | INFO: Blender create Mesh node FlightDeckServicePipe.003
+18:52:23 | INFO: Blender create Mesh node FlightDeckServicePipe.008
+18:52:23 | INFO: Blender create Mesh node ForwardChineInlay.002
+18:52:23 | INFO: Blender create Mesh node ForwardShoulderArmor.002
+18:52:23 | INFO: Blender create Mesh node ForwardShoulderRecess.002
+18:52:23 | INFO: Blender create Mesh node HangarArmoredLintel.002
+18:52:23 | INFO: Blender create Mesh node HangarEntryLight.002
+18:52:23 | INFO: Blender create Mesh node HangarFloor.002
+18:52:23 | INFO: Blender create Mesh node HangarRearWall.002
+18:52:23 | INFO: Blender create Mesh node HangarRoofRib.001
+18:52:23 | INFO: Blender create Mesh node HangarRoofRib.002
+18:52:23 | INFO: Blender create Mesh node HangarRoofRib.006
+18:52:23 | INFO: Blender create Mesh node HeatExchangerHeader.001
+18:52:23 | INFO: Blender create Mesh node HeatExchangerHeader.004
+18:52:23 | INFO: Blender create Mesh node IntakeAftFlowStraightener.003
+18:52:23 | INFO: Blender create Mesh node IntakeAftFlowStraightener.004
+18:52:23 | INFO: Blender create Mesh node IntakeAftFlowStraightener.005
+18:52:23 | INFO: Blender create Mesh node IntakeAftHeatMatrix.001
+18:52:23 | INFO: Blender create Mesh node IntakeBellyTransition.001
+18:52:23 | INFO: Blender create Mesh node IntakeCentralDivider.001
+18:52:23 | INFO: Blender create Mesh node IntakeDuctWalls.001
+18:52:23 | INFO: Blender create Mesh node IntakeIntegratedArmorLip.001
+18:52:23 | INFO: Blender create Mesh node IntakeRecessedGuideVane.003
+18:52:23 | INFO: Blender create Mesh node IntakeRecessedGuideVane.004
+18:52:23 | INFO: Blender create Mesh node IntakeRecessedGuideVane.005
+18:52:23 | INFO: Blender create Mesh node IntakeServiceIsolationBulkhead.001
+18:52:23 | INFO: Blender create Mesh node IntegratedEmitterHousing.002
+18:52:23 | INFO: Blender create Mesh node IntegratedEmitterLens.002
+18:52:23 | INFO: Blender create Mesh node InterBayPowerDatum.001
+18:52:23 | INFO: Blender create Mesh node InterBayPowerDatum.004
+18:52:23 | INFO: Blender create Mesh node InterBayPowerServiceTrunk.002
+18:52:23 | INFO: Blender create Mesh node InterBayTrunkClamp.001
+18:52:23 | INFO: Blender create Mesh node InterBayTrunkClamp.004
+18:52:23 | INFO: Blender create Mesh node LaneOneStroke.002
+18:52:23 | INFO: Blender create Mesh node LaneZeroStroke.001
+18:52:23 | INFO: Blender create Mesh node LaneZeroStroke.002
+18:52:23 | INFO: Blender create Mesh node LaneZeroStroke.003
+18:52:23 | INFO: Blender create Mesh node LaneZeroStroke.008
+18:52:23 | INFO: Blender create Mesh node LaunchCenterDash.001
+18:52:23 | INFO: Blender create Mesh node LaunchCenterDash.002
+18:52:23 | INFO: Blender create Mesh node LaunchCenterDash.003
+18:52:23 | INFO: Blender create Mesh node LaunchCenterDash.004
+18:52:23 | INFO: Blender create Mesh node LaunchCenterDash.010
+18:52:23 | INFO: Blender create Mesh node LaunchLane.001
+18:52:23 | INFO: Blender create Mesh node LaunchLane.004
+18:52:23 | INFO: Blender create Mesh node LaunchThresholdStripe.001
+18:52:23 | INFO: Blender create Mesh node LaunchThresholdStripe.002
+18:52:23 | INFO: Blender create Mesh node LaunchThresholdStripe.003
+18:52:23 | INFO: Blender create Mesh node LaunchThresholdStripe.004
+18:52:23 | INFO: Blender create Mesh node LaunchThresholdStripe.005
+18:52:23 | INFO: Blender create Mesh node LaunchThresholdStripe.006
+18:52:23 | INFO: Blender create Mesh node LaunchThresholdStripe.007
+18:52:23 | INFO: Blender create Mesh node LaunchThresholdStripe.008
+18:52:23 | INFO: Blender create Mesh node LaunchThresholdStripe.009
+18:52:23 | INFO: Blender create Mesh node LaunchThresholdStripe.010
+18:52:23 | INFO: Blender create Mesh node LaunchThresholdStripe.011
+18:52:23 | INFO: Blender create Mesh node LaunchThresholdStripe.024
+18:52:23 | INFO: Blender create Mesh node LongArmoredCentralCitadel.002
+18:52:23 | INFO: Blender create Mesh node MassiveAftEnginePod.002
+18:52:23 | INFO: Blender create Mesh node NavigationSensorHousing.001
+18:52:23 | INFO: Blender create Mesh node NavigationSensorHousing.004
+18:52:23 | INFO: Blender create Mesh node NavigationSensorOptic.001
+18:52:23 | INFO: Blender create Mesh node NavigationSensorOptic.002
+18:52:23 | INFO: Blender create Mesh node NavigationSensorOptic.003
+18:52:23 | INFO: Blender create Mesh node NavigationSensorOptic.008
+18:52:23 | INFO: Blender create Mesh node NavigationSensorRecess.001
+18:52:23 | INFO: Blender create Mesh node NavigationSensorRecess.004
+18:52:23 | INFO: Blender create Mesh node NavigationSensorSeat.001
+18:52:23 | INFO: Blender create Mesh node NavigationSensorSeat.004
+18:52:23 | INFO: Blender create Mesh node OuterRecessedServiceArmor.001
+18:52:23 | INFO: Blender create Mesh node OuterRecessedServiceArmor.002
+18:52:23 | INFO: Blender create Mesh node OuterRecessedServiceArmor.003
+18:52:23 | INFO: Blender create Mesh node OuterRecessedServiceArmor.008
+18:52:23 | INFO: Blender create Mesh node PipeSupport.001
+18:52:23 | INFO: Blender create Mesh node PipeSupport.002
+18:52:23 | INFO: Blender create Mesh node PipeSupport.003
+18:52:23 | INFO: Blender create Mesh node PipeSupport.004
+18:52:23 | INFO: Blender create Mesh node PipeSupport.005
+18:52:23 | INFO: Blender create Mesh node PipeSupport.006
+18:52:23 | INFO: Blender create Mesh node PipeSupport.007
+18:52:23 | INFO: Blender create Mesh node PipeSupport.008
+18:52:23 | INFO: Blender create Mesh node PipeSupport.009
+18:52:23 | INFO: Blender create Mesh node PipeSupport.010
+18:52:23 | INFO: Blender create Mesh node PipeSupport.011
+18:52:23 | INFO: Blender create Mesh node PipeSupport.024
+18:52:23 | INFO: Blender create Mesh node PropulsionExhaustStator.001
+18:52:23 | INFO: Blender create Mesh node PropulsionExhaustStator.004
+18:52:23 | INFO: Blender create Mesh node PropulsionNozzleJamb.001
+18:52:23 | INFO: Blender create Mesh node PropulsionNozzleJamb.002
+18:52:23 | INFO: Blender create Mesh node PropulsionNozzleJamb.003
+18:52:23 | INFO: Blender create Mesh node PropulsionNozzleJamb.008
+18:52:23 | INFO: Blender create Mesh node PropulsionNozzleLip.001
+18:52:23 | INFO: Blender create Mesh node PropulsionNozzleLip.002
+18:52:23 | INFO: Blender create Mesh node PropulsionNozzleLip.003
+18:52:23 | INFO: Blender create Mesh node PropulsionNozzleLip.008
+18:52:23 | INFO: Blender create Mesh node RearSpinePanel.001
+18:52:23 | INFO: Blender create Mesh node RearSpinePanel.002
+18:52:23 | INFO: Blender create Mesh node RearSpinePanel.003
+18:52:23 | INFO: Blender create Mesh node RearSpinePanel.008
+18:52:23 | INFO: Blender create Mesh node RearSpineSeal.001
+18:52:23 | INFO: Blender create Mesh node RearSpineSeal.002
+18:52:23 | INFO: Blender create Mesh node RearSpineSeal.003
+18:52:23 | INFO: Blender create Mesh node RearSpineSeal.008
+18:52:23 | INFO: Blender create Mesh node RecessedFlightDeck.002
+18:52:23 | INFO: Blender create Mesh node RecessedVentHousing.001
+18:52:23 | INFO: Blender create Mesh node RecessedVentHousing.002
+18:52:23 | INFO: Blender create Mesh node RecessedVentHousing.006
+18:52:23 | INFO: Blender create Mesh node SensorCyanDatum.002
+18:52:23 | INFO: Blender create Mesh node SensorGlass.002
+18:52:23 | INFO: Blender create Mesh node SensorMast.002
+18:52:23 | INFO: Blender create Mesh node SensorMastBase.002
+18:52:23 | INFO: Blender create Mesh node SensorRadome.001
+18:52:23 | INFO: Blender create Mesh node SensorRadome.004
+18:52:23 | INFO: Blender create Mesh node SensorRadomeCap.001
+18:52:23 | INFO: Blender create Mesh node SensorRadomeCap.004
+18:52:23 | INFO: Blender create Mesh node SensorRecess.002
+18:52:23 | INFO: Blender create Mesh node ServiceAmmoTransferLatchAft.001
+18:52:23 | INFO: Blender create Mesh node ServiceAmmoTransferLatchAft.004
+18:52:23 | INFO: Blender create Mesh node ServiceAmmoTransferLatchForward.001
+18:52:23 | INFO: Blender create Mesh node ServiceAmmoTransferLatchForward.004
+18:52:23 | INFO: Blender create Mesh node ServiceAmmoTransferPortAft.001
+18:52:23 | INFO: Blender create Mesh node ServiceAmmoTransferPortAft.004
+18:52:23 | INFO: Blender create Mesh node ServiceAmmoTransferPortForward.001
+18:52:23 | INFO: Blender create Mesh node ServiceAmmoTransferPortForward.004
+18:52:23 | INFO: Blender create Mesh node ServiceCaptureRailAft.001
+18:52:23 | INFO: Blender create Mesh node ServiceCaptureRailAft.004
+18:52:23 | INFO: Blender create Mesh node ServiceCaptureRailForward.001
+18:52:23 | INFO: Blender create Mesh node ServiceCaptureRailForward.004
+18:52:23 | INFO: Blender create Mesh node ServiceCaptureStopAft.001
+18:52:23 | INFO: Blender create Mesh node ServiceCaptureStopAft.002
+18:52:23 | INFO: Blender create Mesh node ServiceCaptureStopAft.003
+18:52:23 | INFO: Blender create Mesh node ServiceCaptureStopAft.008
+18:52:23 | INFO: Blender create Mesh node ServiceCaptureStopForward.001
+18:52:23 | INFO: Blender create Mesh node ServiceCaptureStopForward.002
+18:52:23 | INFO: Blender create Mesh node ServiceCaptureStopForward.003
+18:52:23 | INFO: Blender create Mesh node ServiceCaptureStopForward.008
+18:52:23 | INFO: Blender create Mesh node ServiceCeilingAft.002
+18:52:23 | INFO: Blender create Mesh node ServiceCeilingForward.002
+18:52:23 | INFO: Blender create Mesh node ServiceCeilingLampAft.002
+18:52:23 | INFO: Blender create Mesh node ServiceCeilingLampForward.002
+18:52:23 | INFO: Blender create Mesh node ServiceContactAft.001
+18:52:23 | INFO: Blender create Mesh node ServiceContactAft.002
+18:52:23 | INFO: Blender create Mesh node ServiceContactAft.003
+18:52:23 | INFO: Blender create Mesh node ServiceContactAft.008
+18:52:23 | INFO: Blender create Mesh node ServiceContactForward.001
+18:52:23 | INFO: Blender create Mesh node ServiceContactForward.002
+18:52:23 | INFO: Blender create Mesh node ServiceContactForward.003
+18:52:23 | INFO: Blender create Mesh node ServiceContactForward.008
+18:52:23 | INFO: Blender create Mesh node ServiceGuideLampAft.001
+18:52:23 | INFO: Blender create Mesh node ServiceGuideLampAft.002
+18:52:23 | INFO: Blender create Mesh node ServiceGuideLampAft.003
+18:52:23 | INFO: Blender create Mesh node ServiceGuideLampAft.008
+18:52:23 | INFO: Blender create Mesh node ServiceGuideLampForward.001
+18:52:23 | INFO: Blender create Mesh node ServiceGuideLampForward.002
+18:52:23 | INFO: Blender create Mesh node ServiceGuideLampForward.003
+18:52:23 | INFO: Blender create Mesh node ServiceGuideLampForward.008
+18:52:23 | INFO: Blender create Mesh node ServiceMouthArmorAft.002
+18:52:23 | INFO: Blender create Mesh node ServiceMouthArmorForward.002
+18:52:23 | INFO: Blender create Mesh node ServiceMouthSealAft.002
+18:52:23 | INFO: Blender create Mesh node ServiceMouthSealForward.002
+18:52:23 | INFO: Blender create Mesh node ServiceOverheadUtilityTrunkAft.002
+18:52:23 | INFO: Blender create Mesh node ServiceOverheadUtilityTrunkForward.002
+18:52:23 | INFO: Blender create Mesh node ServicePowerCoolantLineAft.001
+18:52:23 | INFO: Blender create Mesh node ServicePowerCoolantLineAft.004
+18:52:23 | INFO: Blender create Mesh node ServicePowerCoolantLineForward.001
+18:52:23 | INFO: Blender create Mesh node ServicePowerCoolantLineForward.004
+18:52:23 | INFO: Blender create Mesh node ServicePowerSocketAft.001
+18:52:23 | INFO: Blender create Mesh node ServicePowerSocketAft.004
+18:52:23 | INFO: Blender create Mesh node ServicePowerSocketForward.001
+18:52:23 | INFO: Blender create Mesh node ServicePowerSocketForward.004
+18:52:23 | INFO: Blender create Mesh node ServiceThresholdHazardAft.001
+18:52:23 | INFO: Blender create Mesh node ServiceThresholdHazardAft.004
+18:52:23 | INFO: Blender create Mesh node ServiceThresholdHazardForward.001
+18:52:23 | INFO: Blender create Mesh node ServiceThresholdHazardForward.004
+18:52:23 | INFO: Blender create Mesh node ServiceThresholdNotchAft.001
+18:52:23 | INFO: Blender create Mesh node ServiceThresholdNotchAft.002
+18:52:23 | INFO: Blender create Mesh node ServiceThresholdNotchAft.003
+18:52:23 | INFO: Blender create Mesh node ServiceThresholdNotchAft.004
+18:52:23 | INFO: Blender create Mesh node ServiceThresholdNotchAft.005
+18:52:23 | INFO: Blender create Mesh node ServiceThresholdNotchAft.006
+18:52:23 | INFO: Blender create Mesh node ServiceThresholdNotchAft.007
+18:52:24 | INFO: Blender create Mesh node ServiceThresholdNotchAft.008
+18:52:24 | INFO: Blender create Mesh node ServiceThresholdNotchAft.009
+18:52:24 | INFO: Blender create Mesh node ServiceThresholdNotchAft.020
+18:52:24 | INFO: Blender create Mesh node ServiceThresholdNotchForward.001
+18:52:24 | INFO: Blender create Mesh node ServiceThresholdNotchForward.002
+18:52:24 | INFO: Blender create Mesh node ServiceThresholdNotchForward.003
+18:52:24 | INFO: Blender create Mesh node ServiceThresholdNotchForward.004
+18:52:24 | INFO: Blender create Mesh node ServiceThresholdNotchForward.005
+18:52:24 | INFO: Blender create Mesh node ServiceThresholdNotchForward.006
+18:52:24 | INFO: Blender create Mesh node ServiceThresholdNotchForward.007
+18:52:24 | INFO: Blender create Mesh node ServiceThresholdNotchForward.008
+18:52:24 | INFO: Blender create Mesh node ServiceThresholdNotchForward.009
+18:52:24 | INFO: Blender create Mesh node ServiceThresholdNotchForward.020
+18:52:24 | INFO: Blender create Mesh node ServiceWallUtilityCabinetAft.001
+18:52:24 | INFO: Blender create Mesh node ServiceWallUtilityCabinetAft.004
+18:52:24 | INFO: Blender create Mesh node ServiceWallUtilityCabinetForward.001
+18:52:24 | INFO: Blender create Mesh node ServiceWallUtilityCabinetForward.004
+18:52:24 | INFO: Blender create Mesh node SideCoolingFin.001
+18:52:24 | INFO: Blender create Mesh node SideCoolingFin.002
+18:52:24 | INFO: Blender create Mesh node SideCoolingFin.003
+18:52:24 | INFO: Blender create Mesh node SideCoolingFin.004
+18:52:24 | INFO: Blender create Mesh node SideCoolingFin.005
+18:52:24 | INFO: Blender create Mesh node SideCoolingFin.006
+18:52:24 | INFO: Blender create Mesh node SideCoolingFin.007
+18:52:24 | INFO: Blender create Mesh node SideCoolingFin.008
+18:52:24 | INFO: Blender create Mesh node SideCoolingFin.009
+18:52:24 | INFO: Blender create Mesh node SideCoolingFin.010
+18:52:24 | INFO: Blender create Mesh node SideCoolingFin.011
+18:52:24 | INFO: Blender create Mesh node SideCoolingFin.012
+18:52:24 | INFO: Blender create Mesh node SideCoolingFin.013
+18:52:24 | INFO: Blender create Mesh node SideCoolingFin.014
+18:52:24 | INFO: Blender create Mesh node SideCoolingFin.015
+18:52:24 | INFO: Blender create Mesh node SideCoolingFin.016
+18:52:24 | INFO: Blender create Mesh node SideCoolingFin.017
+18:52:24 | INFO: Blender create Mesh node SideCoolingFin.036
+18:52:24 | INFO: Blender create Mesh node SideSensorAperture.001
+18:52:24 | INFO: Blender create Mesh node SideSensorAperture.002
+18:52:24 | INFO: Blender create Mesh node SideSensorAperture.006
+18:52:24 | INFO: Blender create Mesh node SideSensorFace.002
+18:52:24 | INFO: Blender create Mesh node TelemetryCrossbar.001
+18:52:24 | INFO: Blender create Mesh node TelemetryCrossbar.004
+18:52:24 | INFO: Blender create Mesh node TelemetryPillar.001
+18:52:24 | INFO: Blender create Mesh node TelemetryPillar.004
+18:52:24 | INFO: Blender create Mesh node TieDown.001
+18:52:24 | INFO: Blender create Mesh node TieDown.002
+18:52:24 | INFO: Blender create Mesh node TieDown.003
+18:52:24 | INFO: Blender create Mesh node TieDown.004
+18:52:24 | INFO: Blender create Mesh node TieDown.005
+18:52:24 | INFO: Blender create Mesh node TieDown.012
+18:52:24 | INFO: Blender create Mesh node UncrewedSensorCrown.002
+18:52:24 | INFO: glTF import finished in 0.36s
+01:51.422  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v28-intake-proposal\contact-sheet.png'
+01:52.078  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v28-intake-proposal\before-after.png'
+01:52.625  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v28-intake-proposal\approval-mobile.png'
+PROPOSAL_COMPLETE_APPROVED_ASSETS_UNCHANGED
+Blender 5.2.0 LTS (hash fbe6228777e7 built 2026-07-14 01:35:40)
+
+Blender quit

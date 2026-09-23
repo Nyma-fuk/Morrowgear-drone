@@ -1,0 +1,137 @@
+{
+  "passed": true,
+  "errors": [],
+  "boundsBlender": [
+    -13.0,
+    -25.0,
+    0.0,
+    13.0,
+    25.0,
+    11.0
+  ],
+  "mirrorError": 0.0,
+  "triangles": 24704,
+  "meshObjects": 393,
+  "bays": [
+    {
+      "slot": 0,
+      "rays": 169,
+      "blocked": []
+    },
+    {
+      "slot": 1,
+      "rays": 169,
+      "blocked": []
+    },
+    {
+      "slot": 2,
+      "rays": 169,
+      "blocked": []
+    },
+    {
+      "slot": 3,
+      "rays": 169,
+      "blocked": []
+    }
+  ],
+  "reference": "C:\\Users\\fukud\\.codex\\generated_images\\019ff8b6-65ab-7b61-9327-249478654bda\\exec-0f667897-253c-40df-8bf5-f0e636268628.png",
+  "referenceSha256": "3ba1db98f8bdab73c79c0887a475c6d7ecb387be03bb2e559f04af9c626f5eb4",
+  "boardingReceiver": {
+    "rays": 169,
+    "blocked": [],
+    "clearTop": 4.4
+  },
+  "revision": "V28_INTAKE_PROPOSAL_01",
+  "scope": "Static proposal geometry and service/boarding spaces only; no airflow, CFD, moving mechanism or game validation",
+  "status": "PROPOSAL_AWAITING_USER_APPROVAL",
+  "intake": {
+    "boundsBlender": [
+      -7.150000095367432,
+      -17.350000381469727,
+      1.0499999523162842,
+      7.150000095367432,
+      -10.300000190734863,
+      4.369999885559082
+    ],
+    "clearMouthWidth": 13.65,
+    "clearMouthHeight": 2.75,
+    "centralDivider": true,
+    "forwardServiceBoundsBlender": [
+      -9.65999984741211,
+      -8.3100004196167,
+      1.2964999675750732,
+      9.65999984741211,
+      -2.0899999141693115,
+      3.759999990463257
+    ],
+    "bayRoomEnvelopeChecks": [
+      {
+        "slot": 0,
+        "runtimeBounds": [
+          -9.45,
+          1.1,
+          -8.1,
+          -4.8500000000000005,
+          3.8,
+          -2.3
+        ],
+        "longitudinalGap": 2.2000001907348636
+      },
+      {
+        "slot": 1,
+        "runtimeBounds": [
+          4.8500000000000005,
+          1.1,
+          -8.1,
+          9.45,
+          3.8,
+          -2.3
+        ],
+        "longitudinalGap": 2.2000001907348636
+      }
+    ],
+    "longitudinalSeparation": 1.989999771118164,
+    "triangleIntersections": [],
+    "recessDepthRays": [
+      {
+        "x": -1.8,
+        "clearDepth": 5.01500129699707,
+        "target": "IntakeAftHeatMatrix",
+        "passed": true
+      },
+      {
+        "x": -3.4,
+        "clearDepth": 5.01500129699707,
+        "target": "IntakeAftHeatMatrix",
+        "passed": true
+      },
+      {
+        "x": -5.0,
+        "clearDepth": 5.01500129699707,
+        "target": "IntakeAftHeatMatrix",
+        "passed": true
+      },
+      {
+        "x": 1.8,
+        "clearDepth": 5.01500129699707,
+        "target": "IntakeAftHeatMatrix",
+        "passed": true
+      },
+      {
+        "x": 3.4,
+        "clearDepth": 5.01500129699707,
+        "target": "IntakeAftHeatMatrix",
+        "passed": true
+      },
+      {
+        "x": 5.0,
+        "clearDepth": 5.01500129699707,
+        "target": "IntakeAftHeatMatrix",
+        "passed": true
+      }
+    ]
+  },
+  "centralEmitterUnchanged": true,
+  "anchorsUnchanged": true,
+  "sourceSha256": "a7399cfb58f44cd94385c4b461f41fa65d3d6a1098507d8fea06c1079acddd90"
+}

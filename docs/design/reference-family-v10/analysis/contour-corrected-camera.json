@@ -1,0 +1,30 @@
+{
+  "method": "Rigid orthographic camera fit; no pixel warp or nonuniform image scaling.",
+  "azimuth": 0.5740423582505605,
+  "elevation": 0.38789575724019304,
+  "pixelsPerUnit": 200.4836775204669,
+  "centerX": 708.9077430854265,
+  "centerY": 432.7552922969821,
+  "resolution": [
+    1681,
+    936
+  ],
+  "fitLandmarks": [
+    "fan_left",
+    "fan_right",
+    "tip_left_front",
+    "tip_left_rear",
+    "tip_right_front",
+    "tip_right_rear",
+    "chin_sensor",
+    "rear_crown"
+  ],
+  "parameters": [
+    0.5740423582505605,
+    0.38789575724019304,
+    200.4836775204669,
+    49.99999999999894,
+    708.9077430854265,
+    432.7552922969821
+  ]
+}

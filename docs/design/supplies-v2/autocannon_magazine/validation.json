@@ -1,0 +1,57 @@
+{
+  "passed": true,
+  "boundsBlender": [
+    -0.8149999976158142,
+    -0.5824999809265137,
+    0.0,
+    0.8149999976158142,
+    0.6153985261917114,
+    2.3529560565948486
+  ],
+  "triangles": 29368,
+  "mirrorError": 0.26633360981941223,
+  "functionalAsymmetry": "cartridge feed -X",
+  "referenceSha256": "118e33e3393d3ad6d7154752dfdee17e1ee177f926f294309c5cad3b8f6db11f",
+  "sourceSha256": "1ddc326f43656d6fc5f316351b3ab6724b2c89e2dd68e29d01add9b2d1e62b54",
+  "glbSha256": "c0497d9cfad72dd20b31bd8620f578140179808cf0aef92e83929cbe12004b40",
+  "capacity": 120,
+  "missileLayout": null,
+  "icons": {
+    "16": {
+      "size": [
+        16,
+        16
+      ],
+      "occupiedPixels": 89,
+      "clipped": false,
+      "rgba": true
+    },
+    "32": {
+      "size": [
+        32,
+        32
+      ],
+      "occupiedPixels": 405,
+      "clipped": false,
+      "rgba": true
+    },
+    "64": {
+      "size": [
+        64,
+        64
+      ],
+      "occupiedPixels": 1500,
+      "clipped": false,
+      "rgba": true
+    },
+    "128": {
+      "size": [
+        128,
+        128
+      ],
+      "occupiedPixels": 5783,
+      "clipped": false,
+      "rgba": true
+    }
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "id": "laser_module",
+  "status": "design candidate / not installed",
+  "checks": [
+    {
+      "frame": 1,
+      "vertices": 4672,
+      "bounds": [
+        -0.5184999704360962,
+        -0.5049999952316284,
+        -0.030000030994415283,
+        0.5184999704360962,
+        0.3935000002384186,
+        0.4700000286102295
+      ],
+      "mirrorError": 0.0,
+      "passed": true
+    },
+    {
+      "frame": 40,
+      "vertices": 4672,
+      "bounds": [
+        -0.5184999704360962,
+        -0.5049999952316284,
+        -0.030000030994415283,
+        0.5184999704360962,
+        0.3935000002384186,
+        0.4700000286102295
+      ],
+      "mirrorError": 0.0,
+      "passed": true
+    },
+    {
+      "frame": 80,
+      "vertices": 4672,
+      "bounds": [
+        -0.5184999704360962,
+        -0.5049999952316284,
+        -0.030000030994415283,
+        0.5184999704360962,
+        0.3935000002384186,
+        0.4700000286102295
+      ],
+      "mirrorError": 0.0,
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "axis": {
+    "symmetry": "X=0",
+    "front": "-Y",
+    "up": "+Z"
+  },
+  "legacy": true,
+  "blendSha256": "0fd7d78bcfedf9676816c52e7bdabbf2adb6bda6f124c53ea99309c36eb11f7c",
+  "glbSha256": "a764f2b2d24ad7355cbc623eb3c2621e0b9c94ffb3eff4d14b183d7de564d510"
+}

@@ -1,0 +1,118 @@
+{
+  "bay-fit-cargo.png": {
+    "bytes": 816489,
+    "sha256": "83ffc39ceebfc2f5a7a1ca199337a63ac399072ac2c51a7382fd0ea470fd5f46"
+  },
+  "bay-fit-engineer.png": {
+    "bytes": 814788,
+    "sha256": "854a2f1eac54c75f1af53faab5a5a529a686c4e19d9a32dff917a340d877af37"
+  },
+  "bay-fit-field.png": {
+    "bytes": 813122,
+    "sha256": "d46f8d5946358ebb1c6b943f0af5da3b269d4db3d282622fe0456bf1bde778e3"
+  },
+  "bay-fit-salvage.png": {
+    "bytes": 812607,
+    "sha256": "704469e6dcb2e9240a519ee232f966be5c5979198c8903aa9b0f5596b71f636a"
+  },
+  "bay-fit-scout.png": {
+    "bytes": 813687,
+    "sha256": "2d96f0a11a536bb4f09dba45c3f22d2fe58350e0f5aac19df12271a5dfd9a168"
+  },
+  "bay-fit-security.png": {
+    "bytes": 812374,
+    "sha256": "bfb240d07f01e66f40187eca244372124dff15afa70accb76be3be22b62897af"
+  },
+  "bay-functional-closeup.png": {
+    "bytes": 1144395,
+    "sha256": "e6ae58f2664b4594ee0cfc4caff78c6e2955fa3233dd3453c25530bebe43a074"
+  },
+  "bay-loaded-overview.png": {
+    "bytes": 1674013,
+    "sha256": "14279d997f162894412dd5d93779dea0fdb750762f6883ac650ecea8e3cfa0c5"
+  },
+  "bay-loaded-security-salvage.png": {
+    "bytes": 1353492,
+    "sha256": "a5b811df8927960766f379419c64c161ea923aa3b68825cf30872d01e77b2c36"
+  },
+  "bay-scale-comparison.png": {
+    "bytes": 3154349,
+    "sha256": "457801fb0ed51a6db76aae385de5beb4e1b267aca4717e57d07aa1037a2dc3a0"
+  },
+  "beam-state.png": {
+    "bytes": 1734281,
+    "sha256": "07f33d6313b85143178a121557023c9166416978027d692175e4cd95ac3a9196"
+  },
+  "before-after.png": {
+    "bytes": 2159520,
+    "sha256": "2197d6200b9b7aa40cd98ffc3e1fa14a20528da79b4c0d6b327c3bb10296391d"
+  },
+  "bottom.png": {
+    "bytes": 1468339,
+    "sha256": "2efd1560c9eb528ecdddc1123ee48c67fc22137b8838a1bb4742625621198d75"
+  },
+  "carrier-v30-proposal.blend": {
+    "bytes": 239944,
+    "sha256": "df3f3fe16f399d08d5543bbf1be3020144a388426cec37e23dd1207b5ce5b9ce"
+  },
+  "carrier-v30-proposal.glb": {
+    "bytes": 1288768,
+    "sha256": "0e1eb0572829dd8c094720843464a2e36eeb9d7e7a14816c292728402f571a99"
+  },
+  "contact-sheet.png": {
+    "bytes": 3019780,
+    "sha256": "614032e042749c94475681afd6d5f3d22af63cbed073d187d2bf2dc9b900b94b"
+  },
+  "emitter-functional-closeup.png": {
+    "bytes": 1108264,
+    "sha256": "3de6a1df84d441fab50c499f9c7c411631c2da854eb45ca98b9d656632eb4f9e"
+  },
+  "front-under-functional-closeup.png": {
+    "bytes": 1600002,
+    "sha256": "4aa03880a13f29950f92c94a05d851122b1afe11c87d278f95c46fdc16bec5a9"
+  },
+  "front.png": {
+    "bytes": 1424746,
+    "sha256": "2b3df98fdc3bc65c6b51549f7ccb974b7e9227e17024602287ce52f4a22c947b"
+  },
+  "functional-comparison-ja.png": {
+    "bytes": 2091412,
+    "sha256": "a7a9abef5a44246e9656e4989e2995abee1e0c141ef4fa95612b5cbdcea96ac6"
+  },
+  "hero.png": {
+    "bytes": 1487878,
+    "sha256": "68fffb0e8a53ab216f9c41a6587a0954673e1eee635367d6757fdbd07c0f26d7"
+  },
+  "intake-functional-closeup.png": {
+    "bytes": 1111379,
+    "sha256": "fce85ae5cb39b3aede7aecbd9dbc22c4a739296150fbb5faed4005d3dbf1571f"
+  },
+  "left.png": {
+    "bytes": 1414303,
+    "sha256": "da1041f62c1a7d1c6f37ae59bb9747afb3623811950876d260d0f467df09488f"
+  },
+  "rear-underside.png": {
+    "bytes": 1519231,
+    "sha256": "2c5e46df8db1a90b9ea2c59a5de90590dc5273bf86a45ff956650864209b49db"
+  },
+  "rear.png": {
+    "bytes": 1440000,
+    "sha256": "a5f1ec74572c47a65f4fb40bac021c2f0088befdeec33f7058c9bf1db8a4a7d3"
+  },
+  "refinement-comparison.png": {
+    "bytes": 1624762,
+    "sha256": "47214965cbc39b59172fddddf475a714069f1ae77db824f516a22a26e45bc31e"
+  },
+  "right.png": {
+    "bytes": 1416512,
+    "sha256": "a9ab1e4197f6fc6033eb28b366845658884b92f0a2b14556dd9ba8fa4ec3f482"
+  },
+  "top.png": {
+    "bytes": 1483868,
+    "sha256": "6b00656477704900602b2366562e3eea7131ff248967ac8d35d22bdb922f8601"
+  },
+  "underside.png": {
+    "bytes": 1512316,
+    "sha256": "273e135b55c745318fdbbf9171c151df69598058e4de150af05233f92b866d29"
+  }
+}

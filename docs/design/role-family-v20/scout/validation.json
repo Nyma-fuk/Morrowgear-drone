@@ -1,0 +1,328 @@
+{
+  "role": "scout",
+  "passed": true,
+  "errors": [],
+  "samples": [
+    {
+      "frame": 1,
+      "mirrorError": 1.0662663498806069e-06,
+      "footContactZ": -1.1229286193847656,
+      "nonGearGroundClearance": 0.8506785929203033,
+      "gearPointsInsideFanFlow": 0,
+      "contactCount": 4,
+      "contactPlaneError": 0.0
+    },
+    {
+      "frame": 20,
+      "mirrorError": 1.0662663498806069e-06,
+      "footContactZ": -1.1229286193847656,
+      "nonGearGroundClearance": 0.8506785929203033,
+      "gearPointsInsideFanFlow": 0,
+      "contactCount": 4,
+      "contactPlaneError": 0.0
+    },
+    {
+      "frame": 30,
+      "mirrorError": 1.0662663498806069e-06,
+      "footContactZ": -0.7575756311416626,
+      "nonGearGroundClearance": 0.4853256046772003,
+      "gearPointsInsideFanFlow": 0,
+      "contactCount": 4,
+      "contactPlaneError": 0.0
+    },
+    {
+      "frame": 40,
+      "mirrorError": 1.0662663498806069e-06,
+      "footContactZ": -0.39222267270088196,
+      "nonGearGroundClearance": 0.11997264623641968,
+      "gearPointsInsideFanFlow": 0,
+      "contactCount": 4,
+      "contactPlaneError": 0.0
+    },
+    {
+      "frame": 50,
+      "mirrorError": 1.0662663498806069e-06,
+      "footContactZ": -0.39222267270088196,
+      "nonGearGroundClearance": 0.11997264623641968,
+      "gearPointsInsideFanFlow": 0,
+      "contactCount": 4,
+      "contactPlaneError": 0.0
+    },
+    {
+      "frame": 60,
+      "mirrorError": 1.0662663498806069e-06,
+      "footContactZ": -0.39222267270088196,
+      "nonGearGroundClearance": 0.11997264623641968,
+      "gearPointsInsideFanFlow": 0,
+      "contactCount": 4,
+      "contactPlaneError": 0.0
+    },
+    {
+      "frame": 70,
+      "mirrorError": 1.0662663498806069e-06,
+      "footContactZ": -0.39222267270088196,
+      "nonGearGroundClearance": 0.11997264623641968,
+      "gearPointsInsideFanFlow": 0,
+      "contactCount": 4,
+      "contactPlaneError": 0.0
+    },
+    {
+      "frame": 80,
+      "mirrorError": 1.0662663498806069e-06,
+      "footContactZ": -0.39222267270088196,
+      "nonGearGroundClearance": 0.11997264623641968,
+      "gearPointsInsideFanFlow": 0,
+      "contactCount": 4,
+      "contactPlaneError": 0.0
+    },
+    {
+      "frame": 100,
+      "mirrorError": 1.0662663498806069e-06,
+      "footContactZ": -0.39222267270088196,
+      "nonGearGroundClearance": 0.11997264623641968,
+      "gearPointsInsideFanFlow": 0,
+      "contactCount": 4,
+      "contactPlaneError": 0.0
+    },
+    {
+      "frame": 110,
+      "mirrorError": 1.0662663498806069e-06,
+      "footContactZ": -0.7575756311416626,
+      "nonGearGroundClearance": 0.4853256046772003,
+      "gearPointsInsideFanFlow": 0,
+      "contactCount": 4,
+      "contactPlaneError": 0.0
+    },
+    {
+      "frame": 120,
+      "mirrorError": 1.0662663498806069e-06,
+      "footContactZ": -1.1229286193847656,
+      "nonGearGroundClearance": 0.8506785929203033,
+      "gearPointsInsideFanFlow": 0,
+      "contactCount": 4,
+      "contactPlaneError": 0.0
+    }
+  ],
+  "hullNonmanifoldEdges": 0,
+  "scale": 1.0,
+  "outerWingFactor": 1.22,
+  "baseSha256": "59a91bf50def34a481730fac7d34dc357d413974dc902bb5074535451f5262aa",
+  "gameVerified": false,
+  "fullSweptCollisionVerified": false,
+  "referenceFidelityApproved": false,
+  "animatedFxExcludedFromStructuralSymmetry": true,
+  "ductProbes": [
+    {
+      "type": "intake",
+      "depth": 0.9315159320831299,
+      "expectedDepth": 0.9315161148383514
+    },
+    {
+      "type": "intake",
+      "depth": 0.9317424893379211,
+      "expectedDepth": 0.9317426950337724
+    },
+    {
+      "type": "intake",
+      "depth": 0.3661663830280304,
+      "expectedDepth": 0.36616661348924007
+    },
+    {
+      "type": "intake",
+      "depth": 0.9365053772926331,
+      "expectedDepth": 0.9365055225591032
+    },
+    {
+      "type": "intake",
+      "depth": 0.9367309808731079,
+      "expectedDepth": 0.9367309895101378
+    },
+    {
+      "type": "intake",
+      "depth": 0.3654598891735077,
+      "expectedDepth": 0.36546040448212125
+    },
+    {
+      "type": "intake",
+      "depth": 0.9416313767433167,
+      "expectedDepth": 0.9416315217411073
+    },
+    {
+      "type": "intake",
+      "depth": 0.941841185092926,
+      "expectedDepth": 0.9418411092034553
+    },
+    {
+      "type": "intake",
+      "depth": 0.3663196563720703,
+      "expectedDepth": 0.36631936200742926
+    },
+    {
+      "type": "exhaust",
+      "depth": 0.8995221853256226,
+      "expectedDepth": 0.8995223088935789
+    },
+    {
+      "type": "exhaust",
+      "depth": 0.8995674848556519,
+      "expectedDepth": 0.8995675982085187
+    },
+    {
+      "type": "exhaust",
+      "depth": 0.8995301723480225,
+      "expectedDepth": 0.8995301609718525
+    },
+    {
+      "type": "exhaust",
+      "depth": 1.0780893564224243,
+      "expectedDepth": 1.0780894508582388
+    },
+    {
+      "type": "exhaust",
+      "depth": 1.0765448808670044,
+      "expectedDepth": 1.0765449998648495
+    },
+    {
+      "type": "exhaust",
+      "depth": 1.0773838758468628,
+      "expectedDepth": 1.0773837540621962
+    },
+    {
+      "type": "exhaust",
+      "depth": 1.0552390813827515,
+      "expectedDepth": 1.0552392152344952
+    },
+    {
+      "type": "exhaust",
+      "depth": 1.053475022315979,
+      "expectedDepth": 1.0534749160047063
+    },
+    {
+      "type": "exhaust",
+      "depth": 1.05486261844635,
+      "expectedDepth": 1.054862509441865
+    },
+    {
+      "type": "exhaust",
+      "depth": 0.5418605208396912,
+      "expectedDepth": 0.5418605885244725
+    },
+    {
+      "type": "exhaust",
+      "depth": 0.7772766351699829,
+      "expectedDepth": 0.7772767694648026
+    },
+    {
+      "type": "exhaust",
+      "depth": 0.6155920624732971,
+      "expectedDepth": 0.6155920048890392
+    },
+    {
+      "type": "intake",
+      "depth": 0.9315153956413269,
+      "expectedDepth": 0.9315153699928416
+    },
+    {
+      "type": "intake",
+      "depth": 0.9317276477813721,
+      "expectedDepth": 0.9317275953790833
+    },
+    {
+      "type": "intake",
+      "depth": 0.3661663830280304,
+      "expectedDepth": 0.36616661348924007
+    },
+    {
+      "type": "intake",
+      "depth": 0.9365054368972778,
+      "expectedDepth": 0.9365055210674047
+    },
+    {
+      "type": "intake",
+      "depth": 0.9367313385009766,
+      "expectedDepth": 0.9367312122167999
+    },
+    {
+      "type": "intake",
+      "depth": 0.3654598891735077,
+      "expectedDepth": 0.36546040448212125
+    },
+    {
+      "type": "intake",
+      "depth": 0.941632091999054,
+      "expectedDepth": 0.9416322269349455
+    },
+    {
+      "type": "intake",
+      "depth": 0.9418566226959229,
+      "expectedDepth": 0.9418567033249221
+    },
+    {
+      "type": "intake",
+      "depth": 0.3663196563720703,
+      "expectedDepth": 0.36631936200742926
+    },
+    {
+      "type": "exhaust",
+      "depth": 0.8995221853256226,
+      "expectedDepth": 0.8995223088935789
+    },
+    {
+      "type": "exhaust",
+      "depth": 0.8995674848556519,
+      "expectedDepth": 0.8995675982085187
+    },
+    {
+      "type": "exhaust",
+      "depth": 0.8995301723480225,
+      "expectedDepth": 0.8995301609718525
+    },
+    {
+      "type": "exhaust",
+      "depth": 1.0781610012054443,
+      "expectedDepth": 1.0781609902387015
+    },
+    {
+      "type": "exhaust",
+      "depth": 1.0769121646881104,
+      "expectedDepth": 1.0769121839554046
+    },
+    {
+      "type": "exhaust",
+      "depth": 1.0770165920257568,
+      "expectedDepth": 1.0770165647155534
+    },
+    {
+      "type": "exhaust",
+      "depth": 1.0556395053863525,
+      "expectedDepth": 1.0556395013512185
+    },
+    {
+      "type": "exhaust",
+      "depth": 1.054390788078308,
+      "expectedDepth": 1.054390929169052
+    },
+    {
+      "type": "exhaust",
+      "depth": 1.0539659261703491,
+      "expectedDepth": 1.0539660211330357
+    },
+    {
+      "type": "exhaust",
+      "depth": 0.5420273542404175,
+      "expectedDepth": 0.5420272403413683
+    },
+    {
+      "type": "exhaust",
+      "depth": 0.7772766351699829,
+      "expectedDepth": 0.7772767694648026
+    },
+    {
+      "type": "exhaust",
+      "depth": 0.615662693977356,
+      "expectedDepth": 0.6156628040382909
+    }
+  ],
+  "hingeTransformChecks": 0,
+  "mirroredAnimationUsesTransformHierarchy": true
+}

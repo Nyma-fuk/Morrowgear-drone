@@ -1,0 +1,50 @@
+[
+  {
+    "path": "docs\\design\\supply-carrier-v24\\models\\autocannon_magazine\\autocannon_magazine.blend",
+    "unchanged": true
+  },
+  {
+    "path": "docs\\design\\supply-carrier-v24\\models\\autocannon_magazine\\autocannon_magazine.glb",
+    "unchanged": true
+  },
+  {
+    "path": "docs\\design\\supply-carrier-v24\\models\\laser_cell\\laser_cell.blend",
+    "unchanged": true
+  },
+  {
+    "path": "docs\\design\\supply-carrier-v24\\models\\laser_cell\\laser_cell.glb",
+    "unchanged": true
+  },
+  {
+    "path": "docs\\design\\supply-carrier-v24\\models\\micro_missile_pack\\micro_missile_pack.blend",
+    "unchanged": true
+  },
+  {
+    "path": "docs\\design\\supply-carrier-v24\\models\\micro_missile_pack\\micro_missile_pack.glb",
+    "unchanged": true
+  },
+  {
+    "path": "docs\\design\\supply-carrier-v24\\models\\chunkbuster\\chunkbuster.blend",
+    "unchanged": true
+  },
+  {
+    "path": "docs\\design\\supply-carrier-v24\\models\\chunkbuster\\chunkbuster.glb",
+    "unchanged": true
+  },
+  {
+    "path": "docs\\design\\detail-scale-v22\\field\\airframe.blend",
+    "unchanged": true
+  },
+  {
+    "path": "docs\\design\\equipment-hmi-v23\\models\\power_cell\\power_cell.blend",
+    "unchanged": true
+  },
+  {
+    "path": "docs\\design\\equipment-hmi-v23\\models\\autocannon_module\\autocannon_module.blend",
+    "unchanged": true
+  },
+  {
+    "path": "docs\\design\\equipment-hmi-v23\\models\\missile_module\\missile_module.blend",
+    "unchanged": true
+  }
+]

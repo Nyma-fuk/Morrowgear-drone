@@ -1,0 +1,57 @@
+{
+  "id": "recovery_tool",
+  "status": "design candidate / not installed",
+  "checks": [
+    {
+      "frame": 1,
+      "vertices": 7568,
+      "bounds": [
+        -0.717149555683136,
+        -0.7994999885559082,
+        -0.5400000214576721,
+        0.717149555683136,
+        0.3400000035762787,
+        0.3540000021457672
+      ],
+      "mirrorError": 0.0,
+      "passed": true
+    },
+    {
+      "frame": 40,
+      "vertices": 7568,
+      "bounds": [
+        -0.8084559440612793,
+        -0.7655485272407532,
+        -0.5400000214576721,
+        0.8084559440612793,
+        0.3400000035762787,
+        0.3540000021457672
+      ],
+      "mirrorError": 0.0,
+      "passed": true
+    },
+    {
+      "frame": 80,
+      "vertices": 7568,
+      "bounds": [
+        -0.717149555683136,
+        -0.7994999885559082,
+        -0.5400000214576721,
+        0.717149555683136,
+        0.3400000035762787,
+        0.3540000021457672
+      ],
+      "mirrorError": 0.0,
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "axis": {
+    "symmetry": "X=0",
+    "front": "-Y",
+    "up": "+Z"
+  },
+  "legacy": false,
+  "blendSha256": "b0733a24978efce4ea8f5c780d52459b0bdcc4afc9be81205f3e3d68ccd22812",
+  "glbSha256": "9fccec3a7656ee0fa2a7f5a5e9d55ada26c8579977386ef718bd9d65e3f12fca"
+}

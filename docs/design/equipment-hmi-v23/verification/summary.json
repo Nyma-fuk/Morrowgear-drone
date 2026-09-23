@@ -1,0 +1,30 @@
+{
+  "scope": "Design artifacts and browser prototype, NOT Minecraft runtime",
+  "registeredItems": 23,
+  "itemPngs": 138,
+  "registeredItemViews": 161,
+  "newCanonicalModels": 23,
+  "hmiSymbols": 95,
+  "hmiSymbolPngs": 380,
+  "geometryPoses": 69,
+  "maximumMirrorError": 0.0,
+  "geometryPassed": true,
+  "exportRoundtripPassed": true,
+  "policyCases": 117,
+  "policyPassed": 117,
+  "browserChecks": 62,
+  "browserPassed": 62,
+  "canvasPixelStd": 37.8790635444039,
+  "changedPixelFraction": 0.014373456790123456,
+  "canvasNonblankAndChanging": true,
+  "gameInstalled": false,
+  "gameVerified": false,
+  "notes": [
+    "Browser screenshots are real prototype captures, not Minecraft screenshots.",
+    "1920 CSS viewport was layout-tested; desktop evidence uses fully captured 1440 viewport.",
+    "The 3D scene renders up to eight representative aircraft; 256-unit tests cover the interface data.",
+    "Material/lighting fidelity in Minecraft and final item display transforms are untested.",
+    "Finite tests do not cover all possible operation sequences or prove absence of bugs."
+  ],
+  "passed": true
+}

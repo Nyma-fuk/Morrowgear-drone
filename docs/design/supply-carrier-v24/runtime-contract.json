@@ -1,0 +1,201 @@
+{
+  "status": "PROPOSAL_PENDING_SEPARATE_CARRIER_APPROVAL",
+  "blender": {
+    "widthX": 48,
+    "lengthY": 32,
+    "heightZ": 7,
+    "bounds": [
+      -24,
+      -16,
+      0,
+      24,
+      16,
+      7
+    ],
+    "front": "-Y",
+    "up": "+Z",
+    "origin": "belly plane center",
+    "beamOrigin": [
+      0,
+      0,
+      -0.1
+    ]
+  },
+  "runtime": {
+    "widthX": 48,
+    "lengthZ": 32,
+    "heightY": 7,
+    "bounds": [
+      -24,
+      0,
+      -16,
+      24,
+      7,
+      16
+    ],
+    "front": "-Z",
+    "up": "+Y",
+    "starboard": "+X",
+    "beamOffset": [
+      0,
+      -0.1,
+      0
+    ],
+    "yaw": "neutral / fixed",
+    "cabin": "separate dimension; not moving blocks"
+  },
+  "mapping": "Runtime(x,y,z) = Blender(x,z,y)",
+  "serviceBays": [
+    {
+      "slot": 0,
+      "name": "port-forward",
+      "runtimePosition": [
+        -7.15,
+        2.4,
+        -5.2
+      ],
+      "blenderPosition": [
+        -7.15,
+        -5.2,
+        2.4
+      ],
+      "approachRuntime": [
+        -7.15,
+        -2,
+        -5.2
+      ],
+      "receivingFootprint": [
+        3,
+        3
+      ],
+      "runtimeClearVolume": [
+        -8.65,
+        2.4,
+        -6.7,
+        -5.65,
+        3.35,
+        -3.7
+      ],
+      "pocketWidth": 4.6,
+      "pocketLength": 5.8
+    },
+    {
+      "slot": 1,
+      "name": "starboard-forward",
+      "runtimePosition": [
+        7.15,
+        2.4,
+        -5.2
+      ],
+      "blenderPosition": [
+        7.15,
+        -5.2,
+        2.4
+      ],
+      "approachRuntime": [
+        7.15,
+        -2,
+        -5.2
+      ],
+      "receivingFootprint": [
+        3,
+        3
+      ],
+      "runtimeClearVolume": [
+        5.65,
+        2.4,
+        -6.7,
+        8.65,
+        3.35,
+        -3.7
+      ],
+      "pocketWidth": 4.6,
+      "pocketLength": 5.8
+    },
+    {
+      "slot": 2,
+      "name": "port-aft",
+      "runtimePosition": [
+        -3.6,
+        2.4,
+        7.8
+      ],
+      "blenderPosition": [
+        -3.6,
+        7.8,
+        2.4
+      ],
+      "approachRuntime": [
+        -3.6,
+        -2,
+        7.8
+      ],
+      "receivingFootprint": [
+        3,
+        3
+      ],
+      "runtimeClearVolume": [
+        -5.1,
+        2.4,
+        6.3,
+        -2.1,
+        3.35,
+        9.3
+      ],
+      "pocketWidth": 4.2,
+      "pocketLength": 4.6
+    },
+    {
+      "slot": 3,
+      "name": "starboard-aft",
+      "runtimePosition": [
+        3.6,
+        2.4,
+        7.8
+      ],
+      "blenderPosition": [
+        3.6,
+        7.8,
+        2.4
+      ],
+      "approachRuntime": [
+        3.6,
+        -2,
+        7.8
+      ],
+      "receivingFootprint": [
+        3,
+        3
+      ],
+      "runtimeClearVolume": [
+        2.1,
+        2.4,
+        6.3,
+        5.1,
+        3.35,
+        9.3
+      ],
+      "pocketWidth": 4.2,
+      "pocketLength": 4.6
+    }
+  ],
+  "serviceBayCount": 4,
+  "receivingClearance": {
+    "entitySize": [
+      3,
+      0.75,
+      3
+    ],
+    "overheadAllowance": 0.2,
+    "clearHeight": 0.9500000000000002,
+    "gearStowedV22Frame": 40,
+    "gearIncluded": true
+  },
+  "windingNote": "Axis exchange changes handedness; use existing exporter winding/normal convention.",
+  "fitAdjustment": {
+    "carrierVerticalScale": 0.986195804561297,
+    "carrierVerticalOffset": 3.5996145455722925,
+    "dockedV22Geometry": "translation only; scale unchanged"
+  },
+  "runtimeExport": "Deferred to coordinating task after explicit shown approval."
+}

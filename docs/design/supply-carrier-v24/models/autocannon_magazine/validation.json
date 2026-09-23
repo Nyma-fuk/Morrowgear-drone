@@ -1,0 +1,89 @@
+{
+  "id": "autocannon_magazine",
+  "status": "PROPOSAL_AWAITING_SHOWN_USER_APPROVAL",
+  "passed": true,
+  "displayName": "Belt Magazine",
+  "errors": [],
+  "axis": {
+    "front": "-Y",
+    "up": "+Z",
+    "symmetry": "X=0",
+    "units": "blocks"
+  },
+  "states": [
+    {
+      "frame": 1,
+      "state": "closed",
+      "bounds": [
+        -0.6599607467651367,
+        -0.4020000100135803,
+        0.07000000029802322,
+        0.6599607467651367,
+        0.3100000023841858,
+        1.334999918937683
+      ],
+      "dimensions": [
+        1.3199214935302734,
+        0.7120000123977661,
+        1.2649999186396599
+      ],
+      "mirrorError": 0.0,
+      "vertices": 7104
+    },
+    {
+      "frame": 40,
+      "state": "service",
+      "bounds": [
+        -0.6599607467651367,
+        -0.4020000100135803,
+        0.07000000029802322,
+        0.6599607467651367,
+        0.3100000023841858,
+        1.334999918937683
+      ],
+      "dimensions": [
+        1.3199214935302734,
+        0.7120000123977661,
+        1.2649999186396599
+      ],
+      "mirrorError": 0.0,
+      "vertices": 7104
+    },
+    {
+      "frame": 80,
+      "state": "active",
+      "bounds": [
+        -0.6599607467651367,
+        -0.4020000100135803,
+        0.07000000029802322,
+        0.6599607467651367,
+        0.3100000023841858,
+        1.334999918937683
+      ],
+      "dimensions": [
+        1.3199214935302734,
+        0.7120000123977661,
+        1.2649999186396599
+      ],
+      "mirrorError": 0.0,
+      "vertices": 7104
+    }
+  ],
+  "meshObjects": 24,
+  "sharedMirrorObjects": 24,
+  "contacts": {
+    "mode": "loose inventory supply",
+    "landingGearCount": 0
+  },
+  "capacity": [
+    120,
+    "round refill"
+  ],
+  "limitations": [
+    "No runtime, launcher, installation or in-game validation.",
+    "Static GLB state exports; animated RuntimeDroneMesh adaptation is deferred.",
+    "No flight physics or arbitrary attitude collision proof."
+  ],
+  "blendSha256": "4242db5f809f7b55788d95c0c6348f56ef2dc50dfbf541d80b760dd8a90f8c87",
+  "glbSha256": "3aab18b0f53ac4ab8a9b7b825be85e231ed1ca826a74fb9f08328fbc5bcf72fa"
+}

@@ -1,0 +1,248 @@
+{
+  "passed": true,
+  "errors": [],
+  "native": {
+    "passed": true,
+    "errors": [],
+    "boundsBlender": [
+      -13.0,
+      -25.0,
+      0.0,
+      13.0,
+      25.0,
+      11.0
+    ],
+    "mirrorError": 0.0,
+    "triangles": 24704,
+    "meshObjects": 393,
+    "bays": [
+      {
+        "slot": 0,
+        "rays": 169,
+        "blocked": []
+      },
+      {
+        "slot": 1,
+        "rays": 169,
+        "blocked": []
+      },
+      {
+        "slot": 2,
+        "rays": 169,
+        "blocked": []
+      },
+      {
+        "slot": 3,
+        "rays": 169,
+        "blocked": []
+      }
+    ],
+    "reference": "C:\\Users\\fukud\\.codex\\generated_images\\019ff8b6-65ab-7b61-9327-249478654bda\\exec-0f667897-253c-40df-8bf5-f0e636268628.png",
+    "referenceSha256": "3ba1db98f8bdab73c79c0887a475c6d7ecb387be03bb2e559f04af9c626f5eb4",
+    "boardingReceiver": {
+      "rays": 169,
+      "blocked": [],
+      "clearTop": 4.4
+    },
+    "revision": "V28_INTAKE_PROPOSAL_01",
+    "scope": "Static proposal geometry and service/boarding spaces only; no airflow, CFD, moving mechanism or game validation",
+    "status": "PROPOSAL_AWAITING_USER_APPROVAL",
+    "intake": {
+      "boundsBlender": [
+        -7.150000095367432,
+        -17.350000381469727,
+        1.0499999523162842,
+        7.150000095367432,
+        -10.300000190734863,
+        4.369999885559082
+      ],
+      "clearMouthWidth": 13.65,
+      "clearMouthHeight": 2.75,
+      "centralDivider": true,
+      "forwardServiceBoundsBlender": [
+        -9.65999984741211,
+        -8.3100004196167,
+        1.2964999675750732,
+        9.65999984741211,
+        -2.0899999141693115,
+        3.759999990463257
+      ],
+      "bayRoomEnvelopeChecks": [
+        {
+          "slot": 0,
+          "runtimeBounds": [
+            -9.45,
+            1.1,
+            -8.1,
+            -4.8500000000000005,
+            3.8,
+            -2.3
+          ],
+          "longitudinalGap": 2.2000001907348636
+        },
+        {
+          "slot": 1,
+          "runtimeBounds": [
+            4.8500000000000005,
+            1.1,
+            -8.1,
+            9.45,
+            3.8,
+            -2.3
+          ],
+          "longitudinalGap": 2.2000001907348636
+        }
+      ],
+      "longitudinalSeparation": 1.989999771118164,
+      "triangleIntersections": [],
+      "recessDepthRays": [
+        {
+          "x": -1.8,
+          "clearDepth": 5.01500129699707,
+          "target": "IntakeAftHeatMatrix",
+          "passed": true
+        },
+        {
+          "x": -3.4,
+          "clearDepth": 5.01500129699707,
+          "target": "IntakeAftHeatMatrix",
+          "passed": true
+        },
+        {
+          "x": -5.0,
+          "clearDepth": 5.01500129699707,
+          "target": "IntakeAftHeatMatrix",
+          "passed": true
+        },
+        {
+          "x": 1.8,
+          "clearDepth": 5.01500129699707,
+          "target": "IntakeAftHeatMatrix",
+          "passed": true
+        },
+        {
+          "x": 3.4,
+          "clearDepth": 5.01500129699707,
+          "target": "IntakeAftHeatMatrix",
+          "passed": true
+        },
+        {
+          "x": 5.0,
+          "clearDepth": 5.01500129699707,
+          "target": "IntakeAftHeatMatrix",
+          "passed": true
+        }
+      ]
+    },
+    "centralEmitterUnchanged": true,
+    "anchorsUnchanged": true,
+    "sourceSha256": "a7399cfb58f44cd94385c4b461f41fa65d3d6a1098507d8fea06c1079acddd90"
+  },
+  "glbBoundsError": 0.0,
+  "glbMirrorError": 0.0,
+  "states": [
+    {
+      "frame": 1,
+      "bounds": [
+        -13.0,
+        -25.0,
+        0.0,
+        13.0,
+        25.0,
+        11.0
+      ]
+    },
+    {
+      "frame": 40,
+      "bounds": [
+        -13.0,
+        -25.0,
+        0.0,
+        13.0,
+        25.0,
+        11.0
+      ]
+    },
+    {
+      "frame": 80,
+      "bounds": [
+        -13.0,
+        -25.0,
+        0.0,
+        13.0,
+        25.0,
+        11.0
+      ]
+    }
+  ],
+  "images": [
+    {
+      "path": "front-belly-hero.png",
+      "size": [
+        1440,
+        1080
+      ],
+      "nonblank": true
+    },
+    {
+      "path": "intake-detail.png",
+      "size": [
+        1440,
+        960
+      ],
+      "nonblank": true
+    },
+    {
+      "path": "front.png",
+      "size": [
+        1280,
+        1024
+      ],
+      "nonblank": true
+    },
+    {
+      "path": "bottom.png",
+      "size": [
+        1280,
+        1024
+      ],
+      "nonblank": true
+    },
+    {
+      "path": "left.png",
+      "size": [
+        1280,
+        1024
+      ],
+      "nonblank": true
+    },
+    {
+      "path": "approval-mobile.png",
+      "size": [
+        900,
+        1570
+      ],
+      "nonblank": true
+    }
+  ],
+  "protectedAssetsUnchanged": true,
+  "protectedFiles": {
+    "docs\\design\\carrier-v27\\carrier-v27.blend": "a7399cfb58f44cd94385c4b461f41fa65d3d6a1098507d8fea06c1079acddd90",
+    "docs\\design\\carrier-v27\\carrier-v27.glb": "22c1aca69773699f4a28570e9951471a5000dc79ae511bba837ba2e794cd5bdb",
+    "src\\main\\resources\\assets\\morrowgear_drone\\items\\carrier_console.json": "e5b5b11738ffbd8b4d34c8f2bd7c08ab3419767da452b1364c0d9721993b2510",
+    "src\\main\\resources\\assets\\morrowgear_drone\\items\\carrier_unit.json": "2ca2ba936c7f3f4726666c2f95a356c9b9e7d870564080cca8013f1f75ba0475",
+    "src\\main\\resources\\assets\\morrowgear_drone\\textures\\item\\carrier_console.png": "4b33757658e4981918222a4970407c024a420500d58f20b6da142129d7385000",
+    "src\\main\\resources\\assets\\morrowgear_drone\\textures\\item\\carrier_unit.png": "009c2f586d9269060f2f8ef51ba3cf432146381cbad2b9e41573c5a34ce6d5da",
+    "src\\main\\resources\\assets\\morrowgear_drone\\textures\\runtime\\carrier.png": "c6a9db9126cb9a7cb555ffa4124b76502ac17e3a95bbe7f0db9ea410c9142788",
+    "src\\main\\resources\\assets\\morrowgear_drone\\textures\\runtime\\carrier_lod.png": "82999e068560b547aaa01749c5e67a1a319f1b75ae51302d56d7d549d337a428",
+    "src\\main\\resources\\assets\\morrowgear_drone\\models\\item\\carrier_console.json": "78f077c0d9c78cd7326642ec9cf6c30c73414be1d9b3e170c15bd7e3b480ef76",
+    "src\\main\\resources\\assets\\morrowgear_drone\\models\\item\\carrier_unit.json": "56ddbab65f76067ebf45a407a995918b801c02ebeec9efd4eeaa3b0421a4538a",
+    "src\\main\\resources\\assets\\morrowgear_drone\\models\\runtime\\carrier.mgm": "168d3f254a54d471a4fe928fd579bd82fa138249e2efa8e54f15051ace648c68",
+    "src\\main\\resources\\assets\\morrowgear_drone\\models\\runtime\\carrier_lod.mgm": "ca298ad0b6fb726b5765b7aed32439895d60f1f24833883cdc8817e8d1460acb",
+    "src\\main\\resources\\assets\\morrowgear_drone\\textures\\item\\autocannon_magazine.png": "c64f449d8808f403096de36c45a2a70e2ae7fbae97f46403a8814f49f8dc94fe",
+    "src\\main\\resources\\assets\\morrowgear_drone\\textures\\item\\laser_cell.png": "3c9c8e17a06d6d66196ae0f41691b82be725cba491e8f5c0ce97de1fced7fb7a",
+    "src\\main\\resources\\assets\\morrowgear_drone\\textures\\item\\micro_missile_pack.png": "08670e57f272b842b5167864389c228f145bafea9ca11983b64ccae871580882"
+  },
+  "blendSha256": "ef1acbde829ed663f07e5a25511bf891c3165aa61182100565ab7bb410b43f43",
+  "glbSha256": "daa4608612fde873e156da32f624f22d301139a3f1c44e3ea2728670a1f69e9a"
+}

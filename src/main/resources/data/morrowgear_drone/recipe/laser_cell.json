@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": ["QGQ", "ARA", " C "],
+  "key": {
+    "Q": "minecraft:quartz",
+    "G": "minecraft:glowstone_dust",
+    "A": "minecraft:amethyst_shard",
+    "R": "minecraft:redstone",
+    "C": "minecraft:copper_ingot"
+  },
+  "result": {"id": "morrowgear_drone:laser_cell", "count": 1}
+}

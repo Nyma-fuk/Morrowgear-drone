@@ -1,0 +1,854 @@
+{
+  "passed": true,
+  "errors": [],
+  "models": [
+    {
+      "id": "autocannon_magazine",
+      "geometryPassed": true,
+      "roundtripPassed": true,
+      "sweepFrames": 0,
+      "sweepFailures": [],
+      "stateMovement": []
+    },
+    {
+      "id": "laser_cell",
+      "geometryPassed": true,
+      "roundtripPassed": true,
+      "sweepFrames": 0,
+      "sweepFailures": [],
+      "stateMovement": []
+    },
+    {
+      "id": "micro_missile_pack",
+      "geometryPassed": true,
+      "roundtripPassed": true,
+      "sweepFrames": 0,
+      "sweepFailures": [],
+      "stateMovement": []
+    },
+    {
+      "id": "chunkbuster",
+      "geometryPassed": true,
+      "roundtripPassed": true,
+      "sweepFrames": 80,
+      "sweepFailures": [],
+      "stateMovement": [
+        {
+          "object": "BayShutterForward",
+          "closed": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "service": [
+            0.0,
+            6.090000152587891,
+            1.5779132843017578
+          ]
+        },
+        {
+          "object": "BayShutterForward.001",
+          "closed": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "service": [
+            0.0,
+            4.953999996185303,
+            1.7061187028884888
+          ]
+        },
+        {
+          "object": "BayShutterForward.002",
+          "closed": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "service": [
+            0.0,
+            3.818000078201294,
+            1.8343242406845093
+          ]
+        },
+        {
+          "object": "BayShutterForward.003",
+          "closed": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "service": [
+            0.0,
+            2.681999921798706,
+            1.9625296592712402
+          ]
+        },
+        {
+          "object": "BayShutterForward.004",
+          "closed": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "service": [
+            0.0,
+            1.5460000038146973,
+            2.0907351970672607
+          ]
+        },
+        {
+          "object": "BayShutterAft",
+          "closed": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "service": [
+            0.0,
+            3.2899999618530273,
+            2.5641090869903564
+          ]
+        },
+        {
+          "object": "BayShutterAft.001",
+          "closed": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "service": [
+            0.0,
+            2.3940000534057617,
+            2.4852135181427
+          ]
+        },
+        {
+          "object": "BayShutterAft.002",
+          "closed": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "service": [
+            0.0,
+            1.4980000257492065,
+            2.406317710876465
+          ]
+        },
+        {
+          "object": "BayShutterAft.003",
+          "closed": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "service": [
+            0.0,
+            0.6019999980926514,
+            2.3274221420288086
+          ]
+        },
+        {
+          "object": "BayShutterAft.004",
+          "closed": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "service": [
+            0.0,
+            -0.2939999997615814,
+            2.2485263347625732
+          ]
+        }
+      ]
+    }
+  ],
+  "renderChecks": [
+    {
+      "path": "models\\autocannon_magazine\\hero.png",
+      "size": [
+        1100,
+        850
+      ],
+      "occupiedPixels": 350250,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "e46c4ed0d82246f70104bef4d2434e23fe3449982edf16f71950af99b0e9ddc2"
+    },
+    {
+      "path": "models\\autocannon_magazine\\front.png",
+      "size": [
+        1100,
+        850
+      ],
+      "occupiedPixels": 340179,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "31ad125e842cbb18a7358ab144de495fa424791bb0d93955e8f225bc3442c261"
+    },
+    {
+      "path": "models\\autocannon_magazine\\rear.png",
+      "size": [
+        1100,
+        850
+      ],
+      "occupiedPixels": 340179,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "69a99b813856c88021c9abf67fee66b40200558e0efde39eb760a8fa9a3f3d9f"
+    },
+    {
+      "path": "models\\autocannon_magazine\\top.png",
+      "size": [
+        1100,
+        850
+      ],
+      "occupiedPixels": 303188,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "aa3dc13fd16a804393e15526bbc1bf3325f4ff85d002d0bed9e56754d770d20d"
+    },
+    {
+      "path": "models\\autocannon_magazine\\bottom.png",
+      "size": [
+        1100,
+        850
+      ],
+      "occupiedPixels": 303188,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "0fa05d130eacfb572193c3e282570719de9cbbc82d2adff8f42c21384609da37"
+    },
+    {
+      "path": "models\\autocannon_magazine\\left.png",
+      "size": [
+        1100,
+        850
+      ],
+      "occupiedPixels": 257977,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "e294a0884571a61f322e2b2cea6de8632de1a2b1822184ddd16e5cb47b496c2e"
+    },
+    {
+      "path": "models\\autocannon_magazine\\right.png",
+      "size": [
+        1100,
+        850
+      ],
+      "occupiedPixels": 257983,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "6546f05ec661424f1a8e0f0d8bc2842ef2cb9507bc3fb5ed72cd73cb179ddd88"
+    },
+    {
+      "path": "models\\autocannon_magazine\\icon-16.png",
+      "size": [
+        16,
+        16
+      ],
+      "occupiedPixels": 114,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "894bea810e1f9eff09fe15543d34c3f0eb259ebd9f1c36be5b249c1b1340cb67"
+    },
+    {
+      "path": "models\\autocannon_magazine\\icon-32.png",
+      "size": [
+        32,
+        32
+      ],
+      "occupiedPixels": 610,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "2d6750df2848006ecf064f93d0e35f00255c3d149f56c686b25d2057d8fb6482"
+    },
+    {
+      "path": "models\\autocannon_magazine\\icon-64.png",
+      "size": [
+        64,
+        64
+      ],
+      "occupiedPixels": 2316,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "42f21c8e3b0cd9208489e81a05e6752951235cff4421abc2a1d0c1b9afb31e46"
+    },
+    {
+      "path": "models\\autocannon_magazine\\icon-1024.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "occupiedPixels": 559809,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "6f832c5f56535ea854180d73d915f4998973d8ae98fbeb5d8d39556d42f92a66"
+    },
+    {
+      "path": "models\\laser_cell\\hero.png",
+      "size": [
+        1100,
+        850
+      ],
+      "occupiedPixels": 196613,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "32a40e8dfddc2ed63b789d11d8f94f0a7331f7915cf47663eba68d2ab6531066"
+    },
+    {
+      "path": "models\\laser_cell\\front.png",
+      "size": [
+        1100,
+        850
+      ],
+      "occupiedPixels": 235149,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "cb06cb0951c7b7e41bad178125720269b14e155ac77f21378802597c92d48e3c"
+    },
+    {
+      "path": "models\\laser_cell\\rear.png",
+      "size": [
+        1100,
+        850
+      ],
+      "occupiedPixels": 235150,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "22473e9dbc642e1182fe1b036cb6b54bd2f60d3660232074c6824227d20f82a4"
+    },
+    {
+      "path": "models\\laser_cell\\top.png",
+      "size": [
+        1100,
+        850
+      ],
+      "occupiedPixels": 90075,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "d4ca06581b2ea857fd601403aac94e8e5ed697a497537f81e6f1dedfe088726d"
+    },
+    {
+      "path": "models\\laser_cell\\bottom.png",
+      "size": [
+        1100,
+        850
+      ],
+      "occupiedPixels": 90075,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "0d23e47c3df7ceef740dee44b78691a842b553d8a3444ebb3bbef1756818e75d"
+    },
+    {
+      "path": "models\\laser_cell\\left.png",
+      "size": [
+        1100,
+        850
+      ],
+      "occupiedPixels": 232488,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "fa10520bbcd5094b6076adb570130e71016cf302836caf2f5d93af7c23b72850"
+    },
+    {
+      "path": "models\\laser_cell\\right.png",
+      "size": [
+        1100,
+        850
+      ],
+      "occupiedPixels": 232488,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "ea735edb85790ef2b09e63c37f267d4b7be6d2721eb0a5f5f2b34d1f59a96a5e"
+    },
+    {
+      "path": "models\\laser_cell\\icon-16.png",
+      "size": [
+        16,
+        16
+      ],
+      "occupiedPixels": 69,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "02a8c248d8df7ffc5a87b8e24d164a33820ca7eca553e0fcf23a48f01890d5e8"
+    },
+    {
+      "path": "models\\laser_cell\\icon-32.png",
+      "size": [
+        32,
+        32
+      ],
+      "occupiedPixels": 313,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "e468c24f997e3c7896bdf63a29f3ee5b584e5a0b0394c007283ef9978c35913e"
+    },
+    {
+      "path": "models\\laser_cell\\icon-64.png",
+      "size": [
+        64,
+        64
+      ],
+      "occupiedPixels": 1187,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "b245b64e1417d551527df97db6a4ffbaa259db98730544d6d21d63d508b9f464"
+    },
+    {
+      "path": "models\\laser_cell\\icon-1024.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "occupiedPixels": 280913,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "73206701b035a7710094b99711cc9f2d3b67b49f5b1d9337ef29d4234b3fdbac"
+    },
+    {
+      "path": "models\\micro_missile_pack\\hero.png",
+      "size": [
+        1100,
+        850
+      ],
+      "occupiedPixels": 327579,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "7aacb040822b4b3ad491cba697f812f41cf1039cc5eae67e2a45b2c297076741"
+    },
+    {
+      "path": "models\\micro_missile_pack\\front.png",
+      "size": [
+        1100,
+        850
+      ],
+      "occupiedPixels": 161787,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "1045e85c674cc3abf5a5f8ef20fc0f15038e2edf8515f649a8706ce1457b3775"
+    },
+    {
+      "path": "models\\micro_missile_pack\\rear.png",
+      "size": [
+        1100,
+        850
+      ],
+      "occupiedPixels": 161787,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "686e8affa22449d2158165eca54f4fdcf6a30c2b3a52a5f8e0fd81d708562634"
+    },
+    {
+      "path": "models\\micro_missile_pack\\top.png",
+      "size": [
+        1100,
+        850
+      ],
+      "occupiedPixels": 418852,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "990124a35c64fb5c7c3a530f2a8ab5779c2f6def85bd30338fa639a5bb5d96d0"
+    },
+    {
+      "path": "models\\micro_missile_pack\\bottom.png",
+      "size": [
+        1100,
+        850
+      ],
+      "occupiedPixels": 418852,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "515673037b923ad39628557ea0747b48a9935deac71f04f2fb7c7b30896dc383"
+    },
+    {
+      "path": "models\\micro_missile_pack\\left.png",
+      "size": [
+        1100,
+        850
+      ],
+      "occupiedPixels": 326909,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "684f2368515fc99aaafb91e381ef4f9e9d46ffcf2b07e68f1c456122780e057a"
+    },
+    {
+      "path": "models\\micro_missile_pack\\right.png",
+      "size": [
+        1100,
+        850
+      ],
+      "occupiedPixels": 326904,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "25e13c5fe164ab8e44c06226f57875574a37837e7adb951702e5920440e9a63e"
+    },
+    {
+      "path": "models\\micro_missile_pack\\icon-16.png",
+      "size": [
+        16,
+        16
+      ],
+      "occupiedPixels": 97,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "bd3f8ab216d3969a98964f86c63ed530b6b9882facd88607799223f573d49971"
+    },
+    {
+      "path": "models\\micro_missile_pack\\icon-32.png",
+      "size": [
+        32,
+        32
+      ],
+      "occupiedPixels": 467,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "0effe917b9d55fa7f03b3ab87d7ac769d576e537ee6f04f93b9b656cb0e49c7e"
+    },
+    {
+      "path": "models\\micro_missile_pack\\icon-64.png",
+      "size": [
+        64,
+        64
+      ],
+      "occupiedPixels": 1769,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "7151c2c5b1c2f9dcbd44d13e3b1f76600b54fa1066d608263c7d9b67520e69ae"
+    },
+    {
+      "path": "models\\micro_missile_pack\\icon-1024.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "occupiedPixels": 429025,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "2f83adf71f076b64998dd8a9c386eb87854f7e25e2e60a2c9ec46d5968be1afe"
+    },
+    {
+      "path": "models\\chunkbuster\\hero.png",
+      "size": [
+        1100,
+        850
+      ],
+      "occupiedPixels": 120261,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "7f426a320d66067b58a0db7278e467003d2d587189e837b8d7f3dfe3338764ec"
+    },
+    {
+      "path": "models\\chunkbuster\\front.png",
+      "size": [
+        1100,
+        850
+      ],
+      "occupiedPixels": 45848,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "034d7640bf54cca5ba5d2364c1ef2a6e4a5311922a54051118bbccacb7eb97de"
+    },
+    {
+      "path": "models\\chunkbuster\\rear.png",
+      "size": [
+        1100,
+        850
+      ],
+      "occupiedPixels": 45848,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "7da864c84d2d00e09137dc8875a487ee9d4fd2bacb2856d0806dea98ceda2af3"
+    },
+    {
+      "path": "models\\chunkbuster\\top.png",
+      "size": [
+        1100,
+        850
+      ],
+      "occupiedPixels": 227190,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "221b9c22e7afd0b128a271b020c24f87976a99278e4bd08f112057cfb9e6a2f6"
+    },
+    {
+      "path": "models\\chunkbuster\\bottom.png",
+      "size": [
+        1100,
+        850
+      ],
+      "occupiedPixels": 227192,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "b62862bba9e93fc21716cc1d8ec89a327db2c2bf20ff102e73db8dc78a695563"
+    },
+    {
+      "path": "models\\chunkbuster\\left.png",
+      "size": [
+        1100,
+        850
+      ],
+      "occupiedPixels": 41044,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "9c1ad61f63c60888d55f99af5faad65d18c68973b54cd990e477a1d1193f3cc3"
+    },
+    {
+      "path": "models\\chunkbuster\\right.png",
+      "size": [
+        1100,
+        850
+      ],
+      "occupiedPixels": 41045,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "d28bd83eacfbd4bbed7bee57c6d73cd1e7ecd0eb72716ef2065f4643900ff72d"
+    },
+    {
+      "path": "models\\chunkbuster\\belly-hero.png",
+      "size": [
+        1280,
+        900
+      ],
+      "occupiedPixels": 163179,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "b1607f47dd5305a1c599f580ca93ad56e51d459d7fba52819c01e4d151b46faa"
+    },
+    {
+      "path": "models\\chunkbuster\\closed.png",
+      "size": [
+        1100,
+        850
+      ],
+      "occupiedPixels": 120679,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "56e3d498e86b7015fee7b66e17a5ec46115a02ee3d17c9e4332e11fbb1b33d06"
+    },
+    {
+      "path": "models\\chunkbuster\\service.png",
+      "size": [
+        1100,
+        850
+      ],
+      "occupiedPixels": 120679,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "8a05defb8107710844a441bc7dacfd79db8fe8f17eb1df4fb627ed4ea6e1c9f6"
+    },
+    {
+      "path": "models\\chunkbuster\\active.png",
+      "size": [
+        1100,
+        850
+      ],
+      "occupiedPixels": 227192,
+      "clipped": false,
+      "nonblank": true,
+      "sha256": "3cd34ca5f8d648f900b8edb9cfe20ec682676cc6fccd0b8b8fffe595a2b20a83"
+    }
+  ],
+  "distinctSilhouetteChecks": [
+    {
+      "a": "autocannon_magazine",
+      "b": "laser_cell",
+      "alphaIntersectionOverUnion16px": 0.5625
+    },
+    {
+      "a": "autocannon_magazine",
+      "b": "micro_missile_pack",
+      "alphaIntersectionOverUnion16px": 0.6637931034482759
+    },
+    {
+      "a": "laser_cell",
+      "b": "micro_missile_pack",
+      "alphaIntersectionOverUnion16px": 0.5670103092783505
+    }
+  ],
+  "protectedCanonicalSources": [
+    {
+      "path": "docs\\design\\detail-scale-v22\\field\\airframe.blend",
+      "sha256": "c95eb0da21c0c5793163394d0f3287cde3c6f09901c14ff6b5d628f263a69f64",
+      "bounds": [
+        -1.5,
+        -1.1231118440628052,
+        0.25965577363967896,
+        1.5,
+        1.1231118440628052,
+        0.5805216431617737
+      ],
+      "meshCount": 228,
+      "materials": [
+        "V10_GraphiteArmor",
+        "V10_MachinedEdge",
+        "V10_OpticCyan",
+        "V10_PanelArmor",
+        "V10_Recess",
+        "V10_RotorComposite",
+        "V10_ServiceAmber",
+        "V10_SkinPanel_0",
+        "V10_SkinPanel_3",
+        "V16_petal",
+        "V16_rim",
+        "V16_titanium",
+        "V20_ContactSole",
+        "V20_DataCyan",
+        "V20_EquipmentGraphite",
+        "V20_EquipmentGraphite.001",
+        "V20_Recess",
+        "V20_Recess.001",
+        "V20_SafetyAmber",
+        "V20_SafetyAmber.001",
+        "V20_SmokedOptic",
+        "V20_StructuralTitanium",
+        "V20_StructuralTitanium.001"
+      ],
+      "unchanged": true
+    },
+    {
+      "path": "docs\\design\\equipment-hmi-v23\\models\\power_cell\\power_cell.blend",
+      "sha256": "41664097c733270dc8d2c36a2750e6eee0e482927ed7e912f4a06811d73d7ad3",
+      "bounds": [
+        -0.4114999771118164,
+        -0.26499998569488525,
+        -0.024999991059303284,
+        0.4114999771118164,
+        0.26499998569488525,
+        0.5049999952316284
+      ],
+      "meshCount": 9,
+      "materials": [
+        "V20_CopperContacts",
+        "V20_DataCyan",
+        "V20_EquipmentGraphite",
+        "V20_Recess",
+        "V20_StructuralTitanium"
+      ],
+      "unchanged": true
+    },
+    {
+      "path": "docs\\design\\equipment-hmi-v23\\models\\autocannon_module\\autocannon_module.blend",
+      "sha256": "3548266816aa4e2ff2a2445061b42925e4f3cd632cbe090f4084ec97ed1d7c08",
+      "bounds": [
+        -0.5184999704360962,
+        -0.8725000023841858,
+        0.0,
+        0.5184999704360962,
+        0.3935000002384186,
+        0.4440000057220459
+      ],
+      "meshCount": 22,
+      "materials": [
+        "V20_CopperContacts",
+        "V20_EquipmentGraphite",
+        "V20_Recess",
+        "V20_SafetyAmber",
+        "V20_StructuralTitanium"
+      ],
+      "unchanged": true
+    },
+    {
+      "path": "docs\\design\\equipment-hmi-v23\\models\\missile_module\\missile_module.blend",
+      "sha256": "1bde3e0c0a881bd40995c55f5c46692f010059099b264dc14bb5da3f403bbec9",
+      "bounds": [
+        -0.5184999704360962,
+        -0.5590000152587891,
+        0.0,
+        0.5184999704360962,
+        0.41999998688697815,
+        0.5649999976158142
+      ],
+      "meshCount": 18,
+      "materials": [
+        "V20_CopperContacts",
+        "V20_DataCyan",
+        "V20_EquipmentGraphite",
+        "V20_Recess",
+        "V20_SafetyAmber",
+        "V20_StructuralTitanium"
+      ],
+      "unchanged": true
+    }
+  ],
+  "approval": {
+    "supplies": "pending user-visible approval",
+    "carrier": "pending separate user-visible approval"
+  },
+  "runtimeChanges": false,
+  "imageEditing": "None; native Blender rendering and read-only pixel checks",
+  "outputModifiedUnixSeconds": {
+    "bay-layout.png": 1790058519.7975702,
+    "native-icons.png": 1790058518.9600072,
+    "proposal-mobile.png": 1790058517.9849107,
+    "reference-comparison.png": 1790058518.5603724,
+    "states-contact.png": 1790058519.3446577,
+    "supplies-approval.png": 1790058520.2596562,
+    "models\\autocannon_magazine\\autocannon_magazine.blend": 1790056060.0240722,
+    "models\\autocannon_magazine\\autocannon_magazine.glb": 1790056060.018077,
+    "models\\autocannon_magazine\\bottom.png": 1790056085.9290261,
+    "models\\autocannon_magazine\\contact-sheet.png": 1790058515.75831,
+    "models\\autocannon_magazine\\front.png": 1790056071.336064,
+    "models\\autocannon_magazine\\hero.png": 1790056653.384076,
+    "models\\autocannon_magazine\\icon-1024.png": 1790056101.2768855,
+    "models\\autocannon_magazine\\icon-16.png": 1790056653.439676,
+    "models\\autocannon_magazine\\icon-32.png": 1790056094.8142145,
+    "models\\autocannon_magazine\\icon-64.png": 1790056094.8915968,
+    "models\\autocannon_magazine\\left.png": 1790056090.3848073,
+    "models\\autocannon_magazine\\rear.png": 1790056076.3370423,
+    "models\\autocannon_magazine\\right.png": 1790056094.680953,
+    "models\\autocannon_magazine\\top.png": 1790056081.204212,
+    "models\\chunkbuster\\active.png": 1790058409.8047638,
+    "models\\chunkbuster\\belly-hero.png": 1790058395.9727807,
+    "models\\chunkbuster\\bottom.png": 1790058382.810084,
+    "models\\chunkbuster\\chunkbuster-closed.glb": 1790058359.6912677,
+    "models\\chunkbuster\\chunkbuster.blend": 1790058359.7327843,
+    "models\\chunkbuster\\chunkbuster.glb": 1790058357.9709399,
+    "models\\chunkbuster\\closed.png": 1790058400.4171827,
+    "models\\chunkbuster\\contact-sheet.png": 1790058517.3998203,
+    "models\\chunkbuster\\front.png": 1790058368.757473,
+    "models\\chunkbuster\\hero.png": 1790058364.667966,
+    "models\\chunkbuster\\left.png": 1790058386.7525196,
+    "models\\chunkbuster\\rear.png": 1790058372.813514,
+    "models\\chunkbuster\\right.png": 1790058390.6690655,
+    "models\\chunkbuster\\service.png": 1790058404.8975286,
+    "models\\chunkbuster\\top.png": 1790058377.7477863,
+    "models\\laser_cell\\bottom.png": 1790056122.417139,
+    "models\\laser_cell\\contact-sheet.png": 1790058516.2555308,
+    "models\\laser_cell\\front.png": 1790056110.8447995,
+    "models\\laser_cell\\hero.png": 1790056657.8404903,
+    "models\\laser_cell\\icon-1024.png": 1790056136.6798003,
+    "models\\laser_cell\\icon-16.png": 1790056657.881498,
+    "models\\laser_cell\\icon-32.png": 1790056131.2625196,
+    "models\\laser_cell\\icon-64.png": 1790056131.3318198,
+    "models\\laser_cell\\laser_cell.blend": 1790056101.4235346,
+    "models\\laser_cell\\laser_cell.glb": 1790056101.4165318,
+    "models\\laser_cell\\left.png": 1790056126.8908749,
+    "models\\laser_cell\\rear.png": 1790056115.276127,
+    "models\\laser_cell\\right.png": 1790056131.1522563,
+    "models\\laser_cell\\top.png": 1790056118.8697653,
+    "models\\micro_missile_pack\\bottom.png": 1790056160.7283633,
+    "models\\micro_missile_pack\\contact-sheet.png": 1790058516.8383133,
+    "models\\micro_missile_pack\\front.png": 1790056146.0891414,
+    "models\\micro_missile_pack\\hero.png": 1790056662.960136,
+    "models\\micro_missile_pack\\icon-1024.png": 1790056176.2643497,
+    "models\\micro_missile_pack\\icon-16.png": 1790056663.010244,
+    "models\\micro_missile_pack\\icon-32.png": 1790056170.488244,
+    "models\\micro_missile_pack\\icon-64.png": 1790056170.5927753,
+    "models\\micro_missile_pack\\left.png": 1790056165.5483093,
+    "models\\micro_missile_pack\\micro_missile_pack.blend": 1790056136.920434,
+    "models\\micro_missile_pack\\micro_missile_pack.glb": 1790056136.9154375,
+    "models\\micro_missile_pack\\rear.png": 1790056150.185247,
+    "models\\micro_missile_pack\\right.png": 1790056170.3757298,
+    "models\\micro_missile_pack\\top.png": 1790056155.2986166
+  },
+  "limitations": [
+    "Not a runtime or game test.",
+    "No continuous bay-mechanism collision proof.",
+    "Three states have symmetry checks; all 80 frames have envelope checks.",
+    "Tiny-icon alpha difference is not a human recognition study."
+  ]
+}

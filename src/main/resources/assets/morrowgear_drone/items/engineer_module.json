@@ -1,3 +1,6 @@
 {
-  "model": { "type": "minecraft:model", "model": "morrowgear_drone:item/engineer_module" }
+  "model": {
+    "type": "minecraft:model",
+    "model": "morrowgear_drone:item/engineer_module"
+  }
 }

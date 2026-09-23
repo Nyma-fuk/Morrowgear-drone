@@ -1,0 +1,345 @@
+Info: Saved as "autocannon_magazine.blend"
+INFO Draco is available, use library at C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\work\blender-portable\blender-5.2.0-windows-x64\5.2\scripts\addons_core\io_scene_gltf2\bf_intern_draco_bridge.dll
+INFO MeshOptimizer is available, use library at C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\work\blender-portable\blender-5.2.0-windows-x64\5.2\scripts\addons_core\io_scene_gltf2\bf_intern_meshopt_bridge.dll
+17:46:48 | INFO: Starting glTF 2.0 export
+17:46:48 | INFO: Extracting primitive: Cube.054
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cube.064
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cube.061
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cube.063
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cube.062
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cube.039
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cube.041
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cube.043
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cube.044
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cube.040
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cube.042
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cube.046
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cube.047
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cylinder.027
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cylinder.029
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cylinder.031
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cylinder.033
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cylinder.026
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cylinder.028
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cylinder.030
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cylinder.032
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cylinder.035
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cylinder.037
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cylinder.034
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cylinder.036
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cube.051
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cube.053
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cube.052
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cylinder.038
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cube.055
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cube.045
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cube.048
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cube.049
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cube.050
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cylinder.039
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cylinder.042
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cylinder.045
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cylinder.048
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cylinder.051
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cylinder.054
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cylinder.040
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cylinder.043
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cylinder.046
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cylinder.049
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cylinder.052
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cylinder.055
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cylinder.041
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cylinder.044
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cylinder.047
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cylinder.050
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cylinder.053
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cylinder.056
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cube.058
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cube.057
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cube.060
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cube.059
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cube.056
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cone
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cone.001
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cone.002
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cone.003
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cone.004
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Extracting primitive: Cone.005
+17:46:48 | INFO: Primitives created: 1
+17:46:48 | INFO: Finished glTF 2.0 export in 0.21029305458068848 s
+00:11.141  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\autocannon_magazine\hero.png'
+00:19.875  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\autocannon_magazine\front.png'
+00:28.234  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\autocannon_magazine\rear.png'
+00:35.281  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\autocannon_magazine\top.png'
+00:42.141  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\autocannon_magazine\bottom.png'
+00:48.297  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\autocannon_magazine\left.png'
+00:54.594  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\autocannon_magazine\right.png'
+00:54.672  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\autocannon_magazine\icon-16.png'
+00:54.734  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\autocannon_magazine\icon-32.png'
+00:54.844  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\autocannon_magazine\icon-64.png'
+00:55.047  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\autocannon_magazine\icon-128.png'
+01:04.109  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\autocannon_magazine\icon-1024.png'
+
+Info: Applied modifier was not first, result may not be as expected
+Info: Saved as "laser_cell.blend"
+17:47:51 | INFO: Starting glTF 2.0 export
+17:47:51 | INFO: Extracting primitive: Cube.032
+17:47:51 | INFO: Primitives created: 1
+17:47:51 | INFO: Extracting primitive: Cube.033
+17:47:51 | INFO: Primitives created: 1
+17:47:51 | INFO: Extracting primitive: Cube.034
+17:47:51 | INFO: Primitives created: 1
+17:47:51 | INFO: Extracting primitive: Cube.035
+17:47:51 | INFO: Primitives created: 1
+17:47:51 | INFO: Extracting primitive: Cube.036
+17:47:51 | INFO: Primitives created: 1
+17:47:51 | INFO: Extracting primitive: Cube.037
+17:47:51 | INFO: Primitives created: 1
+17:47:51 | INFO: Extracting primitive: Cylinder.020
+17:47:51 | INFO: Primitives created: 1
+17:47:51 | INFO: Extracting primitive: Cylinder.021
+17:47:51 | INFO: Primitives created: 1
+17:47:51 | INFO: Extracting primitive: Cube.031
+17:47:51 | INFO: Primitives created: 1
+17:47:51 | INFO: Extracting primitive: CellFrontArmor.001
+17:47:51 | INFO: Primitives created: 1
+17:47:51 | INFO: Extracting primitive: CellIndicatorBezel.001
+17:47:51 | INFO: Primitives created: 1
+17:47:51 | INFO: Extracting primitive: CellIndicatorRecess.001
+17:47:51 | INFO: Primitives created: 1
+17:47:51 | INFO: Extracting primitive: Cube.039
+17:47:51 | INFO: Primitives created: 1
+17:47:51 | INFO: Extracting primitive: Cube.029
+17:47:51 | INFO: Primitives created: 1
+17:47:51 | INFO: Extracting primitive: Cylinder.023
+17:47:51 | INFO: Primitives created: 1
+17:47:51 | INFO: Extracting primitive: Cylinder.025
+17:47:51 | INFO: Primitives created: 1
+17:47:51 | INFO: Extracting primitive: Cylinder.022
+17:47:51 | INFO: Primitives created: 1
+17:47:51 | INFO: Extracting primitive: Cylinder.024
+17:47:51 | INFO: Primitives created: 1
+17:47:51 | INFO: Extracting primitive: Cube.030
+17:47:51 | INFO: Primitives created: 1
+17:47:51 | INFO: Extracting primitive: Cylinder.027
+17:47:51 | INFO: Primitives created: 1
+17:47:51 | INFO: Extracting primitive: Cylinder.029
+17:47:51 | INFO: Primitives created: 1
+17:47:51 | INFO: Extracting primitive: Cylinder.026
+17:47:51 | INFO: Primitives created: 1
+17:47:51 | INFO: Extracting primitive: Cylinder.028
+17:47:51 | INFO: Primitives created: 1
+17:47:51 | INFO: Extracting primitive: Cube.045
+17:47:51 | INFO: Primitives created: 1
+17:47:51 | INFO: Extracting primitive: Cube.046
+17:47:51 | INFO: Primitives created: 1
+17:47:51 | INFO: Extracting primitive: Cube.040
+17:47:51 | INFO: Primitives created: 1
+17:47:51 | INFO: Extracting primitive: Cube.041
+17:47:51 | INFO: Primitives created: 1
+17:47:51 | INFO: Extracting primitive: Cube.042
+17:47:51 | INFO: Primitives created: 1
+17:47:51 | INFO: Extracting primitive: Cube.043
+17:47:51 | INFO: Primitives created: 1
+17:47:51 | INFO: Extracting primitive: Cube.044
+17:47:51 | INFO: Primitives created: 1
+17:47:51 | INFO: Extracting primitive: Cube.038
+17:47:51 | INFO: Primitives created: 1
+17:47:51 | INFO: Extracting primitive: CellTitaniumCrashRail.001
+17:47:51 | INFO: Primitives created: 1
+17:47:51 | INFO: Finished glTF 2.0 export in 0.08145952224731445 s
+01:13.578  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\laser_cell\hero.png'
+01:21.844  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\laser_cell\front.png'
+01:29.359  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\laser_cell\rear.png'
+01:35.484  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\laser_cell\top.png'
+01:41.453  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\laser_cell\bottom.png'
+01:48.203  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\laser_cell\left.png'
+01:56.391  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\laser_cell\right.png'
+01:56.484  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\laser_cell\icon-16.png'
+01:56.563  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\laser_cell\icon-32.png'
+01:56.672  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\laser_cell\icon-64.png'
+01:56.969  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\laser_cell\icon-128.png'
+02:06.563  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\laser_cell\icon-1024.png'
+
+Info: Saved as "micro_missile_pack.blend"
+17:48:53 | INFO: Starting glTF 2.0 export
+17:48:53 | INFO: Extracting primitive: Missile_1.001
+17:48:53 | INFO: Primitives created: 2
+17:48:53 | INFO: Extracting primitive: Cylinder.033
+17:48:53 | INFO: Primitives created: 1
+17:48:53 | INFO: Extracting primitive: Cylinder.034
+17:48:53 | INFO: Primitives created: 1
+17:48:53 | INFO: Extracting primitive: Cylinder.035
+17:48:53 | INFO: Primitives created: 1
+17:48:53 | INFO: Extracting primitive: Cube.070
+17:48:53 | INFO: Primitives created: 1
+17:48:53 | INFO: Extracting primitive: Missile_2.001
+17:48:53 | INFO: Primitives created: 2
+17:48:53 | INFO: Extracting primitive: Cylinder.036
+17:48:53 | INFO: Primitives created: 1
+17:48:53 | INFO: Extracting primitive: Cylinder.037
+17:48:53 | INFO: Primitives created: 1
+17:48:53 | INFO: Extracting primitive: Cylinder.038
+17:48:53 | INFO: Primitives created: 1
+17:48:53 | INFO: Extracting primitive: Cube.071
+17:48:53 | INFO: Primitives created: 1
+17:48:53 | INFO: Extracting primitive: Cube.072
+17:48:53 | INFO: Primitives created: 1
+17:48:53 | INFO: Extracting primitive: Missile_4.001
+17:48:53 | INFO: Primitives created: 2
+17:48:53 | INFO: Extracting primitive: Cylinder.039
+17:48:53 | INFO: Primitives created: 1
+17:48:53 | INFO: Extracting primitive: Cylinder.040
+17:48:53 | INFO: Primitives created: 1
+17:48:53 | INFO: Extracting primitive: Cylinder.041
+17:48:53 | INFO: Primitives created: 1
+17:48:53 | INFO: Extracting primitive: Cube.073
+17:48:53 | INFO: Primitives created: 1
+17:48:53 | INFO: Extracting primitive: Cube.074
+17:48:53 | INFO: Primitives created: 1
+17:48:53 | INFO: Extracting primitive: RackArmoredSide.002
+17:48:53 | INFO: Primitives created: 1
+17:48:53 | INFO: Extracting primitive: Cube.069
+17:48:53 | INFO: Primitives created: 1
+17:48:53 | INFO: Extracting primitive: Cylinder.028
+17:48:53 | INFO: Primitives created: 1
+17:48:53 | INFO: Extracting primitive: Cylinder.030
+17:48:53 | INFO: Primitives created: 1
+17:48:53 | INFO: Extracting primitive: Cylinder.032
+17:48:53 | INFO: Primitives created: 1
+17:48:53 | INFO: Extracting primitive: Cylinder.027
+17:48:53 | INFO: Primitives created: 1
+17:48:53 | INFO: Extracting primitive: Cylinder.029
+17:48:53 | INFO: Primitives created: 1
+17:48:53 | INFO: Extracting primitive: Cylinder.031
+17:48:53 | INFO: Primitives created: 1
+17:48:53 | INFO: Extracting primitive: Cube.047
+17:48:53 | INFO: Primitives created: 1
+17:48:53 | INFO: Extracting primitive: Cube.048
+17:48:53 | INFO: Primitives created: 1
+17:48:53 | INFO: Extracting primitive: Cube.049
+17:48:53 | INFO: Primitives created: 1
+17:48:53 | INFO: Extracting primitive: Cube.054
+17:48:53 | INFO: Primitives created: 1
+17:48:53 | INFO: Extracting primitive: Cube.058
+17:48:53 | INFO: Primitives created: 1
+17:48:53 | INFO: Extracting primitive: Cube.062
+17:48:53 | INFO: Primitives created: 1
+17:48:53 | INFO: Extracting primitive: Cube.050
+17:48:53 | INFO: Primitives created: 1
+17:48:53 | INFO: Extracting primitive: Cube.051
+17:48:53 | INFO: Primitives created: 1
+17:48:53 | INFO: Extracting primitive: Cube.066
+17:48:53 | INFO: Primitives created: 1
+17:48:53 | INFO: Extracting primitive: Cube.067
+17:48:53 | INFO: Primitives created: 1
+17:48:53 | INFO: Extracting primitive: Cube.065
+17:48:53 | INFO: Primitives created: 1
+17:48:53 | INFO: Extracting primitive: Cube.053
+17:48:53 | INFO: Primitives created: 1
+17:48:53 | INFO: Extracting primitive: Cube.057
+17:48:53 | INFO: Primitives created: 1
+17:48:53 | INFO: Extracting primitive: Cube.061
+17:48:53 | INFO: Primitives created: 1
+17:48:53 | INFO: Extracting primitive: Cube.055
+17:48:53 | INFO: Primitives created: 1
+17:48:53 | INFO: Extracting primitive: Cube.056
+17:48:53 | INFO: Primitives created: 1
+17:48:53 | INFO: Extracting primitive: Cube.059
+17:48:53 | INFO: Primitives created: 1
+17:48:53 | INFO: Extracting primitive: Cube.060
+17:48:53 | INFO: Primitives created: 1
+17:48:53 | INFO: Extracting primitive: Cube.063
+17:48:54 | INFO: Primitives created: 1
+17:48:54 | INFO: Extracting primitive: Cube.064
+17:48:54 | INFO: Primitives created: 1
+17:48:54 | INFO: Extracting primitive: Cube.052
+17:48:54 | INFO: Primitives created: 1
+17:48:54 | INFO: Extracting primitive: Cube.046
+17:48:54 | INFO: Primitives created: 1
+17:48:54 | INFO: Extracting primitive: Cube.068
+17:48:54 | INFO: Primitives created: 1
+17:48:54 | INFO: Finished glTF 2.0 export in 0.12114858627319336 s
+02:18.094  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\micro_missile_pack\hero.png'
+02:29.781  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\micro_missile_pack\front.png'
+02:38.797  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\micro_missile_pack\rear.png'
+02:46.516  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\micro_missile_pack\top.png'
+02:53.953  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\micro_missile_pack\bottom.png'
+03:01.031  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\micro_missile_pack\left.png'
+03:08.094  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\micro_missile_pack\right.png'
+03:08.250  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\micro_missile_pack\icon-16.png'
+03:08.359  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\micro_missile_pack\icon-32.png'
+03:08.531  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\micro_missile_pack\icon-64.png'
+03:08.906  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\micro_missile_pack\icon-128.png'
+03:19.313  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\micro_missile_pack\icon-1024.png'
+03:20.781  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\approval-icons.png'
+03:21.609  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\reference-comparison.png'
+03:22.297  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\autocannon_magazine\contact-sheet.png'
+03:23.016  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\laser_cell\contact-sheet.png'
+03:23.797  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\micro_missile_pack\contact-sheet.png'
+
+Blender 5.2.0 LTS (hash fbe6228777e7 built 2026-07-14 01:35:40)
+
+Blender quit

@@ -1,0 +1,89 @@
+{
+  "id": "laser_cell",
+  "status": "PROPOSAL_AWAITING_SHOWN_USER_APPROVAL",
+  "passed": true,
+  "displayName": "Weapon Energy Cell",
+  "errors": [],
+  "axis": {
+    "front": "-Y",
+    "up": "+Z",
+    "symmetry": "X=0",
+    "units": "blocks"
+  },
+  "states": [
+    {
+      "frame": 1,
+      "state": "closed",
+      "bounds": [
+        -0.3400000035762787,
+        -0.3400000035762787,
+        0.0,
+        0.3400000035762787,
+        0.3400000035762787,
+        1.5799999237060547
+      ],
+      "dimensions": [
+        0.6800000071525574,
+        0.6800000071525574,
+        1.5799999237060547
+      ],
+      "mirrorError": 0.0,
+      "vertices": 2688
+    },
+    {
+      "frame": 40,
+      "state": "service",
+      "bounds": [
+        -0.3400000035762787,
+        -0.3400000035762787,
+        0.0,
+        0.3400000035762787,
+        0.3400000035762787,
+        1.5799999237060547
+      ],
+      "dimensions": [
+        0.6800000071525574,
+        0.6800000071525574,
+        1.5799999237060547
+      ],
+      "mirrorError": 0.0,
+      "vertices": 2688
+    },
+    {
+      "frame": 80,
+      "state": "active",
+      "bounds": [
+        -0.3400000035762787,
+        -0.3400000035762787,
+        0.0,
+        0.3400000035762787,
+        0.3400000035762787,
+        1.5799999237060547
+      ],
+      "dimensions": [
+        0.6800000071525574,
+        0.6800000071525574,
+        1.5799999237060547
+      ],
+      "mirrorError": 0.0,
+      "vertices": 2688
+    }
+  ],
+  "meshObjects": 14,
+  "sharedMirrorObjects": 14,
+  "contacts": {
+    "mode": "loose inventory supply",
+    "landingGearCount": 0
+  },
+  "capacity": [
+    1000,
+    "weapon energy"
+  ],
+  "limitations": [
+    "No runtime, launcher, installation or in-game validation.",
+    "Static GLB state exports; animated RuntimeDroneMesh adaptation is deferred.",
+    "No flight physics or arbitrary attitude collision proof."
+  ],
+  "blendSha256": "3c8d55097a7fac5992d7c89a190f6b5e1ca9a3fce1d8e66db6dcfd8ec63350b3",
+  "glbSha256": "efb66d6e8c545217b14220cd7df793d8f56ab5d17e7fddf0837744167df0006c"
+}

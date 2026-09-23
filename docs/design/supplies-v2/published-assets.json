@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "assets": [
+    {
+      "path": "textures\\item\\micro_missile_pack.png",
+      "sha256": "08670e57f272b842b5167864389c228f145bafea9ca11983b64ccae871580882"
+    }
+  ]
+}

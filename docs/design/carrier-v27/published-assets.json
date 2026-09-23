@@ -1,0 +1,27 @@
+{
+  "revision": "V27_FUNCTIONAL_DETAIL_01",
+  "passed": true,
+  "sourceSha256": "a7399cfb58f44cd94385c4b461f41fa65d3d6a1098507d8fea06c1079acddd90",
+  "assets": [
+    {
+      "path": "models/runtime/carrier.mgm",
+      "sha256": "168d3f254a54d471a4fe928fd579bd82fa138249e2efa8e54f15051ace648c68"
+    },
+    {
+      "path": "models/runtime/carrier_lod.mgm",
+      "sha256": "ca298ad0b6fb726b5765b7aed32439895d60f1f24833883cdc8817e8d1460acb"
+    },
+    {
+      "path": "textures/runtime/carrier.png",
+      "sha256": "c6a9db9126cb9a7cb555ffa4124b76502ac17e3a95bbe7f0db9ea410c9142788"
+    },
+    {
+      "path": "textures/runtime/carrier_lod.png",
+      "sha256": "82999e068560b547aaa01749c5e67a1a319f1b75ae51302d56d7d549d337a428"
+    },
+    {
+      "path": "textures/item/carrier_unit.png",
+      "sha256": "009c2f586d9269060f2f8ef51ba3cf432146381cbad2b9e41573c5a34ce6d5da"
+    }
+  ]
+}

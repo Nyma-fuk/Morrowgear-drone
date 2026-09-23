@@ -1,0 +1,66 @@
+{
+  "checks": {
+    "geometryPass": true,
+    "allNineOverviewsFramed": true,
+    "allNineOverviewsFresh": true,
+    "sourceUnmodified": true,
+    "exportsExist": true
+  },
+  "passed": true,
+  "overviewPixelBounds": {
+    "hero": [
+      101,
+      76,
+      1561,
+      743
+    ],
+    "rear-oblique": [
+      255,
+      276,
+      1609,
+      732
+    ],
+    "top": [
+      153,
+      27,
+      1528,
+      911
+    ],
+    "bottom": [
+      153,
+      27,
+      1528,
+      911
+    ],
+    "front": [
+      84,
+      356,
+      1597,
+      553
+    ],
+    "rear": [
+      84,
+      356,
+      1597,
+      553
+    ],
+    "left": [
+      319,
+      355,
+      1293,
+      553
+    ],
+    "right": [
+      388,
+      355,
+      1362,
+      553
+    ],
+    "underside": [
+      255,
+      276,
+      1609,
+      732
+    ]
+  }
+}

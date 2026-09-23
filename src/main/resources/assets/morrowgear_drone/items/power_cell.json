@@ -1,1 +1,6 @@
-{"model":{"type":"minecraft:model","model":"morrowgear_drone:item/power_cell"}}
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "morrowgear_drone:item/power_cell"
+  }
+}

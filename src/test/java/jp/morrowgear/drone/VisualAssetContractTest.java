@@ -1,5 +1,7 @@
 package jp.morrowgear.drone;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -27,10 +29,10 @@ final class VisualAssetContractTest {
 			"security_module", "dock_item", "controller", "raw_morrow_composite", "morrow_alloy",
 			"lightweight_frame", "basic_control_board", "flight_actuator", "standard_battery_pack",
 			"reinforced_battery_pack", "high_density_battery_pack", "autocannon_module", "laser_module",
-			"missile_module", "tactical_visor", "salvage_module", "recovery_tool", "power_cell")) {
+			"missile_module", "tactical_visor", "salvage_module", "recovery_tool", "power_cell", "solar_service_station")) {
 			BufferedImage image = ImageIO.read(ASSETS.resolve("textures/item/" + item + ".png").toFile());
-			assertEquals(64, image.getWidth(), item + " width");
-			assertEquals(64, image.getHeight(), item + " height");
+			assertEquals(128, image.getWidth(), item + " width");
+			assertEquals(128, image.getHeight(), item + " height");
 			assertTrue(image.getColorModel().hasAlpha(), item + " alpha");
 			assertTrue((image.getRGB(0, 0) >>> 24) == 0, item + " transparent padding");
 			assertTrue(hasVisiblePixel(image), item + " visible content");
@@ -62,13 +64,16 @@ final class VisualAssetContractTest {
 	void controllerSeparatesTheApprovedGuiIconFromTheHeldModel() throws Exception {
 		String definition = Files.readString(ASSETS.resolve("items/controller.json"));
 		String gui = Files.readString(ASSETS.resolve("models/item/controller.json"));
-		String held = Files.readString(ASSETS.resolve("models/item/controller_in_hand.json"));
-		assertTrue(definition.contains("minecraft:display_context"));
-		assertTrue(definition.contains("controller_in_hand"));
+		String held = Files.readString(Path.of("src/client/java/jp/morrowgear/drone/client/EquipmentItemModel.java"));
+		String registration = Files.readString(Path.of("src/client/java/jp/morrowgear/drone/client/MorrowgearDroneClient.java"));
+		assertTrue(definition.contains("morrowgear_drone:item/controller"));
+		assertTrue(registration.contains("modifyItemModelAfterBake"));
+		assertTrue(registration.contains("EquipmentItemModel"));
 		assertTrue(gui.contains("minecraft:item/generated"));
-		assertTrue(held.contains("\"elements\""));
-		assertTrue(held.contains("\"firstperson_righthand\""));
-		assertTrue(held.contains("\"thirdperson_righthand\""));
+		assertTrue(held.contains("context == ItemDisplayContext.GUI"));
+		assertTrue(held.contains("inventoryModel.update"));
+		assertTrue(held.contains("RuntimeMesh.load(name)"));
+		assertTrue(held.contains("context.firstPerson()"));
 	}
 
 	@Test
@@ -93,44 +98,45 @@ final class VisualAssetContractTest {
 
 	@Test
 	void approvedPolygonMeshesExistForEveryVisibleDroneFamily() throws Exception {
-		for (String role : List.of("scout", "engineer", "field", "guard")) {
-			Path mesh = ASSETS.resolve("models/entity/family_a_" + role + ".mgm");
+		for (String role : List.of("scout", "engineer", "field", "security", "cargo", "salvage")) {
+			Path mesh = ASSETS.resolve("models/runtime/" + role + ".mgm");
 			assertTrue(Files.size(mesh) > 500_000, role + " mesh detail");
 			byte[] magic = Files.readAllBytes(mesh);
 			assertEquals((byte) 'M', magic[0]);
 			assertEquals((byte) 'G', magic[1]);
 			assertEquals((byte) 'M', magic[2]);
-			assertEquals((byte) '2', magic[3]);
+			assertEquals((byte) '4', magic[3]);
 		}
 	}
 
 	@Test
-	void salvageUsesTheApprovedDetailedFourTurbineMesh() throws Exception {
-		Path mesh = ASSETS.resolve("models/entity/family_a_salvage.mgm");
+	void salvageUsesTheApprovedIntegratedTwinRotorMesh() throws Exception {
+		Path mesh = ASSETS.resolve("models/runtime/salvage.mgm");
 		assertTrue(Files.size(mesh) > 500_000, "salvage mesh detail");
 		byte[] magic = Files.readAllBytes(mesh);
 		assertEquals((byte) 'M', magic[0]);
 		assertEquals((byte) 'G', magic[1]);
 		assertEquals((byte) 'M', magic[2]);
-		assertEquals((byte) '3', magic[3]);
+		assertEquals((byte) '4', magic[3]);
+		assertEquals(2, java.nio.ByteBuffer.wrap(magic).getInt(8));
 	}
 
 	@Test
 	void solarServiceFamilyUsesTheApprovedDetailedMeshes() throws Exception {
-		Path station = ASSETS.resolve("models/entity/solar_service_station.mgm");
-		Path relay = ASSETS.resolve("models/entity/charging_relay.mgm");
-		assertTrue(Files.size(station) > 8_000_000, "station ventral cassettes and lift emitters");
-		assertTrue(Files.size(relay) > 500_000, "relay monocoque, visor, fins, and charging coil");
+		Path station = ASSETS.resolve("models/runtime/solar_service_station.mgm");
+		Path relay = ASSETS.resolve("models/runtime/charging_relay.mgm");
+		assertTrue(Files.size(station) > 100_000, "station runtime mesh");
+		assertTrue(Files.size(relay) > 100_000, "relay runtime mesh");
 		for (Path mesh : List.of(station, relay)) {
 			byte[] magic = Files.readAllBytes(mesh);
 			assertEquals((byte) 'M', magic[0]);
 			assertEquals((byte) 'G', magic[1]);
 			assertEquals((byte) 'M', magic[2]);
-			assertEquals((byte) '2', magic[3]);
+			assertEquals((byte) '4', magic[3]);
 		}
 		String loader = Files.readString(Path.of(
-			"src/client/java/jp/morrowgear/drone/client/DroneMesh.java"));
-		assertTrue(loader.contains("MAX_VERTEX_COUNT = 400_000"),
+			"src/client/java/jp/morrowgear/drone/client/RuntimeMesh.java"));
+		assertTrue(loader.contains("count > 400000"),
 			"the approved station must remain loadable without removing the corruption guard");
 	}
 
@@ -146,8 +152,10 @@ final class VisualAssetContractTest {
 		assertTrue(fragment.contains("endpointFade"));
 		assertTrue(fragment.contains("apply_fog"));
 		assertTrue(renderType.contains("BlendFunction.LIGHTNING"));
-		assertTrue(renderType.contains("CompareOp.LESS_THAN_OR_EQUAL"));
-		assertTrue(renderType.contains("CompareOp.ALWAYS_PASS"));
+		// The 26.2 vanilla depth buffer is reversed. Both beam passes must reject occluded pixels.
+		assertEquals(2, renderType.split("CompareOp.GREATER_THAN_OR_EQUAL", -1).length - 1);
+		assertFalse(renderType.contains("CompareOp.LESS_THAN_OR_EQUAL"));
+		assertFalse(renderType.contains("CompareOp.ALWAYS_PASS"));
 		assertTrue(renderType.contains("visibleEnergyCore"));
 		assertTrue(renderType.contains("false"));
 		String effects = Files.readString(Path.of(

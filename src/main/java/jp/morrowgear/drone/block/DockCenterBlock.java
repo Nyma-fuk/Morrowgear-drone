@@ -19,10 +19,18 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public final class DockCenterBlock extends BaseEntityBlock {
 	public static final MapCodec<DockCenterBlock> CODEC = simpleCodec(DockCenterBlock::new);
 	private static final VoxelShape SHAPE = box(0, 0, 0, 16, 4.5, 16);
+	private final int footprint;
 
 	public DockCenterBlock(BlockBehaviour.Properties properties) {
-		super(properties);
+		this(properties, 3);
 	}
+
+	public DockCenterBlock(BlockBehaviour.Properties properties, int footprint) {
+		super(properties);
+		this.footprint = footprint;
+	}
+
+	public int footprint() { return footprint; }
 
 	@Override
 	protected MapCodec<? extends BaseEntityBlock> codec() {
@@ -36,7 +44,7 @@ public final class DockCenterBlock extends BaseEntityBlock {
 
 	@Override
 	protected VoxelShape getShape(BlockState state, net.minecraft.world.level.BlockGetter level, BlockPos pos, CollisionContext context) {
-		return SHAPE;
+		return footprint == 5 ? box(0, 0, 0, 16, 5.048, 16) : SHAPE;
 	}
 
 	@Override
@@ -44,6 +52,16 @@ public final class DockCenterBlock extends BaseEntityBlock {
 		BlockState result = super.playerWillDestroy(level, pos, state, player);
 		if (level instanceof ServerLevel serverLevel) MorrowgearDrone.removeDock(serverLevel, pos, true);
 		return result;
+	}
+
+	@Override
+	protected InteractionResult useItemOn(net.minecraft.world.item.ItemStack stack, BlockState state,
+		Level level, BlockPos pos, Player player, net.minecraft.world.InteractionHand hand, BlockHitResult hit) {
+		if (!DockBlockEntity.isSupply(stack)) return InteractionResult.PASS;
+		if (level.isClientSide()) return InteractionResult.SUCCESS;
+		return player instanceof net.minecraft.server.level.ServerPlayer serverPlayer
+			&& level.getBlockEntity(pos) instanceof DockBlockEntity dock && dock.insertSupply(serverPlayer, stack)
+			? InteractionResult.SUCCESS : InteractionResult.FAIL;
 	}
 
 	@Override

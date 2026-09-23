@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": ["IGI", "IBI", " C "],
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "G": "minecraft:gunpowder",
+    "B": "minecraft:blaze_powder",
+    "C": "minecraft:copper_ingot"
+  },
+  "result": {"id": "morrowgear_drone:autocannon_magazine", "count": 1}
+}

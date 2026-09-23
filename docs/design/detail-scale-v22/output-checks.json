@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "failures": [],
+  "roleModels": 6,
+  "orthographicAndObliqueViewsPerRole": 9,
+  "iconRasters": 105,
+  "roleGlyphVectors": 7,
+  "sourceBlendsUnchanged": true,
+  "aircraftAndDockExportRoundtrip": true,
+  "notVerified": [
+    "In-game renderer",
+    "Runtime hitboxes/navigation",
+    "Player save migration",
+    "Human small-icon recognition study"
+  ]
+}

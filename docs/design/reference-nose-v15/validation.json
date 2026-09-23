@@ -1,0 +1,385 @@
+{
+  "asset": "reference-nose-v15",
+  "checks": {
+    "bilateralGeometry": true,
+    "watertightHull": true,
+    "positiveHullVolume": true,
+    "finiteCoordinates": true,
+    "aftAndWingHullUnchanged": true,
+    "rotorsUnchanged": true,
+    "wingtipPartsUnchanged": true,
+    "rearPartsUnchanged": true,
+    "hullNoseExtended": true,
+    "spanUnchanged": true
+  },
+  "passed": true,
+  "mirrorError": 8.280877068500558e-07,
+  "nonmanifoldHullEdges": 0,
+  "hullVolume": 11.412694148541936,
+  "hullTipBefore": -2.6600000858306885,
+  "hullTipAfter": -2.940000057220459,
+  "extensionFractionOfPreviousHullLength": 0.05555555334797621,
+  "sourceSha256": "f54c3025c241db5d3332486872d5118da60b4ae18e4730193be41db0f7d0e2d9",
+  "componentChanges": {
+    "H01_ContinuousLiftingBody": {
+      "vertices": 56714,
+      "changed": 4436
+    },
+    "I01_ShoulderIntake_Interior": {
+      "vertices": 6,
+      "changed": 0
+    },
+    "I01_ShoulderIntake_Bezel": {
+      "vertices": 64,
+      "changed": 0
+    },
+    "H03_CrownJoint": {
+      "vertices": 152,
+      "changed": 152
+    },
+    "H03_CrownJoint.001": {
+      "vertices": 152,
+      "changed": 152
+    },
+    "H04_CenterLatch": {
+      "vertices": 56,
+      "changed": 0
+    },
+    "H05_LatchInset": {
+      "vertices": 56,
+      "changed": 0
+    },
+    "H03_CrownJoint.002": {
+      "vertices": 152,
+      "changed": 0
+    },
+    "H03_CrownJoint.003": {
+      "vertices": 152,
+      "changed": 0
+    },
+    "H04_CenterLatch.001": {
+      "vertices": 56,
+      "changed": 0
+    },
+    "H05_LatchInset.001": {
+      "vertices": 56,
+      "changed": 0
+    },
+    "H03_CrownJoint.004": {
+      "vertices": 152,
+      "changed": 0
+    },
+    "H03_CrownJoint.005": {
+      "vertices": 152,
+      "changed": 0
+    },
+    "H06_NoseChamfer": {
+      "vertices": 736,
+      "changed": 320
+    },
+    "H07_ShoulderJoint": {
+      "vertices": 592,
+      "changed": 32
+    },
+    "W01_PanelJoint_00": {
+      "vertices": 592,
+      "changed": 0
+    },
+    "W01_PanelJoint_01": {
+      "vertices": 592,
+      "changed": 0
+    },
+    "W01_PanelJoint_02": {
+      "vertices": 592,
+      "changed": 0
+    },
+    "W05_FlushFastener": {
+      "vertices": 112,
+      "changed": 56
+    },
+    "W05_FlushFastener.001": {
+      "vertices": 112,
+      "changed": 0
+    },
+    "W05_FlushFastener.002": {
+      "vertices": 112,
+      "changed": 0
+    },
+    "W05_FlushFastener.003": {
+      "vertices": 112,
+      "changed": 0
+    },
+    "W05_FlushFastener.004": {
+      "vertices": 112,
+      "changed": 0
+    },
+    "W04_TipMark": {
+      "vertices": 448,
+      "changed": 0
+    },
+    "W07_TipPanelJoint": {
+      "vertices": 592,
+      "changed": 0
+    },
+    "W08_TipFold": {
+      "vertices": 160,
+      "changed": 0
+    },
+    "H09_AftFairing": {
+      "vertices": 312,
+      "changed": 0
+    },
+    "H10_AftOpening": {
+      "vertices": 112,
+      "changed": 0
+    },
+    "H10_AftInternalLouver": {
+      "vertices": 112,
+      "changed": 0
+    },
+    "H10_AftInternalLouver.001": {
+      "vertices": 112,
+      "changed": 0
+    },
+    "H11_AftMark": {
+      "vertices": 8,
+      "changed": 0
+    },
+    "H14_AftBlendedCheek": {
+      "vertices": 16,
+      "changed": 0
+    },
+    "H14_AftBlendedCheek.001": {
+      "vertices": 16,
+      "changed": 0
+    },
+    "H12_RearServiceOpening": {
+      "vertices": 112,
+      "changed": 0
+    },
+    "H13_RearLouver": {
+      "vertices": 112,
+      "changed": 0
+    },
+    "H13_RearLouver.001": {
+      "vertices": 112,
+      "changed": 0
+    },
+    "H13_RearLouver.002": {
+      "vertices": 112,
+      "changed": 0
+    },
+    "H12_RearServiceOpening.001": {
+      "vertices": 112,
+      "changed": 0
+    },
+    "H13_RearLouver.003": {
+      "vertices": 112,
+      "changed": 0
+    },
+    "H13_RearLouver.004": {
+      "vertices": 112,
+      "changed": 0
+    },
+    "H13_RearLouver.005": {
+      "vertices": 112,
+      "changed": 0
+    },
+    "R01_DuctWall": {
+      "vertices": 768,
+      "changed": 0
+    },
+    "R02_RecessedLip": {
+      "vertices": 768,
+      "changed": 0
+    },
+    "R03_LowerLip": {
+      "vertices": 768,
+      "changed": 0
+    },
+    "R04_Hub": {
+      "vertices": 256,
+      "changed": 0
+    },
+    "R05_HubCap": {
+      "vertices": 256,
+      "changed": 0
+    },
+    "R06_Blade_00": {
+      "vertices": 192,
+      "changed": 0
+    },
+    "R06_Blade_01": {
+      "vertices": 192,
+      "changed": 0
+    },
+    "R06_Blade_02": {
+      "vertices": 192,
+      "changed": 0
+    },
+    "R06_Blade_03": {
+      "vertices": 192,
+      "changed": 0
+    },
+    "R06_Blade_04": {
+      "vertices": 192,
+      "changed": 0
+    },
+    "R06_Blade_05": {
+      "vertices": 192,
+      "changed": 0
+    },
+    "R06_Blade_06": {
+      "vertices": 192,
+      "changed": 0
+    },
+    "R06_Blade_07": {
+      "vertices": 192,
+      "changed": 0
+    },
+    "R06_Blade_08": {
+      "vertices": 192,
+      "changed": 0
+    },
+    "R06_Blade_09": {
+      "vertices": 192,
+      "changed": 0
+    },
+    "R06_Blade_10": {
+      "vertices": 192,
+      "changed": 0
+    },
+    "R06_Blade_11": {
+      "vertices": 192,
+      "changed": 0
+    },
+    "R07_Stator": {
+      "vertices": 112,
+      "changed": 0
+    },
+    "R07_Stator.001": {
+      "vertices": 112,
+      "changed": 0
+    },
+    "R07_Stator.002": {
+      "vertices": 112,
+      "changed": 0
+    },
+    "R07_Stator.003": {
+      "vertices": 112,
+      "changed": 0
+    },
+    "R07_Stator.004": {
+      "vertices": 112,
+      "changed": 0
+    },
+    "R07_Stator.005": {
+      "vertices": 112,
+      "changed": 0
+    },
+    "S01_VisorRecess": {
+      "vertices": 14,
+      "changed": 14
+    },
+    "S02_VisorOptic": {
+      "vertices": 14,
+      "changed": 14
+    },
+    "S03_ChinHousing": {
+      "vertices": 56,
+      "changed": 56
+    },
+    "S04_ChinBezel": {
+      "vertices": 56,
+      "changed": 56
+    },
+    "S05_ChinGlass": {
+      "vertices": 56,
+      "changed": 56
+    },
+    "S06_CheekPanel": {
+      "vertices": 112,
+      "changed": 112
+    },
+    "S07_CheekLatch": {
+      "vertices": 112,
+      "changed": 112
+    },
+    "S08_FlankPort": {
+      "vertices": 112,
+      "changed": 112
+    },
+    "S09_FlankPortFrame": {
+      "vertices": 112,
+      "changed": 56
+    },
+    "B01_ServicePanel_0": {
+      "vertices": 56,
+      "changed": 0
+    },
+    "B02_FlushLatch": {
+      "vertices": 112,
+      "changed": 0
+    },
+    "B01_ServicePanel_1": {
+      "vertices": 56,
+      "changed": 0
+    },
+    "B02_FlushLatch.001": {
+      "vertices": 112,
+      "changed": 0
+    },
+    "B01_ServicePanel_2": {
+      "vertices": 56,
+      "changed": 0
+    },
+    "B02_FlushLatch.002": {
+      "vertices": 112,
+      "changed": 0
+    },
+    "B01_ServicePanel_3": {
+      "vertices": 56,
+      "changed": 0
+    },
+    "B02_FlushLatch.003": {
+      "vertices": 112,
+      "changed": 0
+    },
+    "W02_MachinedEdge": {
+      "vertices": 988,
+      "changed": 0
+    },
+    "W02_MachinedEdge.001": {
+      "vertices": 324,
+      "changed": 0
+    },
+    "W02_MachinedEdge.002": {
+      "vertices": 324,
+      "changed": 0
+    },
+    "W02_MachinedEdge.003": {
+      "vertices": 324,
+      "changed": 0
+    },
+    "W02_MachinedEdge.004": {
+      "vertices": 428,
+      "changed": 0
+    },
+    "W02_MachinedEdge.005": {
+      "vertices": 432,
+      "changed": 0
+    },
+    "W06_ProposedElevonHinge": {
+      "vertices": 3472,
+      "changed": 0
+    },
+    "W06_ProposedElevonHinge.001": {
+      "vertices": 3472,
+      "changed": 0
+    }
+  },
+  "referenceFidelityApproved": false,
+  "gameVerified": false,
+  "aerodynamicSimulationPerformed": false,
+  "scope": "Local visual design proposal. Not a reference reconstruction improvement claim."
+}

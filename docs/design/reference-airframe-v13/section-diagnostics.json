@@ -1,0 +1,57 @@
+{
+  "scope": "Geometric section and surface sampling, not airflow simulation.",
+  "maximumSampledTriangleSurfaceError": 0.019971791130888865,
+  "sampledTriangleCount": 37236,
+  "deviatingTriangleCount": 0,
+  "worstTriangles": [],
+  "sections": [
+    {
+      "x": 0.0,
+      "chord": 4.57,
+      "maxThickness": 1.0849258684210525,
+      "thicknessToChord": 0.23740172175515373,
+      "leadingThickness": 0.275,
+      "trailingThickness": 0.08499999999999999
+    },
+    {
+      "x": 0.9,
+      "chord": 4.290035714285715,
+      "maxThickness": 0.9088417451311941,
+      "thicknessToChord": 0.2118494589927942,
+      "leadingThickness": 0.2959631760848351,
+      "trailingThickness": 0.0605395594007002
+    },
+    {
+      "x": 1.3,
+      "chord": 3.9982550335570473,
+      "maxThickness": 0.6500819569695111,
+      "thicknessToChord": 0.1625914183846261,
+      "leadingThickness": 0.02798778523489933,
+      "trailingThickness": 0.02798778523489933
+    },
+    {
+      "x": 2.95,
+      "chord": 2.229555316202492,
+      "maxThickness": 0.5180487504968205,
+      "thicknessToChord": 0.23235519062123616,
+      "leadingThickness": 0.015606887213417445,
+      "trailingThickness": 0.015606887213417443
+    },
+    {
+      "x": 3.3,
+      "chord": 1.6988736728727498,
+      "maxThickness": 0.23659828163447816,
+      "thicknessToChord": 0.13926773097519182,
+      "leadingThickness": 0.01189211571010925,
+      "trailingThickness": 0.011892115710109313
+    },
+    {
+      "x": 3.7,
+      "chord": 1.2412298507462682,
+      "maxThickness": 0.16518557252477206,
+      "thicknessToChord": 0.13308217847440348,
+      "leadingThickness": 0.008688608955223878,
+      "trailingThickness": 0.008688608955223887
+    }
+  ]
+}

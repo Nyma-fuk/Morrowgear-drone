@@ -9,6 +9,7 @@ public final class PatrolRoutePolicy {
 	public static final int MAX_POINTS = 8;
 	public static final double TURN_RADIUS = 18.0;
 	public static final double ADVANCE_RADIUS = 6.5;
+	private static final double MAX_CORNER_LEAD = ADVANCE_RADIUS - 1.0;
 
 	private PatrolRoutePolicy() {}
 
@@ -72,17 +73,24 @@ public final class PatrolRoutePolicy {
 
 	public static Vec3 curvedTarget(Vec3 position, Vec3 current, Vec3 next, int routeSize, int currentIndex) {
 		double distance = position.distanceTo(current);
-		if (distance >= TURN_RADIUS) return current;
+		if (routeSize <= 1 || distance >= TURN_RADIUS) return current;
 		double blend = 1.0 - Math.max(0.0, distance) / TURN_RADIUS;
 		blend = blend * blend * (3.0 - 2.0 * blend);
 		Vec3 target = current.scale(1.0 - blend * 0.9).add(next.scale(blend * 0.9));
-		if (routeSize != 2) return target;
-		Vec3 outgoing = next.subtract(current).multiply(1, 0, 1);
-		if (outgoing.lengthSqr() < 0.001) return target;
-		Vec3 side = new Vec3(-outgoing.z, 0, outgoing.x).normalize();
-		if ((currentIndex & 1) != 0) side = side.scale(-1);
-		double arc = Math.sin(Math.PI * blend) * TURN_RADIUS * 0.58;
-		return target.add(side.scale(arc));
+		if (routeSize == 2) {
+			Vec3 outgoing = next.subtract(current).multiply(1, 0, 1);
+			if (outgoing.lengthSqr() >= 0.001) {
+				Vec3 side = new Vec3(-outgoing.z, 0, outgoing.x).normalize();
+				if ((currentIndex & 1) != 0) side = side.scale(-1);
+				double arc = Math.sin(Math.PI * blend) * TURN_RADIUS * 0.58;
+				target = target.add(side.scale(arc));
+			}
+		}
+		// Until handoff, keep the moving goal inside the current vertex's acceptance
+		// volume. Unbounded lookahead can create a fixed point outside that volume.
+		Vec3 lead = target.subtract(current);
+		return lead.lengthSqr() > MAX_CORNER_LEAD * MAX_CORNER_LEAD
+			? current.add(lead.normalize().scale(MAX_CORNER_LEAD)) : target;
 	}
 
 	public static Vec3 smoothGuidance(Vec3 previous, Vec3 requested) {
@@ -99,6 +107,9 @@ public final class PatrolRoutePolicy {
 	}
 
 	public static boolean shouldAdvance(Vec3 leaderPosition, Vec3 previous, Vec3 current) {
+		// Multi-point patrol handoffs require the current altitude, unlike the legacy
+		// two-argument horizontal arrival check used by single-point callers.
+		if (Math.abs(leaderPosition.y - current.y) > ADVANCE_RADIUS) return false;
 		if (shouldAdvance(leaderPosition, current)) return true;
 		Vec3 leg = current.subtract(previous).multiply(1, 0, 1);
 		if (leg.lengthSqr() < 4.0) return false;
@@ -107,7 +118,8 @@ public final class PatrolRoutePolicy {
 		double clamped = Math.max(0.0, Math.min(1.0, progress));
 		Vec3 closest = previous.add(leg.scale(clamped));
 		double crossTrack = leaderPosition.multiply(1, 0, 1).distanceTo(closest.multiply(1, 0, 1));
-		return progress >= 0.82 && crossTrack <= TURN_RADIUS * 1.25;
+		return progress >= 0.82 && crossTrack <= TURN_RADIUS * 1.25
+			&& leaderPosition.multiply(1, 0, 1).distanceTo(current.multiply(1, 0, 1)) <= TURN_RADIUS * 1.25;
 	}
 
 	public static boolean leaderQuorumReached(int arrivedLeaders, int totalLeaders) {

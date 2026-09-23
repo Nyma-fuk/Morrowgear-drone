@@ -1,0 +1,3075 @@
+C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\tools\drone-design\blender\build_carrier_v30_proposal.py:26: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  mat.use_nodes = True
+GEOMETRY_VALIDATION {"proposalOnly": true, "axes": {"front": "-Y", "up": "+Z", "mirror": "X=0"}, "bounds": [[-25.0, 25.0], [-16.028892517089844, 14.897500038146973], [-0.10000000149011612, 7.150000095367432]], "dimensions": [50.0, 30.926392555236816, 7.250000096857548], "symmetryMaxError": 0.0, "evaluatedVertices": 13715, "polygons": 10894, "nonManifoldEdgesByObject": {}, "bayApproachChecks": [{"centerX": -15, "approachSamplesClear": true, "samples": 9}, {"centerX": -10, "approachSamplesClear": true, "samples": 9}, {"centerX": 10, "approachSamplesClear": true, "samples": 9}, {"centerX": 15, "approachSamplesClear": true, "samples": 9}], "beamOrigin": [0, 0, -0.1], "bayClearEnvelope": [3.5999999046325684, 4.400000095367432, 2.4000000953674316], "revision": "V30_CONTINUOUS_ARMORED_SPAN_01", "functionalArmorPanelCount": 16, "rearNozzleCount": 8, "maximumCenterHullThickness": 4.33, "topCenterClosed": true, "lowerFrontIntake": {"exists": true, "objectCount": 8, "bounds": [[-4.800000190734863, 4.800000190734863], [-13.295000076293945, -4.449999809265137], [1.8200000524520874, 4.179999828338623]], "distinctFromServiceBays": true, "approachSamplesClear": true, "samples": 6, "bayCentersX": [-15, -10, 10, 15]}, "exhaustDuctChecks": [{"centerX": -4.0, "ductSamplesClear": true, "samples": 2}, {"centerX": 4.0, "ductSamplesClear": true, "samples": 2}, {"centerX": -9.2, "ductSamplesClear": true, "samples": 2}, {"centerX": 9.2, "ductSamplesClear": true, "samples": 2}, {"centerX": -14.7, "ductSamplesClear": true, "samples": 2}, {"centerX": 14.7, "ductSamplesClear": true, "samples": 2}, {"centerX": -20.0, "ductSamplesClear": true, "samples": 2}, {"centerX": 20.0, "ductSamplesClear": true, "samples": 2}], "passed": true}
+C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\tools\drone-design\blender\build_carrier_v30_proposal.py:431: DeprecationWarning: 'World.use_nodes' is expected to be removed in Blender 6.0
+  scene.world.use_nodes=True
+00:11.547  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v30-proposal\hero.png'
+Info: Saved as "carrier-v30-proposal.blend"
+INFO Draco is available, use library at C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\work\blender-portable\blender-5.2.0-windows-x64\5.2\scripts\addons_core\io_scene_gltf2\bf_intern_draco_bridge.dll
+INFO MeshOptimizer is available, use library at C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\work\blender-portable\blender-5.2.0-windows-x64\5.2\scripts\addons_core\io_scene_gltf2\bf_intern_meshopt_bridge.dll
+08:15:57 | INFO: Starting glTF 2.0 export
+08:15:57 | INFO: Extracting primitive: Aft_maintenance_stencil
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Aft_maintenance_stencil.001
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Aft_maintenance_stencil.002
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Aft_maintenance_stencil.003
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Aft_maintenance_stencil.004
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Aft_maintenance_stencil.005
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Aft_maintenance_stencil.006
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Aft_maintenance_stencil.007
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Aft_maintenance_stencil.008
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Aft_maintenance_stencil.009
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Aft_maintenance_stencil.010
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Aft_maintenance_stencil.011
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Aft_maintenance_stencil.012
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Aft_maintenance_stencil.013
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Aft_maintenance_stencil.014
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Aft_maintenance_stencil.015
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Aft_thermal_armor
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Aft_vector_nozzle_open_duct
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Aft_vector_nozzle_open_duct.001
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Aft_vector_nozzle_open_duct.002
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Aft_vector_nozzle_open_duct.003
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Bay_0_aft_service_bulkhead
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Bay_0_internal_floor
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Bay_1_aft_service_bulkhead
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Bay_1_internal_floor
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Bay_docking_rail
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Bay_docking_rail.001
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Bay_docking_rail.002
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Bay_docking_rail.003
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Bay_recessed_guidance
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Bay_recessed_guidance.001
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Bay_recessed_guidance.002
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Bay_recessed_guidance.003
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Bay_service_console
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Bay_service_console.001
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Bay_threshold_service_mark
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Bay_threshold_service_mark.001
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Bay_threshold_service_mark.002
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Bay_threshold_service_mark.003
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Bay_threshold_service_mark.004
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Bay_threshold_service_mark.005
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Bay_threshold_service_mark.006
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Bay_threshold_service_mark.007
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Bay_threshold_service_mark.008
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Bay_threshold_service_mark.009
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Bay_threshold_service_mark.010
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Bay_threshold_service_mark.011
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Belly_emitter_armored_recess
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Belly_emitter_conductor
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Belly_emitter_optical_surface
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Cassette_cooling_fin
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Cassette_cooling_fin.001
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Cassette_cooling_fin.002
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Cassette_cooling_fin.003
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Cassette_cooling_fin.004
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Cassette_cooling_fin.005
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Cassette_cooling_fin.006
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Cassette_cooling_fin.007
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Cassette_cooling_fin.008
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Cassette_cooling_fin.009
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Cassette_cooling_fin.010
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Cassette_cooling_fin.011
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Cassette_cooling_fin.012
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Cassette_cooling_fin.013
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Cassette_cooling_fin.014
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Cassette_cooling_fin.015
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Cassette_cooling_fin.016
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Cassette_cooling_fin.017
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Cassette_cooling_fin.018
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Cassette_cooling_fin.019
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Cassette_cooling_fin.020
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Cassette_cooling_fin.021
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Cassette_cooling_fin.022
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Cassette_cooling_fin.023
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Cassette_cooling_fin.024
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Command_hatch_lock
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Command_hatch_lock.001
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Command_hatch_lock.002
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Command_service_hatch
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Command_service_hatch.001
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Command_service_hatch.002
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Command_spine_armor
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Command_window
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Command_window.001
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Command_window.002
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Command_window.003
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Command_window.004
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Command_window.005
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Command_window.006
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Command_window.007
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Command_window.008
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Command_window.009
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Command_window.010
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Command_window.011
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Command_window.012
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Command_window_recess
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Command_window_recess.001
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Command_window_recess.002
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Command_window_recess.003
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Command_window_recess.004
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Command_window_recess.005
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Command_window_recess.006
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Command_window_recess.007
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Command_window_recess.008
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Command_window_recess.009
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Command_window_recess.010
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Command_window_recess.011
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Command_window_recess.012
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Continuous_low_armored_flying_hull
+08:15:57 | INFO: Primitives created: 2
+08:15:57 | INFO: Extracting primitive: Emitter_buried_load_path
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Emitter_buried_load_path.001
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Emitter_hydraulic_ram
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Emitter_hydraulic_ram.001
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Emitter_service_segment
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Emitter_service_segment.001
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Emitter_service_segment.002
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Emitter_service_segment.003
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Emitter_service_segment.004
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Emitter_service_segment.005
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Emitter_service_segment.006
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Emitter_service_segment.007
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Emitter_service_segment.008
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Emitter_service_segment.009
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Emitter_service_segment.010
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Emitter_service_segment.011
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Exhaust_vector_vane
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Exhaust_vector_vane.001
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Exhaust_vector_vane.002
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Exhaust_vector_vane.003
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Exhaust_vector_vane.004
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Exhaust_vector_vane.005
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Exhaust_vector_vane.006
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Exhaust_vector_vane.007
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Exhaust_vector_vane.008
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Exhaust_vector_vane.009
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Exhaust_vector_vane.010
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Exhaust_vector_vane.011
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Faceted_leading_edge_armor
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Faceted_leading_edge_armor.001
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Faceted_leading_edge_armor.002
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Faceted_leading_edge_armor.003
+08:15:57 | INFO: Primitives created: 2
+08:15:57 | INFO: Extracting primitive: Faceted_leading_edge_armor.004
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Faceted_leading_edge_armor.005
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Faceted_leading_edge_armor.006
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Faceted_leading_edge_armor.007
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Flush_maintenance_handrail
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Flush_maintenance_handrail.001
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Flush_maintenance_handrail.002
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Flush_maintenance_handrail.003
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Forward_sensor_cheek
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Functional_service_stencil
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Functional_service_stencil.001
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Functional_service_stencil.002
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Functional_service_stencil.003
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Functional_service_stencil.004
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Functional_service_stencil.005
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Functional_service_stencil.006
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Functional_service_stencil.007
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Functional_service_stencil.008
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Functional_service_stencil.009
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Functional_service_stencil.010
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Functional_service_stencil.011
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Inboard_power_distribution
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Inset_thermal_bank_lamella
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Inset_thermal_bank_lamella.001
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Inset_thermal_bank_lamella.002
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Inset_thermal_bank_lamella.003
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Inset_thermal_bank_lamella.004
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Inset_thermal_bank_lamella.005
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Inset_thermal_bank_lamella.006
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Inset_thermal_bank_lamella.007
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Inset_thermal_bank_lamella.008
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Inset_thermal_bank_lamella.009
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Inset_thermal_bank_lamella.010
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Inset_thermal_bank_lamella.011
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Inset_thermal_bank_lamella.012
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Inset_thermal_bank_lamella.013
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Inset_thermal_bank_lamella.014
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Inset_thermal_bank_lamella.015
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Inset_thermal_bank_lamella.016
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Inset_thermal_bank_lamella.017
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Inset_thermal_bank_lamella.018
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Inset_thermal_bank_lamella.019
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Inset_thermal_bank_lamella.020
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Inset_thermal_bank_lamella.021
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Integrated_forward_command_blister
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: LowerFrontIntake_armored_converging_duct
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: LowerFrontIntake_flow_straightener
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: LowerFrontIntake_flow_straightener.001
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: LowerFrontIntake_flow_straightener.002
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: LowerFrontIntake_mouth_service_mark
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: LowerFrontIntake_mouth_service_mark.001
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: LowerFrontIntake_mouth_service_mark.002
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: LowerFrontIntake_mouth_service_mark.003
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Midspan_load_armor
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Nozzle_actuator
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Nozzle_actuator.001
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Nozzle_actuator.002
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Nozzle_actuator.003
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Nozzle_actuator.004
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Nozzle_actuator.005
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Nozzle_actuator.006
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Nozzle_actuator.007
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Outer_sensor_armor
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Primary_avionics_armor
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Protected_power_line
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Protected_power_line.001
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Protected_power_line.002
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Protected_power_line.003
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Protected_power_line.004
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Recessed_ventral_service_cassette
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Recessed_ventral_service_cassette.001
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Recessed_ventral_service_cassette.002
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Recessed_ventral_service_cassette.003
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Recessed_ventral_service_cassette.004
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Scale_observation_window
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Scale_observation_window.001
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Scale_observation_window.002
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Scale_observation_window.003
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Scale_observation_window.004
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Scale_observation_window.005
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Scale_observation_window.006
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Scale_observation_window.007
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Scale_observation_window.008
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Scale_observation_window.009
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Span_lower_chord
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Span_lower_chord.001
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Span_lower_chord.002
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Span_lower_chord.003
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Span_lower_chord.004
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Span_lower_chord.005
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Span_lower_chord.006
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Span_lower_chord.007
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Span_lower_chord.008
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Span_lower_chord.009
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Span_lower_chord.010
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Span_lower_chord.011
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Span_upper_chord
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Span_upper_chord.001
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Span_upper_chord.002
+08:15:57 | INFO: Primitives created: 1
+08:15:57 | INFO: Extracting primitive: Span_upper_chord.003
+08:15:58 | INFO: Primitives created: 1
+08:15:58 | INFO: Extracting primitive: Span_upper_chord.004
+08:15:58 | INFO: Primitives created: 1
+08:15:58 | INFO: Extracting primitive: Span_upper_chord.005
+08:15:58 | INFO: Primitives created: 1
+08:15:58 | INFO: Extracting primitive: Span_upper_chord.006
+08:15:58 | INFO: Primitives created: 1
+08:15:58 | INFO: Extracting primitive: Span_upper_chord.007
+08:15:58 | INFO: Primitives created: 1
+08:15:58 | INFO: Extracting primitive: Span_upper_chord.008
+08:15:58 | INFO: Primitives created: 1
+08:15:58 | INFO: Extracting primitive: Span_upper_chord.009
+08:15:58 | INFO: Primitives created: 1
+08:15:58 | INFO: Extracting primitive: Span_upper_chord.010
+08:15:58 | INFO: Primitives created: 1
+08:15:58 | INFO: Extracting primitive: Span_upper_chord.011
+08:15:58 | INFO: Primitives created: 1
+08:15:58 | INFO: Extracting primitive: Thruster_recessed_throat
+08:15:58 | INFO: Primitives created: 1
+08:15:58 | INFO: Extracting primitive: Thruster_recessed_throat.001
+08:15:58 | INFO: Primitives created: 1
+08:15:58 | INFO: Extracting primitive: Thruster_recessed_throat.002
+08:15:58 | INFO: Primitives created: 1
+08:15:58 | INFO: Extracting primitive: Thruster_recessed_throat.003
+08:15:58 | INFO: Primitives created: 1
+08:15:58 | INFO: Extracting primitive: Triangulated_span_web
+08:15:58 | INFO: Primitives created: 1
+08:15:58 | INFO: Extracting primitive: Triangulated_span_web.001
+08:15:58 | INFO: Primitives created: 1
+08:15:58 | INFO: Extracting primitive: Triangulated_span_web.002
+08:15:58 | INFO: Primitives created: 1
+08:15:58 | INFO: Extracting primitive: Triangulated_span_web.003
+08:15:58 | INFO: Primitives created: 1
+08:15:58 | INFO: Extracting primitive: Triangulated_span_web.004
+08:15:58 | INFO: Primitives created: 1
+08:15:58 | INFO: Extracting primitive: Triangulated_span_web.005
+08:15:58 | INFO: Primitives created: 1
+08:15:58 | INFO: Extracting primitive: Triangulated_span_web.006
+08:15:58 | INFO: Primitives created: 1
+08:15:58 | INFO: Extracting primitive: Triangulated_span_web.007
+08:15:58 | INFO: Primitives created: 1
+08:15:58 | INFO: Extracting primitive: Triangulated_span_web.008
+08:15:58 | INFO: Primitives created: 1
+08:15:58 | INFO: Extracting primitive: Triangulated_span_web.009
+08:15:58 | INFO: Primitives created: 1
+08:15:58 | INFO: Extracting primitive: Triangulated_span_web.010
+08:15:58 | INFO: Primitives created: 1
+08:15:58 | INFO: Extracting primitive: Triangulated_span_web.011
+08:15:58 | INFO: Primitives created: 1
+08:15:58 | INFO: Extracting primitive: Truss_vertical_tie
+08:15:58 | INFO: Primitives created: 1
+08:15:58 | INFO: Extracting primitive: Truss_vertical_tie.001
+08:15:58 | INFO: Primitives created: 1
+08:15:58 | INFO: Extracting primitive: Truss_vertical_tie.002
+08:15:58 | INFO: Primitives created: 1
+08:15:58 | INFO: Extracting primitive: Truss_vertical_tie.003
+08:15:58 | INFO: Primitives created: 1
+08:15:58 | INFO: Extracting primitive: Truss_vertical_tie.004
+08:15:58 | INFO: Primitives created: 1
+08:15:58 | INFO: Extracting primitive: Truss_vertical_tie.005
+08:15:58 | INFO: Primitives created: 1
+08:15:58 | INFO: Extracting primitive: Truss_vertical_tie.006
+08:15:58 | INFO: Primitives created: 1
+08:15:58 | INFO: Extracting primitive: Truss_vertical_tie.007
+08:15:58 | INFO: Primitives created: 1
+08:15:58 | INFO: Extracting primitive: Truss_vertical_tie.008
+08:15:58 | INFO: Primitives created: 1
+08:15:58 | INFO: Extracting primitive: Truss_vertical_tie.009
+08:15:58 | INFO: Primitives created: 1
+08:15:58 | INFO: Extracting primitive: Truss_vertical_tie.010
+08:15:58 | INFO: Primitives created: 1
+08:15:58 | INFO: Extracting primitive: Truss_vertical_tie.011
+08:15:58 | INFO: Primitives created: 1
+08:15:58 | INFO: Extracting primitive: Wingtip_service_cap
+08:15:58 | INFO: Primitives created: 1
+08:15:58 | INFO: Finished glTF 2.0 export in 0.48073339462280273 s
+00:19.516  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v30-proposal\front.png'
+00:26.813  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v30-proposal\rear.png'
+00:36.610  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v30-proposal\top.png'
+00:46.657  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v30-proposal\bottom.png'
+00:53.485  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v30-proposal\left.png'
+01:00.266  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v30-proposal\right.png'
+01:09.157  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v30-proposal\underside.png'
+01:17.844  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v30-proposal\rear-underside.png'
+01:27.547  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v30-proposal\beam-state.png'
+01:41.047  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v30-proposal\front-under-functional-closeup.png'
+01:54.360  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v30-proposal\intake-functional-closeup.png'
+02:05.704  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v30-proposal\bay-functional-closeup.png'
+02:19.266  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v30-proposal\emitter-functional-closeup.png'
+
+08:18:05 | INFO: Data are loaded, start creating Blender stuff
+08:18:05 | INFO: Blender create Mesh node Cylinder
+08:18:05 | INFO: Blender create Mesh node Cylinder.001
+08:18:05 | INFO: Blender create Mesh node Cylinder.004
+08:18:05 | INFO: Blender create Mesh node AFT_CassetteGasket
+08:18:05 | INFO: Blender create Mesh node Cylinder.006
+08:18:05 | INFO: Blender create Mesh node AFT_FastenerSlot
+08:18:05 | INFO: Blender create Mesh node AFT_FastenerSlot.001
+08:18:05 | INFO: Blender create Mesh node AFT_FastenerSlot.002
+08:18:05 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_00
+08:18:05 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_01
+08:18:05 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_02
+08:18:05 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_03
+08:18:05 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_04
+08:18:05 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_05
+08:18:05 | INFO: Blender create Mesh node AFT_LouverEdge_00
+08:18:05 | INFO: Blender create Mesh node AFT_LouverEdge_01
+08:18:05 | INFO: Blender create Mesh node AFT_LouverEdge_02
+08:18:05 | INFO: Blender create Mesh node AFT_LouverEdge_03
+08:18:05 | INFO: Blender create Mesh node AFT_LouverEdge_04
+08:18:05 | INFO: Blender create Mesh node AFT_LouverEdge_05
+08:18:05 | INFO: Blender create Mesh node AFT_ReleaseLatch
+08:18:05 | INFO: Blender create Mesh node AFT_ServiceCassette
+08:18:05 | INFO: Blender create Mesh node Cylinder.005
+08:18:05 | INFO: Blender create Mesh node AFT_StatusLens
+08:18:05 | INFO: Blender create Mesh node AFT_StatusLens.001
+08:18:05 | INFO: Blender create Mesh node Cube.016
+08:18:05 | INFO: Blender create Mesh node FIELD_LinkRadome
+08:18:05 | INFO: Blender create Mesh node Cube.029
+08:18:05 | INFO: Blender create Mesh node Cube.030
+08:18:05 | INFO: Blender create Mesh node Cube.031
+08:18:05 | INFO: Blender create Mesh node Cube.014
+08:18:05 | INFO: Blender create Mesh node Cube.015
+08:18:05 | INFO: Blender create Mesh node Cube.013
+08:18:05 | INFO: Blender create Mesh node Cube.001
+08:18:05 | INFO: Blender create Mesh node Cube.008
+08:18:05 | INFO: Blender create Mesh node Cube.009
+08:18:05 | INFO: Blender create Mesh node Cube.002
+08:18:05 | INFO: Blender create Mesh node GEAR_FixedSocket_1
+08:18:05 | INFO: Blender create Mesh node GEAR_FixedSocket_-1
+08:18:05 | INFO: Blender create Mesh node Cube.010
+08:18:05 | INFO: Blender create Mesh node Cube.003
+08:18:05 | INFO: Blender create Mesh node Cube.012
+08:18:05 | INFO: Blender create Mesh node Cube.011
+08:18:05 | INFO: Blender create Mesh node Cube.006
+08:18:05 | INFO: Blender create Mesh node Cube.005
+08:18:05 | INFO: Blender create Mesh node GEAR_TelescopicStage_1_0
+08:18:05 | INFO: Blender create Mesh node GEAR_TelescopicStage_1_1
+08:18:05 | INFO: Blender create Mesh node Cylinder.008
+08:18:05 | INFO: Blender create Mesh node GEAR_TelescopicStage_-1_0
+08:18:05 | INFO: Blender create Mesh node GEAR_TelescopicStage_-1_1
+08:18:05 | INFO: Blender create Mesh node Cylinder.007
+08:18:05 | INFO: Blender create Mesh node H01_ContinuousLiftingBody_Mesh.001
+08:18:05 | INFO: Blender create Mesh node H03_CrownJoint.006
+08:18:05 | INFO: Blender create Mesh node H03_CrownJoint.007
+08:18:05 | INFO: Blender create Mesh node H03_CrownJoint.002
+08:18:05 | INFO: Blender create Mesh node H03_CrownJoint.003
+08:18:05 | INFO: Blender create Mesh node H03_CrownJoint.004
+08:18:05 | INFO: Blender create Mesh node H03_CrownJoint.008
+08:18:05 | INFO: Blender create Mesh node Cube.004
+08:18:05 | INFO: Blender create Mesh node Cube.018
+08:18:05 | INFO: Blender create Mesh node Cube.017
+08:18:05 | INFO: Blender create Mesh node Cube.019
+08:18:05 | INFO: Blender create Mesh node H06_NoseChamfer.002
+08:18:05 | INFO: Blender create Mesh node H07_ShoulderJoint.002
+08:18:05 | INFO: Blender create Mesh node I01_ShoulderIntake_Bezel.002
+08:18:05 | INFO: Blender create Mesh node I01_ShoulderIntake_Interior_Mesh.001
+08:18:05 | INFO: Blender create Mesh node P01_IntakeCowl.001
+08:18:05 | INFO: Blender create Mesh node P02_IntakeLip.001
+08:18:05 | INFO: Blender create Mesh node P03_IntakeThroat.001
+08:18:05 | INFO: Blender create Mesh node P04_IntakeBack.001
+08:18:05 | INFO: Blender create Mesh node P05_WingCowlBlend.002
+08:18:05 | INFO: Blender create Mesh node P05_WingCowlBlend.003
+08:18:05 | INFO: Blender create Mesh node P06_IntakeGuide.002
+08:18:05 | INFO: Blender create Mesh node P06_IntakeGuide.003
+08:18:05 | INFO: Blender create Mesh node P07_CowlWarning.001
+08:18:05 | INFO: Blender create Mesh node P10_ExhaustRim.001
+08:18:05 | INFO: Blender create Mesh node P11_ExhaustThroat.001
+08:18:05 | INFO: Blender create Mesh node P12_ExhaustBack.001
+08:18:05 | INFO: Blender create Mesh node P13_HeatPetal.016
+08:18:05 | INFO: Blender create Mesh node P13_HeatPetal.017
+08:18:05 | INFO: Blender create Mesh node P13_HeatPetal.018
+08:18:05 | INFO: Blender create Mesh node P13_HeatPetal.019
+08:18:05 | INFO: Blender create Mesh node P13_HeatPetal.020
+08:18:05 | INFO: Blender create Mesh node P13_HeatPetal.021
+08:18:05 | INFO: Blender create Mesh node P13_HeatPetal.022
+08:18:05 | INFO: Blender create Mesh node P13_HeatPetal.023
+08:18:05 | INFO: Blender create Mesh node P13_HeatPetal.024
+08:18:05 | INFO: Blender create Mesh node P13_HeatPetal.025
+08:18:05 | INFO: Blender create Mesh node P13_HeatPetal.026
+08:18:05 | INFO: Blender create Mesh node P13_HeatPetal.027
+08:18:05 | INFO: Blender create Mesh node P13_HeatPetal.028
+08:18:05 | INFO: Blender create Mesh node P13_HeatPetal.029
+08:18:05 | INFO: Blender create Mesh node P13_HeatPetal.030
+08:18:05 | INFO: Blender create Mesh node P13_HeatPetal.031
+08:18:05 | INFO: Blender create Mesh node P14_InternalMixer.003
+08:18:05 | INFO: Blender create Mesh node P14_InternalMixer.004
+08:18:05 | INFO: Blender create Mesh node P14_InternalMixer.005
+08:18:05 | INFO: Blender create Mesh node P15_ExhaustApron.001
+08:18:05 | INFO: Blender create Mesh node R01_DuctWall_Mesh.001
+08:18:05 | INFO: Blender create Mesh node R02_RecessedLip_Mesh.001
+08:18:05 | INFO: Blender create Mesh node R03_LowerLip_Mesh.001
+08:18:05 | INFO: Blender create Mesh node Cylinder.002
+08:18:05 | INFO: Blender create Mesh node Cylinder.003
+08:18:05 | INFO: Blender create Mesh node R06_Blade_00_Mesh.001
+08:18:05 | INFO: Blender create Mesh node R06_Blade_01_Mesh.001
+08:18:05 | INFO: Blender create Mesh node R06_Blade_02_Mesh.001
+08:18:05 | INFO: Blender create Mesh node R06_Blade_03_Mesh.001
+08:18:05 | INFO: Blender create Mesh node R06_Blade_04_Mesh.001
+08:18:05 | INFO: Blender create Mesh node R06_Blade_05_Mesh.001
+08:18:05 | INFO: Blender create Mesh node R06_Blade_06_Mesh.001
+08:18:05 | INFO: Blender create Mesh node R06_Blade_07_Mesh.001
+08:18:05 | INFO: Blender create Mesh node R06_Blade_08_Mesh.001
+08:18:05 | INFO: Blender create Mesh node R06_Blade_09_Mesh.001
+08:18:05 | INFO: Blender create Mesh node R06_Blade_10_Mesh.001
+08:18:05 | INFO: Blender create Mesh node R06_Blade_11_Mesh.001
+08:18:05 | INFO: Blender create Mesh node Cube.024
+08:18:05 | INFO: Blender create Mesh node Cube.025
+08:18:05 | INFO: Blender create Mesh node Cube.026
+08:18:05 | INFO: Blender create Mesh node Cube.027
+08:18:05 | INFO: Blender create Mesh node Cube.028
+08:18:05 | INFO: Blender create Mesh node Cube.035
+08:18:05 | INFO: Blender create Mesh node S01_VisorRecess_Mesh.002
+08:18:05 | INFO: Blender create Mesh node S02_VisorOptic_Mesh.002
+08:18:05 | INFO: Blender create Mesh node Cube.037
+08:18:05 | INFO: Blender create Mesh node Cube.038
+08:18:05 | INFO: Blender create Mesh node Cube.039
+08:18:05 | INFO: Blender create Mesh node Cube.040
+08:18:05 | INFO: Blender create Mesh node Cube.041
+08:18:05 | INFO: Blender create Mesh node Cube.042
+08:18:05 | INFO: Blender create Mesh node Cube.043
+08:18:05 | INFO: Blender create Mesh node Cylinder.001
+08:18:05 | INFO: Blender create Mesh node Cylinder.004
+08:18:05 | INFO: Blender create Mesh node Cylinder
+08:18:05 | INFO: Blender create Mesh node Cylinder.006
+08:18:05 | INFO: Blender create Mesh node Cylinder.005
+08:18:05 | INFO: Blender create Mesh node Cube.015
+08:18:05 | INFO: Blender create Mesh node Cube.014
+08:18:05 | INFO: Blender create Mesh node Cube.008
+08:18:05 | INFO: Blender create Mesh node Cube.001
+08:18:05 | INFO: Blender create Mesh node Cube.009
+08:18:05 | INFO: Blender create Mesh node Cube.002
+08:18:05 | INFO: Blender create Mesh node Cube.010
+08:18:05 | INFO: Blender create Mesh node Cube.003
+08:18:05 | INFO: Blender create Mesh node Cube.012
+08:18:05 | INFO: Blender create Mesh node Cube.011
+08:18:05 | INFO: Blender create Mesh node Cube.006
+08:18:05 | INFO: Blender create Mesh node Cube.005
+08:18:05 | INFO: Blender create Mesh node Cylinder.008
+08:18:05 | INFO: Blender create Mesh node Cylinder.007
+08:18:05 | INFO: Blender create Mesh node V22_AvionicsServiceLockSlot
+08:18:05 | INFO: Blender create Mesh node Cylinder.011
+08:18:05 | INFO: Blender create Mesh node V22_AvionicsServiceSeal
+08:18:05 | INFO: Blender create Mesh node V22_AvionicsServiceSkin
+08:18:05 | INFO: Blender create Mesh node Cylinder.012
+08:18:05 | INFO: Blender create Mesh node Cylinder.013
+08:18:05 | INFO: Blender create Mesh node Cylinder.014
+08:18:05 | INFO: Blender create Mesh node Cylinder.015
+08:18:05 | INFO: Blender create Mesh node Cylinder.016
+08:18:05 | INFO: Blender create Mesh node Cylinder.017
+08:18:05 | INFO: Blender create Mesh node Cylinder.018
+08:18:05 | INFO: Blender create Mesh node Cylinder.019
+08:18:05 | INFO: Blender create Mesh node Cylinder.020
+08:18:05 | INFO: Blender create Mesh node Cylinder.021
+08:18:05 | INFO: Blender create Mesh node Cylinder.022
+08:18:05 | INFO: Blender create Mesh node Cylinder.023
+08:18:05 | INFO: Blender create Mesh node V22_FanFastenerSlot
+08:18:05 | INFO: Blender create Mesh node V22_FanFastenerSlot.001
+08:18:05 | INFO: Blender create Mesh node V22_FanFastenerSlot.002
+08:18:05 | INFO: Blender create Mesh node V22_FanFastenerSlot.003
+08:18:05 | INFO: Blender create Mesh node V22_FanFastenerSlot.004
+08:18:05 | INFO: Blender create Mesh node V22_FanFastenerSlot.005
+08:18:05 | INFO: Blender create Mesh node V22_FanFastenerSlot.006
+08:18:05 | INFO: Blender create Mesh node V22_FanFastenerSlot.007
+08:18:05 | INFO: Blender create Mesh node V22_FanFastenerSlot.008
+08:18:05 | INFO: Blender create Mesh node V22_FanFastenerSlot.009
+08:18:05 | INFO: Blender create Mesh node V22_FanFastenerSlot.010
+08:18:05 | INFO: Blender create Mesh node V22_FanFastenerSlot.011
+08:18:05 | INFO: Blender create Mesh node V22_FanServiceRim
+08:18:05 | INFO: Blender create Mesh node V22_FanServiceRim.001
+08:18:05 | INFO: Blender create Mesh node V22_ForwardAccessLockSlot
+08:18:05 | INFO: Blender create Mesh node Cylinder.009
+08:18:05 | INFO: Blender create Mesh node V22_ForwardAccessSeal
+08:18:05 | INFO: Blender create Mesh node V22_ForwardAccessSkin
+08:18:05 | INFO: Blender create Mesh node V22_OutboardAccessLockSlot
+08:18:05 | INFO: Blender create Mesh node Cylinder.010
+08:18:05 | INFO: Blender create Mesh node V22_OutboardAccessSeal
+08:18:05 | INFO: Blender create Mesh node V22_OutboardAccessSkin
+08:18:05 | INFO: Blender create Mesh node V22_ReleaseWitness
+08:18:05 | INFO: Blender create Mesh node V22_ReleaseWitness.001
+08:18:05 | INFO: Blender create Mesh node W01_PanelJoint_00.002
+08:18:05 | INFO: Blender create Mesh node W01_PanelJoint_01.002
+08:18:05 | INFO: Blender create Mesh node W04_TipMark.001
+08:18:05 | INFO: Blender create Mesh node Cube.036
+08:18:05 | INFO: Blender create Mesh node Cube.020
+08:18:06 | INFO: Blender create Mesh node Cube.021
+08:18:06 | INFO: Blender create Mesh node Cube.022
+08:18:06 | INFO: Blender create Mesh node Cube.023
+08:18:06 | INFO: Blender create Mesh node W06_ProposedElevonHinge.002
+08:18:06 | INFO: Blender create Mesh node W06_ProposedElevonHinge.001
+08:18:06 | INFO: Blender create Mesh node W07_TipPanelJoint.002
+08:18:06 | INFO: Blender create Mesh node W08_TipFold.002
+08:18:06 | INFO: glTF import finished in 0.74s
+02:30.204  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v30-proposal\bay-fit-field.png'
+08:18:16 | INFO: Data are loaded, start creating Blender stuff
+08:18:16 | INFO: Blender create Mesh node Cylinder
+08:18:16 | INFO: Blender create Mesh node Cylinder.001
+08:18:16 | INFO: Blender create Mesh node Cylinder.004
+08:18:16 | INFO: Blender create Mesh node AFT_CassetteGasket
+08:18:16 | INFO: Blender create Mesh node Cylinder.006
+08:18:16 | INFO: Blender create Mesh node AFT_FastenerSlot
+08:18:16 | INFO: Blender create Mesh node AFT_FastenerSlot.001
+08:18:16 | INFO: Blender create Mesh node AFT_FastenerSlot.002
+08:18:16 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_00
+08:18:16 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_01
+08:18:16 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_02
+08:18:16 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_03
+08:18:16 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_04
+08:18:16 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_05
+08:18:16 | INFO: Blender create Mesh node AFT_LouverEdge_00
+08:18:16 | INFO: Blender create Mesh node AFT_LouverEdge_01
+08:18:16 | INFO: Blender create Mesh node AFT_LouverEdge_02
+08:18:16 | INFO: Blender create Mesh node AFT_LouverEdge_03
+08:18:16 | INFO: Blender create Mesh node AFT_LouverEdge_04
+08:18:16 | INFO: Blender create Mesh node AFT_LouverEdge_05
+08:18:16 | INFO: Blender create Mesh node AFT_ReleaseLatch
+08:18:16 | INFO: Blender create Mesh node AFT_ServiceCassette
+08:18:16 | INFO: Blender create Mesh node Cylinder.005
+08:18:16 | INFO: Blender create Mesh node AFT_StatusLens
+08:18:16 | INFO: Blender create Mesh node AFT_StatusLens.001
+08:18:16 | INFO: Blender create Mesh node Cylinder.011
+08:18:16 | INFO: Blender create Mesh node Cube.001
+08:18:16 | INFO: Blender create Mesh node Cube.008
+08:18:16 | INFO: Blender create Mesh node Cube.009
+08:18:16 | INFO: Blender create Mesh node Cube.002
+08:18:16 | INFO: Blender create Mesh node GEAR_FixedSocket_1
+08:18:16 | INFO: Blender create Mesh node GEAR_FixedSocket_-1
+08:18:16 | INFO: Blender create Mesh node Cube.010
+08:18:16 | INFO: Blender create Mesh node Cube.003
+08:18:16 | INFO: Blender create Mesh node Cube.012
+08:18:16 | INFO: Blender create Mesh node Cube.011
+08:18:16 | INFO: Blender create Mesh node Cube.006
+08:18:16 | INFO: Blender create Mesh node Cube.005
+08:18:16 | INFO: Blender create Mesh node GEAR_TelescopicStage_1_0
+08:18:16 | INFO: Blender create Mesh node GEAR_TelescopicStage_1_1
+08:18:16 | INFO: Blender create Mesh node Cylinder.008
+08:18:16 | INFO: Blender create Mesh node GEAR_TelescopicStage_-1_0
+08:18:16 | INFO: Blender create Mesh node GEAR_TelescopicStage_-1_1
+08:18:16 | INFO: Blender create Mesh node Cylinder.007
+08:18:16 | INFO: Blender create Mesh node H01_ContinuousLiftingBody_Mesh.001
+08:18:16 | INFO: Blender create Mesh node H03_CrownJoint.006
+08:18:16 | INFO: Blender create Mesh node H03_CrownJoint.007
+08:18:16 | INFO: Blender create Mesh node H03_CrownJoint.002
+08:18:16 | INFO: Blender create Mesh node H03_CrownJoint.003
+08:18:16 | INFO: Blender create Mesh node H03_CrownJoint.004
+08:18:16 | INFO: Blender create Mesh node H03_CrownJoint.008
+08:18:16 | INFO: Blender create Mesh node Cube.004
+08:18:16 | INFO: Blender create Mesh node Cube.018
+08:18:16 | INFO: Blender create Mesh node Cube.017
+08:18:16 | INFO: Blender create Mesh node Cube.019
+08:18:16 | INFO: Blender create Mesh node I01_ShoulderIntake_Bezel.002
+08:18:16 | INFO: Blender create Mesh node I01_ShoulderIntake_Interior_Mesh.001
+08:18:16 | INFO: Blender create Mesh node P01_IntakeCowl.001
+08:18:16 | INFO: Blender create Mesh node P02_IntakeLip.001
+08:18:16 | INFO: Blender create Mesh node P03_IntakeThroat.001
+08:18:16 | INFO: Blender create Mesh node P04_IntakeBack.001
+08:18:16 | INFO: Blender create Mesh node P05_WingCowlBlend.002
+08:18:16 | INFO: Blender create Mesh node P05_WingCowlBlend.003
+08:18:16 | INFO: Blender create Mesh node P06_IntakeGuide.002
+08:18:16 | INFO: Blender create Mesh node P06_IntakeGuide.003
+08:18:16 | INFO: Blender create Mesh node P07_CowlWarning.001
+08:18:16 | INFO: Blender create Mesh node P10_ExhaustRim.001
+08:18:16 | INFO: Blender create Mesh node P11_ExhaustThroat.001
+08:18:16 | INFO: Blender create Mesh node P12_ExhaustBack.001
+08:18:16 | INFO: Blender create Mesh node P13_HeatPetal.016
+08:18:16 | INFO: Blender create Mesh node P13_HeatPetal.017
+08:18:16 | INFO: Blender create Mesh node P13_HeatPetal.018
+08:18:16 | INFO: Blender create Mesh node P13_HeatPetal.019
+08:18:16 | INFO: Blender create Mesh node P13_HeatPetal.020
+08:18:16 | INFO: Blender create Mesh node P13_HeatPetal.021
+08:18:16 | INFO: Blender create Mesh node P13_HeatPetal.022
+08:18:16 | INFO: Blender create Mesh node P13_HeatPetal.023
+08:18:16 | INFO: Blender create Mesh node P13_HeatPetal.024
+08:18:16 | INFO: Blender create Mesh node P13_HeatPetal.025
+08:18:16 | INFO: Blender create Mesh node P13_HeatPetal.026
+08:18:16 | INFO: Blender create Mesh node P13_HeatPetal.027
+08:18:16 | INFO: Blender create Mesh node P13_HeatPetal.028
+08:18:16 | INFO: Blender create Mesh node P13_HeatPetal.029
+08:18:16 | INFO: Blender create Mesh node P13_HeatPetal.030
+08:18:16 | INFO: Blender create Mesh node P13_HeatPetal.031
+08:18:16 | INFO: Blender create Mesh node P14_InternalMixer.003
+08:18:16 | INFO: Blender create Mesh node P14_InternalMixer.004
+08:18:16 | INFO: Blender create Mesh node P14_InternalMixer.005
+08:18:16 | INFO: Blender create Mesh node P15_ExhaustApron.001
+08:18:16 | INFO: Blender create Mesh node R01_DuctWall_Mesh.001
+08:18:16 | INFO: Blender create Mesh node R02_RecessedLip_Mesh.001
+08:18:16 | INFO: Blender create Mesh node R03_LowerLip_Mesh.001
+08:18:16 | INFO: Blender create Mesh node Cylinder.002
+08:18:16 | INFO: Blender create Mesh node Cylinder.003
+08:18:16 | INFO: Blender create Mesh node R06_Blade_00_Mesh.001
+08:18:16 | INFO: Blender create Mesh node R06_Blade_01_Mesh.001
+08:18:16 | INFO: Blender create Mesh node R06_Blade_02_Mesh.001
+08:18:16 | INFO: Blender create Mesh node R06_Blade_03_Mesh.001
+08:18:16 | INFO: Blender create Mesh node R06_Blade_04_Mesh.001
+08:18:16 | INFO: Blender create Mesh node R06_Blade_05_Mesh.001
+08:18:16 | INFO: Blender create Mesh node R06_Blade_06_Mesh.001
+08:18:16 | INFO: Blender create Mesh node R06_Blade_07_Mesh.001
+08:18:16 | INFO: Blender create Mesh node R06_Blade_08_Mesh.001
+08:18:16 | INFO: Blender create Mesh node R06_Blade_09_Mesh.001
+08:18:16 | INFO: Blender create Mesh node R06_Blade_10_Mesh.001
+08:18:16 | INFO: Blender create Mesh node R06_Blade_11_Mesh.001
+08:18:16 | INFO: Blender create Mesh node Cube.024
+08:18:16 | INFO: Blender create Mesh node Cube.025
+08:18:16 | INFO: Blender create Mesh node Cube.026
+08:18:16 | INFO: Blender create Mesh node Cube.027
+08:18:16 | INFO: Blender create Mesh node Cube.028
+08:18:16 | INFO: Blender create Mesh node Cube.035
+08:18:16 | INFO: Blender create Mesh node S01_VisorRecess_Mesh.002
+08:18:16 | INFO: Blender create Mesh node S02_VisorOptic_Mesh.002
+08:18:16 | INFO: Blender create Mesh node SCOUT_CheekGlass
+08:18:16 | INFO: Blender create Mesh node SCOUT_CheekSensor_Interior
+08:18:16 | INFO: Blender create Mesh node SCOUT_DorsalReceiver
+08:18:16 | INFO: Blender create Mesh node Cylinder.015
+08:18:16 | INFO: Blender create Mesh node Cylinder.014
+08:18:16 | INFO: Blender create Mesh node Cylinder.013
+08:18:16 | INFO: Blender create Mesh node SCOUT_PerimeterRecess
+08:18:16 | INFO: Blender create Mesh node SCOUT_ScanTrack
+08:18:16 | INFO: Blender create Mesh node SCOUT_SensorSeal
+08:18:16 | INFO: Blender create Mesh node SCOUT_SideScanLens
+08:18:16 | INFO: Blender create Mesh node Cylinder.001
+08:18:16 | INFO: Blender create Mesh node Cylinder.004
+08:18:16 | INFO: Blender create Mesh node Cylinder
+08:18:16 | INFO: Blender create Mesh node Cylinder.006
+08:18:16 | INFO: Blender create Mesh node Cylinder.005
+08:18:16 | INFO: Blender create Mesh node Cube.008
+08:18:16 | INFO: Blender create Mesh node Cube.001
+08:18:16 | INFO: Blender create Mesh node Cube.009
+08:18:16 | INFO: Blender create Mesh node Cube.002
+08:18:16 | INFO: Blender create Mesh node Cube.010
+08:18:16 | INFO: Blender create Mesh node Cube.003
+08:18:16 | INFO: Blender create Mesh node Cube.012
+08:18:16 | INFO: Blender create Mesh node Cube.011
+08:18:16 | INFO: Blender create Mesh node Cube.006
+08:18:16 | INFO: Blender create Mesh node Cube.005
+08:18:16 | INFO: Blender create Mesh node Cylinder.008
+08:18:16 | INFO: Blender create Mesh node Cylinder.007
+08:18:16 | INFO: Blender create Mesh node Cylinder.015
+08:18:16 | INFO: Blender create Mesh node Cylinder.014
+08:18:16 | INFO: Blender create Mesh node Cylinder.013
+08:18:16 | INFO: Blender create Mesh node V22_AvionicsServiceLockSlot
+08:18:16 | INFO: Blender create Mesh node Cylinder.012
+08:18:16 | INFO: Blender create Mesh node V22_AvionicsServiceSeal
+08:18:16 | INFO: Blender create Mesh node V22_AvionicsServiceSkin
+08:18:16 | INFO: Blender create Mesh node Cylinder.016
+08:18:16 | INFO: Blender create Mesh node Cylinder.017
+08:18:16 | INFO: Blender create Mesh node Cylinder.018
+08:18:16 | INFO: Blender create Mesh node Cylinder.019
+08:18:16 | INFO: Blender create Mesh node Cylinder.020
+08:18:16 | INFO: Blender create Mesh node Cylinder.021
+08:18:16 | INFO: Blender create Mesh node Cylinder.022
+08:18:16 | INFO: Blender create Mesh node Cylinder.023
+08:18:16 | INFO: Blender create Mesh node Cylinder.024
+08:18:16 | INFO: Blender create Mesh node Cylinder.025
+08:18:16 | INFO: Blender create Mesh node Cylinder.026
+08:18:16 | INFO: Blender create Mesh node Cylinder.027
+08:18:16 | INFO: Blender create Mesh node V22_FanFastenerSlot
+08:18:16 | INFO: Blender create Mesh node V22_FanFastenerSlot.001
+08:18:16 | INFO: Blender create Mesh node V22_FanFastenerSlot.002
+08:18:16 | INFO: Blender create Mesh node V22_FanFastenerSlot.003
+08:18:16 | INFO: Blender create Mesh node V22_FanFastenerSlot.004
+08:18:16 | INFO: Blender create Mesh node V22_FanFastenerSlot.005
+08:18:16 | INFO: Blender create Mesh node V22_FanFastenerSlot.006
+08:18:16 | INFO: Blender create Mesh node V22_FanFastenerSlot.007
+08:18:16 | INFO: Blender create Mesh node V22_FanFastenerSlot.008
+08:18:16 | INFO: Blender create Mesh node V22_FanFastenerSlot.009
+08:18:16 | INFO: Blender create Mesh node V22_FanFastenerSlot.010
+08:18:16 | INFO: Blender create Mesh node V22_FanFastenerSlot.011
+08:18:16 | INFO: Blender create Mesh node V22_FanServiceRim
+08:18:16 | INFO: Blender create Mesh node V22_FanServiceRim.001
+08:18:16 | INFO: Blender create Mesh node V22_ForwardAccessLockSlot
+08:18:16 | INFO: Blender create Mesh node Cylinder.009
+08:18:16 | INFO: Blender create Mesh node V22_ForwardAccessSeal
+08:18:16 | INFO: Blender create Mesh node V22_ForwardAccessSkin
+08:18:16 | INFO: Blender create Mesh node V22_OutboardAccessLockSlot
+08:18:16 | INFO: Blender create Mesh node Cylinder.010
+08:18:16 | INFO: Blender create Mesh node V22_OutboardAccessSeal
+08:18:16 | INFO: Blender create Mesh node V22_OutboardAccessSkin
+08:18:16 | INFO: Blender create Mesh node V22_ReleaseWitness
+08:18:16 | INFO: Blender create Mesh node V22_ReleaseWitness.001
+08:18:16 | INFO: Blender create Mesh node W01_PanelJoint_00.002
+08:18:16 | INFO: Blender create Mesh node W01_PanelJoint_01.002
+08:18:16 | INFO: Blender create Mesh node W04_TipMark.001
+08:18:16 | INFO: Blender create Mesh node Cube.036
+08:18:16 | INFO: Blender create Mesh node Cube.020
+08:18:16 | INFO: Blender create Mesh node Cube.021
+08:18:16 | INFO: Blender create Mesh node Cube.022
+08:18:16 | INFO: Blender create Mesh node Cube.023
+08:18:16 | INFO: Blender create Mesh node W06_ProposedElevonHinge.002
+08:18:16 | INFO: Blender create Mesh node W06_ProposedElevonHinge.001
+08:18:16 | INFO: Blender create Mesh node W07_TipPanelJoint.002
+08:18:16 | INFO: Blender create Mesh node W08_TipFold.002
+08:18:16 | INFO: glTF import finished in 0.67s
+02:41.000  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v30-proposal\bay-fit-scout.png'
+08:18:27 | INFO: Data are loaded, start creating Blender stuff
+08:18:27 | INFO: Blender create Mesh node Cylinder
+08:18:27 | INFO: Blender create Mesh node Cylinder.001
+08:18:27 | INFO: Blender create Mesh node Cylinder.004
+08:18:27 | INFO: Blender create Mesh node AFT_CassetteGasket
+08:18:27 | INFO: Blender create Mesh node Cylinder.006
+08:18:27 | INFO: Blender create Mesh node AFT_FastenerSlot
+08:18:27 | INFO: Blender create Mesh node AFT_FastenerSlot.001
+08:18:27 | INFO: Blender create Mesh node AFT_FastenerSlot.002
+08:18:27 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_00
+08:18:27 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_01
+08:18:27 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_02
+08:18:27 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_03
+08:18:27 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_04
+08:18:27 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_05
+08:18:27 | INFO: Blender create Mesh node AFT_LouverEdge_00
+08:18:27 | INFO: Blender create Mesh node AFT_LouverEdge_01
+08:18:27 | INFO: Blender create Mesh node AFT_LouverEdge_02
+08:18:27 | INFO: Blender create Mesh node AFT_LouverEdge_03
+08:18:27 | INFO: Blender create Mesh node AFT_LouverEdge_04
+08:18:27 | INFO: Blender create Mesh node AFT_LouverEdge_05
+08:18:27 | INFO: Blender create Mesh node AFT_ReleaseLatch
+08:18:27 | INFO: Blender create Mesh node AFT_ServiceCassette
+08:18:27 | INFO: Blender create Mesh node Cylinder.005
+08:18:27 | INFO: Blender create Mesh node AFT_StatusLens
+08:18:27 | INFO: Blender create Mesh node AFT_StatusLens.001
+08:18:27 | INFO: Blender create Mesh node CARGO_DrawerLatch
+08:18:27 | INFO: Blender create Mesh node CARGO_DrawerLatch.001
+08:18:27 | INFO: Blender create Mesh node CARGO_DrawerSeal
+08:18:27 | INFO: Blender create Mesh node CARGO_DrawerSeal.001
+08:18:27 | INFO: Blender create Mesh node CARGO_FloorDoor_Interior
+08:18:27 | INFO: Blender create Mesh node CARGO_FloorDoor
+08:18:27 | INFO: Blender create Mesh node CARGO_FrontDoor
+08:18:27 | INFO: Blender create Mesh node CARGO_FrontDoor.001
+08:18:27 | INFO: Blender create Mesh node CARGO_FrontDrawer_Interior
+08:18:27 | INFO: Blender create Mesh node CARGO_FrontDrawer_Interior.001
+08:18:27 | INFO: Blender create Mesh node Cube.014
+08:18:27 | INFO: Blender create Mesh node Cube.016
+08:18:27 | INFO: Blender create Mesh node Cube.030
+08:18:27 | INFO: Blender create Mesh node Cube.013
+08:18:27 | INFO: Blender create Mesh node Cube.015
+08:18:27 | INFO: Blender create Mesh node Cube.029
+08:18:27 | INFO: Blender create Mesh node CARGO_ShellJoint
+08:18:27 | INFO: Blender create Mesh node CARGO_ShellJoint.001
+08:18:27 | INFO: Blender create Mesh node CARGO_ShellJoint.002
+08:18:27 | INFO: Blender create Mesh node Cube.001
+08:18:27 | INFO: Blender create Mesh node Cube.008
+08:18:27 | INFO: Blender create Mesh node Cube.009
+08:18:27 | INFO: Blender create Mesh node Cube.002
+08:18:27 | INFO: Blender create Mesh node GEAR_FixedSocket_1
+08:18:27 | INFO: Blender create Mesh node GEAR_FixedSocket_-1
+08:18:27 | INFO: Blender create Mesh node Cube.010
+08:18:27 | INFO: Blender create Mesh node Cube.003
+08:18:27 | INFO: Blender create Mesh node Cube.012
+08:18:27 | INFO: Blender create Mesh node Cube.011
+08:18:27 | INFO: Blender create Mesh node Cube.006
+08:18:27 | INFO: Blender create Mesh node Cube.005
+08:18:27 | INFO: Blender create Mesh node GEAR_TelescopicStage_1_0
+08:18:27 | INFO: Blender create Mesh node GEAR_TelescopicStage_1_1
+08:18:27 | INFO: Blender create Mesh node Cylinder.008
+08:18:27 | INFO: Blender create Mesh node GEAR_TelescopicStage_-1_0
+08:18:27 | INFO: Blender create Mesh node GEAR_TelescopicStage_-1_1
+08:18:27 | INFO: Blender create Mesh node Cylinder.007
+08:18:27 | INFO: Blender create Mesh node H01_ContinuousLiftingBody_Mesh.001
+08:18:27 | INFO: Blender create Mesh node H03_CrownJoint.006
+08:18:27 | INFO: Blender create Mesh node H03_CrownJoint.007
+08:18:27 | INFO: Blender create Mesh node H03_CrownJoint.002
+08:18:27 | INFO: Blender create Mesh node H03_CrownJoint.003
+08:18:27 | INFO: Blender create Mesh node H03_CrownJoint.004
+08:18:27 | INFO: Blender create Mesh node H03_CrownJoint.008
+08:18:27 | INFO: Blender create Mesh node Cube.004
+08:18:27 | INFO: Blender create Mesh node Cube.018
+08:18:27 | INFO: Blender create Mesh node Cube.017
+08:18:27 | INFO: Blender create Mesh node Cube.019
+08:18:27 | INFO: Blender create Mesh node I01_ShoulderIntake_Bezel.002
+08:18:27 | INFO: Blender create Mesh node I01_ShoulderIntake_Interior_Mesh.001
+08:18:27 | INFO: Blender create Mesh node P01_IntakeCowl.001
+08:18:27 | INFO: Blender create Mesh node P02_IntakeLip.001
+08:18:27 | INFO: Blender create Mesh node P03_IntakeThroat.001
+08:18:27 | INFO: Blender create Mesh node P04_IntakeBack.001
+08:18:27 | INFO: Blender create Mesh node P05_WingCowlBlend.002
+08:18:27 | INFO: Blender create Mesh node P05_WingCowlBlend.003
+08:18:27 | INFO: Blender create Mesh node P06_IntakeGuide.002
+08:18:27 | INFO: Blender create Mesh node P06_IntakeGuide.003
+08:18:27 | INFO: Blender create Mesh node P07_CowlWarning.001
+08:18:27 | INFO: Blender create Mesh node P10_ExhaustRim.001
+08:18:27 | INFO: Blender create Mesh node P11_ExhaustThroat.001
+08:18:27 | INFO: Blender create Mesh node P12_ExhaustBack.001
+08:18:27 | INFO: Blender create Mesh node P13_HeatPetal.016
+08:18:27 | INFO: Blender create Mesh node P13_HeatPetal.017
+08:18:27 | INFO: Blender create Mesh node P13_HeatPetal.018
+08:18:27 | INFO: Blender create Mesh node P13_HeatPetal.019
+08:18:27 | INFO: Blender create Mesh node P13_HeatPetal.020
+08:18:27 | INFO: Blender create Mesh node P13_HeatPetal.021
+08:18:27 | INFO: Blender create Mesh node P13_HeatPetal.022
+08:18:27 | INFO: Blender create Mesh node P13_HeatPetal.023
+08:18:27 | INFO: Blender create Mesh node P13_HeatPetal.024
+08:18:27 | INFO: Blender create Mesh node P13_HeatPetal.025
+08:18:27 | INFO: Blender create Mesh node P13_HeatPetal.026
+08:18:27 | INFO: Blender create Mesh node P13_HeatPetal.027
+08:18:27 | INFO: Blender create Mesh node P13_HeatPetal.028
+08:18:27 | INFO: Blender create Mesh node P13_HeatPetal.029
+08:18:27 | INFO: Blender create Mesh node P13_HeatPetal.030
+08:18:27 | INFO: Blender create Mesh node P13_HeatPetal.031
+08:18:27 | INFO: Blender create Mesh node P14_InternalMixer.003
+08:18:27 | INFO: Blender create Mesh node P14_InternalMixer.004
+08:18:27 | INFO: Blender create Mesh node P14_InternalMixer.005
+08:18:27 | INFO: Blender create Mesh node P15_ExhaustApron.001
+08:18:27 | INFO: Blender create Mesh node R01_DuctWall_Mesh.001
+08:18:27 | INFO: Blender create Mesh node R02_RecessedLip_Mesh.001
+08:18:27 | INFO: Blender create Mesh node R03_LowerLip_Mesh.001
+08:18:27 | INFO: Blender create Mesh node Cylinder.002
+08:18:27 | INFO: Blender create Mesh node Cylinder.003
+08:18:27 | INFO: Blender create Mesh node R06_Blade_00_Mesh.001
+08:18:27 | INFO: Blender create Mesh node R06_Blade_01_Mesh.001
+08:18:27 | INFO: Blender create Mesh node R06_Blade_02_Mesh.001
+08:18:27 | INFO: Blender create Mesh node R06_Blade_03_Mesh.001
+08:18:27 | INFO: Blender create Mesh node R06_Blade_04_Mesh.001
+08:18:27 | INFO: Blender create Mesh node R06_Blade_05_Mesh.001
+08:18:27 | INFO: Blender create Mesh node R06_Blade_06_Mesh.001
+08:18:27 | INFO: Blender create Mesh node R06_Blade_07_Mesh.001
+08:18:27 | INFO: Blender create Mesh node R06_Blade_08_Mesh.001
+08:18:27 | INFO: Blender create Mesh node R06_Blade_09_Mesh.001
+08:18:27 | INFO: Blender create Mesh node R06_Blade_10_Mesh.001
+08:18:27 | INFO: Blender create Mesh node R06_Blade_11_Mesh.001
+08:18:27 | INFO: Blender create Mesh node Cube.024
+08:18:27 | INFO: Blender create Mesh node Cube.025
+08:18:27 | INFO: Blender create Mesh node Cube.026
+08:18:27 | INFO: Blender create Mesh node Cube.027
+08:18:27 | INFO: Blender create Mesh node Cube.028
+08:18:27 | INFO: Blender create Mesh node Cube.035
+08:18:27 | INFO: Blender create Mesh node S01_VisorRecess_Mesh.002
+08:18:27 | INFO: Blender create Mesh node S02_VisorOptic_Mesh.002
+08:18:27 | INFO: Blender create Mesh node Cylinder.001
+08:18:27 | INFO: Blender create Mesh node Cylinder.004
+08:18:27 | INFO: Blender create Mesh node Cylinder
+08:18:27 | INFO: Blender create Mesh node Cylinder.006
+08:18:27 | INFO: Blender create Mesh node Cylinder.005
+08:18:27 | INFO: Blender create Mesh node CARGO_FloorDoor
+08:18:27 | INFO: Blender create Mesh node Cube.016
+08:18:27 | INFO: Blender create Mesh node Cube.030
+08:18:27 | INFO: Blender create Mesh node Cube.014
+08:18:27 | INFO: Blender create Mesh node Cube.015
+08:18:27 | INFO: Blender create Mesh node Cube.029
+08:18:27 | INFO: Blender create Mesh node Cube.013
+08:18:27 | INFO: Blender create Mesh node Cube.008
+08:18:27 | INFO: Blender create Mesh node Cube.001
+08:18:27 | INFO: Blender create Mesh node Cube.009
+08:18:27 | INFO: Blender create Mesh node Cube.002
+08:18:27 | INFO: Blender create Mesh node Cube.010
+08:18:27 | INFO: Blender create Mesh node Cube.003
+08:18:27 | INFO: Blender create Mesh node Cube.012
+08:18:27 | INFO: Blender create Mesh node Cube.011
+08:18:27 | INFO: Blender create Mesh node Cube.006
+08:18:27 | INFO: Blender create Mesh node Cube.005
+08:18:27 | INFO: Blender create Mesh node Cylinder.008
+08:18:27 | INFO: Blender create Mesh node Cylinder.007
+08:18:27 | INFO: Blender create Mesh node V22_AvionicsServiceLockSlot
+08:18:27 | INFO: Blender create Mesh node Cylinder.011
+08:18:27 | INFO: Blender create Mesh node V22_AvionicsServiceSeal
+08:18:27 | INFO: Blender create Mesh node V22_AvionicsServiceSkin
+08:18:27 | INFO: Blender create Mesh node Cylinder.012
+08:18:27 | INFO: Blender create Mesh node Cylinder.013
+08:18:27 | INFO: Blender create Mesh node Cylinder.014
+08:18:27 | INFO: Blender create Mesh node Cylinder.015
+08:18:27 | INFO: Blender create Mesh node Cylinder.016
+08:18:27 | INFO: Blender create Mesh node Cylinder.017
+08:18:27 | INFO: Blender create Mesh node Cylinder.018
+08:18:27 | INFO: Blender create Mesh node Cylinder.019
+08:18:27 | INFO: Blender create Mesh node Cylinder.020
+08:18:27 | INFO: Blender create Mesh node Cylinder.021
+08:18:27 | INFO: Blender create Mesh node Cylinder.022
+08:18:27 | INFO: Blender create Mesh node Cylinder.023
+08:18:27 | INFO: Blender create Mesh node V22_FanFastenerSlot
+08:18:27 | INFO: Blender create Mesh node V22_FanFastenerSlot.001
+08:18:27 | INFO: Blender create Mesh node V22_FanFastenerSlot.002
+08:18:27 | INFO: Blender create Mesh node V22_FanFastenerSlot.003
+08:18:27 | INFO: Blender create Mesh node V22_FanFastenerSlot.004
+08:18:27 | INFO: Blender create Mesh node V22_FanFastenerSlot.005
+08:18:27 | INFO: Blender create Mesh node V22_FanFastenerSlot.006
+08:18:27 | INFO: Blender create Mesh node V22_FanFastenerSlot.007
+08:18:27 | INFO: Blender create Mesh node V22_FanFastenerSlot.008
+08:18:27 | INFO: Blender create Mesh node V22_FanFastenerSlot.009
+08:18:27 | INFO: Blender create Mesh node V22_FanFastenerSlot.010
+08:18:27 | INFO: Blender create Mesh node V22_FanFastenerSlot.011
+08:18:27 | INFO: Blender create Mesh node V22_FanServiceRim
+08:18:27 | INFO: Blender create Mesh node V22_FanServiceRim.001
+08:18:27 | INFO: Blender create Mesh node V22_ForwardAccessLockSlot
+08:18:27 | INFO: Blender create Mesh node Cylinder.009
+08:18:27 | INFO: Blender create Mesh node V22_ForwardAccessSeal
+08:18:27 | INFO: Blender create Mesh node V22_ForwardAccessSkin
+08:18:27 | INFO: Blender create Mesh node V22_OutboardAccessLockSlot
+08:18:27 | INFO: Blender create Mesh node Cylinder.010
+08:18:27 | INFO: Blender create Mesh node V22_OutboardAccessSeal
+08:18:27 | INFO: Blender create Mesh node V22_OutboardAccessSkin
+08:18:27 | INFO: Blender create Mesh node V22_ReleaseWitness
+08:18:27 | INFO: Blender create Mesh node V22_ReleaseWitness.001
+08:18:27 | INFO: Blender create Mesh node W01_PanelJoint_00.002
+08:18:27 | INFO: Blender create Mesh node W01_PanelJoint_01.002
+08:18:27 | INFO: Blender create Mesh node W04_TipMark.001
+08:18:27 | INFO: Blender create Mesh node Cube.036
+08:18:27 | INFO: Blender create Mesh node Cube.020
+08:18:27 | INFO: Blender create Mesh node Cube.021
+08:18:27 | INFO: Blender create Mesh node Cube.022
+08:18:27 | INFO: Blender create Mesh node Cube.023
+08:18:27 | INFO: Blender create Mesh node W06_ProposedElevonHinge.002
+08:18:27 | INFO: Blender create Mesh node W06_ProposedElevonHinge.001
+08:18:27 | INFO: Blender create Mesh node W07_TipPanelJoint.002
+08:18:27 | INFO: Blender create Mesh node W08_TipFold.002
+08:18:27 | INFO: glTF import finished in 0.86s
+02:52.641  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v30-proposal\bay-fit-cargo.png'
+08:18:38 | INFO: Data are loaded, start creating Blender stuff
+08:18:38 | INFO: Blender create Mesh node Cylinder
+08:18:38 | INFO: Blender create Mesh node Cylinder.001
+08:18:38 | INFO: Blender create Mesh node Cylinder.004
+08:18:38 | INFO: Blender create Mesh node AFT_CassetteGasket
+08:18:38 | INFO: Blender create Mesh node Cylinder.006
+08:18:38 | INFO: Blender create Mesh node AFT_FastenerSlot
+08:18:38 | INFO: Blender create Mesh node AFT_FastenerSlot.001
+08:18:38 | INFO: Blender create Mesh node AFT_FastenerSlot.002
+08:18:38 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_00
+08:18:38 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_01
+08:18:38 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_02
+08:18:38 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_03
+08:18:38 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_04
+08:18:38 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_05
+08:18:38 | INFO: Blender create Mesh node AFT_LouverEdge_00
+08:18:38 | INFO: Blender create Mesh node AFT_LouverEdge_01
+08:18:38 | INFO: Blender create Mesh node AFT_LouverEdge_02
+08:18:38 | INFO: Blender create Mesh node AFT_LouverEdge_03
+08:18:38 | INFO: Blender create Mesh node AFT_LouverEdge_04
+08:18:38 | INFO: Blender create Mesh node AFT_LouverEdge_05
+08:18:38 | INFO: Blender create Mesh node AFT_ReleaseLatch
+08:18:38 | INFO: Blender create Mesh node AFT_ServiceCassette
+08:18:38 | INFO: Blender create Mesh node Cylinder.005
+08:18:38 | INFO: Blender create Mesh node AFT_StatusLens
+08:18:38 | INFO: Blender create Mesh node AFT_StatusLens.001
+08:18:38 | INFO: Blender create Mesh node Cylinder.016
+08:18:38 | INFO: Blender create Mesh node ENG_ArmCradle_Interior
+08:18:38 | INFO: Blender create Mesh node ENG_CradleRim
+08:18:38 | INFO: Blender create Mesh node Cube.014
+08:18:38 | INFO: Blender create Mesh node Cube.015
+08:18:38 | INFO: Blender create Mesh node Cube.029
+08:18:38 | INFO: Blender create Mesh node Cube.016
+08:18:38 | INFO: Blender create Mesh node Cylinder.020
+08:18:38 | INFO: Blender create Mesh node Cylinder.019
+08:18:38 | INFO: Blender create Mesh node Cylinder.018
+08:18:38 | INFO: Blender create Mesh node Cylinder.009
+08:18:38 | INFO: Blender create Mesh node Cylinder.010
+08:18:38 | INFO: Blender create Mesh node Cylinder.011
+08:18:38 | INFO: Blender create Mesh node Cylinder.012
+08:18:38 | INFO: Blender create Mesh node Cylinder.013
+08:18:38 | INFO: Blender create Mesh node Cylinder.014
+08:18:38 | INFO: Blender create Mesh node Cylinder.015
+08:18:38 | INFO: Blender create Mesh node Cube.013
+08:18:38 | INFO: Blender create Mesh node Cube.001
+08:18:38 | INFO: Blender create Mesh node Cube.008
+08:18:38 | INFO: Blender create Mesh node Cube.009
+08:18:38 | INFO: Blender create Mesh node Cube.002
+08:18:38 | INFO: Blender create Mesh node GEAR_FixedSocket_1
+08:18:38 | INFO: Blender create Mesh node GEAR_FixedSocket_-1
+08:18:38 | INFO: Blender create Mesh node Cube.010
+08:18:38 | INFO: Blender create Mesh node Cube.003
+08:18:38 | INFO: Blender create Mesh node Cube.012
+08:18:38 | INFO: Blender create Mesh node Cube.011
+08:18:38 | INFO: Blender create Mesh node Cube.006
+08:18:38 | INFO: Blender create Mesh node Cube.005
+08:18:38 | INFO: Blender create Mesh node GEAR_TelescopicStage_1_0
+08:18:38 | INFO: Blender create Mesh node GEAR_TelescopicStage_1_1
+08:18:38 | INFO: Blender create Mesh node Cylinder.008
+08:18:38 | INFO: Blender create Mesh node GEAR_TelescopicStage_-1_0
+08:18:38 | INFO: Blender create Mesh node GEAR_TelescopicStage_-1_1
+08:18:38 | INFO: Blender create Mesh node Cylinder.007
+08:18:38 | INFO: Blender create Mesh node H01_ContinuousLiftingBody_Mesh.001
+08:18:39 | INFO: Blender create Mesh node H03_CrownJoint.006
+08:18:39 | INFO: Blender create Mesh node H03_CrownJoint.007
+08:18:39 | INFO: Blender create Mesh node H03_CrownJoint.002
+08:18:39 | INFO: Blender create Mesh node H03_CrownJoint.003
+08:18:39 | INFO: Blender create Mesh node H03_CrownJoint.004
+08:18:39 | INFO: Blender create Mesh node H03_CrownJoint.008
+08:18:39 | INFO: Blender create Mesh node Cube.004
+08:18:39 | INFO: Blender create Mesh node Cube.018
+08:18:39 | INFO: Blender create Mesh node Cube.017
+08:18:39 | INFO: Blender create Mesh node Cube.019
+08:18:39 | INFO: Blender create Mesh node I01_ShoulderIntake_Bezel.002
+08:18:39 | INFO: Blender create Mesh node I01_ShoulderIntake_Interior_Mesh.001
+08:18:39 | INFO: Blender create Mesh node P01_IntakeCowl.001
+08:18:39 | INFO: Blender create Mesh node P02_IntakeLip.001
+08:18:39 | INFO: Blender create Mesh node P03_IntakeThroat.001
+08:18:39 | INFO: Blender create Mesh node P04_IntakeBack.001
+08:18:39 | INFO: Blender create Mesh node P05_WingCowlBlend.002
+08:18:39 | INFO: Blender create Mesh node P05_WingCowlBlend.003
+08:18:39 | INFO: Blender create Mesh node P06_IntakeGuide.002
+08:18:39 | INFO: Blender create Mesh node P06_IntakeGuide.003
+08:18:39 | INFO: Blender create Mesh node P07_CowlWarning.001
+08:18:39 | INFO: Blender create Mesh node P10_ExhaustRim.001
+08:18:39 | INFO: Blender create Mesh node P11_ExhaustThroat.001
+08:18:39 | INFO: Blender create Mesh node P12_ExhaustBack.001
+08:18:39 | INFO: Blender create Mesh node P13_HeatPetal.016
+08:18:39 | INFO: Blender create Mesh node P13_HeatPetal.017
+08:18:39 | INFO: Blender create Mesh node P13_HeatPetal.018
+08:18:39 | INFO: Blender create Mesh node P13_HeatPetal.019
+08:18:39 | INFO: Blender create Mesh node P13_HeatPetal.020
+08:18:39 | INFO: Blender create Mesh node P13_HeatPetal.021
+08:18:39 | INFO: Blender create Mesh node P13_HeatPetal.022
+08:18:39 | INFO: Blender create Mesh node P13_HeatPetal.023
+08:18:39 | INFO: Blender create Mesh node P13_HeatPetal.024
+08:18:39 | INFO: Blender create Mesh node P13_HeatPetal.025
+08:18:39 | INFO: Blender create Mesh node P13_HeatPetal.026
+08:18:39 | INFO: Blender create Mesh node P13_HeatPetal.027
+08:18:39 | INFO: Blender create Mesh node P13_HeatPetal.028
+08:18:39 | INFO: Blender create Mesh node P13_HeatPetal.029
+08:18:39 | INFO: Blender create Mesh node P13_HeatPetal.030
+08:18:39 | INFO: Blender create Mesh node P13_HeatPetal.031
+08:18:39 | INFO: Blender create Mesh node P14_InternalMixer.003
+08:18:39 | INFO: Blender create Mesh node P14_InternalMixer.004
+08:18:39 | INFO: Blender create Mesh node P14_InternalMixer.005
+08:18:39 | INFO: Blender create Mesh node P15_ExhaustApron.001
+08:18:39 | INFO: Blender create Mesh node R01_DuctWall_Mesh.001
+08:18:39 | INFO: Blender create Mesh node R02_RecessedLip_Mesh.001
+08:18:39 | INFO: Blender create Mesh node R03_LowerLip_Mesh.001
+08:18:39 | INFO: Blender create Mesh node Cylinder.002
+08:18:39 | INFO: Blender create Mesh node Cylinder.003
+08:18:39 | INFO: Blender create Mesh node R06_Blade_00_Mesh.001
+08:18:39 | INFO: Blender create Mesh node R06_Blade_01_Mesh.001
+08:18:39 | INFO: Blender create Mesh node R06_Blade_02_Mesh.001
+08:18:39 | INFO: Blender create Mesh node R06_Blade_03_Mesh.001
+08:18:39 | INFO: Blender create Mesh node R06_Blade_04_Mesh.001
+08:18:39 | INFO: Blender create Mesh node R06_Blade_05_Mesh.001
+08:18:39 | INFO: Blender create Mesh node R06_Blade_06_Mesh.001
+08:18:39 | INFO: Blender create Mesh node R06_Blade_07_Mesh.001
+08:18:39 | INFO: Blender create Mesh node R06_Blade_08_Mesh.001
+08:18:39 | INFO: Blender create Mesh node R06_Blade_09_Mesh.001
+08:18:39 | INFO: Blender create Mesh node R06_Blade_10_Mesh.001
+08:18:39 | INFO: Blender create Mesh node R06_Blade_11_Mesh.001
+08:18:39 | INFO: Blender create Mesh node Cube.024
+08:18:39 | INFO: Blender create Mesh node Cube.025
+08:18:39 | INFO: Blender create Mesh node Cube.026
+08:18:39 | INFO: Blender create Mesh node Cube.027
+08:18:39 | INFO: Blender create Mesh node Cube.028
+08:18:39 | INFO: Blender create Mesh node Cube.035
+08:18:39 | INFO: Blender create Mesh node S01_VisorRecess_Mesh.002
+08:18:39 | INFO: Blender create Mesh node S02_VisorOptic_Mesh.002
+08:18:39 | INFO: Blender create Mesh node Cylinder.001
+08:18:39 | INFO: Blender create Mesh node Cylinder.004
+08:18:39 | INFO: Blender create Mesh node Cylinder
+08:18:39 | INFO: Blender create Mesh node Cylinder.006
+08:18:39 | INFO: Blender create Mesh node Cylinder.005
+08:18:39 | INFO: Blender create Mesh node Cylinder.016
+08:18:39 | INFO: Blender create Mesh node Cube.015
+08:18:39 | INFO: Blender create Mesh node Cube.029
+08:18:39 | INFO: Blender create Mesh node Cube.016
+08:18:39 | INFO: Blender create Mesh node Cylinder.009
+08:18:39 | INFO: Blender create Mesh node Cylinder.010
+08:18:39 | INFO: Blender create Mesh node Cylinder.011
+08:18:39 | INFO: Blender create Mesh node Cylinder.012
+08:18:39 | INFO: Blender create Mesh node Cylinder.013
+08:18:39 | INFO: Blender create Mesh node Cylinder.014
+08:18:39 | INFO: Blender create Mesh node Cylinder.015
+08:18:39 | INFO: Blender create Mesh node Cube.008
+08:18:39 | INFO: Blender create Mesh node Cube.001
+08:18:39 | INFO: Blender create Mesh node Cube.009
+08:18:39 | INFO: Blender create Mesh node Cube.002
+08:18:39 | INFO: Blender create Mesh node Cube.010
+08:18:39 | INFO: Blender create Mesh node Cube.003
+08:18:39 | INFO: Blender create Mesh node Cube.012
+08:18:39 | INFO: Blender create Mesh node Cube.011
+08:18:39 | INFO: Blender create Mesh node Cube.006
+08:18:39 | INFO: Blender create Mesh node Cube.005
+08:18:39 | INFO: Blender create Mesh node Cylinder.008
+08:18:39 | INFO: Blender create Mesh node Cylinder.007
+08:18:39 | INFO: Blender create Mesh node V22_AvionicsServiceLockSlot
+08:18:39 | INFO: Blender create Mesh node Cylinder.022
+08:18:39 | INFO: Blender create Mesh node V22_AvionicsServiceSeal
+08:18:39 | INFO: Blender create Mesh node V22_AvionicsServiceSkin
+08:18:39 | INFO: Blender create Mesh node Cylinder.023
+08:18:39 | INFO: Blender create Mesh node Cylinder.024
+08:18:39 | INFO: Blender create Mesh node Cylinder.025
+08:18:39 | INFO: Blender create Mesh node Cylinder.026
+08:18:39 | INFO: Blender create Mesh node Cylinder.027
+08:18:39 | INFO: Blender create Mesh node Cylinder.028
+08:18:39 | INFO: Blender create Mesh node Cylinder.029
+08:18:39 | INFO: Blender create Mesh node Cylinder.030
+08:18:39 | INFO: Blender create Mesh node Cylinder.031
+08:18:39 | INFO: Blender create Mesh node Cylinder.032
+08:18:39 | INFO: Blender create Mesh node Cylinder.033
+08:18:39 | INFO: Blender create Mesh node Cylinder.034
+08:18:39 | INFO: Blender create Mesh node V22_FanFastenerSlot
+08:18:39 | INFO: Blender create Mesh node V22_FanFastenerSlot.001
+08:18:39 | INFO: Blender create Mesh node V22_FanFastenerSlot.002
+08:18:39 | INFO: Blender create Mesh node V22_FanFastenerSlot.003
+08:18:39 | INFO: Blender create Mesh node V22_FanFastenerSlot.004
+08:18:39 | INFO: Blender create Mesh node V22_FanFastenerSlot.005
+08:18:39 | INFO: Blender create Mesh node V22_FanFastenerSlot.006
+08:18:39 | INFO: Blender create Mesh node V22_FanFastenerSlot.007
+08:18:39 | INFO: Blender create Mesh node V22_FanFastenerSlot.008
+08:18:39 | INFO: Blender create Mesh node V22_FanFastenerSlot.009
+08:18:39 | INFO: Blender create Mesh node V22_FanFastenerSlot.010
+08:18:39 | INFO: Blender create Mesh node V22_FanFastenerSlot.011
+08:18:39 | INFO: Blender create Mesh node V22_FanServiceRim
+08:18:39 | INFO: Blender create Mesh node V22_FanServiceRim.001
+08:18:39 | INFO: Blender create Mesh node V22_ForwardAccessLockSlot
+08:18:39 | INFO: Blender create Mesh node Cylinder.017
+08:18:39 | INFO: Blender create Mesh node V22_ForwardAccessSeal
+08:18:39 | INFO: Blender create Mesh node V22_ForwardAccessSkin
+08:18:39 | INFO: Blender create Mesh node V22_OutboardAccessLockSlot
+08:18:39 | INFO: Blender create Mesh node Cylinder.021
+08:18:39 | INFO: Blender create Mesh node V22_OutboardAccessSeal
+08:18:39 | INFO: Blender create Mesh node V22_OutboardAccessSkin
+08:18:39 | INFO: Blender create Mesh node V22_ReleaseWitness
+08:18:39 | INFO: Blender create Mesh node V22_ReleaseWitness.001
+08:18:39 | INFO: Blender create Mesh node W01_PanelJoint_00.002
+08:18:39 | INFO: Blender create Mesh node W01_PanelJoint_01.002
+08:18:39 | INFO: Blender create Mesh node W04_TipMark.001
+08:18:39 | INFO: Blender create Mesh node Cube.036
+08:18:39 | INFO: Blender create Mesh node Cube.020
+08:18:39 | INFO: Blender create Mesh node Cube.021
+08:18:39 | INFO: Blender create Mesh node Cube.022
+08:18:39 | INFO: Blender create Mesh node Cube.023
+08:18:39 | INFO: Blender create Mesh node W06_ProposedElevonHinge.002
+08:18:39 | INFO: Blender create Mesh node W06_ProposedElevonHinge.001
+08:18:39 | INFO: Blender create Mesh node W07_TipPanelJoint.002
+08:18:39 | INFO: Blender create Mesh node W08_TipFold.002
+08:18:39 | INFO: glTF import finished in 0.84s
+03:03.579  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v30-proposal\bay-fit-engineer.png'
+08:18:49 | INFO: Data are loaded, start creating Blender stuff
+08:18:49 | INFO: Blender create Mesh node Cylinder
+08:18:49 | INFO: Blender create Mesh node Cylinder.001
+08:18:49 | INFO: Blender create Mesh node Cylinder.004
+08:18:49 | INFO: Blender create Mesh node AFT_CassetteGasket
+08:18:49 | INFO: Blender create Mesh node Cylinder.006
+08:18:49 | INFO: Blender create Mesh node AFT_FastenerSlot
+08:18:49 | INFO: Blender create Mesh node AFT_FastenerSlot.001
+08:18:49 | INFO: Blender create Mesh node AFT_FastenerSlot.002
+08:18:49 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_00
+08:18:49 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_01
+08:18:49 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_02
+08:18:49 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_03
+08:18:49 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_04
+08:18:49 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_05
+08:18:49 | INFO: Blender create Mesh node AFT_LouverEdge_00
+08:18:49 | INFO: Blender create Mesh node AFT_LouverEdge_01
+08:18:49 | INFO: Blender create Mesh node AFT_LouverEdge_02
+08:18:49 | INFO: Blender create Mesh node AFT_LouverEdge_03
+08:18:49 | INFO: Blender create Mesh node AFT_LouverEdge_04
+08:18:49 | INFO: Blender create Mesh node AFT_LouverEdge_05
+08:18:49 | INFO: Blender create Mesh node AFT_ReleaseLatch
+08:18:49 | INFO: Blender create Mesh node AFT_ServiceCassette
+08:18:49 | INFO: Blender create Mesh node Cylinder.005
+08:18:49 | INFO: Blender create Mesh node AFT_StatusLens
+08:18:49 | INFO: Blender create Mesh node AFT_StatusLens.001
+08:18:49 | INFO: Blender create Mesh node Cylinder.026
+08:18:49 | INFO: Blender create Mesh node Cube.001
+08:18:49 | INFO: Blender create Mesh node Cube.008
+08:18:49 | INFO: Blender create Mesh node Cube.009
+08:18:49 | INFO: Blender create Mesh node Cube.002
+08:18:49 | INFO: Blender create Mesh node GEAR_FixedSocket_1
+08:18:49 | INFO: Blender create Mesh node GEAR_FixedSocket_-1
+08:18:49 | INFO: Blender create Mesh node Cube.010
+08:18:49 | INFO: Blender create Mesh node Cube.003
+08:18:49 | INFO: Blender create Mesh node Cube.012
+08:18:49 | INFO: Blender create Mesh node Cube.011
+08:18:49 | INFO: Blender create Mesh node Cube.006
+08:18:49 | INFO: Blender create Mesh node Cube.005
+08:18:49 | INFO: Blender create Mesh node GEAR_TelescopicStage_1_0
+08:18:49 | INFO: Blender create Mesh node GEAR_TelescopicStage_1_1
+08:18:49 | INFO: Blender create Mesh node Cylinder.008
+08:18:49 | INFO: Blender create Mesh node GEAR_TelescopicStage_-1_0
+08:18:49 | INFO: Blender create Mesh node GEAR_TelescopicStage_-1_1
+08:18:49 | INFO: Blender create Mesh node Cylinder.007
+08:18:49 | INFO: Blender create Mesh node H01_ContinuousLiftingBody_Mesh.001
+08:18:50 | INFO: Blender create Mesh node I01_ShoulderIntake_Bezel.002
+08:18:50 | INFO: Blender create Mesh node I01_ShoulderIntake_Interior_Mesh.001
+08:18:50 | INFO: Blender create Mesh node P01_IntakeCowl.001
+08:18:50 | INFO: Blender create Mesh node P02_IntakeLip.001
+08:18:50 | INFO: Blender create Mesh node P03_IntakeThroat.001
+08:18:50 | INFO: Blender create Mesh node P04_IntakeBack.001
+08:18:50 | INFO: Blender create Mesh node P05_WingCowlBlend.002
+08:18:50 | INFO: Blender create Mesh node P05_WingCowlBlend.003
+08:18:50 | INFO: Blender create Mesh node P06_IntakeGuide.002
+08:18:50 | INFO: Blender create Mesh node P06_IntakeGuide.003
+08:18:50 | INFO: Blender create Mesh node P07_CowlWarning.001
+08:18:50 | INFO: Blender create Mesh node P10_ExhaustRim.001
+08:18:50 | INFO: Blender create Mesh node P11_ExhaustThroat.001
+08:18:50 | INFO: Blender create Mesh node P12_ExhaustBack.001
+08:18:50 | INFO: Blender create Mesh node P13_HeatPetal.016
+08:18:50 | INFO: Blender create Mesh node P13_HeatPetal.017
+08:18:50 | INFO: Blender create Mesh node P13_HeatPetal.018
+08:18:50 | INFO: Blender create Mesh node P13_HeatPetal.019
+08:18:50 | INFO: Blender create Mesh node P13_HeatPetal.020
+08:18:50 | INFO: Blender create Mesh node P13_HeatPetal.021
+08:18:50 | INFO: Blender create Mesh node P13_HeatPetal.022
+08:18:50 | INFO: Blender create Mesh node P13_HeatPetal.023
+08:18:50 | INFO: Blender create Mesh node P13_HeatPetal.024
+08:18:50 | INFO: Blender create Mesh node P13_HeatPetal.025
+08:18:50 | INFO: Blender create Mesh node P13_HeatPetal.026
+08:18:50 | INFO: Blender create Mesh node P13_HeatPetal.027
+08:18:50 | INFO: Blender create Mesh node P13_HeatPetal.028
+08:18:50 | INFO: Blender create Mesh node P13_HeatPetal.029
+08:18:50 | INFO: Blender create Mesh node P13_HeatPetal.030
+08:18:50 | INFO: Blender create Mesh node P13_HeatPetal.031
+08:18:50 | INFO: Blender create Mesh node P14_InternalMixer.003
+08:18:50 | INFO: Blender create Mesh node P14_InternalMixer.004
+08:18:50 | INFO: Blender create Mesh node P14_InternalMixer.005
+08:18:50 | INFO: Blender create Mesh node P15_ExhaustApron.001
+08:18:50 | INFO: Blender create Mesh node R01_DuctWall_Mesh.001
+08:18:50 | INFO: Blender create Mesh node R02_RecessedLip_Mesh.001
+08:18:50 | INFO: Blender create Mesh node R03_LowerLip_Mesh.001
+08:18:50 | INFO: Blender create Mesh node Cylinder.002
+08:18:50 | INFO: Blender create Mesh node Cylinder.003
+08:18:50 | INFO: Blender create Mesh node R06_Blade_00_Mesh.001
+08:18:50 | INFO: Blender create Mesh node R06_Blade_01_Mesh.001
+08:18:50 | INFO: Blender create Mesh node R06_Blade_02_Mesh.001
+08:18:50 | INFO: Blender create Mesh node R06_Blade_03_Mesh.001
+08:18:50 | INFO: Blender create Mesh node R06_Blade_04_Mesh.001
+08:18:50 | INFO: Blender create Mesh node R06_Blade_05_Mesh.001
+08:18:50 | INFO: Blender create Mesh node R06_Blade_06_Mesh.001
+08:18:50 | INFO: Blender create Mesh node R06_Blade_07_Mesh.001
+08:18:50 | INFO: Blender create Mesh node R06_Blade_08_Mesh.001
+08:18:50 | INFO: Blender create Mesh node R06_Blade_09_Mesh.001
+08:18:50 | INFO: Blender create Mesh node R06_Blade_10_Mesh.001
+08:18:50 | INFO: Blender create Mesh node R06_Blade_11_Mesh.001
+08:18:50 | INFO: Blender create Mesh node Cube.024
+08:18:50 | INFO: Blender create Mesh node Cube.025
+08:18:50 | INFO: Blender create Mesh node Cube.026
+08:18:50 | INFO: Blender create Mesh node Cube.027
+08:18:50 | INFO: Blender create Mesh node Cube.028
+08:18:50 | INFO: Blender create Mesh node Cube.035
+08:18:50 | INFO: Blender create Mesh node S01_VisorRecess_Mesh.002
+08:18:50 | INFO: Blender create Mesh node S02_VisorOptic_Mesh.002
+08:18:50 | INFO: Blender create Mesh node Cylinder.019
+08:18:50 | INFO: Blender create Mesh node Cylinder.021
+08:18:50 | INFO: Blender create Mesh node Cylinder.023
+08:18:50 | INFO: Blender create Mesh node Cylinder.020
+08:18:50 | INFO: Blender create Mesh node Cylinder.022
+08:18:50 | INFO: Blender create Mesh node Cylinder.024
+08:18:50 | INFO: Blender create Mesh node Cylinder.018
+08:18:50 | INFO: Blender create Mesh node SEC_DorsalMissileHatch_Interior
+08:18:50 | INFO: Blender create Mesh node SEC_DorsalMissileHatch
+08:18:50 | INFO: Blender create Mesh node SEC_EnergyWellSeal
+08:18:50 | INFO: Blender create Mesh node Cylinder.009
+08:18:50 | INFO: Blender create Mesh node Cylinder.011
+08:18:50 | INFO: Blender create Mesh node Cylinder.013
+08:18:50 | INFO: Blender create Mesh node Cylinder.015
+08:18:50 | INFO: Blender create Mesh node Cylinder.010
+08:18:50 | INFO: Blender create Mesh node Cylinder.012
+08:18:50 | INFO: Blender create Mesh node Cylinder.014
+08:18:50 | INFO: Blender create Mesh node Cylinder.016
+08:18:50 | INFO: Blender create Mesh node SEC_SmokedEnergyDome
+08:18:50 | INFO: Blender create Mesh node Cylinder.001
+08:18:50 | INFO: Blender create Mesh node Cylinder.004
+08:18:50 | INFO: Blender create Mesh node Cylinder
+08:18:50 | INFO: Blender create Mesh node Cylinder.006
+08:18:50 | INFO: Blender create Mesh node Cylinder.005
+08:18:50 | INFO: Blender create Mesh node Cube.008
+08:18:50 | INFO: Blender create Mesh node Cube.001
+08:18:50 | INFO: Blender create Mesh node Cube.009
+08:18:50 | INFO: Blender create Mesh node Cube.002
+08:18:50 | INFO: Blender create Mesh node Cube.010
+08:18:50 | INFO: Blender create Mesh node Cube.003
+08:18:50 | INFO: Blender create Mesh node Cube.012
+08:18:50 | INFO: Blender create Mesh node Cube.011
+08:18:50 | INFO: Blender create Mesh node Cube.006
+08:18:50 | INFO: Blender create Mesh node Cube.005
+08:18:50 | INFO: Blender create Mesh node Cylinder.008
+08:18:50 | INFO: Blender create Mesh node Cylinder.007
+08:18:50 | INFO: Blender create Mesh node Cylinder.021
+08:18:50 | INFO: Blender create Mesh node Cylinder.023
+08:18:50 | INFO: Blender create Mesh node Cylinder.019
+08:18:50 | INFO: Blender create Mesh node Cylinder.022
+08:18:50 | INFO: Blender create Mesh node Cylinder.024
+08:18:50 | INFO: Blender create Mesh node Cylinder.020
+08:18:50 | INFO: Blender create Mesh node Cylinder.018
+08:18:50 | INFO: Blender create Mesh node SEC_DorsalMissileHatch
+08:18:50 | INFO: Blender create Mesh node Cylinder.011
+08:18:50 | INFO: Blender create Mesh node Cylinder.013
+08:18:50 | INFO: Blender create Mesh node Cylinder.015
+08:18:50 | INFO: Blender create Mesh node Cylinder.009
+08:18:50 | INFO: Blender create Mesh node Cylinder.012
+08:18:50 | INFO: Blender create Mesh node Cylinder.014
+08:18:50 | INFO: Blender create Mesh node Cylinder.016
+08:18:50 | INFO: Blender create Mesh node Cylinder.010
+08:18:50 | INFO: Blender create Mesh node V22_AvionicsServiceLockSlot
+08:18:50 | INFO: Blender create Mesh node Cylinder.027
+08:18:50 | INFO: Blender create Mesh node V22_AvionicsServiceSeal
+08:18:50 | INFO: Blender create Mesh node V22_AvionicsServiceSkin
+08:18:50 | INFO: Blender create Mesh node Cylinder.028
+08:18:50 | INFO: Blender create Mesh node Cylinder.029
+08:18:50 | INFO: Blender create Mesh node Cylinder.030
+08:18:50 | INFO: Blender create Mesh node Cylinder.031
+08:18:50 | INFO: Blender create Mesh node Cylinder.032
+08:18:50 | INFO: Blender create Mesh node Cylinder.033
+08:18:50 | INFO: Blender create Mesh node Cylinder.034
+08:18:50 | INFO: Blender create Mesh node Cylinder.035
+08:18:50 | INFO: Blender create Mesh node Cylinder.036
+08:18:50 | INFO: Blender create Mesh node Cylinder.037
+08:18:50 | INFO: Blender create Mesh node Cylinder.038
+08:18:50 | INFO: Blender create Mesh node Cylinder.039
+08:18:50 | INFO: Blender create Mesh node V22_FanFastenerSlot
+08:18:50 | INFO: Blender create Mesh node V22_FanFastenerSlot.001
+08:18:50 | INFO: Blender create Mesh node V22_FanFastenerSlot.002
+08:18:50 | INFO: Blender create Mesh node V22_FanFastenerSlot.003
+08:18:50 | INFO: Blender create Mesh node V22_FanFastenerSlot.004
+08:18:50 | INFO: Blender create Mesh node V22_FanFastenerSlot.005
+08:18:50 | INFO: Blender create Mesh node V22_FanFastenerSlot.006
+08:18:50 | INFO: Blender create Mesh node V22_FanFastenerSlot.007
+08:18:50 | INFO: Blender create Mesh node V22_FanFastenerSlot.008
+08:18:50 | INFO: Blender create Mesh node V22_FanFastenerSlot.009
+08:18:50 | INFO: Blender create Mesh node V22_FanFastenerSlot.010
+08:18:50 | INFO: Blender create Mesh node V22_FanFastenerSlot.011
+08:18:50 | INFO: Blender create Mesh node V22_FanServiceRim
+08:18:50 | INFO: Blender create Mesh node V22_FanServiceRim.001
+08:18:50 | INFO: Blender create Mesh node V22_ForwardAccessLockSlot
+08:18:50 | INFO: Blender create Mesh node Cylinder.017
+08:18:50 | INFO: Blender create Mesh node V22_ForwardAccessSeal
+08:18:50 | INFO: Blender create Mesh node V22_ForwardAccessSkin
+08:18:50 | INFO: Blender create Mesh node V22_OutboardAccessLockSlot
+08:18:50 | INFO: Blender create Mesh node Cylinder.025
+08:18:50 | INFO: Blender create Mesh node V22_OutboardAccessSeal
+08:18:50 | INFO: Blender create Mesh node V22_OutboardAccessSkin
+08:18:50 | INFO: Blender create Mesh node V22_ReleaseWitness
+08:18:50 | INFO: Blender create Mesh node V22_ReleaseWitness.001
+08:18:50 | INFO: Blender create Mesh node W01_PanelJoint_00.002
+08:18:50 | INFO: Blender create Mesh node W01_PanelJoint_01.002
+08:18:50 | INFO: Blender create Mesh node W04_TipMark.001
+08:18:50 | INFO: Blender create Mesh node Cube.036
+08:18:50 | INFO: Blender create Mesh node Cube.020
+08:18:50 | INFO: Blender create Mesh node Cube.021
+08:18:50 | INFO: Blender create Mesh node Cube.022
+08:18:50 | INFO: Blender create Mesh node Cube.023
+08:18:50 | INFO: Blender create Mesh node W06_ProposedElevonHinge.002
+08:18:50 | INFO: Blender create Mesh node W06_ProposedElevonHinge.001
+08:18:50 | INFO: Blender create Mesh node W07_TipPanelJoint.002
+08:18:50 | INFO: Blender create Mesh node W08_TipFold.002
+08:18:50 | INFO: glTF import finished in 1.20s
+03:15.469  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v30-proposal\bay-fit-security.png'
+08:19:01 | INFO: Data are loaded, start creating Blender stuff
+08:19:01 | INFO: Blender create Mesh node Cylinder
+08:19:01 | INFO: Blender create Mesh node Cylinder.001
+08:19:01 | INFO: Blender create Mesh node Cylinder.004
+08:19:01 | INFO: Blender create Mesh node AFT_CassetteGasket
+08:19:01 | INFO: Blender create Mesh node Cylinder.006
+08:19:01 | INFO: Blender create Mesh node AFT_FastenerSlot
+08:19:01 | INFO: Blender create Mesh node AFT_FastenerSlot.001
+08:19:01 | INFO: Blender create Mesh node AFT_FastenerSlot.002
+08:19:01 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_00
+08:19:01 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_01
+08:19:01 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_02
+08:19:01 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_03
+08:19:01 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_04
+08:19:01 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_05
+08:19:01 | INFO: Blender create Mesh node AFT_LouverEdge_00
+08:19:01 | INFO: Blender create Mesh node AFT_LouverEdge_01
+08:19:01 | INFO: Blender create Mesh node AFT_LouverEdge_02
+08:19:01 | INFO: Blender create Mesh node AFT_LouverEdge_03
+08:19:01 | INFO: Blender create Mesh node AFT_LouverEdge_04
+08:19:01 | INFO: Blender create Mesh node AFT_LouverEdge_05
+08:19:01 | INFO: Blender create Mesh node AFT_ReleaseLatch
+08:19:01 | INFO: Blender create Mesh node AFT_ServiceCassette
+08:19:01 | INFO: Blender create Mesh node Cylinder.005
+08:19:01 | INFO: Blender create Mesh node AFT_StatusLens
+08:19:01 | INFO: Blender create Mesh node AFT_StatusLens.001
+08:19:01 | INFO: Blender create Mesh node Cube.001
+08:19:01 | INFO: Blender create Mesh node Cube.008
+08:19:01 | INFO: Blender create Mesh node Cube.009
+08:19:01 | INFO: Blender create Mesh node Cube.002
+08:19:01 | INFO: Blender create Mesh node GEAR_FixedSocket_1
+08:19:01 | INFO: Blender create Mesh node GEAR_FixedSocket_-1
+08:19:01 | INFO: Blender create Mesh node Cube.010
+08:19:01 | INFO: Blender create Mesh node Cube.003
+08:19:01 | INFO: Blender create Mesh node Cube.012
+08:19:01 | INFO: Blender create Mesh node Cube.011
+08:19:01 | INFO: Blender create Mesh node Cube.006
+08:19:01 | INFO: Blender create Mesh node Cube.005
+08:19:01 | INFO: Blender create Mesh node GEAR_TelescopicStage_1_0
+08:19:01 | INFO: Blender create Mesh node GEAR_TelescopicStage_1_1
+08:19:01 | INFO: Blender create Mesh node Cylinder.008
+08:19:01 | INFO: Blender create Mesh node GEAR_TelescopicStage_-1_0
+08:19:01 | INFO: Blender create Mesh node GEAR_TelescopicStage_-1_1
+08:19:01 | INFO: Blender create Mesh node Cylinder.007
+08:19:01 | INFO: Blender create Mesh node H01_ContinuousLiftingBody_Mesh.001
+08:19:02 | INFO: Blender create Mesh node H03_CrownJoint.006
+08:19:02 | INFO: Blender create Mesh node H03_CrownJoint.007
+08:19:02 | INFO: Blender create Mesh node H03_CrownJoint.002
+08:19:02 | INFO: Blender create Mesh node H03_CrownJoint.003
+08:19:02 | INFO: Blender create Mesh node H03_CrownJoint.004
+08:19:02 | INFO: Blender create Mesh node H03_CrownJoint.008
+08:19:02 | INFO: Blender create Mesh node Cube.004
+08:19:02 | INFO: Blender create Mesh node Cube.018
+08:19:02 | INFO: Blender create Mesh node Cube.017
+08:19:02 | INFO: Blender create Mesh node Cube.019
+08:19:02 | INFO: Blender create Mesh node I01_ShoulderIntake_Bezel.002
+08:19:02 | INFO: Blender create Mesh node I01_ShoulderIntake_Interior_Mesh.001
+08:19:02 | INFO: Blender create Mesh node P01_IntakeCowl.001
+08:19:02 | INFO: Blender create Mesh node P02_IntakeLip.001
+08:19:02 | INFO: Blender create Mesh node P03_IntakeThroat.001
+08:19:02 | INFO: Blender create Mesh node P04_IntakeBack.001
+08:19:02 | INFO: Blender create Mesh node P05_WingCowlBlend.002
+08:19:02 | INFO: Blender create Mesh node P05_WingCowlBlend.003
+08:19:02 | INFO: Blender create Mesh node P06_IntakeGuide.002
+08:19:02 | INFO: Blender create Mesh node P06_IntakeGuide.003
+08:19:02 | INFO: Blender create Mesh node P07_CowlWarning.001
+08:19:02 | INFO: Blender create Mesh node P10_ExhaustRim.001
+08:19:02 | INFO: Blender create Mesh node P11_ExhaustThroat.001
+08:19:02 | INFO: Blender create Mesh node P12_ExhaustBack.001
+08:19:02 | INFO: Blender create Mesh node P13_HeatPetal.016
+08:19:02 | INFO: Blender create Mesh node P13_HeatPetal.017
+08:19:02 | INFO: Blender create Mesh node P13_HeatPetal.018
+08:19:02 | INFO: Blender create Mesh node P13_HeatPetal.019
+08:19:02 | INFO: Blender create Mesh node P13_HeatPetal.020
+08:19:02 | INFO: Blender create Mesh node P13_HeatPetal.021
+08:19:02 | INFO: Blender create Mesh node P13_HeatPetal.022
+08:19:02 | INFO: Blender create Mesh node P13_HeatPetal.023
+08:19:02 | INFO: Blender create Mesh node P13_HeatPetal.024
+08:19:02 | INFO: Blender create Mesh node P13_HeatPetal.025
+08:19:02 | INFO: Blender create Mesh node P13_HeatPetal.026
+08:19:02 | INFO: Blender create Mesh node P13_HeatPetal.027
+08:19:02 | INFO: Blender create Mesh node P13_HeatPetal.028
+08:19:02 | INFO: Blender create Mesh node P13_HeatPetal.029
+08:19:02 | INFO: Blender create Mesh node P13_HeatPetal.030
+08:19:02 | INFO: Blender create Mesh node P13_HeatPetal.031
+08:19:02 | INFO: Blender create Mesh node P14_InternalMixer.003
+08:19:02 | INFO: Blender create Mesh node P14_InternalMixer.004
+08:19:02 | INFO: Blender create Mesh node P14_InternalMixer.005
+08:19:02 | INFO: Blender create Mesh node P15_ExhaustApron.001
+08:19:02 | INFO: Blender create Mesh node R01_DuctWall_Mesh.001
+08:19:02 | INFO: Blender create Mesh node R02_RecessedLip_Mesh.001
+08:19:02 | INFO: Blender create Mesh node R03_LowerLip_Mesh.001
+08:19:02 | INFO: Blender create Mesh node Cylinder.002
+08:19:02 | INFO: Blender create Mesh node Cylinder.003
+08:19:02 | INFO: Blender create Mesh node R06_Blade_00_Mesh.001
+08:19:02 | INFO: Blender create Mesh node R06_Blade_01_Mesh.001
+08:19:02 | INFO: Blender create Mesh node R06_Blade_02_Mesh.001
+08:19:02 | INFO: Blender create Mesh node R06_Blade_03_Mesh.001
+08:19:02 | INFO: Blender create Mesh node R06_Blade_04_Mesh.001
+08:19:02 | INFO: Blender create Mesh node R06_Blade_05_Mesh.001
+08:19:02 | INFO: Blender create Mesh node R06_Blade_06_Mesh.001
+08:19:02 | INFO: Blender create Mesh node R06_Blade_07_Mesh.001
+08:19:02 | INFO: Blender create Mesh node R06_Blade_08_Mesh.001
+08:19:02 | INFO: Blender create Mesh node R06_Blade_09_Mesh.001
+08:19:02 | INFO: Blender create Mesh node R06_Blade_10_Mesh.001
+08:19:02 | INFO: Blender create Mesh node R06_Blade_11_Mesh.001
+08:19:02 | INFO: Blender create Mesh node Cube.024
+08:19:02 | INFO: Blender create Mesh node Cube.025
+08:19:02 | INFO: Blender create Mesh node Cube.026
+08:19:02 | INFO: Blender create Mesh node Cube.027
+08:19:02 | INFO: Blender create Mesh node Cube.028
+08:19:02 | INFO: Blender create Mesh node Cube.035
+08:19:02 | INFO: Blender create Mesh node S01_VisorRecess_Mesh.002
+08:19:02 | INFO: Blender create Mesh node S02_VisorOptic_Mesh.002
+08:19:02 | INFO: Blender create Mesh node SALVAGE_BaySeal
+08:19:02 | INFO: Blender create Mesh node SALVAGE_CableWinding
+08:19:02 | INFO: Blender create Mesh node Cylinder.012
+08:19:02 | INFO: Blender create Mesh node Cube.016
+08:19:02 | INFO: Blender create Mesh node Cube.029
+08:19:02 | INFO: Blender create Mesh node SALVAGE_FairleadCable
+08:19:02 | INFO: Blender create Mesh node Cube.014
+08:19:02 | INFO: Blender create Mesh node Cube.030
+08:19:02 | INFO: Blender create Mesh node Cube.031
+08:19:02 | INFO: Blender create Mesh node Cube.013
+08:19:02 | INFO: Blender create Mesh node SALVAGE_InternalWinchBay_Interior
+08:19:02 | INFO: Blender create Mesh node Cylinder.010
+08:19:02 | INFO: Blender create Mesh node Cylinder.011
+08:19:02 | INFO: Blender create Mesh node Cube.015
+08:19:02 | INFO: Blender create Mesh node Cylinder.009
+08:19:02 | INFO: Blender create Mesh node Cylinder.001
+08:19:02 | INFO: Blender create Mesh node Cylinder.004
+08:19:02 | INFO: Blender create Mesh node Cylinder
+08:19:02 | INFO: Blender create Mesh node Cylinder.006
+08:19:02 | INFO: Blender create Mesh node Cylinder.005
+08:19:02 | INFO: Blender create Mesh node Cube.008
+08:19:02 | INFO: Blender create Mesh node Cube.001
+08:19:02 | INFO: Blender create Mesh node Cube.009
+08:19:02 | INFO: Blender create Mesh node Cube.002
+08:19:02 | INFO: Blender create Mesh node Cube.010
+08:19:02 | INFO: Blender create Mesh node Cube.003
+08:19:02 | INFO: Blender create Mesh node Cube.012
+08:19:02 | INFO: Blender create Mesh node Cube.011
+08:19:02 | INFO: Blender create Mesh node Cube.006
+08:19:02 | INFO: Blender create Mesh node Cube.005
+08:19:02 | INFO: Blender create Mesh node Cylinder.008
+08:19:02 | INFO: Blender create Mesh node Cylinder.007
+08:19:02 | INFO: Blender create Mesh node Cube.016
+08:19:02 | INFO: Blender create Mesh node Cube.029
+08:19:02 | INFO: Blender create Mesh node Cube.031
+08:19:02 | INFO: Blender create Mesh node Cube.030
+08:19:02 | INFO: Blender create Mesh node Cube.013
+08:19:02 | INFO: Blender create Mesh node Cylinder.010
+08:19:02 | INFO: Blender create Mesh node V22_AvionicsServiceLockSlot
+08:19:02 | INFO: Blender create Mesh node Cylinder.015
+08:19:02 | INFO: Blender create Mesh node V22_AvionicsServiceSeal
+08:19:02 | INFO: Blender create Mesh node V22_AvionicsServiceSkin
+08:19:02 | INFO: Blender create Mesh node Cylinder.016
+08:19:02 | INFO: Blender create Mesh node Cylinder.017
+08:19:02 | INFO: Blender create Mesh node Cylinder.018
+08:19:02 | INFO: Blender create Mesh node Cylinder.019
+08:19:02 | INFO: Blender create Mesh node Cylinder.020
+08:19:02 | INFO: Blender create Mesh node Cylinder.021
+08:19:02 | INFO: Blender create Mesh node Cylinder.022
+08:19:02 | INFO: Blender create Mesh node Cylinder.023
+08:19:02 | INFO: Blender create Mesh node Cylinder.024
+08:19:02 | INFO: Blender create Mesh node Cylinder.025
+08:19:02 | INFO: Blender create Mesh node Cylinder.026
+08:19:02 | INFO: Blender create Mesh node Cylinder.027
+08:19:02 | INFO: Blender create Mesh node V22_FanFastenerSlot
+08:19:02 | INFO: Blender create Mesh node V22_FanFastenerSlot.001
+08:19:02 | INFO: Blender create Mesh node V22_FanFastenerSlot.002
+08:19:02 | INFO: Blender create Mesh node V22_FanFastenerSlot.003
+08:19:02 | INFO: Blender create Mesh node V22_FanFastenerSlot.004
+08:19:02 | INFO: Blender create Mesh node V22_FanFastenerSlot.005
+08:19:02 | INFO: Blender create Mesh node V22_FanFastenerSlot.006
+08:19:02 | INFO: Blender create Mesh node V22_FanFastenerSlot.007
+08:19:02 | INFO: Blender create Mesh node V22_FanFastenerSlot.008
+08:19:02 | INFO: Blender create Mesh node V22_FanFastenerSlot.009
+08:19:02 | INFO: Blender create Mesh node V22_FanFastenerSlot.010
+08:19:02 | INFO: Blender create Mesh node V22_FanFastenerSlot.011
+08:19:02 | INFO: Blender create Mesh node V22_FanServiceRim
+08:19:02 | INFO: Blender create Mesh node V22_FanServiceRim.001
+08:19:02 | INFO: Blender create Mesh node V22_ForwardAccessLockSlot
+08:19:02 | INFO: Blender create Mesh node Cylinder.013
+08:19:02 | INFO: Blender create Mesh node V22_ForwardAccessSeal
+08:19:02 | INFO: Blender create Mesh node V22_ForwardAccessSkin
+08:19:02 | INFO: Blender create Mesh node V22_OutboardAccessLockSlot
+08:19:02 | INFO: Blender create Mesh node Cylinder.014
+08:19:02 | INFO: Blender create Mesh node V22_OutboardAccessSeal
+08:19:02 | INFO: Blender create Mesh node V22_OutboardAccessSkin
+08:19:02 | INFO: Blender create Mesh node V22_ReleaseWitness
+08:19:02 | INFO: Blender create Mesh node V22_ReleaseWitness.001
+08:19:02 | INFO: Blender create Mesh node W01_PanelJoint_00.002
+08:19:02 | INFO: Blender create Mesh node W01_PanelJoint_01.002
+08:19:02 | INFO: Blender create Mesh node W04_TipMark.001
+08:19:02 | INFO: Blender create Mesh node Cube.036
+08:19:02 | INFO: Blender create Mesh node Cube.020
+08:19:02 | INFO: Blender create Mesh node Cube.021
+08:19:02 | INFO: Blender create Mesh node Cube.022
+08:19:02 | INFO: Blender create Mesh node Cube.023
+08:19:02 | INFO: Blender create Mesh node W06_ProposedElevonHinge.002
+08:19:02 | INFO: Blender create Mesh node W06_ProposedElevonHinge.001
+08:19:02 | INFO: Blender create Mesh node W07_TipPanelJoint.002
+08:19:02 | INFO: Blender create Mesh node W08_TipFold.002
+08:19:02 | INFO: glTF import finished in 1.05s
+03:27.250  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v30-proposal\bay-fit-salvage.png'
+08:19:13 | INFO: Data are loaded, start creating Blender stuff
+08:19:13 | INFO: Blender create Mesh node Cylinder
+08:19:13 | INFO: Blender create Mesh node Cylinder.001
+08:19:13 | INFO: Blender create Mesh node Cylinder.004
+08:19:13 | INFO: Blender create Mesh node AFT_CassetteGasket
+08:19:13 | INFO: Blender create Mesh node Cylinder.006
+08:19:13 | INFO: Blender create Mesh node AFT_FastenerSlot
+08:19:13 | INFO: Blender create Mesh node AFT_FastenerSlot.001
+08:19:13 | INFO: Blender create Mesh node AFT_FastenerSlot.002
+08:19:13 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_00
+08:19:13 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_01
+08:19:13 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_02
+08:19:13 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_03
+08:19:13 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_04
+08:19:13 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_05
+08:19:13 | INFO: Blender create Mesh node AFT_LouverEdge_00
+08:19:13 | INFO: Blender create Mesh node AFT_LouverEdge_01
+08:19:13 | INFO: Blender create Mesh node AFT_LouverEdge_02
+08:19:13 | INFO: Blender create Mesh node AFT_LouverEdge_03
+08:19:13 | INFO: Blender create Mesh node AFT_LouverEdge_04
+08:19:13 | INFO: Blender create Mesh node AFT_LouverEdge_05
+08:19:13 | INFO: Blender create Mesh node AFT_ReleaseLatch
+08:19:13 | INFO: Blender create Mesh node AFT_ServiceCassette
+08:19:13 | INFO: Blender create Mesh node Cylinder.005
+08:19:13 | INFO: Blender create Mesh node AFT_StatusLens
+08:19:13 | INFO: Blender create Mesh node AFT_StatusLens.001
+08:19:13 | INFO: Blender create Mesh node Cube.016
+08:19:13 | INFO: Blender create Mesh node FIELD_LinkRadome
+08:19:13 | INFO: Blender create Mesh node Cube.029
+08:19:13 | INFO: Blender create Mesh node Cube.030
+08:19:13 | INFO: Blender create Mesh node Cube.031
+08:19:13 | INFO: Blender create Mesh node Cube.014
+08:19:13 | INFO: Blender create Mesh node Cube.015
+08:19:13 | INFO: Blender create Mesh node Cube.013
+08:19:13 | INFO: Blender create Mesh node Cube.001
+08:19:13 | INFO: Blender create Mesh node Cube.008
+08:19:13 | INFO: Blender create Mesh node Cube.009
+08:19:13 | INFO: Blender create Mesh node Cube.002
+08:19:13 | INFO: Blender create Mesh node GEAR_FixedSocket_1
+08:19:13 | INFO: Blender create Mesh node GEAR_FixedSocket_-1
+08:19:13 | INFO: Blender create Mesh node Cube.010
+08:19:13 | INFO: Blender create Mesh node Cube.003
+08:19:13 | INFO: Blender create Mesh node Cube.012
+08:19:13 | INFO: Blender create Mesh node Cube.011
+08:19:13 | INFO: Blender create Mesh node Cube.006
+08:19:13 | INFO: Blender create Mesh node Cube.005
+08:19:13 | INFO: Blender create Mesh node GEAR_TelescopicStage_1_0
+08:19:13 | INFO: Blender create Mesh node GEAR_TelescopicStage_1_1
+08:19:13 | INFO: Blender create Mesh node Cylinder.008
+08:19:13 | INFO: Blender create Mesh node GEAR_TelescopicStage_-1_0
+08:19:13 | INFO: Blender create Mesh node GEAR_TelescopicStage_-1_1
+08:19:13 | INFO: Blender create Mesh node Cylinder.007
+08:19:13 | INFO: Blender create Mesh node H01_ContinuousLiftingBody_Mesh.001
+08:19:13 | INFO: Blender create Mesh node H03_CrownJoint.006
+08:19:13 | INFO: Blender create Mesh node H03_CrownJoint.007
+08:19:13 | INFO: Blender create Mesh node H03_CrownJoint.002
+08:19:13 | INFO: Blender create Mesh node H03_CrownJoint.003
+08:19:13 | INFO: Blender create Mesh node H03_CrownJoint.004
+08:19:13 | INFO: Blender create Mesh node H03_CrownJoint.008
+08:19:13 | INFO: Blender create Mesh node Cube.004
+08:19:13 | INFO: Blender create Mesh node Cube.018
+08:19:13 | INFO: Blender create Mesh node Cube.017
+08:19:13 | INFO: Blender create Mesh node Cube.019
+08:19:13 | INFO: Blender create Mesh node H06_NoseChamfer.002
+08:19:13 | INFO: Blender create Mesh node H07_ShoulderJoint.002
+08:19:13 | INFO: Blender create Mesh node I01_ShoulderIntake_Bezel.002
+08:19:13 | INFO: Blender create Mesh node I01_ShoulderIntake_Interior_Mesh.001
+08:19:13 | INFO: Blender create Mesh node P01_IntakeCowl.001
+08:19:13 | INFO: Blender create Mesh node P02_IntakeLip.001
+08:19:13 | INFO: Blender create Mesh node P03_IntakeThroat.001
+08:19:13 | INFO: Blender create Mesh node P04_IntakeBack.001
+08:19:13 | INFO: Blender create Mesh node P05_WingCowlBlend.002
+08:19:13 | INFO: Blender create Mesh node P05_WingCowlBlend.003
+08:19:13 | INFO: Blender create Mesh node P06_IntakeGuide.002
+08:19:13 | INFO: Blender create Mesh node P06_IntakeGuide.003
+08:19:13 | INFO: Blender create Mesh node P07_CowlWarning.001
+08:19:13 | INFO: Blender create Mesh node P10_ExhaustRim.001
+08:19:13 | INFO: Blender create Mesh node P11_ExhaustThroat.001
+08:19:13 | INFO: Blender create Mesh node P12_ExhaustBack.001
+08:19:13 | INFO: Blender create Mesh node P13_HeatPetal.016
+08:19:13 | INFO: Blender create Mesh node P13_HeatPetal.017
+08:19:13 | INFO: Blender create Mesh node P13_HeatPetal.018
+08:19:13 | INFO: Blender create Mesh node P13_HeatPetal.019
+08:19:13 | INFO: Blender create Mesh node P13_HeatPetal.020
+08:19:13 | INFO: Blender create Mesh node P13_HeatPetal.021
+08:19:13 | INFO: Blender create Mesh node P13_HeatPetal.022
+08:19:13 | INFO: Blender create Mesh node P13_HeatPetal.023
+08:19:13 | INFO: Blender create Mesh node P13_HeatPetal.024
+08:19:13 | INFO: Blender create Mesh node P13_HeatPetal.025
+08:19:13 | INFO: Blender create Mesh node P13_HeatPetal.026
+08:19:13 | INFO: Blender create Mesh node P13_HeatPetal.027
+08:19:13 | INFO: Blender create Mesh node P13_HeatPetal.028
+08:19:13 | INFO: Blender create Mesh node P13_HeatPetal.029
+08:19:13 | INFO: Blender create Mesh node P13_HeatPetal.030
+08:19:13 | INFO: Blender create Mesh node P13_HeatPetal.031
+08:19:13 | INFO: Blender create Mesh node P14_InternalMixer.003
+08:19:13 | INFO: Blender create Mesh node P14_InternalMixer.004
+08:19:13 | INFO: Blender create Mesh node P14_InternalMixer.005
+08:19:13 | INFO: Blender create Mesh node P15_ExhaustApron.001
+08:19:13 | INFO: Blender create Mesh node R01_DuctWall_Mesh.001
+08:19:13 | INFO: Blender create Mesh node R02_RecessedLip_Mesh.001
+08:19:13 | INFO: Blender create Mesh node R03_LowerLip_Mesh.001
+08:19:13 | INFO: Blender create Mesh node Cylinder.002
+08:19:13 | INFO: Blender create Mesh node Cylinder.003
+08:19:13 | INFO: Blender create Mesh node R06_Blade_00_Mesh.001
+08:19:13 | INFO: Blender create Mesh node R06_Blade_01_Mesh.001
+08:19:13 | INFO: Blender create Mesh node R06_Blade_02_Mesh.001
+08:19:13 | INFO: Blender create Mesh node R06_Blade_03_Mesh.001
+08:19:13 | INFO: Blender create Mesh node R06_Blade_04_Mesh.001
+08:19:13 | INFO: Blender create Mesh node R06_Blade_05_Mesh.001
+08:19:13 | INFO: Blender create Mesh node R06_Blade_06_Mesh.001
+08:19:13 | INFO: Blender create Mesh node R06_Blade_07_Mesh.001
+08:19:13 | INFO: Blender create Mesh node R06_Blade_08_Mesh.001
+08:19:13 | INFO: Blender create Mesh node R06_Blade_09_Mesh.001
+08:19:13 | INFO: Blender create Mesh node R06_Blade_10_Mesh.001
+08:19:13 | INFO: Blender create Mesh node R06_Blade_11_Mesh.001
+08:19:13 | INFO: Blender create Mesh node Cube.024
+08:19:13 | INFO: Blender create Mesh node Cube.025
+08:19:13 | INFO: Blender create Mesh node Cube.026
+08:19:13 | INFO: Blender create Mesh node Cube.027
+08:19:13 | INFO: Blender create Mesh node Cube.028
+08:19:13 | INFO: Blender create Mesh node Cube.035
+08:19:13 | INFO: Blender create Mesh node S01_VisorRecess_Mesh.002
+08:19:13 | INFO: Blender create Mesh node S02_VisorOptic_Mesh.002
+08:19:13 | INFO: Blender create Mesh node Cube.037
+08:19:13 | INFO: Blender create Mesh node Cube.038
+08:19:13 | INFO: Blender create Mesh node Cube.039
+08:19:13 | INFO: Blender create Mesh node Cube.040
+08:19:13 | INFO: Blender create Mesh node Cube.041
+08:19:13 | INFO: Blender create Mesh node Cube.042
+08:19:13 | INFO: Blender create Mesh node Cube.043
+08:19:13 | INFO: Blender create Mesh node Cylinder.001
+08:19:13 | INFO: Blender create Mesh node Cylinder.004
+08:19:13 | INFO: Blender create Mesh node Cylinder
+08:19:13 | INFO: Blender create Mesh node Cylinder.006
+08:19:14 | INFO: Blender create Mesh node Cylinder.005
+08:19:14 | INFO: Blender create Mesh node Cube.015
+08:19:14 | INFO: Blender create Mesh node Cube.014
+08:19:14 | INFO: Blender create Mesh node Cube.008
+08:19:14 | INFO: Blender create Mesh node Cube.001
+08:19:14 | INFO: Blender create Mesh node Cube.009
+08:19:14 | INFO: Blender create Mesh node Cube.002
+08:19:14 | INFO: Blender create Mesh node Cube.010
+08:19:14 | INFO: Blender create Mesh node Cube.003
+08:19:14 | INFO: Blender create Mesh node Cube.012
+08:19:14 | INFO: Blender create Mesh node Cube.011
+08:19:14 | INFO: Blender create Mesh node Cube.006
+08:19:14 | INFO: Blender create Mesh node Cube.005
+08:19:14 | INFO: Blender create Mesh node Cylinder.008
+08:19:14 | INFO: Blender create Mesh node Cylinder.007
+08:19:14 | INFO: Blender create Mesh node V22_AvionicsServiceLockSlot
+08:19:14 | INFO: Blender create Mesh node Cylinder.011
+08:19:14 | INFO: Blender create Mesh node V22_AvionicsServiceSeal
+08:19:14 | INFO: Blender create Mesh node V22_AvionicsServiceSkin
+08:19:14 | INFO: Blender create Mesh node Cylinder.012
+08:19:14 | INFO: Blender create Mesh node Cylinder.013
+08:19:14 | INFO: Blender create Mesh node Cylinder.014
+08:19:14 | INFO: Blender create Mesh node Cylinder.015
+08:19:14 | INFO: Blender create Mesh node Cylinder.016
+08:19:14 | INFO: Blender create Mesh node Cylinder.017
+08:19:14 | INFO: Blender create Mesh node Cylinder.018
+08:19:14 | INFO: Blender create Mesh node Cylinder.019
+08:19:14 | INFO: Blender create Mesh node Cylinder.020
+08:19:14 | INFO: Blender create Mesh node Cylinder.021
+08:19:14 | INFO: Blender create Mesh node Cylinder.022
+08:19:14 | INFO: Blender create Mesh node Cylinder.023
+08:19:14 | INFO: Blender create Mesh node V22_FanFastenerSlot
+08:19:14 | INFO: Blender create Mesh node V22_FanFastenerSlot.001
+08:19:14 | INFO: Blender create Mesh node V22_FanFastenerSlot.002
+08:19:14 | INFO: Blender create Mesh node V22_FanFastenerSlot.003
+08:19:14 | INFO: Blender create Mesh node V22_FanFastenerSlot.004
+08:19:14 | INFO: Blender create Mesh node V22_FanFastenerSlot.005
+08:19:14 | INFO: Blender create Mesh node V22_FanFastenerSlot.006
+08:19:14 | INFO: Blender create Mesh node V22_FanFastenerSlot.007
+08:19:14 | INFO: Blender create Mesh node V22_FanFastenerSlot.008
+08:19:14 | INFO: Blender create Mesh node V22_FanFastenerSlot.009
+08:19:14 | INFO: Blender create Mesh node V22_FanFastenerSlot.010
+08:19:14 | INFO: Blender create Mesh node V22_FanFastenerSlot.011
+08:19:14 | INFO: Blender create Mesh node V22_FanServiceRim
+08:19:14 | INFO: Blender create Mesh node V22_FanServiceRim.001
+08:19:14 | INFO: Blender create Mesh node V22_ForwardAccessLockSlot
+08:19:14 | INFO: Blender create Mesh node Cylinder.009
+08:19:14 | INFO: Blender create Mesh node V22_ForwardAccessSeal
+08:19:14 | INFO: Blender create Mesh node V22_ForwardAccessSkin
+08:19:14 | INFO: Blender create Mesh node V22_OutboardAccessLockSlot
+08:19:14 | INFO: Blender create Mesh node Cylinder.010
+08:19:14 | INFO: Blender create Mesh node V22_OutboardAccessSeal
+08:19:14 | INFO: Blender create Mesh node V22_OutboardAccessSkin
+08:19:14 | INFO: Blender create Mesh node V22_ReleaseWitness
+08:19:14 | INFO: Blender create Mesh node V22_ReleaseWitness.001
+08:19:14 | INFO: Blender create Mesh node W01_PanelJoint_00.002
+08:19:14 | INFO: Blender create Mesh node W01_PanelJoint_01.002
+08:19:14 | INFO: Blender create Mesh node W04_TipMark.001
+08:19:14 | INFO: Blender create Mesh node Cube.036
+08:19:14 | INFO: Blender create Mesh node Cube.020
+08:19:14 | INFO: Blender create Mesh node Cube.021
+08:19:14 | INFO: Blender create Mesh node Cube.022
+08:19:14 | INFO: Blender create Mesh node Cube.023
+08:19:14 | INFO: Blender create Mesh node W06_ProposedElevonHinge.002
+08:19:14 | INFO: Blender create Mesh node W06_ProposedElevonHinge.001
+08:19:14 | INFO: Blender create Mesh node W07_TipPanelJoint.002
+08:19:14 | INFO: Blender create Mesh node W08_TipFold.002
+08:19:14 | INFO: glTF import finished in 0.93s
+08:19:14 | INFO: Data are loaded, start creating Blender stuff
+08:19:14 | INFO: Blender create Mesh node Cylinder
+08:19:14 | INFO: Blender create Mesh node Cylinder.001
+08:19:14 | INFO: Blender create Mesh node Cylinder.004
+08:19:14 | INFO: Blender create Mesh node AFT_CassetteGasket
+08:19:14 | INFO: Blender create Mesh node Cylinder.006
+08:19:14 | INFO: Blender create Mesh node AFT_FastenerSlot
+08:19:14 | INFO: Blender create Mesh node AFT_FastenerSlot.001
+08:19:14 | INFO: Blender create Mesh node AFT_FastenerSlot.002
+08:19:14 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_00
+08:19:14 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_01
+08:19:14 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_02
+08:19:14 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_03
+08:19:14 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_04
+08:19:14 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_05
+08:19:14 | INFO: Blender create Mesh node AFT_LouverEdge_00
+08:19:14 | INFO: Blender create Mesh node AFT_LouverEdge_01
+08:19:14 | INFO: Blender create Mesh node AFT_LouverEdge_02
+08:19:14 | INFO: Blender create Mesh node AFT_LouverEdge_03
+08:19:14 | INFO: Blender create Mesh node AFT_LouverEdge_04
+08:19:14 | INFO: Blender create Mesh node AFT_LouverEdge_05
+08:19:14 | INFO: Blender create Mesh node AFT_ReleaseLatch
+08:19:14 | INFO: Blender create Mesh node AFT_ServiceCassette
+08:19:14 | INFO: Blender create Mesh node Cylinder.005
+08:19:14 | INFO: Blender create Mesh node AFT_StatusLens
+08:19:14 | INFO: Blender create Mesh node AFT_StatusLens.001
+08:19:14 | INFO: Blender create Mesh node Cylinder.011
+08:19:14 | INFO: Blender create Mesh node Cube.001
+08:19:14 | INFO: Blender create Mesh node Cube.008
+08:19:14 | INFO: Blender create Mesh node Cube.009
+08:19:14 | INFO: Blender create Mesh node Cube.002
+08:19:14 | INFO: Blender create Mesh node GEAR_FixedSocket_1
+08:19:14 | INFO: Blender create Mesh node GEAR_FixedSocket_-1
+08:19:14 | INFO: Blender create Mesh node Cube.010
+08:19:14 | INFO: Blender create Mesh node Cube.003
+08:19:14 | INFO: Blender create Mesh node Cube.012
+08:19:14 | INFO: Blender create Mesh node Cube.011
+08:19:14 | INFO: Blender create Mesh node Cube.006
+08:19:14 | INFO: Blender create Mesh node Cube.005
+08:19:14 | INFO: Blender create Mesh node GEAR_TelescopicStage_1_0
+08:19:14 | INFO: Blender create Mesh node GEAR_TelescopicStage_1_1
+08:19:14 | INFO: Blender create Mesh node Cylinder.008
+08:19:14 | INFO: Blender create Mesh node GEAR_TelescopicStage_-1_0
+08:19:14 | INFO: Blender create Mesh node GEAR_TelescopicStage_-1_1
+08:19:14 | INFO: Blender create Mesh node Cylinder.007
+08:19:14 | INFO: Blender create Mesh node H01_ContinuousLiftingBody_Mesh.001
+08:19:14 | INFO: Blender create Mesh node H03_CrownJoint.006
+08:19:14 | INFO: Blender create Mesh node H03_CrownJoint.007
+08:19:14 | INFO: Blender create Mesh node H03_CrownJoint.002
+08:19:14 | INFO: Blender create Mesh node H03_CrownJoint.003
+08:19:14 | INFO: Blender create Mesh node H03_CrownJoint.004
+08:19:14 | INFO: Blender create Mesh node H03_CrownJoint.008
+08:19:14 | INFO: Blender create Mesh node Cube.004
+08:19:14 | INFO: Blender create Mesh node Cube.018
+08:19:14 | INFO: Blender create Mesh node Cube.017
+08:19:14 | INFO: Blender create Mesh node Cube.019
+08:19:14 | INFO: Blender create Mesh node I01_ShoulderIntake_Bezel.002
+08:19:14 | INFO: Blender create Mesh node I01_ShoulderIntake_Interior_Mesh.001
+08:19:14 | INFO: Blender create Mesh node P01_IntakeCowl.001
+08:19:14 | INFO: Blender create Mesh node P02_IntakeLip.001
+08:19:14 | INFO: Blender create Mesh node P03_IntakeThroat.001
+08:19:14 | INFO: Blender create Mesh node P04_IntakeBack.001
+08:19:14 | INFO: Blender create Mesh node P05_WingCowlBlend.002
+08:19:14 | INFO: Blender create Mesh node P05_WingCowlBlend.003
+08:19:14 | INFO: Blender create Mesh node P06_IntakeGuide.002
+08:19:14 | INFO: Blender create Mesh node P06_IntakeGuide.003
+08:19:14 | INFO: Blender create Mesh node P07_CowlWarning.001
+08:19:14 | INFO: Blender create Mesh node P10_ExhaustRim.001
+08:19:14 | INFO: Blender create Mesh node P11_ExhaustThroat.001
+08:19:14 | INFO: Blender create Mesh node P12_ExhaustBack.001
+08:19:14 | INFO: Blender create Mesh node P13_HeatPetal.016
+08:19:14 | INFO: Blender create Mesh node P13_HeatPetal.017
+08:19:14 | INFO: Blender create Mesh node P13_HeatPetal.018
+08:19:14 | INFO: Blender create Mesh node P13_HeatPetal.019
+08:19:14 | INFO: Blender create Mesh node P13_HeatPetal.020
+08:19:14 | INFO: Blender create Mesh node P13_HeatPetal.021
+08:19:14 | INFO: Blender create Mesh node P13_HeatPetal.022
+08:19:14 | INFO: Blender create Mesh node P13_HeatPetal.023
+08:19:14 | INFO: Blender create Mesh node P13_HeatPetal.024
+08:19:14 | INFO: Blender create Mesh node P13_HeatPetal.025
+08:19:14 | INFO: Blender create Mesh node P13_HeatPetal.026
+08:19:14 | INFO: Blender create Mesh node P13_HeatPetal.027
+08:19:14 | INFO: Blender create Mesh node P13_HeatPetal.028
+08:19:14 | INFO: Blender create Mesh node P13_HeatPetal.029
+08:19:14 | INFO: Blender create Mesh node P13_HeatPetal.030
+08:19:14 | INFO: Blender create Mesh node P13_HeatPetal.031
+08:19:14 | INFO: Blender create Mesh node P14_InternalMixer.003
+08:19:14 | INFO: Blender create Mesh node P14_InternalMixer.004
+08:19:14 | INFO: Blender create Mesh node P14_InternalMixer.005
+08:19:14 | INFO: Blender create Mesh node P15_ExhaustApron.001
+08:19:14 | INFO: Blender create Mesh node R01_DuctWall_Mesh.001
+08:19:14 | INFO: Blender create Mesh node R02_RecessedLip_Mesh.001
+08:19:14 | INFO: Blender create Mesh node R03_LowerLip_Mesh.001
+08:19:14 | INFO: Blender create Mesh node Cylinder.002
+08:19:14 | INFO: Blender create Mesh node Cylinder.003
+08:19:14 | INFO: Blender create Mesh node R06_Blade_00_Mesh.001
+08:19:14 | INFO: Blender create Mesh node R06_Blade_01_Mesh.001
+08:19:14 | INFO: Blender create Mesh node R06_Blade_02_Mesh.001
+08:19:14 | INFO: Blender create Mesh node R06_Blade_03_Mesh.001
+08:19:14 | INFO: Blender create Mesh node R06_Blade_04_Mesh.001
+08:19:15 | INFO: Blender create Mesh node R06_Blade_05_Mesh.001
+08:19:15 | INFO: Blender create Mesh node R06_Blade_06_Mesh.001
+08:19:15 | INFO: Blender create Mesh node R06_Blade_07_Mesh.001
+08:19:15 | INFO: Blender create Mesh node R06_Blade_08_Mesh.001
+08:19:15 | INFO: Blender create Mesh node R06_Blade_09_Mesh.001
+08:19:15 | INFO: Blender create Mesh node R06_Blade_10_Mesh.001
+08:19:15 | INFO: Blender create Mesh node R06_Blade_11_Mesh.001
+08:19:15 | INFO: Blender create Mesh node Cube.024
+08:19:15 | INFO: Blender create Mesh node Cube.025
+08:19:15 | INFO: Blender create Mesh node Cube.026
+08:19:15 | INFO: Blender create Mesh node Cube.027
+08:19:15 | INFO: Blender create Mesh node Cube.028
+08:19:15 | INFO: Blender create Mesh node Cube.035
+08:19:15 | INFO: Blender create Mesh node S01_VisorRecess_Mesh.002
+08:19:15 | INFO: Blender create Mesh node S02_VisorOptic_Mesh.002
+08:19:15 | INFO: Blender create Mesh node SCOUT_CheekGlass
+08:19:15 | INFO: Blender create Mesh node SCOUT_CheekSensor_Interior
+08:19:15 | INFO: Blender create Mesh node SCOUT_DorsalReceiver
+08:19:15 | INFO: Blender create Mesh node Cylinder.015
+08:19:15 | INFO: Blender create Mesh node Cylinder.014
+08:19:15 | INFO: Blender create Mesh node Cylinder.013
+08:19:15 | INFO: Blender create Mesh node SCOUT_PerimeterRecess
+08:19:15 | INFO: Blender create Mesh node SCOUT_ScanTrack
+08:19:15 | INFO: Blender create Mesh node SCOUT_SensorSeal
+08:19:15 | INFO: Blender create Mesh node SCOUT_SideScanLens
+08:19:15 | INFO: Blender create Mesh node Cylinder.001
+08:19:15 | INFO: Blender create Mesh node Cylinder.004
+08:19:15 | INFO: Blender create Mesh node Cylinder
+08:19:15 | INFO: Blender create Mesh node Cylinder.006
+08:19:15 | INFO: Blender create Mesh node Cylinder.005
+08:19:15 | INFO: Blender create Mesh node Cube.008
+08:19:15 | INFO: Blender create Mesh node Cube.001
+08:19:15 | INFO: Blender create Mesh node Cube.009
+08:19:15 | INFO: Blender create Mesh node Cube.002
+08:19:15 | INFO: Blender create Mesh node Cube.010
+08:19:15 | INFO: Blender create Mesh node Cube.003
+08:19:15 | INFO: Blender create Mesh node Cube.012
+08:19:15 | INFO: Blender create Mesh node Cube.011
+08:19:15 | INFO: Blender create Mesh node Cube.006
+08:19:15 | INFO: Blender create Mesh node Cube.005
+08:19:15 | INFO: Blender create Mesh node Cylinder.008
+08:19:15 | INFO: Blender create Mesh node Cylinder.007
+08:19:15 | INFO: Blender create Mesh node Cylinder.015
+08:19:15 | INFO: Blender create Mesh node Cylinder.014
+08:19:15 | INFO: Blender create Mesh node Cylinder.013
+08:19:15 | INFO: Blender create Mesh node V22_AvionicsServiceLockSlot
+08:19:15 | INFO: Blender create Mesh node Cylinder.012
+08:19:15 | INFO: Blender create Mesh node V22_AvionicsServiceSeal
+08:19:15 | INFO: Blender create Mesh node V22_AvionicsServiceSkin
+08:19:15 | INFO: Blender create Mesh node Cylinder.016
+08:19:15 | INFO: Blender create Mesh node Cylinder.017
+08:19:15 | INFO: Blender create Mesh node Cylinder.018
+08:19:15 | INFO: Blender create Mesh node Cylinder.019
+08:19:15 | INFO: Blender create Mesh node Cylinder.020
+08:19:15 | INFO: Blender create Mesh node Cylinder.021
+08:19:15 | INFO: Blender create Mesh node Cylinder.022
+08:19:15 | INFO: Blender create Mesh node Cylinder.023
+08:19:15 | INFO: Blender create Mesh node Cylinder.024
+08:19:15 | INFO: Blender create Mesh node Cylinder.025
+08:19:15 | INFO: Blender create Mesh node Cylinder.026
+08:19:15 | INFO: Blender create Mesh node Cylinder.027
+08:19:15 | INFO: Blender create Mesh node V22_FanFastenerSlot
+08:19:15 | INFO: Blender create Mesh node V22_FanFastenerSlot.001
+08:19:15 | INFO: Blender create Mesh node V22_FanFastenerSlot.002
+08:19:15 | INFO: Blender create Mesh node V22_FanFastenerSlot.003
+08:19:15 | INFO: Blender create Mesh node V22_FanFastenerSlot.004
+08:19:15 | INFO: Blender create Mesh node V22_FanFastenerSlot.005
+08:19:15 | INFO: Blender create Mesh node V22_FanFastenerSlot.006
+08:19:15 | INFO: Blender create Mesh node V22_FanFastenerSlot.007
+08:19:15 | INFO: Blender create Mesh node V22_FanFastenerSlot.008
+08:19:15 | INFO: Blender create Mesh node V22_FanFastenerSlot.009
+08:19:15 | INFO: Blender create Mesh node V22_FanFastenerSlot.010
+08:19:15 | INFO: Blender create Mesh node V22_FanFastenerSlot.011
+08:19:15 | INFO: Blender create Mesh node V22_FanServiceRim
+08:19:15 | INFO: Blender create Mesh node V22_FanServiceRim.001
+08:19:15 | INFO: Blender create Mesh node V22_ForwardAccessLockSlot
+08:19:15 | INFO: Blender create Mesh node Cylinder.009
+08:19:15 | INFO: Blender create Mesh node V22_ForwardAccessSeal
+08:19:15 | INFO: Blender create Mesh node V22_ForwardAccessSkin
+08:19:15 | INFO: Blender create Mesh node V22_OutboardAccessLockSlot
+08:19:15 | INFO: Blender create Mesh node Cylinder.010
+08:19:15 | INFO: Blender create Mesh node V22_OutboardAccessSeal
+08:19:15 | INFO: Blender create Mesh node V22_OutboardAccessSkin
+08:19:15 | INFO: Blender create Mesh node V22_ReleaseWitness
+08:19:15 | INFO: Blender create Mesh node V22_ReleaseWitness.001
+08:19:15 | INFO: Blender create Mesh node W01_PanelJoint_00.002
+08:19:15 | INFO: Blender create Mesh node W01_PanelJoint_01.002
+08:19:15 | INFO: Blender create Mesh node W04_TipMark.001
+08:19:15 | INFO: Blender create Mesh node Cube.036
+08:19:15 | INFO: Blender create Mesh node Cube.020
+08:19:15 | INFO: Blender create Mesh node Cube.021
+08:19:15 | INFO: Blender create Mesh node Cube.022
+08:19:15 | INFO: Blender create Mesh node Cube.023
+08:19:15 | INFO: Blender create Mesh node W06_ProposedElevonHinge.002
+08:19:15 | INFO: Blender create Mesh node W06_ProposedElevonHinge.001
+08:19:15 | INFO: Blender create Mesh node W07_TipPanelJoint.002
+08:19:15 | INFO: Blender create Mesh node W08_TipFold.002
+08:19:15 | INFO: glTF import finished in 1.01s
+08:19:15 | INFO: Data are loaded, start creating Blender stuff
+08:19:15 | INFO: Blender create Mesh node Cylinder
+08:19:15 | INFO: Blender create Mesh node Cylinder.001
+08:19:15 | INFO: Blender create Mesh node Cylinder.004
+08:19:15 | INFO: Blender create Mesh node AFT_CassetteGasket
+08:19:15 | INFO: Blender create Mesh node Cylinder.006
+08:19:15 | INFO: Blender create Mesh node AFT_FastenerSlot
+08:19:15 | INFO: Blender create Mesh node AFT_FastenerSlot.001
+08:19:15 | INFO: Blender create Mesh node AFT_FastenerSlot.002
+08:19:15 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_00
+08:19:15 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_01
+08:19:15 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_02
+08:19:15 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_03
+08:19:15 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_04
+08:19:15 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_05
+08:19:15 | INFO: Blender create Mesh node AFT_LouverEdge_00
+08:19:15 | INFO: Blender create Mesh node AFT_LouverEdge_01
+08:19:15 | INFO: Blender create Mesh node AFT_LouverEdge_02
+08:19:15 | INFO: Blender create Mesh node AFT_LouverEdge_03
+08:19:15 | INFO: Blender create Mesh node AFT_LouverEdge_04
+08:19:15 | INFO: Blender create Mesh node AFT_LouverEdge_05
+08:19:15 | INFO: Blender create Mesh node AFT_ReleaseLatch
+08:19:15 | INFO: Blender create Mesh node AFT_ServiceCassette
+08:19:15 | INFO: Blender create Mesh node Cylinder.005
+08:19:15 | INFO: Blender create Mesh node AFT_StatusLens
+08:19:15 | INFO: Blender create Mesh node AFT_StatusLens.001
+08:19:15 | INFO: Blender create Mesh node CARGO_DrawerLatch
+08:19:15 | INFO: Blender create Mesh node CARGO_DrawerLatch.001
+08:19:15 | INFO: Blender create Mesh node CARGO_DrawerSeal
+08:19:15 | INFO: Blender create Mesh node CARGO_DrawerSeal.001
+08:19:15 | INFO: Blender create Mesh node CARGO_FloorDoor_Interior
+08:19:15 | INFO: Blender create Mesh node CARGO_FloorDoor
+08:19:15 | INFO: Blender create Mesh node CARGO_FrontDoor
+08:19:15 | INFO: Blender create Mesh node CARGO_FrontDoor.001
+08:19:15 | INFO: Blender create Mesh node CARGO_FrontDrawer_Interior
+08:19:15 | INFO: Blender create Mesh node CARGO_FrontDrawer_Interior.001
+08:19:15 | INFO: Blender create Mesh node Cube.014
+08:19:15 | INFO: Blender create Mesh node Cube.016
+08:19:15 | INFO: Blender create Mesh node Cube.030
+08:19:15 | INFO: Blender create Mesh node Cube.013
+08:19:15 | INFO: Blender create Mesh node Cube.015
+08:19:15 | INFO: Blender create Mesh node Cube.029
+08:19:15 | INFO: Blender create Mesh node CARGO_ShellJoint
+08:19:15 | INFO: Blender create Mesh node CARGO_ShellJoint.001
+08:19:15 | INFO: Blender create Mesh node CARGO_ShellJoint.002
+08:19:15 | INFO: Blender create Mesh node Cube.001
+08:19:15 | INFO: Blender create Mesh node Cube.008
+08:19:15 | INFO: Blender create Mesh node Cube.009
+08:19:15 | INFO: Blender create Mesh node Cube.002
+08:19:15 | INFO: Blender create Mesh node GEAR_FixedSocket_1
+08:19:15 | INFO: Blender create Mesh node GEAR_FixedSocket_-1
+08:19:15 | INFO: Blender create Mesh node Cube.010
+08:19:15 | INFO: Blender create Mesh node Cube.003
+08:19:16 | INFO: Blender create Mesh node Cube.012
+08:19:16 | INFO: Blender create Mesh node Cube.011
+08:19:16 | INFO: Blender create Mesh node Cube.006
+08:19:16 | INFO: Blender create Mesh node Cube.005
+08:19:16 | INFO: Blender create Mesh node GEAR_TelescopicStage_1_0
+08:19:16 | INFO: Blender create Mesh node GEAR_TelescopicStage_1_1
+08:19:16 | INFO: Blender create Mesh node Cylinder.008
+08:19:16 | INFO: Blender create Mesh node GEAR_TelescopicStage_-1_0
+08:19:16 | INFO: Blender create Mesh node GEAR_TelescopicStage_-1_1
+08:19:16 | INFO: Blender create Mesh node Cylinder.007
+08:19:16 | INFO: Blender create Mesh node H01_ContinuousLiftingBody_Mesh.001
+08:19:16 | INFO: Blender create Mesh node H03_CrownJoint.006
+08:19:16 | INFO: Blender create Mesh node H03_CrownJoint.007
+08:19:16 | INFO: Blender create Mesh node H03_CrownJoint.002
+08:19:16 | INFO: Blender create Mesh node H03_CrownJoint.003
+08:19:16 | INFO: Blender create Mesh node H03_CrownJoint.004
+08:19:16 | INFO: Blender create Mesh node H03_CrownJoint.008
+08:19:16 | INFO: Blender create Mesh node Cube.004
+08:19:16 | INFO: Blender create Mesh node Cube.018
+08:19:16 | INFO: Blender create Mesh node Cube.017
+08:19:16 | INFO: Blender create Mesh node Cube.019
+08:19:16 | INFO: Blender create Mesh node I01_ShoulderIntake_Bezel.002
+08:19:16 | INFO: Blender create Mesh node I01_ShoulderIntake_Interior_Mesh.001
+08:19:16 | INFO: Blender create Mesh node P01_IntakeCowl.001
+08:19:16 | INFO: Blender create Mesh node P02_IntakeLip.001
+08:19:16 | INFO: Blender create Mesh node P03_IntakeThroat.001
+08:19:16 | INFO: Blender create Mesh node P04_IntakeBack.001
+08:19:16 | INFO: Blender create Mesh node P05_WingCowlBlend.002
+08:19:16 | INFO: Blender create Mesh node P05_WingCowlBlend.003
+08:19:16 | INFO: Blender create Mesh node P06_IntakeGuide.002
+08:19:16 | INFO: Blender create Mesh node P06_IntakeGuide.003
+08:19:16 | INFO: Blender create Mesh node P07_CowlWarning.001
+08:19:16 | INFO: Blender create Mesh node P10_ExhaustRim.001
+08:19:16 | INFO: Blender create Mesh node P11_ExhaustThroat.001
+08:19:16 | INFO: Blender create Mesh node P12_ExhaustBack.001
+08:19:16 | INFO: Blender create Mesh node P13_HeatPetal.016
+08:19:16 | INFO: Blender create Mesh node P13_HeatPetal.017
+08:19:16 | INFO: Blender create Mesh node P13_HeatPetal.018
+08:19:16 | INFO: Blender create Mesh node P13_HeatPetal.019
+08:19:16 | INFO: Blender create Mesh node P13_HeatPetal.020
+08:19:16 | INFO: Blender create Mesh node P13_HeatPetal.021
+08:19:16 | INFO: Blender create Mesh node P13_HeatPetal.022
+08:19:16 | INFO: Blender create Mesh node P13_HeatPetal.023
+08:19:16 | INFO: Blender create Mesh node P13_HeatPetal.024
+08:19:16 | INFO: Blender create Mesh node P13_HeatPetal.025
+08:19:16 | INFO: Blender create Mesh node P13_HeatPetal.026
+08:19:16 | INFO: Blender create Mesh node P13_HeatPetal.027
+08:19:16 | INFO: Blender create Mesh node P13_HeatPetal.028
+08:19:16 | INFO: Blender create Mesh node P13_HeatPetal.029
+08:19:16 | INFO: Blender create Mesh node P13_HeatPetal.030
+08:19:16 | INFO: Blender create Mesh node P13_HeatPetal.031
+08:19:16 | INFO: Blender create Mesh node P14_InternalMixer.003
+08:19:16 | INFO: Blender create Mesh node P14_InternalMixer.004
+08:19:16 | INFO: Blender create Mesh node P14_InternalMixer.005
+08:19:16 | INFO: Blender create Mesh node P15_ExhaustApron.001
+08:19:16 | INFO: Blender create Mesh node R01_DuctWall_Mesh.001
+08:19:16 | INFO: Blender create Mesh node R02_RecessedLip_Mesh.001
+08:19:16 | INFO: Blender create Mesh node R03_LowerLip_Mesh.001
+08:19:16 | INFO: Blender create Mesh node Cylinder.002
+08:19:16 | INFO: Blender create Mesh node Cylinder.003
+08:19:16 | INFO: Blender create Mesh node R06_Blade_00_Mesh.001
+08:19:16 | INFO: Blender create Mesh node R06_Blade_01_Mesh.001
+08:19:16 | INFO: Blender create Mesh node R06_Blade_02_Mesh.001
+08:19:16 | INFO: Blender create Mesh node R06_Blade_03_Mesh.001
+08:19:16 | INFO: Blender create Mesh node R06_Blade_04_Mesh.001
+08:19:16 | INFO: Blender create Mesh node R06_Blade_05_Mesh.001
+08:19:16 | INFO: Blender create Mesh node R06_Blade_06_Mesh.001
+08:19:16 | INFO: Blender create Mesh node R06_Blade_07_Mesh.001
+08:19:16 | INFO: Blender create Mesh node R06_Blade_08_Mesh.001
+08:19:16 | INFO: Blender create Mesh node R06_Blade_09_Mesh.001
+08:19:16 | INFO: Blender create Mesh node R06_Blade_10_Mesh.001
+08:19:16 | INFO: Blender create Mesh node R06_Blade_11_Mesh.001
+08:19:16 | INFO: Blender create Mesh node Cube.024
+08:19:16 | INFO: Blender create Mesh node Cube.025
+08:19:16 | INFO: Blender create Mesh node Cube.026
+08:19:16 | INFO: Blender create Mesh node Cube.027
+08:19:16 | INFO: Blender create Mesh node Cube.028
+08:19:16 | INFO: Blender create Mesh node Cube.035
+08:19:16 | INFO: Blender create Mesh node S01_VisorRecess_Mesh.002
+08:19:16 | INFO: Blender create Mesh node S02_VisorOptic_Mesh.002
+08:19:16 | INFO: Blender create Mesh node Cylinder.001
+08:19:16 | INFO: Blender create Mesh node Cylinder.004
+08:19:16 | INFO: Blender create Mesh node Cylinder
+08:19:16 | INFO: Blender create Mesh node Cylinder.006
+08:19:16 | INFO: Blender create Mesh node Cylinder.005
+08:19:16 | INFO: Blender create Mesh node CARGO_FloorDoor
+08:19:16 | INFO: Blender create Mesh node Cube.016
+08:19:16 | INFO: Blender create Mesh node Cube.030
+08:19:16 | INFO: Blender create Mesh node Cube.014
+08:19:16 | INFO: Blender create Mesh node Cube.015
+08:19:16 | INFO: Blender create Mesh node Cube.029
+08:19:16 | INFO: Blender create Mesh node Cube.013
+08:19:16 | INFO: Blender create Mesh node Cube.008
+08:19:16 | INFO: Blender create Mesh node Cube.001
+08:19:16 | INFO: Blender create Mesh node Cube.009
+08:19:16 | INFO: Blender create Mesh node Cube.002
+08:19:16 | INFO: Blender create Mesh node Cube.010
+08:19:16 | INFO: Blender create Mesh node Cube.003
+08:19:16 | INFO: Blender create Mesh node Cube.012
+08:19:16 | INFO: Blender create Mesh node Cube.011
+08:19:16 | INFO: Blender create Mesh node Cube.006
+08:19:16 | INFO: Blender create Mesh node Cube.005
+08:19:16 | INFO: Blender create Mesh node Cylinder.008
+08:19:16 | INFO: Blender create Mesh node Cylinder.007
+08:19:16 | INFO: Blender create Mesh node V22_AvionicsServiceLockSlot
+08:19:16 | INFO: Blender create Mesh node Cylinder.011
+08:19:16 | INFO: Blender create Mesh node V22_AvionicsServiceSeal
+08:19:16 | INFO: Blender create Mesh node V22_AvionicsServiceSkin
+08:19:16 | INFO: Blender create Mesh node Cylinder.012
+08:19:16 | INFO: Blender create Mesh node Cylinder.013
+08:19:16 | INFO: Blender create Mesh node Cylinder.014
+08:19:16 | INFO: Blender create Mesh node Cylinder.015
+08:19:16 | INFO: Blender create Mesh node Cylinder.016
+08:19:16 | INFO: Blender create Mesh node Cylinder.017
+08:19:16 | INFO: Blender create Mesh node Cylinder.018
+08:19:16 | INFO: Blender create Mesh node Cylinder.019
+08:19:16 | INFO: Blender create Mesh node Cylinder.020
+08:19:16 | INFO: Blender create Mesh node Cylinder.021
+08:19:16 | INFO: Blender create Mesh node Cylinder.022
+08:19:16 | INFO: Blender create Mesh node Cylinder.023
+08:19:16 | INFO: Blender create Mesh node V22_FanFastenerSlot
+08:19:16 | INFO: Blender create Mesh node V22_FanFastenerSlot.001
+08:19:16 | INFO: Blender create Mesh node V22_FanFastenerSlot.002
+08:19:16 | INFO: Blender create Mesh node V22_FanFastenerSlot.003
+08:19:16 | INFO: Blender create Mesh node V22_FanFastenerSlot.004
+08:19:16 | INFO: Blender create Mesh node V22_FanFastenerSlot.005
+08:19:16 | INFO: Blender create Mesh node V22_FanFastenerSlot.006
+08:19:16 | INFO: Blender create Mesh node V22_FanFastenerSlot.007
+08:19:16 | INFO: Blender create Mesh node V22_FanFastenerSlot.008
+08:19:16 | INFO: Blender create Mesh node V22_FanFastenerSlot.009
+08:19:16 | INFO: Blender create Mesh node V22_FanFastenerSlot.010
+08:19:16 | INFO: Blender create Mesh node V22_FanFastenerSlot.011
+08:19:16 | INFO: Blender create Mesh node V22_FanServiceRim
+08:19:16 | INFO: Blender create Mesh node V22_FanServiceRim.001
+08:19:16 | INFO: Blender create Mesh node V22_ForwardAccessLockSlot
+08:19:16 | INFO: Blender create Mesh node Cylinder.009
+08:19:16 | INFO: Blender create Mesh node V22_ForwardAccessSeal
+08:19:16 | INFO: Blender create Mesh node V22_ForwardAccessSkin
+08:19:16 | INFO: Blender create Mesh node V22_OutboardAccessLockSlot
+08:19:16 | INFO: Blender create Mesh node Cylinder.010
+08:19:16 | INFO: Blender create Mesh node V22_OutboardAccessSeal
+08:19:16 | INFO: Blender create Mesh node V22_OutboardAccessSkin
+08:19:16 | INFO: Blender create Mesh node V22_ReleaseWitness
+08:19:16 | INFO: Blender create Mesh node V22_ReleaseWitness.001
+08:19:16 | INFO: Blender create Mesh node W01_PanelJoint_00.002
+08:19:16 | INFO: Blender create Mesh node W01_PanelJoint_01.002
+08:19:16 | INFO: Blender create Mesh node W04_TipMark.001
+08:19:16 | INFO: Blender create Mesh node Cube.036
+08:19:16 | INFO: Blender create Mesh node Cube.020
+08:19:16 | INFO: Blender create Mesh node Cube.021
+08:19:16 | INFO: Blender create Mesh node Cube.022
+08:19:16 | INFO: Blender create Mesh node Cube.023
+08:19:16 | INFO: Blender create Mesh node W06_ProposedElevonHinge.002
+08:19:16 | INFO: Blender create Mesh node W06_ProposedElevonHinge.001
+08:19:16 | INFO: Blender create Mesh node W07_TipPanelJoint.002
+08:19:16 | INFO: Blender create Mesh node W08_TipFold.002
+08:19:16 | INFO: glTF import finished in 1.19s
+08:19:17 | INFO: Data are loaded, start creating Blender stuff
+08:19:17 | INFO: Blender create Mesh node Cylinder
+08:19:17 | INFO: Blender create Mesh node Cylinder.001
+08:19:17 | INFO: Blender create Mesh node Cylinder.004
+08:19:17 | INFO: Blender create Mesh node AFT_CassetteGasket
+08:19:17 | INFO: Blender create Mesh node Cylinder.006
+08:19:17 | INFO: Blender create Mesh node AFT_FastenerSlot
+08:19:17 | INFO: Blender create Mesh node AFT_FastenerSlot.001
+08:19:17 | INFO: Blender create Mesh node AFT_FastenerSlot.002
+08:19:17 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_00
+08:19:17 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_01
+08:19:17 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_02
+08:19:17 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_03
+08:19:17 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_04
+08:19:17 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_05
+08:19:17 | INFO: Blender create Mesh node AFT_LouverEdge_00
+08:19:17 | INFO: Blender create Mesh node AFT_LouverEdge_01
+08:19:17 | INFO: Blender create Mesh node AFT_LouverEdge_02
+08:19:17 | INFO: Blender create Mesh node AFT_LouverEdge_03
+08:19:17 | INFO: Blender create Mesh node AFT_LouverEdge_04
+08:19:17 | INFO: Blender create Mesh node AFT_LouverEdge_05
+08:19:17 | INFO: Blender create Mesh node AFT_ReleaseLatch
+08:19:17 | INFO: Blender create Mesh node AFT_ServiceCassette
+08:19:17 | INFO: Blender create Mesh node Cylinder.005
+08:19:17 | INFO: Blender create Mesh node AFT_StatusLens
+08:19:17 | INFO: Blender create Mesh node AFT_StatusLens.001
+08:19:17 | INFO: Blender create Mesh node Cylinder.016
+08:19:17 | INFO: Blender create Mesh node ENG_ArmCradle_Interior
+08:19:17 | INFO: Blender create Mesh node ENG_CradleRim
+08:19:17 | INFO: Blender create Mesh node Cube.014
+08:19:17 | INFO: Blender create Mesh node Cube.015
+08:19:17 | INFO: Blender create Mesh node Cube.029
+08:19:17 | INFO: Blender create Mesh node Cube.016
+08:19:17 | INFO: Blender create Mesh node Cylinder.020
+08:19:17 | INFO: Blender create Mesh node Cylinder.019
+08:19:17 | INFO: Blender create Mesh node Cylinder.018
+08:19:17 | INFO: Blender create Mesh node Cylinder.009
+08:19:17 | INFO: Blender create Mesh node Cylinder.010
+08:19:17 | INFO: Blender create Mesh node Cylinder.011
+08:19:17 | INFO: Blender create Mesh node Cylinder.012
+08:19:17 | INFO: Blender create Mesh node Cylinder.013
+08:19:17 | INFO: Blender create Mesh node Cylinder.014
+08:19:17 | INFO: Blender create Mesh node Cylinder.015
+08:19:17 | INFO: Blender create Mesh node Cube.013
+08:19:17 | INFO: Blender create Mesh node Cube.001
+08:19:17 | INFO: Blender create Mesh node Cube.008
+08:19:17 | INFO: Blender create Mesh node Cube.009
+08:19:17 | INFO: Blender create Mesh node Cube.002
+08:19:17 | INFO: Blender create Mesh node GEAR_FixedSocket_1
+08:19:17 | INFO: Blender create Mesh node GEAR_FixedSocket_-1
+08:19:17 | INFO: Blender create Mesh node Cube.010
+08:19:17 | INFO: Blender create Mesh node Cube.003
+08:19:17 | INFO: Blender create Mesh node Cube.012
+08:19:17 | INFO: Blender create Mesh node Cube.011
+08:19:17 | INFO: Blender create Mesh node Cube.006
+08:19:17 | INFO: Blender create Mesh node Cube.005
+08:19:17 | INFO: Blender create Mesh node GEAR_TelescopicStage_1_0
+08:19:17 | INFO: Blender create Mesh node GEAR_TelescopicStage_1_1
+08:19:17 | INFO: Blender create Mesh node Cylinder.008
+08:19:17 | INFO: Blender create Mesh node GEAR_TelescopicStage_-1_0
+08:19:17 | INFO: Blender create Mesh node GEAR_TelescopicStage_-1_1
+08:19:17 | INFO: Blender create Mesh node Cylinder.007
+08:19:17 | INFO: Blender create Mesh node H01_ContinuousLiftingBody_Mesh.001
+08:19:17 | INFO: Blender create Mesh node H03_CrownJoint.006
+08:19:17 | INFO: Blender create Mesh node H03_CrownJoint.007
+08:19:17 | INFO: Blender create Mesh node H03_CrownJoint.002
+08:19:17 | INFO: Blender create Mesh node H03_CrownJoint.003
+08:19:17 | INFO: Blender create Mesh node H03_CrownJoint.004
+08:19:17 | INFO: Blender create Mesh node H03_CrownJoint.008
+08:19:17 | INFO: Blender create Mesh node Cube.004
+08:19:17 | INFO: Blender create Mesh node Cube.018
+08:19:17 | INFO: Blender create Mesh node Cube.017
+08:19:17 | INFO: Blender create Mesh node Cube.019
+08:19:17 | INFO: Blender create Mesh node I01_ShoulderIntake_Bezel.002
+08:19:17 | INFO: Blender create Mesh node I01_ShoulderIntake_Interior_Mesh.001
+08:19:17 | INFO: Blender create Mesh node P01_IntakeCowl.001
+08:19:17 | INFO: Blender create Mesh node P02_IntakeLip.001
+08:19:17 | INFO: Blender create Mesh node P03_IntakeThroat.001
+08:19:17 | INFO: Blender create Mesh node P04_IntakeBack.001
+08:19:17 | INFO: Blender create Mesh node P05_WingCowlBlend.002
+08:19:17 | INFO: Blender create Mesh node P05_WingCowlBlend.003
+08:19:17 | INFO: Blender create Mesh node P06_IntakeGuide.002
+08:19:17 | INFO: Blender create Mesh node P06_IntakeGuide.003
+08:19:17 | INFO: Blender create Mesh node P07_CowlWarning.001
+08:19:17 | INFO: Blender create Mesh node P10_ExhaustRim.001
+08:19:17 | INFO: Blender create Mesh node P11_ExhaustThroat.001
+08:19:17 | INFO: Blender create Mesh node P12_ExhaustBack.001
+08:19:17 | INFO: Blender create Mesh node P13_HeatPetal.016
+08:19:17 | INFO: Blender create Mesh node P13_HeatPetal.017
+08:19:17 | INFO: Blender create Mesh node P13_HeatPetal.018
+08:19:17 | INFO: Blender create Mesh node P13_HeatPetal.019
+08:19:17 | INFO: Blender create Mesh node P13_HeatPetal.020
+08:19:17 | INFO: Blender create Mesh node P13_HeatPetal.021
+08:19:17 | INFO: Blender create Mesh node P13_HeatPetal.022
+08:19:17 | INFO: Blender create Mesh node P13_HeatPetal.023
+08:19:17 | INFO: Blender create Mesh node P13_HeatPetal.024
+08:19:17 | INFO: Blender create Mesh node P13_HeatPetal.025
+08:19:17 | INFO: Blender create Mesh node P13_HeatPetal.026
+08:19:17 | INFO: Blender create Mesh node P13_HeatPetal.027
+08:19:17 | INFO: Blender create Mesh node P13_HeatPetal.028
+08:19:17 | INFO: Blender create Mesh node P13_HeatPetal.029
+08:19:17 | INFO: Blender create Mesh node P13_HeatPetal.030
+08:19:17 | INFO: Blender create Mesh node P13_HeatPetal.031
+08:19:17 | INFO: Blender create Mesh node P14_InternalMixer.003
+08:19:17 | INFO: Blender create Mesh node P14_InternalMixer.004
+08:19:17 | INFO: Blender create Mesh node P14_InternalMixer.005
+08:19:17 | INFO: Blender create Mesh node P15_ExhaustApron.001
+08:19:17 | INFO: Blender create Mesh node R01_DuctWall_Mesh.001
+08:19:17 | INFO: Blender create Mesh node R02_RecessedLip_Mesh.001
+08:19:17 | INFO: Blender create Mesh node R03_LowerLip_Mesh.001
+08:19:17 | INFO: Blender create Mesh node Cylinder.002
+08:19:17 | INFO: Blender create Mesh node Cylinder.003
+08:19:17 | INFO: Blender create Mesh node R06_Blade_00_Mesh.001
+08:19:17 | INFO: Blender create Mesh node R06_Blade_01_Mesh.001
+08:19:17 | INFO: Blender create Mesh node R06_Blade_02_Mesh.001
+08:19:17 | INFO: Blender create Mesh node R06_Blade_03_Mesh.001
+08:19:17 | INFO: Blender create Mesh node R06_Blade_04_Mesh.001
+08:19:17 | INFO: Blender create Mesh node R06_Blade_05_Mesh.001
+08:19:17 | INFO: Blender create Mesh node R06_Blade_06_Mesh.001
+08:19:17 | INFO: Blender create Mesh node R06_Blade_07_Mesh.001
+08:19:17 | INFO: Blender create Mesh node R06_Blade_08_Mesh.001
+08:19:17 | INFO: Blender create Mesh node R06_Blade_09_Mesh.001
+08:19:17 | INFO: Blender create Mesh node R06_Blade_10_Mesh.001
+08:19:17 | INFO: Blender create Mesh node R06_Blade_11_Mesh.001
+08:19:17 | INFO: Blender create Mesh node Cube.024
+08:19:17 | INFO: Blender create Mesh node Cube.025
+08:19:17 | INFO: Blender create Mesh node Cube.026
+08:19:17 | INFO: Blender create Mesh node Cube.027
+08:19:17 | INFO: Blender create Mesh node Cube.028
+08:19:17 | INFO: Blender create Mesh node Cube.035
+08:19:17 | INFO: Blender create Mesh node S01_VisorRecess_Mesh.002
+08:19:17 | INFO: Blender create Mesh node S02_VisorOptic_Mesh.002
+08:19:17 | INFO: Blender create Mesh node Cylinder.001
+08:19:17 | INFO: Blender create Mesh node Cylinder.004
+08:19:17 | INFO: Blender create Mesh node Cylinder
+08:19:17 | INFO: Blender create Mesh node Cylinder.006
+08:19:17 | INFO: Blender create Mesh node Cylinder.005
+08:19:17 | INFO: Blender create Mesh node Cylinder.016
+08:19:17 | INFO: Blender create Mesh node Cube.015
+08:19:17 | INFO: Blender create Mesh node Cube.029
+08:19:17 | INFO: Blender create Mesh node Cube.016
+08:19:17 | INFO: Blender create Mesh node Cylinder.009
+08:19:17 | INFO: Blender create Mesh node Cylinder.010
+08:19:17 | INFO: Blender create Mesh node Cylinder.011
+08:19:17 | INFO: Blender create Mesh node Cylinder.012
+08:19:17 | INFO: Blender create Mesh node Cylinder.013
+08:19:17 | INFO: Blender create Mesh node Cylinder.014
+08:19:17 | INFO: Blender create Mesh node Cylinder.015
+08:19:17 | INFO: Blender create Mesh node Cube.008
+08:19:17 | INFO: Blender create Mesh node Cube.001
+08:19:17 | INFO: Blender create Mesh node Cube.009
+08:19:17 | INFO: Blender create Mesh node Cube.002
+08:19:18 | INFO: Blender create Mesh node Cube.010
+08:19:18 | INFO: Blender create Mesh node Cube.003
+08:19:18 | INFO: Blender create Mesh node Cube.012
+08:19:18 | INFO: Blender create Mesh node Cube.011
+08:19:18 | INFO: Blender create Mesh node Cube.006
+08:19:18 | INFO: Blender create Mesh node Cube.005
+08:19:18 | INFO: Blender create Mesh node Cylinder.008
+08:19:18 | INFO: Blender create Mesh node Cylinder.007
+08:19:18 | INFO: Blender create Mesh node V22_AvionicsServiceLockSlot
+08:19:18 | INFO: Blender create Mesh node Cylinder.022
+08:19:18 | INFO: Blender create Mesh node V22_AvionicsServiceSeal
+08:19:18 | INFO: Blender create Mesh node V22_AvionicsServiceSkin
+08:19:18 | INFO: Blender create Mesh node Cylinder.023
+08:19:18 | INFO: Blender create Mesh node Cylinder.024
+08:19:18 | INFO: Blender create Mesh node Cylinder.025
+08:19:18 | INFO: Blender create Mesh node Cylinder.026
+08:19:18 | INFO: Blender create Mesh node Cylinder.027
+08:19:18 | INFO: Blender create Mesh node Cylinder.028
+08:19:18 | INFO: Blender create Mesh node Cylinder.029
+08:19:18 | INFO: Blender create Mesh node Cylinder.030
+08:19:18 | INFO: Blender create Mesh node Cylinder.031
+08:19:18 | INFO: Blender create Mesh node Cylinder.032
+08:19:18 | INFO: Blender create Mesh node Cylinder.033
+08:19:18 | INFO: Blender create Mesh node Cylinder.034
+08:19:18 | INFO: Blender create Mesh node V22_FanFastenerSlot
+08:19:18 | INFO: Blender create Mesh node V22_FanFastenerSlot.001
+08:19:18 | INFO: Blender create Mesh node V22_FanFastenerSlot.002
+08:19:18 | INFO: Blender create Mesh node V22_FanFastenerSlot.003
+08:19:18 | INFO: Blender create Mesh node V22_FanFastenerSlot.004
+08:19:18 | INFO: Blender create Mesh node V22_FanFastenerSlot.005
+08:19:18 | INFO: Blender create Mesh node V22_FanFastenerSlot.006
+08:19:18 | INFO: Blender create Mesh node V22_FanFastenerSlot.007
+08:19:18 | INFO: Blender create Mesh node V22_FanFastenerSlot.008
+08:19:18 | INFO: Blender create Mesh node V22_FanFastenerSlot.009
+08:19:18 | INFO: Blender create Mesh node V22_FanFastenerSlot.010
+08:19:18 | INFO: Blender create Mesh node V22_FanFastenerSlot.011
+08:19:18 | INFO: Blender create Mesh node V22_FanServiceRim
+08:19:18 | INFO: Blender create Mesh node V22_FanServiceRim.001
+08:19:18 | INFO: Blender create Mesh node V22_ForwardAccessLockSlot
+08:19:18 | INFO: Blender create Mesh node Cylinder.017
+08:19:18 | INFO: Blender create Mesh node V22_ForwardAccessSeal
+08:19:18 | INFO: Blender create Mesh node V22_ForwardAccessSkin
+08:19:18 | INFO: Blender create Mesh node V22_OutboardAccessLockSlot
+08:19:18 | INFO: Blender create Mesh node Cylinder.021
+08:19:18 | INFO: Blender create Mesh node V22_OutboardAccessSeal
+08:19:18 | INFO: Blender create Mesh node V22_OutboardAccessSkin
+08:19:18 | INFO: Blender create Mesh node V22_ReleaseWitness
+08:19:18 | INFO: Blender create Mesh node V22_ReleaseWitness.001
+08:19:18 | INFO: Blender create Mesh node W01_PanelJoint_00.002
+08:19:18 | INFO: Blender create Mesh node W01_PanelJoint_01.002
+08:19:18 | INFO: Blender create Mesh node W04_TipMark.001
+08:19:18 | INFO: Blender create Mesh node Cube.036
+08:19:18 | INFO: Blender create Mesh node Cube.020
+08:19:18 | INFO: Blender create Mesh node Cube.021
+08:19:18 | INFO: Blender create Mesh node Cube.022
+08:19:18 | INFO: Blender create Mesh node Cube.023
+08:19:18 | INFO: Blender create Mesh node W06_ProposedElevonHinge.002
+08:19:18 | INFO: Blender create Mesh node W06_ProposedElevonHinge.001
+08:19:18 | INFO: Blender create Mesh node W07_TipPanelJoint.002
+08:19:18 | INFO: Blender create Mesh node W08_TipFold.002
+08:19:18 | INFO: glTF import finished in 1.27s
+03:42.016  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v30-proposal\bay-loaded-overview.png'
+08:19:29 | INFO: Data are loaded, start creating Blender stuff
+08:19:29 | INFO: Blender create Mesh node Cylinder
+08:19:29 | INFO: Blender create Mesh node Cylinder.001
+08:19:29 | INFO: Blender create Mesh node Cylinder.004
+08:19:29 | INFO: Blender create Mesh node AFT_CassetteGasket
+08:19:29 | INFO: Blender create Mesh node Cylinder.006
+08:19:29 | INFO: Blender create Mesh node AFT_FastenerSlot
+08:19:29 | INFO: Blender create Mesh node AFT_FastenerSlot.001
+08:19:29 | INFO: Blender create Mesh node AFT_FastenerSlot.002
+08:19:29 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_00
+08:19:29 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_01
+08:19:29 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_02
+08:19:29 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_03
+08:19:29 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_04
+08:19:29 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_05
+08:19:29 | INFO: Blender create Mesh node AFT_LouverEdge_00
+08:19:29 | INFO: Blender create Mesh node AFT_LouverEdge_01
+08:19:29 | INFO: Blender create Mesh node AFT_LouverEdge_02
+08:19:29 | INFO: Blender create Mesh node AFT_LouverEdge_03
+08:19:29 | INFO: Blender create Mesh node AFT_LouverEdge_04
+08:19:29 | INFO: Blender create Mesh node AFT_LouverEdge_05
+08:19:29 | INFO: Blender create Mesh node AFT_ReleaseLatch
+08:19:29 | INFO: Blender create Mesh node AFT_ServiceCassette
+08:19:29 | INFO: Blender create Mesh node Cylinder.005
+08:19:29 | INFO: Blender create Mesh node AFT_StatusLens
+08:19:29 | INFO: Blender create Mesh node AFT_StatusLens.001
+08:19:29 | INFO: Blender create Mesh node Cylinder.026
+08:19:29 | INFO: Blender create Mesh node Cube.001
+08:19:29 | INFO: Blender create Mesh node Cube.008
+08:19:29 | INFO: Blender create Mesh node Cube.009
+08:19:29 | INFO: Blender create Mesh node Cube.002
+08:19:29 | INFO: Blender create Mesh node GEAR_FixedSocket_1
+08:19:29 | INFO: Blender create Mesh node GEAR_FixedSocket_-1
+08:19:29 | INFO: Blender create Mesh node Cube.010
+08:19:29 | INFO: Blender create Mesh node Cube.003
+08:19:29 | INFO: Blender create Mesh node Cube.012
+08:19:29 | INFO: Blender create Mesh node Cube.011
+08:19:29 | INFO: Blender create Mesh node Cube.006
+08:19:29 | INFO: Blender create Mesh node Cube.005
+08:19:29 | INFO: Blender create Mesh node GEAR_TelescopicStage_1_0
+08:19:29 | INFO: Blender create Mesh node GEAR_TelescopicStage_1_1
+08:19:29 | INFO: Blender create Mesh node Cylinder.008
+08:19:29 | INFO: Blender create Mesh node GEAR_TelescopicStage_-1_0
+08:19:29 | INFO: Blender create Mesh node GEAR_TelescopicStage_-1_1
+08:19:29 | INFO: Blender create Mesh node Cylinder.007
+08:19:29 | INFO: Blender create Mesh node H01_ContinuousLiftingBody_Mesh.001
+08:19:30 | INFO: Blender create Mesh node I01_ShoulderIntake_Bezel.002
+08:19:30 | INFO: Blender create Mesh node I01_ShoulderIntake_Interior_Mesh.001
+08:19:30 | INFO: Blender create Mesh node P01_IntakeCowl.001
+08:19:30 | INFO: Blender create Mesh node P02_IntakeLip.001
+08:19:30 | INFO: Blender create Mesh node P03_IntakeThroat.001
+08:19:30 | INFO: Blender create Mesh node P04_IntakeBack.001
+08:19:30 | INFO: Blender create Mesh node P05_WingCowlBlend.002
+08:19:30 | INFO: Blender create Mesh node P05_WingCowlBlend.003
+08:19:30 | INFO: Blender create Mesh node P06_IntakeGuide.002
+08:19:30 | INFO: Blender create Mesh node P06_IntakeGuide.003
+08:19:30 | INFO: Blender create Mesh node P07_CowlWarning.001
+08:19:30 | INFO: Blender create Mesh node P10_ExhaustRim.001
+08:19:30 | INFO: Blender create Mesh node P11_ExhaustThroat.001
+08:19:30 | INFO: Blender create Mesh node P12_ExhaustBack.001
+08:19:30 | INFO: Blender create Mesh node P13_HeatPetal.016
+08:19:30 | INFO: Blender create Mesh node P13_HeatPetal.017
+08:19:30 | INFO: Blender create Mesh node P13_HeatPetal.018
+08:19:30 | INFO: Blender create Mesh node P13_HeatPetal.019
+08:19:30 | INFO: Blender create Mesh node P13_HeatPetal.020
+08:19:30 | INFO: Blender create Mesh node P13_HeatPetal.021
+08:19:30 | INFO: Blender create Mesh node P13_HeatPetal.022
+08:19:30 | INFO: Blender create Mesh node P13_HeatPetal.023
+08:19:30 | INFO: Blender create Mesh node P13_HeatPetal.024
+08:19:30 | INFO: Blender create Mesh node P13_HeatPetal.025
+08:19:30 | INFO: Blender create Mesh node P13_HeatPetal.026
+08:19:30 | INFO: Blender create Mesh node P13_HeatPetal.027
+08:19:30 | INFO: Blender create Mesh node P13_HeatPetal.028
+08:19:30 | INFO: Blender create Mesh node P13_HeatPetal.029
+08:19:30 | INFO: Blender create Mesh node P13_HeatPetal.030
+08:19:30 | INFO: Blender create Mesh node P13_HeatPetal.031
+08:19:30 | INFO: Blender create Mesh node P14_InternalMixer.003
+08:19:30 | INFO: Blender create Mesh node P14_InternalMixer.004
+08:19:30 | INFO: Blender create Mesh node P14_InternalMixer.005
+08:19:30 | INFO: Blender create Mesh node P15_ExhaustApron.001
+08:19:30 | INFO: Blender create Mesh node R01_DuctWall_Mesh.001
+08:19:30 | INFO: Blender create Mesh node R02_RecessedLip_Mesh.001
+08:19:30 | INFO: Blender create Mesh node R03_LowerLip_Mesh.001
+08:19:30 | INFO: Blender create Mesh node Cylinder.002
+08:19:30 | INFO: Blender create Mesh node Cylinder.003
+08:19:30 | INFO: Blender create Mesh node R06_Blade_00_Mesh.001
+08:19:30 | INFO: Blender create Mesh node R06_Blade_01_Mesh.001
+08:19:30 | INFO: Blender create Mesh node R06_Blade_02_Mesh.001
+08:19:30 | INFO: Blender create Mesh node R06_Blade_03_Mesh.001
+08:19:30 | INFO: Blender create Mesh node R06_Blade_04_Mesh.001
+08:19:30 | INFO: Blender create Mesh node R06_Blade_05_Mesh.001
+08:19:30 | INFO: Blender create Mesh node R06_Blade_06_Mesh.001
+08:19:30 | INFO: Blender create Mesh node R06_Blade_07_Mesh.001
+08:19:30 | INFO: Blender create Mesh node R06_Blade_08_Mesh.001
+08:19:30 | INFO: Blender create Mesh node R06_Blade_09_Mesh.001
+08:19:30 | INFO: Blender create Mesh node R06_Blade_10_Mesh.001
+08:19:30 | INFO: Blender create Mesh node R06_Blade_11_Mesh.001
+08:19:30 | INFO: Blender create Mesh node Cube.024
+08:19:30 | INFO: Blender create Mesh node Cube.025
+08:19:30 | INFO: Blender create Mesh node Cube.026
+08:19:30 | INFO: Blender create Mesh node Cube.027
+08:19:30 | INFO: Blender create Mesh node Cube.028
+08:19:30 | INFO: Blender create Mesh node Cube.035
+08:19:30 | INFO: Blender create Mesh node S01_VisorRecess_Mesh.002
+08:19:30 | INFO: Blender create Mesh node S02_VisorOptic_Mesh.002
+08:19:30 | INFO: Blender create Mesh node Cylinder.019
+08:19:30 | INFO: Blender create Mesh node Cylinder.021
+08:19:30 | INFO: Blender create Mesh node Cylinder.023
+08:19:30 | INFO: Blender create Mesh node Cylinder.020
+08:19:30 | INFO: Blender create Mesh node Cylinder.022
+08:19:30 | INFO: Blender create Mesh node Cylinder.024
+08:19:30 | INFO: Blender create Mesh node Cylinder.018
+08:19:30 | INFO: Blender create Mesh node SEC_DorsalMissileHatch_Interior
+08:19:30 | INFO: Blender create Mesh node SEC_DorsalMissileHatch
+08:19:30 | INFO: Blender create Mesh node SEC_EnergyWellSeal
+08:19:30 | INFO: Blender create Mesh node Cylinder.009
+08:19:30 | INFO: Blender create Mesh node Cylinder.011
+08:19:30 | INFO: Blender create Mesh node Cylinder.013
+08:19:30 | INFO: Blender create Mesh node Cylinder.015
+08:19:30 | INFO: Blender create Mesh node Cylinder.010
+08:19:30 | INFO: Blender create Mesh node Cylinder.012
+08:19:30 | INFO: Blender create Mesh node Cylinder.014
+08:19:30 | INFO: Blender create Mesh node Cylinder.016
+08:19:30 | INFO: Blender create Mesh node SEC_SmokedEnergyDome
+08:19:30 | INFO: Blender create Mesh node Cylinder.001
+08:19:30 | INFO: Blender create Mesh node Cylinder.004
+08:19:30 | INFO: Blender create Mesh node Cylinder
+08:19:30 | INFO: Blender create Mesh node Cylinder.006
+08:19:30 | INFO: Blender create Mesh node Cylinder.005
+08:19:30 | INFO: Blender create Mesh node Cube.008
+08:19:30 | INFO: Blender create Mesh node Cube.001
+08:19:30 | INFO: Blender create Mesh node Cube.009
+08:19:30 | INFO: Blender create Mesh node Cube.002
+08:19:30 | INFO: Blender create Mesh node Cube.010
+08:19:30 | INFO: Blender create Mesh node Cube.003
+08:19:30 | INFO: Blender create Mesh node Cube.012
+08:19:30 | INFO: Blender create Mesh node Cube.011
+08:19:30 | INFO: Blender create Mesh node Cube.006
+08:19:30 | INFO: Blender create Mesh node Cube.005
+08:19:30 | INFO: Blender create Mesh node Cylinder.008
+08:19:30 | INFO: Blender create Mesh node Cylinder.007
+08:19:30 | INFO: Blender create Mesh node Cylinder.021
+08:19:30 | INFO: Blender create Mesh node Cylinder.023
+08:19:30 | INFO: Blender create Mesh node Cylinder.019
+08:19:30 | INFO: Blender create Mesh node Cylinder.022
+08:19:30 | INFO: Blender create Mesh node Cylinder.024
+08:19:30 | INFO: Blender create Mesh node Cylinder.020
+08:19:30 | INFO: Blender create Mesh node Cylinder.018
+08:19:30 | INFO: Blender create Mesh node SEC_DorsalMissileHatch
+08:19:30 | INFO: Blender create Mesh node Cylinder.011
+08:19:30 | INFO: Blender create Mesh node Cylinder.013
+08:19:30 | INFO: Blender create Mesh node Cylinder.015
+08:19:30 | INFO: Blender create Mesh node Cylinder.009
+08:19:30 | INFO: Blender create Mesh node Cylinder.012
+08:19:30 | INFO: Blender create Mesh node Cylinder.014
+08:19:30 | INFO: Blender create Mesh node Cylinder.016
+08:19:30 | INFO: Blender create Mesh node Cylinder.010
+08:19:30 | INFO: Blender create Mesh node V22_AvionicsServiceLockSlot
+08:19:30 | INFO: Blender create Mesh node Cylinder.027
+08:19:30 | INFO: Blender create Mesh node V22_AvionicsServiceSeal
+08:19:30 | INFO: Blender create Mesh node V22_AvionicsServiceSkin
+08:19:30 | INFO: Blender create Mesh node Cylinder.028
+08:19:30 | INFO: Blender create Mesh node Cylinder.029
+08:19:30 | INFO: Blender create Mesh node Cylinder.030
+08:19:30 | INFO: Blender create Mesh node Cylinder.031
+08:19:30 | INFO: Blender create Mesh node Cylinder.032
+08:19:30 | INFO: Blender create Mesh node Cylinder.033
+08:19:30 | INFO: Blender create Mesh node Cylinder.034
+08:19:30 | INFO: Blender create Mesh node Cylinder.035
+08:19:30 | INFO: Blender create Mesh node Cylinder.036
+08:19:30 | INFO: Blender create Mesh node Cylinder.037
+08:19:30 | INFO: Blender create Mesh node Cylinder.038
+08:19:30 | INFO: Blender create Mesh node Cylinder.039
+08:19:30 | INFO: Blender create Mesh node V22_FanFastenerSlot
+08:19:30 | INFO: Blender create Mesh node V22_FanFastenerSlot.001
+08:19:30 | INFO: Blender create Mesh node V22_FanFastenerSlot.002
+08:19:30 | INFO: Blender create Mesh node V22_FanFastenerSlot.003
+08:19:30 | INFO: Blender create Mesh node V22_FanFastenerSlot.004
+08:19:30 | INFO: Blender create Mesh node V22_FanFastenerSlot.005
+08:19:30 | INFO: Blender create Mesh node V22_FanFastenerSlot.006
+08:19:30 | INFO: Blender create Mesh node V22_FanFastenerSlot.007
+08:19:30 | INFO: Blender create Mesh node V22_FanFastenerSlot.008
+08:19:30 | INFO: Blender create Mesh node V22_FanFastenerSlot.009
+08:19:30 | INFO: Blender create Mesh node V22_FanFastenerSlot.010
+08:19:30 | INFO: Blender create Mesh node V22_FanFastenerSlot.011
+08:19:30 | INFO: Blender create Mesh node V22_FanServiceRim
+08:19:30 | INFO: Blender create Mesh node V22_FanServiceRim.001
+08:19:30 | INFO: Blender create Mesh node V22_ForwardAccessLockSlot
+08:19:30 | INFO: Blender create Mesh node Cylinder.017
+08:19:30 | INFO: Blender create Mesh node V22_ForwardAccessSeal
+08:19:30 | INFO: Blender create Mesh node V22_ForwardAccessSkin
+08:19:30 | INFO: Blender create Mesh node V22_OutboardAccessLockSlot
+08:19:30 | INFO: Blender create Mesh node Cylinder.025
+08:19:30 | INFO: Blender create Mesh node V22_OutboardAccessSeal
+08:19:30 | INFO: Blender create Mesh node V22_OutboardAccessSkin
+08:19:30 | INFO: Blender create Mesh node V22_ReleaseWitness
+08:19:30 | INFO: Blender create Mesh node V22_ReleaseWitness.001
+08:19:30 | INFO: Blender create Mesh node W01_PanelJoint_00.002
+08:19:30 | INFO: Blender create Mesh node W01_PanelJoint_01.002
+08:19:30 | INFO: Blender create Mesh node W04_TipMark.001
+08:19:30 | INFO: Blender create Mesh node Cube.036
+08:19:30 | INFO: Blender create Mesh node Cube.020
+08:19:30 | INFO: Blender create Mesh node Cube.021
+08:19:30 | INFO: Blender create Mesh node Cube.022
+08:19:30 | INFO: Blender create Mesh node Cube.023
+08:19:30 | INFO: Blender create Mesh node W06_ProposedElevonHinge.002
+08:19:30 | INFO: Blender create Mesh node W06_ProposedElevonHinge.001
+08:19:30 | INFO: Blender create Mesh node W07_TipPanelJoint.002
+08:19:30 | INFO: Blender create Mesh node W08_TipFold.002
+08:19:30 | INFO: glTF import finished in 1.18s
+08:19:31 | INFO: Data are loaded, start creating Blender stuff
+08:19:31 | INFO: Blender create Mesh node Cylinder
+08:19:31 | INFO: Blender create Mesh node Cylinder.001
+08:19:31 | INFO: Blender create Mesh node Cylinder.004
+08:19:31 | INFO: Blender create Mesh node AFT_CassetteGasket
+08:19:31 | INFO: Blender create Mesh node Cylinder.006
+08:19:31 | INFO: Blender create Mesh node AFT_FastenerSlot
+08:19:31 | INFO: Blender create Mesh node AFT_FastenerSlot.001
+08:19:31 | INFO: Blender create Mesh node AFT_FastenerSlot.002
+08:19:31 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_00
+08:19:31 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_01
+08:19:31 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_02
+08:19:31 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_03
+08:19:31 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_04
+08:19:31 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_05
+08:19:31 | INFO: Blender create Mesh node AFT_LouverEdge_00
+08:19:31 | INFO: Blender create Mesh node AFT_LouverEdge_01
+08:19:31 | INFO: Blender create Mesh node AFT_LouverEdge_02
+08:19:31 | INFO: Blender create Mesh node AFT_LouverEdge_03
+08:19:31 | INFO: Blender create Mesh node AFT_LouverEdge_04
+08:19:31 | INFO: Blender create Mesh node AFT_LouverEdge_05
+08:19:31 | INFO: Blender create Mesh node AFT_ReleaseLatch
+08:19:31 | INFO: Blender create Mesh node AFT_ServiceCassette
+08:19:31 | INFO: Blender create Mesh node Cylinder.005
+08:19:31 | INFO: Blender create Mesh node AFT_StatusLens
+08:19:31 | INFO: Blender create Mesh node AFT_StatusLens.001
+08:19:31 | INFO: Blender create Mesh node Cube.001
+08:19:31 | INFO: Blender create Mesh node Cube.008
+08:19:31 | INFO: Blender create Mesh node Cube.009
+08:19:31 | INFO: Blender create Mesh node Cube.002
+08:19:31 | INFO: Blender create Mesh node GEAR_FixedSocket_1
+08:19:31 | INFO: Blender create Mesh node GEAR_FixedSocket_-1
+08:19:31 | INFO: Blender create Mesh node Cube.010
+08:19:31 | INFO: Blender create Mesh node Cube.003
+08:19:31 | INFO: Blender create Mesh node Cube.012
+08:19:31 | INFO: Blender create Mesh node Cube.011
+08:19:31 | INFO: Blender create Mesh node Cube.006
+08:19:31 | INFO: Blender create Mesh node Cube.005
+08:19:31 | INFO: Blender create Mesh node GEAR_TelescopicStage_1_0
+08:19:31 | INFO: Blender create Mesh node GEAR_TelescopicStage_1_1
+08:19:31 | INFO: Blender create Mesh node Cylinder.008
+08:19:31 | INFO: Blender create Mesh node GEAR_TelescopicStage_-1_0
+08:19:31 | INFO: Blender create Mesh node GEAR_TelescopicStage_-1_1
+08:19:31 | INFO: Blender create Mesh node Cylinder.007
+08:19:31 | INFO: Blender create Mesh node H01_ContinuousLiftingBody_Mesh.001
+08:19:31 | INFO: Blender create Mesh node H03_CrownJoint.006
+08:19:31 | INFO: Blender create Mesh node H03_CrownJoint.007
+08:19:31 | INFO: Blender create Mesh node H03_CrownJoint.002
+08:19:31 | INFO: Blender create Mesh node H03_CrownJoint.003
+08:19:31 | INFO: Blender create Mesh node H03_CrownJoint.004
+08:19:31 | INFO: Blender create Mesh node H03_CrownJoint.008
+08:19:31 | INFO: Blender create Mesh node Cube.004
+08:19:31 | INFO: Blender create Mesh node Cube.018
+08:19:31 | INFO: Blender create Mesh node Cube.017
+08:19:31 | INFO: Blender create Mesh node Cube.019
+08:19:31 | INFO: Blender create Mesh node I01_ShoulderIntake_Bezel.002
+08:19:31 | INFO: Blender create Mesh node I01_ShoulderIntake_Interior_Mesh.001
+08:19:31 | INFO: Blender create Mesh node P01_IntakeCowl.001
+08:19:31 | INFO: Blender create Mesh node P02_IntakeLip.001
+08:19:31 | INFO: Blender create Mesh node P03_IntakeThroat.001
+08:19:31 | INFO: Blender create Mesh node P04_IntakeBack.001
+08:19:31 | INFO: Blender create Mesh node P05_WingCowlBlend.002
+08:19:31 | INFO: Blender create Mesh node P05_WingCowlBlend.003
+08:19:31 | INFO: Blender create Mesh node P06_IntakeGuide.002
+08:19:31 | INFO: Blender create Mesh node P06_IntakeGuide.003
+08:19:31 | INFO: Blender create Mesh node P07_CowlWarning.001
+08:19:31 | INFO: Blender create Mesh node P10_ExhaustRim.001
+08:19:31 | INFO: Blender create Mesh node P11_ExhaustThroat.001
+08:19:31 | INFO: Blender create Mesh node P12_ExhaustBack.001
+08:19:31 | INFO: Blender create Mesh node P13_HeatPetal.016
+08:19:31 | INFO: Blender create Mesh node P13_HeatPetal.017
+08:19:31 | INFO: Blender create Mesh node P13_HeatPetal.018
+08:19:31 | INFO: Blender create Mesh node P13_HeatPetal.019
+08:19:31 | INFO: Blender create Mesh node P13_HeatPetal.020
+08:19:31 | INFO: Blender create Mesh node P13_HeatPetal.021
+08:19:31 | INFO: Blender create Mesh node P13_HeatPetal.022
+08:19:31 | INFO: Blender create Mesh node P13_HeatPetal.023
+08:19:31 | INFO: Blender create Mesh node P13_HeatPetal.024
+08:19:31 | INFO: Blender create Mesh node P13_HeatPetal.025
+08:19:31 | INFO: Blender create Mesh node P13_HeatPetal.026
+08:19:31 | INFO: Blender create Mesh node P13_HeatPetal.027
+08:19:31 | INFO: Blender create Mesh node P13_HeatPetal.028
+08:19:31 | INFO: Blender create Mesh node P13_HeatPetal.029
+08:19:31 | INFO: Blender create Mesh node P13_HeatPetal.030
+08:19:31 | INFO: Blender create Mesh node P13_HeatPetal.031
+08:19:31 | INFO: Blender create Mesh node P14_InternalMixer.003
+08:19:31 | INFO: Blender create Mesh node P14_InternalMixer.004
+08:19:31 | INFO: Blender create Mesh node P14_InternalMixer.005
+08:19:31 | INFO: Blender create Mesh node P15_ExhaustApron.001
+08:19:31 | INFO: Blender create Mesh node R01_DuctWall_Mesh.001
+08:19:31 | INFO: Blender create Mesh node R02_RecessedLip_Mesh.001
+08:19:31 | INFO: Blender create Mesh node R03_LowerLip_Mesh.001
+08:19:31 | INFO: Blender create Mesh node Cylinder.002
+08:19:31 | INFO: Blender create Mesh node Cylinder.003
+08:19:31 | INFO: Blender create Mesh node R06_Blade_00_Mesh.001
+08:19:31 | INFO: Blender create Mesh node R06_Blade_01_Mesh.001
+08:19:31 | INFO: Blender create Mesh node R06_Blade_02_Mesh.001
+08:19:31 | INFO: Blender create Mesh node R06_Blade_03_Mesh.001
+08:19:31 | INFO: Blender create Mesh node R06_Blade_04_Mesh.001
+08:19:31 | INFO: Blender create Mesh node R06_Blade_05_Mesh.001
+08:19:31 | INFO: Blender create Mesh node R06_Blade_06_Mesh.001
+08:19:31 | INFO: Blender create Mesh node R06_Blade_07_Mesh.001
+08:19:31 | INFO: Blender create Mesh node R06_Blade_08_Mesh.001
+08:19:31 | INFO: Blender create Mesh node R06_Blade_09_Mesh.001
+08:19:31 | INFO: Blender create Mesh node R06_Blade_10_Mesh.001
+08:19:31 | INFO: Blender create Mesh node R06_Blade_11_Mesh.001
+08:19:31 | INFO: Blender create Mesh node Cube.024
+08:19:31 | INFO: Blender create Mesh node Cube.025
+08:19:31 | INFO: Blender create Mesh node Cube.026
+08:19:31 | INFO: Blender create Mesh node Cube.027
+08:19:31 | INFO: Blender create Mesh node Cube.028
+08:19:31 | INFO: Blender create Mesh node Cube.035
+08:19:31 | INFO: Blender create Mesh node S01_VisorRecess_Mesh.002
+08:19:31 | INFO: Blender create Mesh node S02_VisorOptic_Mesh.002
+08:19:31 | INFO: Blender create Mesh node SALVAGE_BaySeal
+08:19:31 | INFO: Blender create Mesh node SALVAGE_CableWinding
+08:19:31 | INFO: Blender create Mesh node Cylinder.012
+08:19:31 | INFO: Blender create Mesh node Cube.016
+08:19:31 | INFO: Blender create Mesh node Cube.029
+08:19:31 | INFO: Blender create Mesh node SALVAGE_FairleadCable
+08:19:31 | INFO: Blender create Mesh node Cube.014
+08:19:31 | INFO: Blender create Mesh node Cube.030
+08:19:31 | INFO: Blender create Mesh node Cube.031
+08:19:31 | INFO: Blender create Mesh node Cube.013
+08:19:31 | INFO: Blender create Mesh node SALVAGE_InternalWinchBay_Interior
+08:19:31 | INFO: Blender create Mesh node Cylinder.010
+08:19:31 | INFO: Blender create Mesh node Cylinder.011
+08:19:31 | INFO: Blender create Mesh node Cube.015
+08:19:31 | INFO: Blender create Mesh node Cylinder.009
+08:19:31 | INFO: Blender create Mesh node Cylinder.001
+08:19:31 | INFO: Blender create Mesh node Cylinder.004
+08:19:31 | INFO: Blender create Mesh node Cylinder
+08:19:31 | INFO: Blender create Mesh node Cylinder.006
+08:19:31 | INFO: Blender create Mesh node Cylinder.005
+08:19:31 | INFO: Blender create Mesh node Cube.008
+08:19:31 | INFO: Blender create Mesh node Cube.001
+08:19:31 | INFO: Blender create Mesh node Cube.009
+08:19:31 | INFO: Blender create Mesh node Cube.002
+08:19:32 | INFO: Blender create Mesh node Cube.010
+08:19:32 | INFO: Blender create Mesh node Cube.003
+08:19:32 | INFO: Blender create Mesh node Cube.012
+08:19:32 | INFO: Blender create Mesh node Cube.011
+08:19:32 | INFO: Blender create Mesh node Cube.006
+08:19:32 | INFO: Blender create Mesh node Cube.005
+08:19:32 | INFO: Blender create Mesh node Cylinder.008
+08:19:32 | INFO: Blender create Mesh node Cylinder.007
+08:19:32 | INFO: Blender create Mesh node Cube.016
+08:19:32 | INFO: Blender create Mesh node Cube.029
+08:19:32 | INFO: Blender create Mesh node Cube.031
+08:19:32 | INFO: Blender create Mesh node Cube.030
+08:19:32 | INFO: Blender create Mesh node Cube.013
+08:19:32 | INFO: Blender create Mesh node Cylinder.010
+08:19:32 | INFO: Blender create Mesh node V22_AvionicsServiceLockSlot
+08:19:32 | INFO: Blender create Mesh node Cylinder.015
+08:19:32 | INFO: Blender create Mesh node V22_AvionicsServiceSeal
+08:19:32 | INFO: Blender create Mesh node V22_AvionicsServiceSkin
+08:19:32 | INFO: Blender create Mesh node Cylinder.016
+08:19:32 | INFO: Blender create Mesh node Cylinder.017
+08:19:32 | INFO: Blender create Mesh node Cylinder.018
+08:19:32 | INFO: Blender create Mesh node Cylinder.019
+08:19:32 | INFO: Blender create Mesh node Cylinder.020
+08:19:32 | INFO: Blender create Mesh node Cylinder.021
+08:19:32 | INFO: Blender create Mesh node Cylinder.022
+08:19:32 | INFO: Blender create Mesh node Cylinder.023
+08:19:32 | INFO: Blender create Mesh node Cylinder.024
+08:19:32 | INFO: Blender create Mesh node Cylinder.025
+08:19:32 | INFO: Blender create Mesh node Cylinder.026
+08:19:32 | INFO: Blender create Mesh node Cylinder.027
+08:19:32 | INFO: Blender create Mesh node V22_FanFastenerSlot
+08:19:32 | INFO: Blender create Mesh node V22_FanFastenerSlot.001
+08:19:32 | INFO: Blender create Mesh node V22_FanFastenerSlot.002
+08:19:32 | INFO: Blender create Mesh node V22_FanFastenerSlot.003
+08:19:32 | INFO: Blender create Mesh node V22_FanFastenerSlot.004
+08:19:32 | INFO: Blender create Mesh node V22_FanFastenerSlot.005
+08:19:32 | INFO: Blender create Mesh node V22_FanFastenerSlot.006
+08:19:32 | INFO: Blender create Mesh node V22_FanFastenerSlot.007
+08:19:32 | INFO: Blender create Mesh node V22_FanFastenerSlot.008
+08:19:32 | INFO: Blender create Mesh node V22_FanFastenerSlot.009
+08:19:32 | INFO: Blender create Mesh node V22_FanFastenerSlot.010
+08:19:32 | INFO: Blender create Mesh node V22_FanFastenerSlot.011
+08:19:32 | INFO: Blender create Mesh node V22_FanServiceRim
+08:19:32 | INFO: Blender create Mesh node V22_FanServiceRim.001
+08:19:32 | INFO: Blender create Mesh node V22_ForwardAccessLockSlot
+08:19:32 | INFO: Blender create Mesh node Cylinder.013
+08:19:32 | INFO: Blender create Mesh node V22_ForwardAccessSeal
+08:19:32 | INFO: Blender create Mesh node V22_ForwardAccessSkin
+08:19:32 | INFO: Blender create Mesh node V22_OutboardAccessLockSlot
+08:19:32 | INFO: Blender create Mesh node Cylinder.014
+08:19:32 | INFO: Blender create Mesh node V22_OutboardAccessSeal
+08:19:32 | INFO: Blender create Mesh node V22_OutboardAccessSkin
+08:19:32 | INFO: Blender create Mesh node V22_ReleaseWitness
+08:19:32 | INFO: Blender create Mesh node V22_ReleaseWitness.001
+08:19:32 | INFO: Blender create Mesh node W01_PanelJoint_00.002
+08:19:32 | INFO: Blender create Mesh node W01_PanelJoint_01.002
+08:19:32 | INFO: Blender create Mesh node W04_TipMark.001
+08:19:32 | INFO: Blender create Mesh node Cube.036
+08:19:32 | INFO: Blender create Mesh node Cube.020
+08:19:32 | INFO: Blender create Mesh node Cube.021
+08:19:32 | INFO: Blender create Mesh node Cube.022
+08:19:32 | INFO: Blender create Mesh node Cube.023
+08:19:32 | INFO: Blender create Mesh node W06_ProposedElevonHinge.002
+08:19:32 | INFO: Blender create Mesh node W06_ProposedElevonHinge.001
+08:19:32 | INFO: Blender create Mesh node W07_TipPanelJoint.002
+08:19:32 | INFO: Blender create Mesh node W08_TipFold.002
+08:19:32 | INFO: glTF import finished in 1.19s
+03:56.297  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v30-proposal\bay-loaded-security-salvage.png'
+03:59.797  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v30-proposal\bay-scale-comparison.png'
+04:01.032  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v30-proposal\contact-sheet.png'
+04:01.750  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v30-proposal\before-after.png'
+04:02.313  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v30-proposal\refinement-comparison.png'
+04:03.016  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v30-proposal\functional-comparison-ja.png'
+Blender 5.2.0 LTS (hash fbe6228777e7 built 2026-07-14 01:35:40)
+
+Blender quit

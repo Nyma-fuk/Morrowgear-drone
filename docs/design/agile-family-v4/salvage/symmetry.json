@@ -1,0 +1,10 @@
+{
+  "role": "salvage",
+  "verticesChecked": 7568,
+  "tolerance": 1e-05,
+  "geometrySymmetryPass": true,
+  "errors": [],
+  "visualApproval": false,
+  "gameVerified": false,
+  "animationVerified": false
+}

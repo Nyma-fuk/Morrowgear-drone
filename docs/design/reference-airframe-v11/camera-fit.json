@@ -1,0 +1,28 @@
+{
+  "method": "Rigid perspective camera only. Airframe mesh and input image are unchanged.",
+  "cameraParameters": [
+    0.5088105223432564,
+    0.47195985608949165,
+    188.62760203754445,
+    44.57453811036393,
+    717.16412071053,
+    437.29683806384077
+  ],
+  "startingCamera": [
+    0.4940423582543699,
+    0.4647443153265976,
+    188.76566552243528,
+    42.545029939555256,
+    721.7922175232912,
+    439.2684802617922
+  ],
+  "initialObjective": 688.7587822500964,
+  "finalObjective": 598.2686868374657,
+  "anchorErrorsPx": {
+    "fan_left": 13.606149932424373,
+    "fan_right": 12.091252699354172,
+    "chin_sensor": 59.09110413623194
+  },
+  "sourceMeshSha256": "0241d192b42e18b75ac4456a35176aa5a9aa0b88e75b7e06bfa7a5088d7783ec",
+  "visualApproval": false
+}

@@ -1,0 +1,66 @@
+{
+  "beam-state.png": {
+    "bytes": 725992,
+    "sha256": "b6bcdf6b8857a49e0ee1353b129b40dace6289f6a488899771cfdbd170f75796"
+  },
+  "before-after.png": {
+    "bytes": 2100688,
+    "sha256": "3a2bb2901e0be3110a4917aa2e0f808737c6ee5d68180dde6b8510621ea6c6ec"
+  },
+  "bottom.png": {
+    "bytes": 928696,
+    "sha256": "9dc1ab8f82f0f465a4564ac2e7a3fa03b86b272105ff6c71fee587e14f0afc2c"
+  },
+  "carrier-v29-proposal.blend": {
+    "bytes": 401027,
+    "sha256": "8f352b14600f08844a9db3e48e154faaaef6cacb86943b9dfa845ce635898132"
+  },
+  "carrier-v29-proposal.glb": {
+    "bytes": 2397304,
+    "sha256": "0c86719e2348cbd13e0beff4cb568b58295791b40b76a27efce5fe92228167bb"
+  },
+  "contact-sheet.png": {
+    "bytes": 3079280,
+    "sha256": "09e1fe715de03a8cf7bec9750187322b486e14ee55d81fa77d7c4b374795c834"
+  },
+  "front.png": {
+    "bytes": 471496,
+    "sha256": "86cdbf41b4d2edf5ded990808d6a0c144d63d68299c33e0ed836cc9552fcd896"
+  },
+  "hero.png": {
+    "bytes": 696875,
+    "sha256": "91c628457516229e1e18471b451fb1185b2b9645387098400eb8cc19cb39e4c5"
+  },
+  "left.png": {
+    "bytes": 426182,
+    "sha256": "cb0c2903e86c065091251ddafd54ea9777f3570059990b9841c04bfa0682c56e"
+  },
+  "previous-blockout-hero.png": {
+    "bytes": 791192,
+    "sha256": "1f67d66a1250ba0477a1977f3260ea74667038a172bfb80c037f0f36025887b5"
+  },
+  "rear-underside.png": {
+    "bytes": 653762,
+    "sha256": "bcdb85b2c76fc83d68bfb63ca21eea0d46d703b6e81c24b262a013432ce312c7"
+  },
+  "rear.png": {
+    "bytes": 473422,
+    "sha256": "c9eaa7ed26c7205aa33cbcdd4042ebcce3d110d8c7e063d0172e5be0ebe5e596"
+  },
+  "refinement-comparison.png": {
+    "bytes": 1633371,
+    "sha256": "1499b1080c73ea0dc62a34061a77a4f7527426c447ebe15e9d8ac0f33af9e6c6"
+  },
+  "right.png": {
+    "bytes": 424970,
+    "sha256": "64d4cae6b3b1d79d0e684e11ba12f72548810c8588fc9c9b6fb8f9962bf79d90"
+  },
+  "top.png": {
+    "bytes": 981613,
+    "sha256": "63f37f9f31d27d5786b55e43ac865d69677076add567038f5bf61f41af5eda15"
+  },
+  "underside.png": {
+    "bytes": 711049,
+    "sha256": "a4af0ade2e56d0cd8593f05458ac8c497108a3863774f2c0466af88d5d0117cd"
+  }
+}

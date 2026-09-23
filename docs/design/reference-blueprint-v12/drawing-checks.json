@@ -1,0 +1,71 @@
+{
+  "checks": {
+    "sourceExists": true,
+    "outlineSymmetry": true,
+    "fanLipBelowDeck": true,
+    "hiddenSurfacesFlagged": true,
+    "approvalNotAssumed": true,
+    "hasSixViews": true,
+    "sameViewScale": true,
+    "positiveShellDepth": true,
+    "surfaceSymmetry": true,
+    "sectionsWithinOutline": true,
+    "sectionsExcludeFanVoid": true,
+    "fanCirclesInsideOutline": true,
+    "fanRotorBelowLip": true,
+    "frontEnvelopeSymmetry": true,
+    "svgIncludesModelOverlay": true
+  },
+  "passed": true,
+  "scope": "Drawing consistency only. Image fidelity and airworthiness are not certified.",
+  "orthographicDimensionsAreHypotheses": true,
+  "ratios": {
+    "翼幅": 1.0,
+    "全長 / 翼幅": 0.4763440860215053,
+    "胴体肩幅 / 翼幅": 0.253763440860215,
+    "タービン直径 / 翼幅": 0.20215053763440857,
+    "タービン中心間 / 翼幅": 0.40430107526881714,
+    "全高の仮説 / 翼幅": 0.121505376344086
+  },
+  "visualApproval": false,
+  "modelOverlaySvgContainsRasterModel": true,
+  "sourceSha256": "4d47d66ff549e0fe7e273896022870dfa115dfbb249d782ffdd2bc64d2dd6eb7",
+  "constraintSha256": "551e84832ff4842bc828c0700f2ea1f78a81615d2b268c4e25b512e94f79e9f2",
+  "candidateHullSha256": "0241d192b42e18b75ac4456a35176aa5a9aa0b88e75b7e06bfa7a5088d7783ec",
+  "sectionIntervals": {
+    "A-A": [
+      [
+        -1.044285714285714,
+        1.044285714285714
+      ]
+    ],
+    "B-B": [
+      [
+        -3.8810945273631843,
+        -2.82
+      ],
+      [
+        -0.94,
+        0.94
+      ],
+      [
+        2.82,
+        3.8810945273631843
+      ]
+    ],
+    "C-C": [
+      [
+        -4.65,
+        -4.190322580645162
+      ],
+      [
+        -3.364,
+        3.364
+      ],
+      [
+        4.190322580645162,
+        4.65
+      ]
+    ]
+  }
+}

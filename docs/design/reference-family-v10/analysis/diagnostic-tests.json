@@ -1,0 +1,9 @@
+{
+  "completedUtc": "2026-09-20T12:01:29.612591+00:00",
+  "scope": "Diagnostic tooling and limited structural checks only; not visual fidelity, role mechanisms or Minecraft gameplay.",
+  "testsRun": 15,
+  "failures": 0,
+  "errors": 0,
+  "passed": true,
+  "comparisonSha256": "203a17cdd2edb5f125e9ba7014163f8df1341a0b4e8e66cb1a532a8f364eece8"
+}

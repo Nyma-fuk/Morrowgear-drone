@@ -25,7 +25,8 @@ public final class MorrowgearRenderTypes {
 			.withBindGroupLayout(BindGroupLayouts.MATRICES_PROJECTION)
 			.withBindGroupLayout(BindGroupLayouts.FOG)
 			.withColorTargetState(new ColorTargetState(BlendFunction.LIGHTNING))
-			.withDepthStencilState(new DepthStencilState(CompareOp.LESS_THAN_OR_EQUAL, false))
+			// Minecraft 26.2 uses reversed depth; match the vanilla depth comparison.
+			.withDepthStencilState(new DepthStencilState(CompareOp.GREATER_THAN_OR_EQUAL, false))
 			.withVertexBinding(0, DefaultVertexFormat.ENTITY)
 			.withPrimitiveTopology(PrimitiveTopology.QUADS)
 			.withCull(false)
@@ -40,7 +41,7 @@ public final class MorrowgearRenderTypes {
 			.withBindGroupLayout(BindGroupLayouts.MATRICES_PROJECTION)
 			.withBindGroupLayout(BindGroupLayouts.FOG)
 			.withColorTargetState(new ColorTargetState(BlendFunction.LIGHTNING))
-			.withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
+			.withDepthStencilState(new DepthStencilState(CompareOp.GREATER_THAN_OR_EQUAL, false))
 			.withVertexBinding(0, DefaultVertexFormat.ENTITY)
 			.withPrimitiveTopology(PrimitiveTopology.QUADS)
 			.withCull(false)

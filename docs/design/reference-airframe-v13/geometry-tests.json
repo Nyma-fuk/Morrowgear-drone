@@ -1,0 +1,7 @@
+{
+  "tests": 12,
+  "failures": 0,
+  "errors": 0,
+  "passed": true,
+  "scope": "Art geometry and export regressions only; not CFD, real-world flight, reference approval or game testing."
+}

@@ -22,7 +22,7 @@ class SwarmFormationTest {
 
 	@Test
 	void orbitRadiusGrowsForLargeFleet() {
-		assertEquals(5.4, SwarmFormation.orbitRadius(3), 0.001);
+		assertEquals(8.0, SwarmFormation.orbitRadius(3), 0.001);
 		assertTrue(SwarmFormation.orbitRadius(16) > SwarmFormation.orbitRadius(8));
 	}
 
@@ -76,7 +76,7 @@ class SwarmFormationTest {
 		assertTrue(first.distanceTo(second) > 8.0);
 		assertTrue(second.y > first.y);
 		assertTrue(fourth.z < first.z);
-		assertEquals(11.4, SwarmFormation.wingOrbitCenter(Vec3.ZERO, 3).y, 0.001);
+		assertEquals(18.0, SwarmFormation.wingOrbitCenter(Vec3.ZERO, 3).y, 0.001);
 		assertTrue(SwarmFormation.wingArrivalRadius(30) > 25.0);
 	}
 
@@ -102,6 +102,23 @@ class SwarmFormationTest {
 	}
 
 	@Test
+	void waypointMergeTargetsNeverSendAnySupportedFormationSizeAwayFromDestination() {
+		Vec3 destination = new Vec3(80, 72, 20);
+		for (int count : List.of(1, 2, 4, 8, 16, 24)) {
+			Vec3 leader = new Vec3(12, 70, -4);
+			Vec3 forward = destination.subtract(leader);
+			for (int index = 0; index < count; index++) {
+				Vec3 current = leader.add(index * 0.4, index % 3, index * 0.2);
+				Vec3 slot = leader.add(SwarmFormation.movingOffset(index, count, forward));
+				Vec3 target = SwarmFormation.nonRegressiveMergeTarget(current, destination, slot);
+				Vec3 destinationDirection = destination.subtract(current).multiply(1, 0, 1).normalize();
+				assertTrue(target.subtract(current).dot(destinationDirection) >= -1.0e-9,
+					"formation " + count + " index " + index + " regressed: " + target);
+			}
+		}
+	}
+
+	@Test
 	void undergroundFormationUsesACompactThreeDimensionalColumn() {
 		Vec3 forward = new Vec3(1, -0.25, 1).normalize();
 		Vec3 first = SwarmFormation.movingOffset(1, 6, forward, true);
@@ -109,7 +126,8 @@ class SwarmFormationTest {
 
 		assertTrue(first.dot(forward) < 0);
 		assertTrue(third.dot(forward) < first.dot(forward));
-		assertTrue(Math.abs(first.x) < 3.0 && Math.abs(first.z) < 3.0);
+		assertEquals(5.0, first.length(), 0.001);
+		assertTrue(first.cross(forward).length() < 0.001, "narrow passages must use a single centerline");
 	}
 
 	@Test
@@ -168,7 +186,7 @@ class SwarmFormationTest {
 	@Test
 	void dispersedUnitsUseRendezvousUntilFleetIsCompact() {
 		assertTrue(SwarmFormation.convergenceRequired(40.0, 7));
-		assertTrue(!SwarmFormation.convergenceComplete(14.0, 7));
+		assertTrue(!SwarmFormation.convergenceComplete(30.0, 7));
 		assertTrue(SwarmFormation.convergenceComplete(10.0, 7));
 	}
 

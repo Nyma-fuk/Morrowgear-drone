@@ -1,0 +1,10 @@
+{
+  "checks": {
+    "sourcePreserved": true,
+    "allNineViewsNonblank": true,
+    "allNineViewsSameResolution": true,
+    "allNineViewsFresh": true,
+    "exportsExist": true
+  },
+  "passed": true
+}

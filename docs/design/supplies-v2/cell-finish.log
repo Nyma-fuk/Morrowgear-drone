@@ -1,0 +1,85 @@
+Info: Saved as "laser_cell.blend"
+INFO Draco is available, use library at C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\work\blender-portable\blender-5.2.0-windows-x64\5.2\scripts\addons_core\io_scene_gltf2\bf_intern_draco_bridge.dll
+INFO MeshOptimizer is available, use library at C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\work\blender-portable\blender-5.2.0-windows-x64\5.2\scripts\addons_core\io_scene_gltf2\bf_intern_meshopt_bridge.dll
+17:50:31 | INFO: Starting glTF 2.0 export
+17:50:31 | INFO: Extracting primitive: Cube.032
+17:50:31 | INFO: Primitives created: 1
+17:50:31 | INFO: Extracting primitive: Cube.033
+17:50:31 | INFO: Primitives created: 1
+17:50:31 | INFO: Extracting primitive: Cube.034
+17:50:31 | INFO: Primitives created: 1
+17:50:31 | INFO: Extracting primitive: Cube.035
+17:50:31 | INFO: Primitives created: 1
+17:50:31 | INFO: Extracting primitive: Cube.036
+17:50:31 | INFO: Primitives created: 1
+17:50:31 | INFO: Extracting primitive: Cube.037
+17:50:31 | INFO: Primitives created: 1
+17:50:31 | INFO: Extracting primitive: Cylinder.020
+17:50:31 | INFO: Primitives created: 1
+17:50:31 | INFO: Extracting primitive: Cylinder.021
+17:50:31 | INFO: Primitives created: 1
+17:50:31 | INFO: Extracting primitive: Cube.031
+17:50:31 | INFO: Primitives created: 1
+17:50:31 | INFO: Extracting primitive: CellFrontArmor.001
+17:50:31 | INFO: Primitives created: 1
+17:50:31 | INFO: Extracting primitive: CellIndicatorBezel.001
+17:50:31 | INFO: Primitives created: 1
+17:50:31 | INFO: Extracting primitive: CellIndicatorRecess.001
+17:50:31 | INFO: Primitives created: 1
+17:50:31 | INFO: Extracting primitive: Cube.039
+17:50:31 | INFO: Primitives created: 1
+17:50:31 | INFO: Extracting primitive: Cube.029
+17:50:31 | INFO: Primitives created: 1
+17:50:31 | INFO: Extracting primitive: Cylinder.023
+17:50:31 | INFO: Primitives created: 1
+17:50:31 | INFO: Extracting primitive: Cylinder.025
+17:50:31 | INFO: Primitives created: 1
+17:50:31 | INFO: Extracting primitive: Cylinder.022
+17:50:31 | INFO: Primitives created: 1
+17:50:31 | INFO: Extracting primitive: Cylinder.024
+17:50:31 | INFO: Primitives created: 1
+17:50:31 | INFO: Extracting primitive: Cube.030
+17:50:31 | INFO: Primitives created: 1
+17:50:31 | INFO: Extracting primitive: Cylinder.027
+17:50:31 | INFO: Primitives created: 1
+17:50:31 | INFO: Extracting primitive: Cylinder.029
+17:50:31 | INFO: Primitives created: 1
+17:50:31 | INFO: Extracting primitive: Cylinder.026
+17:50:31 | INFO: Primitives created: 1
+17:50:31 | INFO: Extracting primitive: Cylinder.028
+17:50:31 | INFO: Primitives created: 1
+17:50:31 | INFO: Extracting primitive: Cube.045
+17:50:31 | INFO: Primitives created: 1
+17:50:31 | INFO: Extracting primitive: Cube.046
+17:50:31 | INFO: Primitives created: 1
+17:50:31 | INFO: Extracting primitive: Cube.040
+17:50:31 | INFO: Primitives created: 1
+17:50:31 | INFO: Extracting primitive: Cube.041
+17:50:31 | INFO: Primitives created: 1
+17:50:31 | INFO: Extracting primitive: Cube.042
+17:50:31 | INFO: Primitives created: 1
+17:50:31 | INFO: Extracting primitive: Cube.043
+17:50:31 | INFO: Primitives created: 1
+17:50:31 | INFO: Extracting primitive: Cube.044
+17:50:31 | INFO: Primitives created: 1
+17:50:31 | INFO: Extracting primitive: Cube.038
+17:50:31 | INFO: Primitives created: 1
+17:50:31 | INFO: Extracting primitive: CellTitaniumCrashRail.001
+17:50:31 | INFO: Primitives created: 1
+17:50:31 | INFO: Finished glTF 2.0 export in 0.11021828651428223 s
+00:10.391  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\laser_cell\hero.png'
+00:18.641  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\laser_cell\front.png'
+00:26.844  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\laser_cell\rear.png'
+00:32.860  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\laser_cell\top.png'
+00:38.781  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\laser_cell\bottom.png'
+00:45.610  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\laser_cell\left.png'
+00:52.485  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\laser_cell\right.png'
+00:52.578  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\laser_cell\icon-16.png'
+00:52.656  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\laser_cell\icon-32.png'
+00:52.766  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\laser_cell\icon-64.png'
+00:53.000  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\laser_cell\icon-128.png'
+01:01.641  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\laser_cell\icon-1024.png'
+
+Blender 5.2.0 LTS (hash fbe6228777e7 built 2026-07-14 01:35:40)
+
+Blender quit

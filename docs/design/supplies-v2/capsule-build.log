@@ -1,0 +1,252 @@
+Info: Saved as "micro_missile_pack.blend"
+INFO Draco is available, use library at C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\work\blender-portable\blender-5.2.0-windows-x64\5.2\scripts\addons_core\io_scene_gltf2\bf_intern_draco_bridge.dll
+INFO MeshOptimizer is available, use library at C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\work\blender-portable\blender-5.2.0-windows-x64\5.2\scripts\addons_core\io_scene_gltf2\bf_intern_meshopt_bridge.dll
+18:32:17 | INFO: Starting glTF 2.0 export
+18:32:17 | INFO: Extracting primitive: Missile_1.001
+18:32:17 | INFO: Primitives created: 12
+18:32:17 | INFO: Extracting primitive: Cube.070
+18:32:17 | INFO: Primitives created: 1
+18:32:17 | INFO: Extracting primitive: Missile_1RecessedRedBand.001
+18:32:17 | INFO: Primitives created: 1
+18:32:17 | INFO: Extracting primitive: Missile_2.001
+18:32:17 | INFO: Primitives created: 12
+18:32:17 | INFO: Extracting primitive: Cube.071
+18:32:17 | INFO: Primitives created: 1
+18:32:17 | INFO: Extracting primitive: Cube.072
+18:32:17 | INFO: Primitives created: 1
+18:32:17 | INFO: Extracting primitive: Missile_2RecessedRedBand.001
+18:32:17 | INFO: Primitives created: 1
+18:32:17 | INFO: Extracting primitive: Missile_4.001
+18:32:17 | INFO: Primitives created: 12
+18:32:17 | INFO: Extracting primitive: Cube.073
+18:32:17 | INFO: Primitives created: 1
+18:32:17 | INFO: Extracting primitive: Cube.074
+18:32:17 | INFO: Primitives created: 1
+18:32:17 | INFO: Extracting primitive: Missile_4RecessedRedBand.001
+18:32:17 | INFO: Primitives created: 1
+18:32:17 | INFO: Extracting primitive: RackArmoredSide.002
+18:32:17 | INFO: Primitives created: 1
+18:32:17 | INFO: Extracting primitive: Cube.069
+18:32:17 | INFO: Primitives created: 1
+18:32:17 | INFO: Extracting primitive: Cylinder.013
+18:32:17 | INFO: Primitives created: 1
+18:32:17 | INFO: Extracting primitive: Cylinder.015
+18:32:17 | INFO: Primitives created: 1
+18:32:17 | INFO: Extracting primitive: Cylinder.017
+18:32:17 | INFO: Primitives created: 1
+18:32:17 | INFO: Extracting primitive: Cylinder.012
+18:32:17 | INFO: Primitives created: 1
+18:32:17 | INFO: Extracting primitive: Cylinder.014
+18:32:17 | INFO: Primitives created: 1
+18:32:17 | INFO: Extracting primitive: Cylinder.016
+18:32:17 | INFO: Primitives created: 1
+18:32:17 | INFO: Extracting primitive: Cube.047
+18:32:17 | INFO: Primitives created: 1
+18:32:17 | INFO: Extracting primitive: Cube.048
+18:32:17 | INFO: Primitives created: 1
+18:32:17 | INFO: Extracting primitive: Cube.049
+18:32:17 | INFO: Primitives created: 1
+18:32:17 | INFO: Extracting primitive: Cube.054
+18:32:17 | INFO: Primitives created: 1
+18:32:17 | INFO: Extracting primitive: Cube.058
+18:32:17 | INFO: Primitives created: 1
+18:32:17 | INFO: Extracting primitive: Cube.062
+18:32:17 | INFO: Primitives created: 1
+18:32:17 | INFO: Extracting primitive: Cube.050
+18:32:17 | INFO: Primitives created: 1
+18:32:17 | INFO: Extracting primitive: Cube.051
+18:32:17 | INFO: Primitives created: 1
+18:32:17 | INFO: Extracting primitive: Cube.066
+18:32:17 | INFO: Primitives created: 1
+18:32:17 | INFO: Extracting primitive: Cube.067
+18:32:17 | INFO: Primitives created: 1
+18:32:17 | INFO: Extracting primitive: Cube.065
+18:32:17 | INFO: Primitives created: 1
+18:32:17 | INFO: Extracting primitive: Cube.053
+18:32:17 | INFO: Primitives created: 1
+18:32:17 | INFO: Extracting primitive: Cube.057
+18:32:17 | INFO: Primitives created: 1
+18:32:17 | INFO: Extracting primitive: Cube.061
+18:32:17 | INFO: Primitives created: 1
+18:32:17 | INFO: Extracting primitive: Cube.055
+18:32:17 | INFO: Primitives created: 1
+18:32:17 | INFO: Extracting primitive: Cube.056
+18:32:17 | INFO: Primitives created: 1
+18:32:17 | INFO: Extracting primitive: Cube.059
+18:32:17 | INFO: Primitives created: 1
+18:32:17 | INFO: Extracting primitive: Cube.060
+18:32:17 | INFO: Primitives created: 1
+18:32:17 | INFO: Extracting primitive: Cube.063
+18:32:17 | INFO: Primitives created: 1
+18:32:17 | INFO: Extracting primitive: Cube.064
+18:32:17 | INFO: Primitives created: 1
+18:32:17 | INFO: Extracting primitive: Cube.052
+18:32:17 | INFO: Primitives created: 1
+18:32:17 | INFO: Extracting primitive: Cube.046
+18:32:17 | INFO: Primitives created: 1
+18:32:17 | INFO: Extracting primitive: Cube.068
+18:32:17 | INFO: Primitives created: 1
+18:32:17 | INFO: Finished glTF 2.0 export in 0.11173868179321289 s
+00:10.859  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\micro_missile_pack\hero.png'
+00:20.172  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\micro_missile_pack\front.png'
+00:27.609  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\micro_missile_pack\rear.png'
+00:34.062  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\micro_missile_pack\top.png'
+00:40.031  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\micro_missile_pack\bottom.png'
+00:46.640  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\micro_missile_pack\left.png'
+00:53.265  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\micro_missile_pack\right.png'
+00:53.343  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\micro_missile_pack\icon-16.png'
+00:53.422  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\micro_missile_pack\icon-32.png'
+00:53.515  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\micro_missile_pack\icon-64.png'
+00:53.765  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\micro_missile_pack\icon-128.png'
+01:03.093  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\micro_missile_pack\icon-1024.png'
+01:04.328  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\approval-icons.png'
+01:04.968  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\reference-comparison.png'
+01:05.625  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\micro_missile_pack\contact-sheet.png'
+01:06.047  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\supplies-v2\micro_missile_pack\capsule-comparison.png'
+
+18:33:22 | INFO: Data are loaded, start creating Blender stuff
+18:33:22 | INFO: Blender create Mesh node Cube.054
+18:33:22 | INFO: Blender create Mesh node Cube.064
+18:33:22 | INFO: Blender create Mesh node Cube.061
+18:33:22 | INFO: Blender create Mesh node Cube.063
+18:33:22 | INFO: Blender create Mesh node Cube.062
+18:33:22 | INFO: Blender create Mesh node Cube.039
+18:33:22 | INFO: Blender create Mesh node Cube.041
+18:33:22 | INFO: Blender create Mesh node Cube.043
+18:33:22 | INFO: Blender create Mesh node Cube.044
+18:33:22 | INFO: Blender create Mesh node Cube.040
+18:33:22 | INFO: Blender create Mesh node Cube.042
+18:33:22 | INFO: Blender create Mesh node Cube.046
+18:33:22 | INFO: Blender create Mesh node Cube.047
+18:33:22 | INFO: Blender create Mesh node Cylinder.027
+18:33:22 | INFO: Blender create Mesh node Cylinder.029
+18:33:22 | INFO: Blender create Mesh node Cylinder.031
+18:33:22 | INFO: Blender create Mesh node Cylinder.033
+18:33:22 | INFO: Blender create Mesh node Cylinder.026
+18:33:22 | INFO: Blender create Mesh node Cylinder.028
+18:33:22 | INFO: Blender create Mesh node Cylinder.030
+18:33:22 | INFO: Blender create Mesh node Cylinder.032
+18:33:22 | INFO: Blender create Mesh node Cylinder.035
+18:33:22 | INFO: Blender create Mesh node Cylinder.037
+18:33:22 | INFO: Blender create Mesh node Cylinder.034
+18:33:22 | INFO: Blender create Mesh node Cylinder.036
+18:33:22 | INFO: Blender create Mesh node Cube.051
+18:33:22 | INFO: Blender create Mesh node Cube.053
+18:33:22 | INFO: Blender create Mesh node Cube.052
+18:33:22 | INFO: Blender create Mesh node Cylinder.038
+18:33:22 | INFO: Blender create Mesh node Cube.055
+18:33:22 | INFO: Blender create Mesh node Cube.045
+18:33:22 | INFO: Blender create Mesh node Cube.048
+18:33:22 | INFO: Blender create Mesh node Cube.049
+18:33:22 | INFO: Blender create Mesh node Cube.050
+18:33:22 | INFO: Blender create Mesh node Cylinder.039
+18:33:22 | INFO: Blender create Mesh node Cylinder.042
+18:33:22 | INFO: Blender create Mesh node Cylinder.045
+18:33:22 | INFO: Blender create Mesh node Cylinder.048
+18:33:22 | INFO: Blender create Mesh node Cylinder.051
+18:33:22 | INFO: Blender create Mesh node Cylinder.054
+18:33:22 | INFO: Blender create Mesh node Cylinder.040
+18:33:22 | INFO: Blender create Mesh node Cylinder.043
+18:33:22 | INFO: Blender create Mesh node Cylinder.046
+18:33:22 | INFO: Blender create Mesh node Cylinder.049
+18:33:22 | INFO: Blender create Mesh node Cylinder.052
+18:33:22 | INFO: Blender create Mesh node Cylinder.055
+18:33:22 | INFO: Blender create Mesh node Cylinder.041
+18:33:22 | INFO: Blender create Mesh node Cylinder.044
+18:33:22 | INFO: Blender create Mesh node Cylinder.047
+18:33:22 | INFO: Blender create Mesh node Cylinder.050
+18:33:22 | INFO: Blender create Mesh node Cylinder.053
+18:33:22 | INFO: Blender create Mesh node Cylinder.056
+18:33:22 | INFO: Blender create Mesh node Cube.058
+18:33:22 | INFO: Blender create Mesh node Cube.057
+18:33:22 | INFO: Blender create Mesh node Cube.060
+18:33:22 | INFO: Blender create Mesh node Cube.059
+18:33:22 | INFO: Blender create Mesh node Cube.056
+18:33:22 | INFO: Blender create Mesh node Cone
+18:33:22 | INFO: Blender create Mesh node Cone.001
+18:33:22 | INFO: Blender create Mesh node Cone.002
+18:33:22 | INFO: Blender create Mesh node Cone.003
+18:33:22 | INFO: Blender create Mesh node Cone.004
+18:33:22 | INFO: Blender create Mesh node Cone.005
+18:33:22 | INFO: glTF import finished in 0.21s
+18:33:22 | INFO: Data are loaded, start creating Blender stuff
+18:33:22 | INFO: Blender create Mesh node Cube.032
+18:33:22 | INFO: Blender create Mesh node Cube.033
+18:33:22 | INFO: Blender create Mesh node Cube.034
+18:33:22 | INFO: Blender create Mesh node Cube.035
+18:33:22 | INFO: Blender create Mesh node Cube.036
+18:33:22 | INFO: Blender create Mesh node Cube.037
+18:33:22 | INFO: Blender create Mesh node Cylinder.020
+18:33:22 | INFO: Blender create Mesh node Cylinder.021
+18:33:22 | INFO: Blender create Mesh node Cube.031
+18:33:22 | INFO: Blender create Mesh node CellFrontArmor.001
+18:33:22 | INFO: Blender create Mesh node CellIndicatorBezel.001
+18:33:22 | INFO: Blender create Mesh node CellIndicatorRecess.001
+18:33:22 | INFO: Blender create Mesh node Cube.039
+18:33:22 | INFO: Blender create Mesh node Cube.029
+18:33:22 | INFO: Blender create Mesh node Cylinder.023
+18:33:22 | INFO: Blender create Mesh node Cylinder.025
+18:33:22 | INFO: Blender create Mesh node Cylinder.022
+18:33:22 | INFO: Blender create Mesh node Cylinder.024
+18:33:22 | INFO: Blender create Mesh node Cube.030
+18:33:22 | INFO: Blender create Mesh node Cylinder.027
+18:33:22 | INFO: Blender create Mesh node Cylinder.029
+18:33:22 | INFO: Blender create Mesh node Cylinder.026
+18:33:22 | INFO: Blender create Mesh node Cylinder.028
+18:33:22 | INFO: Blender create Mesh node Cube.045
+18:33:22 | INFO: Blender create Mesh node Cube.046
+18:33:22 | INFO: Blender create Mesh node Cube.040
+18:33:22 | INFO: Blender create Mesh node Cube.041
+18:33:22 | INFO: Blender create Mesh node Cube.042
+18:33:22 | INFO: Blender create Mesh node Cube.043
+18:33:22 | INFO: Blender create Mesh node Cube.044
+18:33:22 | INFO: Blender create Mesh node Cube.038
+18:33:22 | INFO: Blender create Mesh node CellTitaniumCrashRail.001
+18:33:22 | INFO: glTF import finished in 0.09s
+18:33:22 | INFO: Data are loaded, start creating Blender stuff
+18:33:22 | INFO: Blender create Mesh node Missile_1.001
+18:33:22 | INFO: Blender create Mesh node Cube.070
+18:33:22 | INFO: Blender create Mesh node Missile_1RecessedRedBand.001
+18:33:22 | INFO: Blender create Mesh node Missile_2.001
+18:33:22 | INFO: Blender create Mesh node Cube.071
+18:33:22 | INFO: Blender create Mesh node Cube.072
+18:33:22 | INFO: Blender create Mesh node Missile_2RecessedRedBand.001
+18:33:22 | INFO: Blender create Mesh node Missile_4.001
+18:33:22 | INFO: Blender create Mesh node Cube.073
+18:33:22 | INFO: Blender create Mesh node Cube.074
+18:33:22 | INFO: Blender create Mesh node Missile_4RecessedRedBand.001
+18:33:22 | INFO: Blender create Mesh node RackArmoredSide.002
+18:33:22 | INFO: Blender create Mesh node Cube.069
+18:33:22 | INFO: Blender create Mesh node Cylinder.013
+18:33:22 | INFO: Blender create Mesh node Cylinder.015
+18:33:22 | INFO: Blender create Mesh node Cylinder.017
+18:33:22 | INFO: Blender create Mesh node Cylinder.012
+18:33:22 | INFO: Blender create Mesh node Cylinder.014
+18:33:22 | INFO: Blender create Mesh node Cylinder.016
+18:33:22 | INFO: Blender create Mesh node Cube.047
+18:33:22 | INFO: Blender create Mesh node Cube.048
+18:33:22 | INFO: Blender create Mesh node Cube.049
+18:33:22 | INFO: Blender create Mesh node Cube.054
+18:33:22 | INFO: Blender create Mesh node Cube.058
+18:33:22 | INFO: Blender create Mesh node Cube.062
+18:33:22 | INFO: Blender create Mesh node Cube.050
+18:33:22 | INFO: Blender create Mesh node Cube.051
+18:33:22 | INFO: Blender create Mesh node Cube.066
+18:33:22 | INFO: Blender create Mesh node Cube.067
+18:33:22 | INFO: Blender create Mesh node Cube.065
+18:33:22 | INFO: Blender create Mesh node Cube.053
+18:33:22 | INFO: Blender create Mesh node Cube.057
+18:33:22 | INFO: Blender create Mesh node Cube.061
+18:33:22 | INFO: Blender create Mesh node Cube.055
+18:33:22 | INFO: Blender create Mesh node Cube.056
+18:33:22 | INFO: Blender create Mesh node Cube.059
+18:33:22 | INFO: Blender create Mesh node Cube.060
+18:33:22 | INFO: Blender create Mesh node Cube.063
+18:33:22 | INFO: Blender create Mesh node Cube.064
+18:33:22 | INFO: Blender create Mesh node Cube.052
+18:33:22 | INFO: Blender create Mesh node Cube.046
+18:33:22 | INFO: Blender create Mesh node Cube.068
+18:33:22 | INFO: glTF import finished in 0.12s
+Blender 5.2.0 LTS (hash fbe6228777e7 built 2026-07-14 01:35:40)
+
+Blender quit

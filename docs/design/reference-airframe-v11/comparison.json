@@ -1,0 +1,14 @@
+{
+  "silhouetteIoU": 0.9071045871166006,
+  "meanContourErrorPx": 12.471343040466309,
+  "p95ContourErrorPx": 33.0,
+  "scope": "Fixed-camera full-model external silhouette. Not 3D fidelity or flight balance.",
+  "referenceAnnotationReviewed": false,
+  "visualApproval": false,
+  "inputSha256": {
+    "docs\\design\\blended-wing-v5\\concept.png": "4d47d66ff549e0fe7e273896022870dfa115dfbb249d782ffdd2bc64d2dd6eb7",
+    "docs\\design\\reference-airframe-v11\\hero.png": "86aa19402be4bd29c812830bcebb714670d97175ddce88c0b6d09a1afc13626e",
+    "docs\\design\\reference-airframe-v11\\hull-mesh.json": "0241d192b42e18b75ac4456a35176aa5a9aa0b88e75b7e06bfa7a5088d7783ec",
+    "docs\\design\\reference-family-v10\\analysis\\reference-silhouette.png": "cb7843a4828b07ffe82f1157c62059d1c14ad85fab33e37ab216dac891120036"
+  }
+}

@@ -1,0 +1,105 @@
+[
+  {
+    "path": "docs\\design\\detail-scale-v22\\field\\airframe.blend",
+    "sha256": "c95eb0da21c0c5793163394d0f3287cde3c6f09901c14ff6b5d628f263a69f64",
+    "bounds": [
+      -1.5,
+      -1.1231118440628052,
+      0.25965577363967896,
+      1.5,
+      1.1231118440628052,
+      0.5805216431617737
+    ],
+    "meshCount": 228,
+    "materials": [
+      "V10_GraphiteArmor",
+      "V10_MachinedEdge",
+      "V10_OpticCyan",
+      "V10_PanelArmor",
+      "V10_Recess",
+      "V10_RotorComposite",
+      "V10_ServiceAmber",
+      "V10_SkinPanel_0",
+      "V10_SkinPanel_3",
+      "V16_petal",
+      "V16_rim",
+      "V16_titanium",
+      "V20_ContactSole",
+      "V20_DataCyan",
+      "V20_EquipmentGraphite",
+      "V20_EquipmentGraphite.001",
+      "V20_Recess",
+      "V20_Recess.001",
+      "V20_SafetyAmber",
+      "V20_SafetyAmber.001",
+      "V20_SmokedOptic",
+      "V20_StructuralTitanium",
+      "V20_StructuralTitanium.001"
+    ],
+    "unchanged": true
+  },
+  {
+    "path": "docs\\design\\equipment-hmi-v23\\models\\power_cell\\power_cell.blend",
+    "sha256": "41664097c733270dc8d2c36a2750e6eee0e482927ed7e912f4a06811d73d7ad3",
+    "bounds": [
+      -0.4114999771118164,
+      -0.26499998569488525,
+      -0.024999991059303284,
+      0.4114999771118164,
+      0.26499998569488525,
+      0.5049999952316284
+    ],
+    "meshCount": 9,
+    "materials": [
+      "V20_CopperContacts",
+      "V20_DataCyan",
+      "V20_EquipmentGraphite",
+      "V20_Recess",
+      "V20_StructuralTitanium"
+    ],
+    "unchanged": true
+  },
+  {
+    "path": "docs\\design\\equipment-hmi-v23\\models\\autocannon_module\\autocannon_module.blend",
+    "sha256": "3548266816aa4e2ff2a2445061b42925e4f3cd632cbe090f4084ec97ed1d7c08",
+    "bounds": [
+      -0.5184999704360962,
+      -0.8725000023841858,
+      0.0,
+      0.5184999704360962,
+      0.3935000002384186,
+      0.4440000057220459
+    ],
+    "meshCount": 22,
+    "materials": [
+      "V20_CopperContacts",
+      "V20_EquipmentGraphite",
+      "V20_Recess",
+      "V20_SafetyAmber",
+      "V20_StructuralTitanium"
+    ],
+    "unchanged": true
+  },
+  {
+    "path": "docs\\design\\equipment-hmi-v23\\models\\missile_module\\missile_module.blend",
+    "sha256": "1bde3e0c0a881bd40995c55f5c46692f010059099b264dc14bb5da3f403bbec9",
+    "bounds": [
+      -0.5184999704360962,
+      -0.5590000152587891,
+      0.0,
+      0.5184999704360962,
+      0.41999998688697815,
+      0.5649999976158142
+    ],
+    "meshCount": 18,
+    "materials": [
+      "V20_CopperContacts",
+      "V20_DataCyan",
+      "V20_EquipmentGraphite",
+      "V20_Recess",
+      "V20_SafetyAmber",
+      "V20_StructuralTitanium"
+    ],
+    "unchanged": true
+  }
+]

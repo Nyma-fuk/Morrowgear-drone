@@ -1,0 +1,8 @@
+{
+  "checks": 4574,
+  "passed": 4574,
+  "failed": [],
+  "gameTested": false,
+  "referenceVisualFidelityApproved": false,
+  "scope": "artifact integrity, stationary symmetry, ground clearance, nonblank coverage; not gameplay or complete mechanical collision certification"
+}

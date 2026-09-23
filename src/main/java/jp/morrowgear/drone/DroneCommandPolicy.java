@@ -29,15 +29,10 @@ public final class DroneCommandPolicy {
 
 	public static boolean validFieldRadius(FieldOperationType type, int radius) {
 		if (type == null) return false;
-		return switch (type) {
-			case ORE -> radius >= 12 && radius <= 48;
-			case FORESTRY -> radius >= 6 && radius <= 24;
-			case EXCAVATE -> radius >= 2 && radius <= 8;
-			case NONE -> false;
-		};
+		return type != FieldOperationType.NONE && radius == DroneStatePolicy.fieldRadius(type, radius);
 	}
 
 	public static boolean validSecurityRadius(int radius) {
-		return radius >= 6 && radius <= 32;
+		return radius == DroneStatePolicy.securityRadius(radius);
 	}
 }

@@ -1,0 +1,12 @@
+	- morrowgear_drone 0.20.0
+[18:01:39] [Server thread/INFO]: Morrowgear state tick=898314 unit=MG-DRN-A79A0A SPAWN -> DOCKED mode=STANDBY combat=IDLE field=IDLE cargo=UNASSIGNED engineer=IDLE battery=100% weapon=100% heat=0 ammo=240 missiles=4 recovery=0
+[18:01:39] [Server thread/INFO]: Morrowgear state tick=898315 unit=MG-DRN-8895C2 SPAWN -> DOCKED mode=STANDBY combat=IDLE field=IDLE cargo=UNASSIGNED engineer=IDLE battery=100% weapon=100% heat=0 ammo=240 missiles=4 recovery=0
+[18:03:04] [Render thread/INFO]: [System] [CHAT] [MORROWGEAR] MG-DRN-8895C2 JOIN WING-014A8E 1/8
+[18:03:04] [Render thread/INFO]: [System] [CHAT] [MORROWGEAR] MG-DRN-A79A0A JOIN WING-014A8E 2/8
+[18:05:00] [Server thread/INFO]: Morrowgear state tick=902343 unit=MG-DRN-A79A0A DOCKED -> WAYPOINT mode=WAYPOINT combat=IDLE field=IDLE cargo=UNASSIGNED engineer=IDLE battery=100% weapon=100% heat=0 ammo=240 missiles=4 recovery=0
+[18:05:00] [Server thread/INFO]: Morrowgear state tick=902343 unit=MG-DRN-8895C2 DOCKED -> WAYPOINT mode=WAYPOINT combat=IDLE field=IDLE cargo=UNASSIGNED engineer=IDLE battery=100% weapon=100% heat=0 ammo=240 missiles=4 recovery=0
+[18:05:49] [Server thread/INFO]: Morrowgear state tick=903326 unit=MG-DRN-A79A0A WAYPOINT -> RETURN mode=DOCK combat=IDLE field=IDLE cargo=UNASSIGNED engineer=IDLE battery=86% weapon=100% heat=0 ammo=240 missiles=4 recovery=0
+[18:05:50] [Server thread/INFO]: Morrowgear state tick=903326 unit=MG-DRN-8895C2 WAYPOINT -> RETURN mode=DOCK combat=IDLE field=IDLE cargo=UNASSIGNED engineer=IDLE battery=86% weapon=100% heat=0 ammo=240 missiles=4 recovery=0
+[18:06:03] [Server thread/INFO]: Morrowgear state tick=903605 unit=MG-DRN-8895C2 RETURN -> DOCKED mode=STANDBY combat=IDLE field=IDLE cargo=UNASSIGNED engineer=IDLE battery=80% weapon=100% heat=0 ammo=240 missiles=4 recovery=0
+[18:06:03] [Server thread/INFO]: Morrowgear state tick=903606 unit=MG-DRN-A79A0A RETURN -> DOCKED mode=STANDBY combat=IDLE field=IDLE cargo=UNASSIGNED engineer=IDLE battery=80% weapon=100% heat=0 ammo=240 missiles=4 recovery=0
+[18:09:18] [Render thread/INFO]: [System] [CHAT] [MORROWGEAR] DOCK-P4N5-P4MW を登録しました。

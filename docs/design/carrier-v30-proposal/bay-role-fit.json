@@ -1,0 +1,153 @@
+{
+  "proposalOnly": true,
+  "sourcesAreCanonicalV22Glb": true,
+  "pose": "gear-stowed export, frame 40",
+  "scale": 1.0,
+  "bayClearEnvelope": [
+    3.5999999046325684,
+    4.400000095367432,
+    2.4000000953674316
+  ],
+  "bayFloorZ": 2.25,
+  "roles": {
+    "field": {
+      "source": "docs\\design\\detail-scale-v22\\field\\airframe.glb",
+      "bounds": [
+        -1.5,
+        -1.1231118440628052,
+        -2.537854015827179e-08,
+        1.5,
+        1.1231118440628052,
+        0.5805216431617737
+      ],
+      "dimensions": [
+        3.0,
+        2.2462236881256104,
+        0.5805216685403138
+      ],
+      "clearance": [
+        0.5999999046325684,
+        2.1537764072418213,
+        1.8194784268271178
+      ],
+      "sourceSha256": "51a437c792ab76c8b63f40089e9ec83cf02cdd7924d6aaaad37987ef1b52bb2b",
+      "fits": true
+    },
+    "scout": {
+      "source": "docs\\design\\detail-scale-v22\\scout\\airframe.glb",
+      "bounds": [
+        -1.5,
+        -0.9849094152450562,
+        2.1653249859809875e-08,
+        1.5,
+        0.9942894577980042,
+        0.5108853578567505
+      ],
+      "dimensions": [
+        3.0,
+        1.9791988730430603,
+        0.5108853362035006
+      ],
+      "clearance": [
+        0.5999999046325684,
+        2.4208012223243713,
+        1.889114759163931
+      ],
+      "sourceSha256": "1b9dffad46a4a51cf9da39bd6c08650f43a8828fcad0d2bdf84783b1cb15b927",
+      "fits": true
+    },
+    "cargo": {
+      "source": "docs\\design\\detail-scale-v22\\cargo\\airframe.glb",
+      "bounds": [
+        -1.5,
+        -1.079238772392273,
+        3.4691765904426575e-08,
+        1.5,
+        1.079238772392273,
+        0.6115754842758179
+      ],
+      "dimensions": [
+        3.0,
+        2.158477544784546,
+        0.611575449584052
+      ],
+      "clearance": [
+        0.5999999046325684,
+        2.2415225505828857,
+        1.7884246457833797
+      ],
+      "sourceSha256": "74eff3c974f7a12adec1e116258b12b1643b33d1920c05c4b2821f55d763ca17",
+      "fits": true
+    },
+    "engineer": {
+      "source": "docs\\design\\detail-scale-v22\\engineer\\airframe.glb",
+      "bounds": [
+        -1.5,
+        -1.1007384061813354,
+        -9.243376553058624e-08,
+        1.5,
+        1.1007384061813354,
+        0.5687353610992432
+      ],
+      "dimensions": [
+        3.0,
+        2.201476812362671,
+        0.5687354535330087
+      ],
+      "clearance": [
+        0.5999999046325684,
+        2.1985232830047607,
+        1.831264641834423
+      ],
+      "sourceSha256": "2bfc7b0a4399d9672ba04dac01bad17de99dfbc42ec5e9e2e5a199437b2c536d",
+      "fits": true
+    },
+    "security": {
+      "source": "docs\\design\\detail-scale-v22\\security\\airframe.glb",
+      "bounds": [
+        -1.5,
+        -1.065366268157959,
+        -6.984919309616089e-08,
+        1.5,
+        1.065366268157959,
+        0.5494807958602905
+      ],
+      "dimensions": [
+        3.0,
+        2.130732536315918,
+        0.5494808657094836
+      ],
+      "clearance": [
+        0.5999999046325684,
+        2.2692675590515137,
+        1.850519229657948
+      ],
+      "sourceSha256": "d12ac385d5bc22233670d01e13e95cbf1bcb0c902e82507f294b77048840f5c3",
+      "fits": true
+    },
+    "salvage": {
+      "source": "docs\\design\\detail-scale-v22\\salvage\\airframe.glb",
+      "bounds": [
+        -1.5,
+        -1.03866446018219,
+        -6.984919309616089e-10,
+        1.5,
+        1.0386645793914795,
+        0.5885831117630005
+      ],
+      "dimensions": [
+        3.0,
+        2.0773290395736694,
+        0.5885831124614924
+      ],
+      "clearance": [
+        0.5999999046325684,
+        2.322671055793762,
+        1.8114169829059392
+      ],
+      "sourceSha256": "c8d6cafdd5965281f2024babaa63ada0c11f06a0cf373ed787e0c3e3c09304a6",
+      "fits": true
+    }
+  },
+  "passed": true
+}

@@ -1,0 +1,32 @@
+{
+  "id": "micro_missile_pack",
+  "passed": true,
+  "beamAnchor": null,
+  "beamAnchorError": 0,
+  "serviceBayAnchors": {},
+  "serviceBayAnchorError": 0,
+  "maxBoundsError": 0.0,
+  "maxPerPartBoundsError": 0.0,
+  "missingParts": [],
+  "sourceBounds": [
+    -0.44300001859664917,
+    -0.6614999771118164,
+    0.11500000953674316,
+    0.44300001859664917,
+    0.6250000596046448,
+    0.8824999928474426
+  ],
+  "importBounds": [
+    -0.44300001859664917,
+    -0.6614999771118164,
+    0.11500000953674316,
+    0.44300001859664917,
+    0.6250000596046448,
+    0.8824999928474426
+  ],
+  "sourceMeshCount": 23,
+  "importMeshCount": 23,
+  "state": "service / static GLB",
+  "frontAfterImport": "-Y",
+  "upAfterImport": "+Z"
+}

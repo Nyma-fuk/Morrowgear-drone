@@ -16,18 +16,14 @@ import net.minecraft.resources.Identifier;
 final class SolarServiceStationRenderer extends EntityRenderer<SolarServiceStationEntity, ServiceEntityRenderState> {
 	private static final Identifier WHITE = Identifier.fromNamespaceAndPath(MorrowgearDrone.MOD_ID,
 		"textures/entity/emissive_white.png");
-	private final DroneMesh mesh;
-	private final DroneMesh lightSatelliteMesh;
+	private final RuntimeMesh mesh;
+	private final RuntimeMesh lightSatelliteMesh;
 
 	SolarServiceStationRenderer(EntityRendererProvider.Context context) {
 		super(context);
 		shadowRadius = 1.8f;
-		try {
-			mesh = DroneMesh.read(context.getResourceManager().getResourceOrThrow(Identifier.fromNamespaceAndPath(
-				MorrowgearDrone.MOD_ID, "models/entity/solar_service_station.mgm")).open());
-			lightSatelliteMesh = DroneMesh.read(context.getResourceManager().getResourceOrThrow(Identifier.fromNamespaceAndPath(
-				MorrowgearDrone.MOD_ID, "models/entity/charging_relay.mgm")).open());
-		} catch (IOException exception) { throw new IllegalStateException(exception); }
+		mesh = RuntimeMesh.load("solar_service_station");
+		lightSatelliteMesh = RuntimeMesh.load("service_light");
 	}
 
 	@Override public ServiceEntityRenderState createRenderState() { return new ServiceEntityRenderState(); }
@@ -41,10 +37,7 @@ final class SolarServiceStationRenderer extends EntityRenderer<SolarServiceStati
 		super.submit(state, poseStack, collector, camera);
 		poseStack.pushPose();
 		poseStack.mulPose(Axis.YP.rotationDegrees(-state.heading));
-		collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WHITE),
-			(pose, consumer) -> mesh.render(pose, consumer, state.lightCoords, state.rotorAngle));
-		collector.submitCustomGeometry(poseStack, RenderTypes.entityTranslucentEmissive(WHITE),
-			(pose, consumer) -> mesh.renderEmissive(pose, consumer, state.rotorAngle, 1.0f, 255));
+		mesh.submit(poseStack, collector, state.lightCoords, state.rotorAngle, 0, 0, true, false);
 		for (int slot = 0; slot < SolarStationLightingPolicy.SATELLITE_COUNT; slot++) {
 			double angle = Math.toRadians(slot * 90.0);
 			poseStack.pushPose();
@@ -52,13 +45,8 @@ final class SolarServiceStationRenderer extends EntityRenderer<SolarServiceStati
 				SolarStationLightingPolicy.HEIGHT_OFFSET + Math.sin(state.ageInTicks * .08f + slot) * .08,
 				Math.sin(angle) * SolarStationLightingPolicy.ORBIT_RADIUS);
 			poseStack.mulPose(Axis.YP.rotationDegrees(slot * 90.0f + state.ageInTicks * 1.2f));
-			poseStack.scale(.46f, .46f, .46f);
-			collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WHITE),
-				(pose, consumer) -> lightSatelliteMesh.render(pose, consumer, state.lightCoords,
-					state.rotorAngle * 1.6f));
-			collector.submitCustomGeometry(poseStack, RenderTypes.entityTranslucentEmissive(WHITE),
-				(pose, consumer) -> lightSatelliteMesh.renderEmissive(pose, consumer,
-					state.rotorAngle * 1.6f, 1.08f, 255));
+			lightSatelliteMesh.submit(poseStack, collector, state.lightCoords, state.rotorAngle * 1.6f,
+				0, 0, true, false);
 			poseStack.popPose();
 		}
 		poseStack.popPose();

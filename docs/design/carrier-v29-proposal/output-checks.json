@@ -1,0 +1,87 @@
+{
+  "images": {
+    "hero": {
+      "size": [
+        1400,
+        1000
+      ],
+      "visiblePixels": 252552,
+      "notClipped": true
+    },
+    "front": {
+      "size": [
+        1400,
+        1000
+      ],
+      "visiblePixels": 104910,
+      "notClipped": true
+    },
+    "rear": {
+      "size": [
+        1400,
+        1000
+      ],
+      "visiblePixels": 104911,
+      "notClipped": true
+    },
+    "top": {
+      "size": [
+        1400,
+        1000
+      ],
+      "visiblePixels": 487691,
+      "notClipped": true
+    },
+    "bottom": {
+      "size": [
+        1400,
+        1000
+      ],
+      "visiblePixels": 487689,
+      "notClipped": true
+    },
+    "left": {
+      "size": [
+        1400,
+        1000
+      ],
+      "visiblePixels": 71551,
+      "notClipped": true
+    },
+    "right": {
+      "size": [
+        1400,
+        1000
+      ],
+      "visiblePixels": 71547,
+      "notClipped": true
+    },
+    "underside": {
+      "size": [
+        1400,
+        1000
+      ],
+      "visiblePixels": 272665,
+      "notClipped": true
+    },
+    "rear-underside": {
+      "size": [
+        1400,
+        1000
+      ],
+      "visiblePixels": 216606,
+      "notClipped": true
+    },
+    "beam-state": {
+      "size": [
+        1400,
+        1200
+      ],
+      "visiblePixels": 181453,
+      "notClipped": true
+    }
+  },
+  "protectedFileCount": 377,
+  "protectedUnchanged": true,
+  "changedProtectedFiles": []
+}

@@ -1,0 +1,57 @@
+{
+  "id": "autocannon_module",
+  "status": "design candidate / not installed",
+  "checks": [
+    {
+      "frame": 1,
+      "vertices": 5344,
+      "bounds": [
+        -0.5184999704360962,
+        -0.8725000023841858,
+        0.0,
+        0.5184999704360962,
+        0.3935000002384186,
+        0.4440000057220459
+      ],
+      "mirrorError": 0.0,
+      "passed": true
+    },
+    {
+      "frame": 40,
+      "vertices": 5344,
+      "bounds": [
+        -0.5184999704360962,
+        -0.8725000023841858,
+        0.0,
+        0.5184999704360962,
+        0.3935000002384186,
+        0.4440000057220459
+      ],
+      "mirrorError": 0.0,
+      "passed": true
+    },
+    {
+      "frame": 80,
+      "vertices": 5344,
+      "bounds": [
+        -0.5184999704360962,
+        -0.8725000023841858,
+        0.0,
+        0.5184999704360962,
+        0.3935000002384186,
+        0.4440000057220459
+      ],
+      "mirrorError": 0.0,
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "axis": {
+    "symmetry": "X=0",
+    "front": "-Y",
+    "up": "+Z"
+  },
+  "legacy": true,
+  "blendSha256": "3548266816aa4e2ff2a2445061b42925e4f3cd632cbe090f4084ec97ed1d7c08",
+  "glbSha256": "1e34384a94b251b7797142ace97d371491e46c76aeba9c9c6c41d9fe777f32bd"
+}

@@ -1,0 +1,25 @@
+{
+  "status": "DESIGN_HYPOTHESIS_NOT_APPROVED",
+  "source": "docs/design/blended-wing-v5/concept.png",
+  "basis": "Visible features are annotated from the reference. Orthographic dimensions and hidden surfaces are an explicit design hypothesis, not recovered ground truth and not traced from the candidate model.",
+  "axes": {"right": "+X", "front": "-Y", "up": "+Z", "symmetry": "X=0"},
+  "modelUnitsAreMeters": false,
+  "halfOutline": [[0,-2.65],[0.52,-2.64],[0.83,-2.40],[1.18,-1.91],[3.95,0.10],[4.65,0.52],[4.65,1.45],[3.70,1.14],[2.65,1.64],[1.03,1.78],[0,1.78]],
+  "fuselageShoulderHalfWidth": 1.18,
+  "crownHalfWidth": 0.64,
+  "fan": {"centerX": 1.88, "centerY": 0.05, "radius": 0.94, "deckZ": 0.30, "lipZ": 0.29, "rotorZ": 0.13, "lowerZ": -0.22, "bladeTipClearance": 0.018},
+  "crownProfile": [[-2.65,0.025],[-2.36,0.22],[-1.65,0.46],[-0.70,0.66],[0.45,0.70],[1.25,0.53],[1.78,0.23]],
+  "bellyProfile": [[-2.65,-0.40],[-2.05,-0.43],[-0.75,-0.40],[0.65,-0.32],[1.78,-0.10]],
+  "wingTopProfile": [[0,0.30],[2.85,0.30],[3.70,0.13],[4.65,0.58]],
+  "wingBottomProfile": [[0,-0.22],[2.85,-0.22],[3.70,-0.045],[4.65,0.41]],
+  "sectionStations": [{"id":"A-A","y":-2.10,"title":"ノーズとバイザー"},{"id":"B-B","y":0.05,"title":"タービンと中央胴体"},{"id":"C-C","y":1.30,"title":"後部・翼端"}],
+  "noseVisorHalfWidth": 0.76,
+  "wingtipHeight": 0.58,
+  "uncertainties": [
+    "The visible chin optic may not lie on the true symmetry plane. Its image position must not determine the entire airframe centreline.",
+    "Left and right apparent wingtip corners may not be corresponding corners in this perspective image.",
+    "The rear, belly, internal mass distribution, landing gear and complete inlet depth are not visible.",
+    "Dimensions use the fan spacing and visible silhouette as proportion cues. One perspective view does not uniquely determine these orthographic dimensions."
+  ],
+  "holdBeforeModeling": ["nose and visor outline", "body and wing proportions", "wingtip fold and sweep", "fan diameter and inlet clearance", "landing and payload reserved volume"]
+}

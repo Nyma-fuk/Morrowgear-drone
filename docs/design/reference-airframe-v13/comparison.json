@@ -1,0 +1,16 @@
+{
+  "silhouetteIoU": 0.8862349739296632,
+  "meanContourErrorPx": 14.983388900756836,
+  "p95ContourErrorPx": 50.179847717285156,
+  "scope": "External silhouette at the unchanged V11 comparison camera; not aerodynamic performance or complete visual fidelity.",
+  "sourceAnnotationReviewed": false,
+  "visualApproval": false,
+  "gameVerified": false,
+  "aerodynamicSimulationPerformed": false,
+  "inputSha256": {
+    "docs\\design\\blended-wing-v5\\concept.png": "4d47d66ff549e0fe7e273896022870dfa115dfbb249d782ffdd2bc64d2dd6eb7",
+    "docs\\design\\reference-airframe-v13\\hero.png": "611e8a989fe9723f2e4e0622b00dd493678d1b5c8fe1ad545ca5aec923de06f4",
+    "docs\\design\\reference-airframe-v13\\hull-mesh.json": "f171c6f513f427b1c205220b7556319587fd68ee9636f65860d71133a3a72b1c",
+    "docs\\design\\reference-family-v10\\analysis\\reference-silhouette.png": "cb7843a4828b07ffe82f1157c62059d1c14ad85fab33e37ab216dac891120036"
+  }
+}

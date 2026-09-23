@@ -1,4 +1,6 @@
 {
   "parent": "minecraft:item/generated",
-  "textures": { "layer0": "morrowgear_drone:item/field_drone_unit" }
+  "textures": {
+    "layer0": "morrowgear_drone:item/field_drone_unit"
+  }
 }

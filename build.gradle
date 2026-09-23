@@ -16,6 +16,14 @@ repositories {
 
 loom {
 	splitEnvironmentSourceSets()
+	runs {
+		carrierVerification {
+			client()
+			configName = "Morrowgear isolated carrier verification"
+			runDir = "run-carrier-verification"
+			programArgs "--width", "1280", "--height", "720", "--username", "Player705"
+		}
+	}
 
 	mods {
 		"morrowgear_drone" {
@@ -63,6 +71,19 @@ tasks.register("syncLauncherMod") {
 	group = "morrowgear"
 	description = "Installs the current Morrowgear JAR into the official Launcher profile."
 	dependsOn tasks.named("jar")
+	dependsOn tasks.named("check")
+	onlyIf("release integration and design approval completed") {
+		providers.gradleProperty("launcher_release_ready").map { it.toBoolean() }.getOrElse(false)
+	}
+	// Finalizers also run after failures; a failed or bypassed check must never install a JAR.
+	onlyIf("verification completed without task failures") {
+		def verification = tasks.named("check").get().state
+		def tests = tasks.named("test").get().state
+		verification.executed && (!verification.skipped || verification.upToDate)
+			&& tests.executed && (!tests.skipped || tests.upToDate)
+			&& tasks.named("test").get().filter.commandLineIncludePatterns.isEmpty()
+			&& gradle.taskGraph.allTasks.every { it.state.failure == null }
+	}
 	inputs.file(tasks.named("jar").flatMap { it.archiveFile })
 	outputs.file(launcherModsDir.map { new File(it, "morrowgear-drone-latest.jar") })
 	outputs.upToDateWhen {

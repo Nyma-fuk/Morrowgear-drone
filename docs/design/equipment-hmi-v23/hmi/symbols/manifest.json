@@ -1,0 +1,956 @@
+{
+  "count": 95,
+  "structuralSymmetry": "physical objects only; directional controls intentionally directional",
+  "assets": [
+    {
+      "id": "map",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "layers",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "list-checks",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "battery-charging",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "cable",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "scan-eye",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "package",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "sliders-horizontal",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "navigation",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "pause",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "play",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "corner-down-left",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "route",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "pickaxe",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "crosshair",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "archive",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "scan",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "send",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "check",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "x",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "plus",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "minus",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "chevrons-left",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "chevron-left",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "chevron-right",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "chevrons-right",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "arrow-up",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "arrow-down",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "search",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "search-x",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "square",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "check-check",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "log-in",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "log-out",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "undo2",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "redo2",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "locate-fixed",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "map-pin",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "pin",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "pin-off",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "radio-tower",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "wifi",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "wifi-off",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "shield-alert",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "triangle-alert",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "circle-check",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "circle-x",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "clock",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "loader-circle",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "battery",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "battery-low",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "battery-warning",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "zap",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "sun",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "cloud",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "moon",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "thermometer",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "flame",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "wrench",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "package-minus",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "package-plus",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "boxes",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "container",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "tree-pine",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "sprout",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "mountain",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "radar",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "eye",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "eye-off",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "arrow-up-right",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "arrow-down-left",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "refresh-cw",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "rotate-ccw",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "panel-right-open",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "focus",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "volume2",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "volume-x",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "captions",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "circle",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "diamond",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "lock",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "unlock",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "shield",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "target",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "gauge",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "home",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "download",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "circle-help",
+      "source": "lucide",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "field",
+      "source": "V22 role glyph",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "scout",
+      "source": "V22 role glyph",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "cargo",
+      "source": "V22 role glyph",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "engineer",
+      "source": "V22 role glyph",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "security",
+      "source": "V22 role glyph",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "salvage",
+      "source": "V22 role glyph",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    },
+    {
+      "id": "dock",
+      "source": "V22 role glyph",
+      "sizes": [
+        24,
+        32,
+        48,
+        64
+      ]
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "id": "chunkbuster",
+  "passed": true,
+  "beamAnchor": [
+    0.0,
+    0.0,
+    -0.10000000149011612
+  ],
+  "beamAnchorError": 0.0,
+  "serviceBayAnchors": {
+    "ServiceBay_0": [
+      -7.150000095367432,
+      -5.199999809265137,
+      2.4000000953674316
+    ],
+    "ServiceBay_1": [
+      7.150000095367432,
+      -5.199999809265137,
+      2.4000000953674316
+    ],
+    "ServiceBay_2": [
+      -3.5999999046325684,
+      7.800000190734863,
+      2.4000000953674316
+    ],
+    "ServiceBay_3": [
+      3.5999999046325684,
+      7.800000190734863,
+      2.4000000953674316
+    ]
+  },
+  "serviceBayAnchorError": 0.0,
+  "maxBoundsError": 0.0,
+  "maxPerPartBoundsError": 0.0,
+  "missingParts": [],
+  "sourceBounds": [
+    -24.0,
+    -16.0,
+    0.0,
+    24.0,
+    16.0,
+    7.0
+  ],
+  "importBounds": [
+    -24.0,
+    -16.0,
+    0.0,
+    24.0,
+    16.0,
+    7.0
+  ],
+  "sourceMeshCount": 561,
+  "importMeshCount": 561,
+  "state": "service / static GLB",
+  "frontAfterImport": "-Y",
+  "upAfterImport": "+Z",
+  "closedStateCheck": {
+    "passed": true,
+    "maxPerPartBoundsError": 0.0,
+    "missingParts": [],
+    "sha256": "63c839d328967298ebc2d5c15d86f21e8871aaf4bff7589a97f50b8eb9a86ca8"
+  }
+}

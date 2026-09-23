@@ -1,0 +1,3 @@
+allprojects {
+    layout.buildDirectory = layout.projectDirectory.dir('build/carrier-cabin-controls-tests')
+}

@@ -1,0 +1,19 @@
+{
+  "fabric:load_conditions": [{
+    "condition": "fabric:registry_contains",
+    "registry": "minecraft:item",
+    "values": ["morrowgear_drone:carrier_unit"]
+  }],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": ["ABA", "DND", "FLF"],
+  "key": {
+    "A": "morrowgear_drone:morrow_alloy",
+    "B": "morrowgear_drone:high_density_battery_pack",
+    "D": "morrowgear_drone:dock_item",
+    "N": "minecraft:nether_star",
+    "F": "morrowgear_drone:flight_actuator",
+    "L": "morrowgear_drone:laser_module"
+  },
+  "result": { "id": "morrowgear_drone:carrier_unit", "count": 1 }
+}

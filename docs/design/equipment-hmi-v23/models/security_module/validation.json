@@ -1,0 +1,57 @@
+{
+  "id": "security_module",
+  "status": "design candidate / not installed",
+  "checks": [
+    {
+      "frame": 1,
+      "vertices": 3304,
+      "bounds": [
+        -0.5485000014305115,
+        -0.5189362168312073,
+        0.0,
+        0.5485000014305115,
+        0.4634999930858612,
+        0.5139999985694885
+      ],
+      "mirrorError": 0.0,
+      "passed": true
+    },
+    {
+      "frame": 40,
+      "vertices": 3304,
+      "bounds": [
+        -0.5485000014305115,
+        -0.5189362168312073,
+        0.0,
+        0.5485000014305115,
+        0.4634999930858612,
+        0.5139999985694885
+      ],
+      "mirrorError": 0.0,
+      "passed": true
+    },
+    {
+      "frame": 80,
+      "vertices": 3304,
+      "bounds": [
+        -0.5485000014305115,
+        -0.5189362168312073,
+        0.0,
+        0.5485000014305115,
+        0.4634999930858612,
+        0.5139999985694885
+      ],
+      "mirrorError": 0.0,
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "axis": {
+    "symmetry": "X=0",
+    "front": "-Y",
+    "up": "+Z"
+  },
+  "legacy": false,
+  "blendSha256": "570967bf6c39a2dc661a29d0ae8b178939c59c089be2eb40a488586794bbf7e2",
+  "glbSha256": "2472dc98657795a92423327b3b017e522f57d1094f3a350220e05bdc71c5d8b5"
+}

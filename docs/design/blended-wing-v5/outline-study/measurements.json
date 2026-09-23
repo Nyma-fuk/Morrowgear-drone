@@ -1,0 +1,56 @@
+[
+  {
+    "role": "FIELD",
+    "width": 6.356022357940674,
+    "length": 3.636621117591858,
+    "widthLengthRatio": 1.7477823926154787,
+    "bilateralOutlinePass": true,
+    "sameScale": true,
+    "gameVerified": false
+  },
+  {
+    "role": "SCOUT",
+    "width": 9.262499809265137,
+    "length": 3.6014060974121094,
+    "widthLengthRatio": 2.571912069544438,
+    "bilateralOutlinePass": true,
+    "sameScale": true,
+    "gameVerified": false
+  },
+  {
+    "role": "CARGO",
+    "width": 6.735343933105469,
+    "length": 4.35,
+    "widthLengthRatio": 1.5483549271506827,
+    "bilateralOutlinePass": true,
+    "sameScale": true,
+    "gameVerified": false
+  },
+  {
+    "role": "ENGINEER",
+    "width": 7.169360160827637,
+    "length": 4.198749780654907,
+    "widthLengthRatio": 1.707498787819974,
+    "bilateralOutlinePass": true,
+    "sameScale": true,
+    "gameVerified": false
+  },
+  {
+    "role": "SECURITY",
+    "width": 7.071960926055908,
+    "length": 4.516670107841492,
+    "widthLengthRatio": 1.5657466135899807,
+    "bilateralOutlinePass": true,
+    "sameScale": true,
+    "gameVerified": false
+  },
+  {
+    "role": "SALVAGE",
+    "width": 7.856250286102295,
+    "length": 4.797500133514404,
+    "widthLengthRatio": 1.6375716659641248,
+    "bilateralOutlinePass": true,
+    "sameScale": true,
+    "gameVerified": false
+  }
+]

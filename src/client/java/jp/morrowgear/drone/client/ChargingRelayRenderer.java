@@ -18,15 +18,12 @@ import net.minecraft.world.phys.Vec3;
 final class ChargingRelayRenderer extends EntityRenderer<ChargingRelayEntity, ServiceEntityRenderState> {
 	private static final Identifier WHITE = Identifier.fromNamespaceAndPath(MorrowgearDrone.MOD_ID,
 		"textures/entity/emissive_white.png");
-	private final DroneMesh mesh;
+	private final RuntimeMesh mesh;
 
 	ChargingRelayRenderer(EntityRendererProvider.Context context) {
 		super(context);
 		shadowRadius = .32f;
-		try {
-			mesh = DroneMesh.read(context.getResourceManager().getResourceOrThrow(Identifier.fromNamespaceAndPath(
-				MorrowgearDrone.MOD_ID, "models/entity/charging_relay.mgm")).open());
-		} catch (IOException exception) { throw new IllegalStateException(exception); }
+		mesh = RuntimeMesh.load("charging_relay");
 	}
 
 	@Override public ServiceEntityRenderState createRenderState() { return new ServiceEntityRenderState(); }
@@ -45,10 +42,7 @@ final class ChargingRelayRenderer extends EntityRenderer<ChargingRelayEntity, Se
 		super.submit(state, poseStack, collector, camera);
 		poseStack.pushPose();
 		poseStack.mulPose(Axis.YP.rotationDegrees(-state.heading));
-		collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WHITE),
-			(pose, consumer) -> mesh.render(pose, consumer, state.lightCoords, state.rotorAngle));
-		collector.submitCustomGeometry(poseStack, RenderTypes.entityTranslucentEmissive(WHITE),
-			(pose, consumer) -> mesh.renderEmissive(pose, consumer, state.rotorAngle, 1.0f, 255));
+		mesh.submit(poseStack, collector, state.lightCoords, state.rotorAngle, 0, 0, true, false);
 		poseStack.popPose();
 		if (state.chargeTargetOffset != null) {
 			Vec3 start = new Vec3(0, -.10, 0);

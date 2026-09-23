@@ -1,0 +1,57 @@
+{
+  "id": "cargo_module",
+  "status": "design candidate / not installed",
+  "checks": [
+    {
+      "frame": 1,
+      "vertices": 4192,
+      "bounds": [
+        -0.5485000014305115,
+        -0.4880000054836273,
+        0.0,
+        0.5485000014305115,
+        0.4634999930858612,
+        0.5139999985694885
+      ],
+      "mirrorError": 0.0,
+      "passed": true
+    },
+    {
+      "frame": 40,
+      "vertices": 4192,
+      "bounds": [
+        -0.5485000014305115,
+        -0.4880000054836273,
+        0.0,
+        0.5485000014305115,
+        0.4634999930858612,
+        0.5139999985694885
+      ],
+      "mirrorError": 0.0,
+      "passed": true
+    },
+    {
+      "frame": 80,
+      "vertices": 4192,
+      "bounds": [
+        -0.5485000014305115,
+        -0.4880000054836273,
+        0.0,
+        0.5485000014305115,
+        0.4634999930858612,
+        0.5139999985694885
+      ],
+      "mirrorError": 0.0,
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "axis": {
+    "symmetry": "X=0",
+    "front": "-Y",
+    "up": "+Z"
+  },
+  "legacy": false,
+  "blendSha256": "49598f4043c45498f40454365d00484988a9c7dfb13cbfd82d65ea803e24729e",
+  "glbSha256": "b442d2da585482a07aa47dfe9475ecb881a903469fc3c8d5ca1756bc172dd60a"
+}

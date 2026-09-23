@@ -1,0 +1,11 @@
+{
+  "fabric:load_conditions": [{
+    "condition": "fabric:registry_contains",
+    "registry": "minecraft:item",
+    "values": ["morrowgear_drone:carrier_console"]
+  }],
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": ["morrowgear_drone:basic_control_board", "minecraft:compass", "morrowgear_drone:morrow_alloy"],
+  "result": { "id": "morrowgear_drone:carrier_console", "count": 1 }
+}

@@ -1,0 +1,54 @@
+{
+  "poses": [
+    {
+      "item": "controller",
+      "hand": "left",
+      "displayFacingCameraDot": 0.7071068286895752,
+      "mirrorsText": false,
+      "scope": "design-space handed presentation, not Minecraft ItemDisplayContext",
+      "passed": true
+    },
+    {
+      "item": "controller",
+      "hand": "right",
+      "displayFacingCameraDot": 0.7071068286895752,
+      "mirrorsText": false,
+      "scope": "design-space handed presentation, not Minecraft ItemDisplayContext",
+      "passed": true
+    },
+    {
+      "item": "tactical_visor",
+      "hand": "left",
+      "displayFacingCameraDot": 0.7071068286895752,
+      "mirrorsText": false,
+      "scope": "design-space handed presentation, not Minecraft ItemDisplayContext",
+      "passed": true
+    },
+    {
+      "item": "tactical_visor",
+      "hand": "right",
+      "displayFacingCameraDot": 0.7071068286895752,
+      "mirrorsText": false,
+      "scope": "design-space handed presentation, not Minecraft ItemDisplayContext",
+      "passed": true
+    },
+    {
+      "item": "recovery_tool",
+      "hand": "left",
+      "displayFacingCameraDot": 0.7071068286895752,
+      "mirrorsText": false,
+      "scope": "design-space handed presentation, not Minecraft ItemDisplayContext",
+      "passed": true
+    },
+    {
+      "item": "recovery_tool",
+      "hand": "right",
+      "displayFacingCameraDot": 0.7071068286895752,
+      "mirrorsText": false,
+      "scope": "design-space handed presentation, not Minecraft ItemDisplayContext",
+      "passed": true
+    }
+  ],
+  "runtimeApplied": false,
+  "passed": true
+}

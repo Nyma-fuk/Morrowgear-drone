@@ -1,0 +1,57 @@
+{
+  "id": "scout_module",
+  "status": "design candidate / not installed",
+  "checks": [
+    {
+      "frame": 1,
+      "vertices": 4288,
+      "bounds": [
+        -0.5559999942779541,
+        -0.51500004529953,
+        0.0,
+        0.5559999942779541,
+        0.4634999930858612,
+        0.5139999985694885
+      ],
+      "mirrorError": 0.0,
+      "passed": true
+    },
+    {
+      "frame": 40,
+      "vertices": 4288,
+      "bounds": [
+        -0.5559999942779541,
+        -0.51500004529953,
+        0.0,
+        0.5559999942779541,
+        0.4634999930858612,
+        0.5139999985694885
+      ],
+      "mirrorError": 0.0,
+      "passed": true
+    },
+    {
+      "frame": 80,
+      "vertices": 4288,
+      "bounds": [
+        -0.5559999942779541,
+        -0.51500004529953,
+        0.0,
+        0.5559999942779541,
+        0.4634999930858612,
+        0.5139999985694885
+      ],
+      "mirrorError": 0.0,
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "axis": {
+    "symmetry": "X=0",
+    "front": "-Y",
+    "up": "+Z"
+  },
+  "legacy": false,
+  "blendSha256": "9a5dc4300527dab335975c07bd9754831be295e9c963c1be3bdba06abb67f2e8",
+  "glbSha256": "b206218ac601e6d43459ea66e58cddfdc1745d8ca282458f5187d53326f42876"
+}

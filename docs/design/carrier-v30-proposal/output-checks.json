@@ -1,0 +1,183 @@
+{
+  "images": {
+    "hero": {
+      "size": [
+        1400,
+        1000
+      ],
+      "visiblePixels": 263946,
+      "notClipped": true
+    },
+    "front": {
+      "size": [
+        1400,
+        1000
+      ],
+      "visiblePixels": 118316,
+      "notClipped": true
+    },
+    "rear": {
+      "size": [
+        1400,
+        1000
+      ],
+      "visiblePixels": 118960,
+      "notClipped": true
+    },
+    "top": {
+      "size": [
+        1400,
+        1000
+      ],
+      "visiblePixels": 526086,
+      "notClipped": true
+    },
+    "bottom": {
+      "size": [
+        1400,
+        1000
+      ],
+      "visiblePixels": 549761,
+      "notClipped": true
+    },
+    "left": {
+      "size": [
+        1400,
+        1000
+      ],
+      "visiblePixels": 79864,
+      "notClipped": true
+    },
+    "right": {
+      "size": [
+        1400,
+        1000
+      ],
+      "visiblePixels": 84236,
+      "notClipped": true
+    },
+    "underside": {
+      "size": [
+        1400,
+        1000
+      ],
+      "visiblePixels": 300428,
+      "notClipped": true
+    },
+    "rear-underside": {
+      "size": [
+        1400,
+        1000
+      ],
+      "visiblePixels": 230294,
+      "notClipped": true
+    },
+    "beam-state": {
+      "size": [
+        1400,
+        1200
+      ],
+      "visiblePixels": 188948,
+      "notClipped": false
+    },
+    "bay-loaded-overview": {
+      "size": [
+        1600,
+        1000
+      ],
+      "visiblePixels": 226648,
+      "notClipped": false
+    },
+    "bay-loaded-security-salvage": {
+      "size": [
+        1400,
+        900
+      ],
+      "visiblePixels": 428214,
+      "notClipped": false
+    },
+    "front-under-functional-closeup": {
+      "size": [
+        1500,
+        1000
+      ],
+      "visiblePixels": 529261,
+      "notClipped": false
+    },
+    "intake-functional-closeup": {
+      "size": [
+        1200,
+        900
+      ],
+      "visiblePixels": 705866,
+      "notClipped": false
+    },
+    "bay-functional-closeup": {
+      "size": [
+        1200,
+        900
+      ],
+      "visiblePixels": 716528,
+      "notClipped": false
+    },
+    "emitter-functional-closeup": {
+      "size": [
+        1200,
+        900
+      ],
+      "visiblePixels": 782754,
+      "notClipped": false
+    },
+    "bay-fit-field": {
+      "size": [
+        1000,
+        760
+      ],
+      "visiblePixels": 627151,
+      "notClipped": false
+    },
+    "bay-fit-scout": {
+      "size": [
+        1000,
+        760
+      ],
+      "visiblePixels": 626998,
+      "notClipped": false
+    },
+    "bay-fit-cargo": {
+      "size": [
+        1000,
+        760
+      ],
+      "visiblePixels": 627138,
+      "notClipped": false
+    },
+    "bay-fit-engineer": {
+      "size": [
+        1000,
+        760
+      ],
+      "visiblePixels": 627118,
+      "notClipped": false
+    },
+    "bay-fit-security": {
+      "size": [
+        1000,
+        760
+      ],
+      "visiblePixels": 627106,
+      "notClipped": false
+    },
+    "bay-fit-salvage": {
+      "size": [
+        1000,
+        760
+      ],
+      "visiblePixels": 627161,
+      "notClipped": false
+    }
+  },
+  "protectedFileCount": 379,
+  "protectedUnchanged": true,
+  "changedProtectedFiles": []
+}

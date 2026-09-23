@@ -12,6 +12,7 @@ import java.util.UUID;
 import java.util.function.BooleanSupplier;
 
 import com.mojang.brigadier.Command;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import jp.morrowgear.drone.block.DockBlockEntity;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -32,6 +33,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.monster.zombie.Zombie;
@@ -52,6 +54,7 @@ final class MorrowgearRuntimeVerifier {
 	private static SalvageVerificationSession salvageVerification;
 	private static SolarServiceVerificationSession solarServiceVerification;
 	private static DockExhaustionVerificationSession dockExhaustionVerification;
+	private static DynamicDockVerificationSession dynamicDockVerification;
 	private enum VerificationScope { ALL, NAVIGATION, FIELD, COMBAT, ADAPTIVE_COMBAT, REGRESSION }
 
 	private MorrowgearRuntimeVerifier() {
@@ -130,8 +133,15 @@ final class MorrowgearRuntimeVerifier {
 						context.getSource().sendFailure(Component.literal("[MORROWGEAR VERIFY] player only"));
 						return 0;
 					}
-					return startVisualEffects(player);
-				}))
+					return startVisualEffects(player, CombatState.LASER_FIRE, 8);
+				})
+					.then(effectPhaseCommand("charge", CombatState.LASER_CHARGE))
+					.then(effectPhaseCommand("fire", CombatState.LASER_FIRE))
+					.then(Commands.literal("stop").executes(context -> {
+						if (visualEffects != null) visualEffects.cleanup();
+						visualEffects = null;
+						return Command.SINGLE_SUCCESS;
+					})))
 				.then(Commands.literal("persistence_prepare").executes(context -> {
 					Entity entity = context.getSource().getEntity();
 					if (!(entity instanceof ServerPlayer player)) {
@@ -187,6 +197,14 @@ final class MorrowgearRuntimeVerifier {
 						return 0;
 					}
 					return startDockExhaustion(player);
+				}))
+				.then(Commands.literal("dock_allocation").executes(context -> {
+					Entity entity = context.getSource().getEntity();
+					if (!(entity instanceof ServerPlayer player)) {
+						context.getSource().sendFailure(Component.literal("[MORROWGEAR VERIFY] player only"));
+						return 0;
+					}
+					return startDynamicDock(player);
 				}))
 				.then(Commands.literal("status").executes(context -> {
 					context.getSource().sendSuccess(() -> Component.literal(status()), false);
@@ -280,11 +298,29 @@ final class MorrowgearRuntimeVerifier {
 		return Command.SINGLE_SUCCESS;
 	}
 
-	private static int startVisualEffects(ServerPlayer player) {
+	private static com.mojang.brigadier.builder.LiteralArgumentBuilder<net.minecraft.commands.CommandSourceStack>
+		effectPhaseCommand(String name, CombatState state) {
+		return Commands.literal(name)
+			.executes(context -> startVisualEffects(context.getSource().getPlayerOrException(), state, 8))
+			.then(Commands.argument("distance", IntegerArgumentType.integer(4, 128))
+				.executes(context -> startVisualEffects(context.getSource().getPlayerOrException(), state,
+					IntegerArgumentType.getInteger(context, "distance")))
+				.then(Commands.argument("count", IntegerArgumentType.integer(1, 8))
+					.executes(context -> startVisualEffects(context.getSource().getPlayerOrException(), state,
+						IntegerArgumentType.getInteger(context, "distance"),
+						IntegerArgumentType.getInteger(context, "count")))));
+	}
+
+	private static int startVisualEffects(ServerPlayer player, CombatState state, int distance) {
+		return startVisualEffects(player, state, distance, 1);
+	}
+
+	private static int startVisualEffects(ServerPlayer player, CombatState state, int distance, int count) {
 		if (visualEffects != null) visualEffects.cleanup();
-		visualEffects = new VisualEffectSession(player);
+		visualEffects = new VisualEffectSession(player, state, distance, count);
 		player.sendSystemMessage(Component.literal(
-			"[MORROWGEAR VERIFY] EFFECTS START / LASER left / TRACER right / 8 sec"));
+			"[MORROWGEAR VERIFY] EFFECTS START / " + state + " / distance " + distance
+				+ " / lasers " + count + " / 60 sec / visual inspection required (not PASS)"));
 		return Command.SINGLE_SUCCESS;
 	}
 
@@ -406,6 +442,16 @@ final class MorrowgearRuntimeVerifier {
 		return Command.SINGLE_SUCCESS;
 	}
 
+	private static int startDynamicDock(ServerPlayer player) {
+		if (dynamicDockVerification != null && !dynamicDockVerification.done()) {
+			player.sendSystemMessage(Component.literal("[MORROWGEAR VERIFY] already running: "
+				+ dynamicDockVerification.progress()));
+			return 0;
+		}
+		dynamicDockVerification = new DynamicDockVerificationSession(player);
+		return Command.SINGLE_SUCCESS;
+	}
+
 	private static DroneEntity probe(List<DroneEntity> probes, String group) {
 		return probes.stream().filter(drone -> drone.groupId().equals(group)).findFirst().orElse(null);
 	}
@@ -418,6 +464,8 @@ final class MorrowgearRuntimeVerifier {
 		if (solarServiceVerification != null && !solarServiceVerification.done()) solarServiceVerification.tick();
 		if (dockExhaustionVerification != null && !dockExhaustionVerification.done())
 			dockExhaustionVerification.tick();
+		if (dynamicDockVerification != null && !dynamicDockVerification.done())
+			dynamicDockVerification.tick();
 	}
 
 	private static String status() {
@@ -427,8 +475,147 @@ final class MorrowgearRuntimeVerifier {
 		String solar = solarServiceVerification == null ? "solar not started" : solarServiceVerification.progress();
 		String dockExhaustion = dockExhaustionVerification == null ? "dock exhaustion not started"
 			: dockExhaustionVerification.progress();
+		String dynamicDock = dynamicDockVerification == null ? "dock allocation not started"
+			: dynamicDockVerification.progress();
 		return "[MORROWGEAR VERIFY] " + verification + " / " + arena + " / " + salvage
-			+ " / " + solar + " / " + dockExhaustion;
+			+ " / " + solar + " / " + dockExhaustion + " / " + dynamicDock;
+	}
+
+	private static final class DynamicDockVerificationSession {
+		private static final long TIMEOUT_TICKS = 2400L;
+		private final ServerPlayer player;
+		private final ServerLevel level;
+		private final BlockPos dockPos;
+		private final DroneEntity parked;
+		private final DroneEntity ordinary;
+		private final DroneEntity service;
+		private final long startedTick;
+		private boolean queueObserved;
+		private boolean holdingOrbitObserved;
+		private boolean priorityReservationObserved;
+		private boolean parkedYieldObserved;
+		private boolean noDockHoldingObserved;
+		private boolean serviceLandingObserved;
+		private boolean dockCreated;
+		private boolean lateDockCreated;
+		private double ordinaryTravel;
+		private Vec3 previousOrdinary;
+		private boolean complete;
+		private String result = "DOCK ALLOCATION RUNNING";
+
+		private DynamicDockVerificationSession(ServerPlayer player) {
+			this.player = player;
+			this.level = player.level();
+			BlockPos base = player.blockPosition().below().offset(0, 0, 18);
+			dockPos = base.above();
+			for (int x = -22; x <= 22; x++) for (int z = -22; z <= 22; z++) {
+				level.setBlockAndUpdate(base.offset(x, 0, z), Blocks.SMOOTH_STONE.defaultBlockState());
+				for (int y = 1; y <= 18; y++) level.setBlockAndUpdate(base.offset(x, y, z), Blocks.AIR.defaultBlockState());
+			}
+			parked = createDrone(dockPos.getX() + .5, dockPos.getY() + .29, dockPos.getZ() + .5,
+				"VERIFY-DOCK-PARKED", 1000);
+			parked.setMode(DroneMode.STANDBY);
+			ordinary = createDrone(dockPos.getX() + 12.5, dockPos.getY() + 8.0, dockPos.getZ() + .5,
+				"VERIFY-DOCK-ORDINARY", 900);
+			ordinary.requestManualDockReturn();
+			service = createDrone(dockPos.getX() - 12.5, dockPos.getY() + 8.0, dockPos.getZ() + .5,
+				"VERIFY-DOCK-SERVICE", 240);
+			service.beginAirborneServiceReturnForVerification(DroneServicePolicy.Need.FLIGHT_POWER);
+			previousOrdinary = ordinary.position();
+			startedTick = level.getGameTime();
+			say("DOCK ALLOCATION START / drones before Docks / use an area without other owned Docks");
+		}
+
+		private void createDock(BlockPos pos) {
+			for (int index = 0; index < MorrowgearDrone.DOCK_PARTS.length; index++) {
+				BlockPos part = pos.offset(index % 3 - 1, 0, index / 3 - 1);
+				level.setBlockAndUpdate(part, MorrowgearDrone.DOCK_PARTS[index].defaultBlockState());
+			}
+			if (!(level.getBlockEntity(pos) instanceof DockBlockEntity dock))
+				throw new IllegalStateException("dynamic Dock verifier Dock was not created");
+			dock.initialize(player);
+			dock.setStoredPowerForVerification(6000);
+			dock.setItem(DockBlockEntity.SLOT_POWER_INPUT, new ItemStack(Items.CHARCOAL, 16));
+			DockAllocationRuntime.invalidate(level, player.getUUID());
+		}
+
+		private DroneEntity createDrone(double x, double y, double z, String group, int power) {
+			DroneEntity drone = MorrowgearDrone.DRONE.create(level, EntitySpawnReason.TRIGGERED);
+			if (drone == null) throw new IllegalStateException("failed to create dynamic Dock probe");
+			drone.setPos(x, y, z);
+			drone.initializeOwner(player);
+			drone.assignGroup(group);
+			drone.assignRole(DroneRole.FIELD);
+			drone.setPowerForVerification(power, 1000);
+			level.addFreshEntity(drone);
+			return drone;
+		}
+
+		private void tick() {
+			if (complete) return;
+			if (!parked.isAlive() || !ordinary.isAlive() || !service.isAlive()) {
+				finish(false, "probe removed before completion");
+				return;
+			}
+			long elapsed = level.getGameTime() - startedTick;
+			if (!dockCreated) {
+				noDockHoldingObserved |= ordinary.dockHolding() && !ordinary.hasDock() && !ordinary.isDocked()
+					&& service.dockHolding() && !service.hasDock() && !service.isDocked();
+				if (elapsed < 40) return;
+				createDock(dockPos);
+				parked.assignDock(dockPos);
+				parked.setPos(dockPos.getX() + .5, dockPos.getY() + .344, dockPos.getZ() + .5);
+				parked.setDockedForCommission();
+				dockCreated = true;
+			}
+			queueObserved |= service.dockHolding() && service.dockQueuePosition() == 1
+				&& ordinary.dockHolding() && ordinary.dockQueuePosition() >= 2;
+			ordinaryTravel += ordinary.position().distanceTo(previousOrdinary);
+			previousOrdinary = ordinary.position();
+			holdingOrbitObserved |= ordinary.dockHolding() && ordinary.getY() >= dockPos.getY() + 6.0
+				&& ordinaryTravel >= 8.0;
+			priorityReservationObserved |= service.hasDock() && service.dockPos().equals(dockPos);
+			parkedYieldObserved |= parked.dockHolding() && !parked.hasDock();
+			serviceLandingObserved |= service.isDocked() && service.hasDock()
+				&& DockServicePolicy.serviceEnvelope(service.position(), Vec3.atCenterOf(service.dockPos()));
+			if (!lateDockCreated && queueObserved && holdingOrbitObserved
+				&& priorityReservationObserved && parkedYieldObserved) {
+				createDock(dockPos.offset(10, 0, 0));
+				lateDockCreated = true;
+			}
+			if (noDockHoldingObserved && lateDockCreated && serviceLandingObserved && ordinary.isDocked()
+				&& ordinary.dockPos().equals(dockPos.offset(10, 0, 0))
+				&& DockServicePolicy.serviceEnvelope(ordinary.position(), Vec3.atCenterOf(ordinary.dockPos()))) {
+				finish(true, "airborne no Dock hold>priority queue>parked yield>late Dock>both actual landings");
+				return;
+			}
+			if (elapsed >= TIMEOUT_TICKS) finish(false, "timeout / queue=" + queueObserved
+				+ " orbit=" + holdingOrbitObserved + " priority=" + priorityReservationObserved
+				+ " yield=" + parkedYieldObserved + " noDock=" + noDockHoldingObserved
+				+ " serviceLanded=" + serviceLandingObserved + " ordinaryLanded=" + ordinary.isDocked()
+				+ " q=" + ordinary.dockQueuePosition());
+		}
+
+		private void finish(boolean pass, String detail) {
+			complete = true;
+			result = "DOCK ALLOCATION " + (pass ? "PASS" : "FAIL") + " / " + detail;
+			say(result);
+			if (parked.isAlive()) parked.discard();
+			if (ordinary.isAlive()) ordinary.discard();
+			if (service.isAlive()) service.discard();
+			MorrowgearDrone.removeDock(level, dockPos, false);
+			if (lateDockCreated) MorrowgearDrone.removeDock(level, dockPos.offset(10, 0, 0), false);
+		}
+
+		private void say(String message) {
+			String text = "[MORROWGEAR VERIFY] " + message;
+			player.sendSystemMessage(Component.literal(text));
+			MorrowgearDrone.LOGGER.info(text);
+		}
+
+		private boolean done() { return complete; }
+		private String progress() { return complete ? result : "DOCK ALLOCATION t="
+			+ (level.getGameTime() - startedTick); }
 	}
 
 	private static final class DockExhaustionVerificationSession {
@@ -508,6 +695,7 @@ final class MorrowgearRuntimeVerifier {
 			say(result);
 			if (drone.isAlive()) drone.discard();
 			if (target.isAlive()) target.discard();
+			MorrowgearDrone.removeDock(level, dockPos, false);
 		}
 
 		private void say(String message) {
@@ -522,7 +710,8 @@ final class MorrowgearRuntimeVerifier {
 	}
 
 	private static final class SolarServiceVerificationSession {
-		private static final long TIMEOUT_TICKS = 520L;
+		private static final long TIMEOUT_TICKS = 1600L;
+		private static final String RESUME_MISSION = "VERIFY-SOLAR-RESUME";
 		private final ServerPlayer player;
 		private final ServerLevel level;
 		private final SolarServiceStationEntity station;
@@ -530,10 +719,13 @@ final class MorrowgearRuntimeVerifier {
 		private final long startedTick;
 		private final Vec3 initialDronePosition;
 		private final int initialBattery;
+		private Vec3 resumePosition;
 		private double previousAngle = Double.NaN;
 		private double angularTravel;
 		private int stableOrbitSamples;
 		private boolean solarAssignmentObserved;
+		private boolean linkCompletionObserved;
+		private boolean missionResumeObserved;
 		private boolean complete;
 		private String result = "SOLAR SERVICE RUNNING";
 
@@ -555,13 +747,14 @@ final class MorrowgearRuntimeVerifier {
 			drone.initializeOwner(player);
 			drone.assignGroup("VERIFY-SOLAR-SERVICE");
 			drone.assignRole(DroneRole.SCOUT);
-			drone.setMode(DroneMode.STANDBY);
+			drone.assignWaypoint(BlockPos.containing(center.add(forward.scale(36.0))), RESUME_MISSION,
+				1, 0, drone.blockPosition(), level.getGameTime());
 			drone.setPowerForVerification(200, 1000);
 			level.addFreshEntity(drone);
 			startedTick = level.getGameTime();
 			initialDronePosition = drone.position();
 			initialBattery = drone.batteryPercent();
-			say("SOLAR SERVICE START / 1 drone / standby diversion and orbit");
+			say("SOLAR SERVICE START / 1 drone / waypoint diversion, orbit and mission resume");
 		}
 
 		private void tick() {
@@ -585,14 +778,24 @@ final class MorrowgearRuntimeVerifier {
 			boolean moved = drone.position().distanceTo(initialDronePosition) > 4.0;
 			boolean orbiting = stableOrbitSamples >= 80 && angularTravel >= 0.75;
 			boolean charging = drone.batteryPercent() > initialBattery;
-			if (moved && orbiting && charging) {
-				finish(true, "STANDBY>SOLAR DIVERT>CAPTURE>ORBIT / charge gained / samples="
+			if (solarAssignmentObserved && !drone.solarServiceAssignedForVerification()
+				&& drone.batteryPercent() >= drone.solarChargeTargetPercent()) {
+				linkCompletionObserved = true;
+				if (resumePosition == null) resumePosition = drone.position();
+			}
+			missionResumeObserved |= linkCompletionObserved && drone.mode() == DroneMode.WAYPOINT
+				&& RESUME_MISSION.equals(drone.missionId()) && resumePosition != null
+				&& drone.position().distanceTo(resumePosition) >= 2.0;
+			if (moved && orbiting && charging && missionResumeObserved) {
+				finish(true, "WAYPOINT>SOLAR DIVERT>CAPTURE>ORBIT>WAYPOINT RESUME / charge gained / samples="
 					+ stableOrbitSamples);
 				return;
 			}
 			if (elapsed >= TIMEOUT_TICKS) finish(false, "timeout / assigned=" + solarAssignmentObserved
 				+ " moved=" + moved + " samples=" + stableOrbitSamples + " travel="
-				+ String.format("%.2f", angularTravel) + " charge=" + drone.batteryPercent() + "%");
+				+ String.format("%.2f", angularTravel) + " charge=" + drone.batteryPercent()
+				+ "% linkEnd=" + linkCompletionObserved + " resumed=" + missionResumeObserved
+				+ " mode=" + drone.mode() + " mission=" + drone.missionId());
 		}
 
 		private void finish(boolean pass, String detail) {
@@ -638,7 +841,10 @@ final class MorrowgearRuntimeVerifier {
 		private boolean serviceInjected;
 		private boolean serviceReturnObserved;
 		private boolean serviceDockedObserved;
+		private boolean serviceDockDiagnosticReported;
 		private boolean serviceResumeObserved;
+		private boolean loadRestoredObserved;
+		private boolean loadMissionResumedObserved;
 		private boolean complete;
 		private String result = "SALVAGE RUNNING";
 
@@ -670,6 +876,9 @@ final class MorrowgearRuntimeVerifier {
 			load = createDrone(base.getX() + (verticalScenario ? 2.5 : 18.5),
 				base.getY() + (verticalScenario ? 1.15 : 7.15),
 				base.getZ() + .5, "VERIFY-SALVAGE-LOAD", DroneRole.SCOUT);
+			load.assignWaypoint(base.offset(24, 0, 0), "VERIFY-SALVAGE-RESUME", 1, 0,
+				load.blockPosition(), level.getGameTime());
+			load.capturePowerLossTaskForVerification();
 			load.setPowerForVerification(0, 1000);
 			initialLoadY = load.getY();
 			startedTick = level.getGameTime();
@@ -710,6 +919,7 @@ final class MorrowgearRuntimeVerifier {
 			dock.initialize(player);
 			dock.setItem(DockBlockEntity.SLOT_RECOVERY_OUTPUT, ItemStack.EMPTY);
 			dock.setItem(DockBlockEntity.SLOT_POWER_INPUT, new ItemStack(Items.CHARCOAL, 8));
+			dock.setItem(DockBlockEntity.SLOT_REPAIR, new ItemStack(Items.IRON_INGOT, 8));
 		}
 
 		private DroneEntity createDrone(double x, double y, double z, String group, DroneRole role) {
@@ -754,6 +964,19 @@ final class MorrowgearRuntimeVerifier {
 			}
 			serviceReturnObserved |= carrier.serviceReturnActive();
 			serviceDockedObserved |= serviceReturnObserved && carrier.isDocked();
+			if (serviceScenario && serviceDockedObserved && !serviceDockDiagnosticReported) {
+				serviceDockDiagnosticReported = true;
+				DockBlockEntity dock = level.getBlockEntity(dockPos) instanceof DockBlockEntity found ? found : null;
+				Vec3 center = Vec3.atCenterOf(dockPos);
+				say("SALVAGE SERVICE DIAGNOSTIC / delta="
+					+ String.format(java.util.Locale.ROOT, "%.2f,%.2f,%.2f",
+						carrier.getX() - center.x, carrier.getY() - center.y, carrier.getZ() - center.z)
+					+ " / envelope=" + DockServicePolicy.serviceEnvelope(carrier.position(), center)
+					+ " / dock=" + (dock != null)
+					+ " / owner=" + (dock != null && dock.isOwnedBy(carrier.ownerId()))
+					+ " / fuel=" + (dock == null ? -1 : dock.supplyCount(DockSupplyPolicy.SupplyKind.FUEL))
+					+ " / stored=" + (dock == null ? -1 : dock.storedFlightPower()));
+			}
 			serviceResumeObserved |= serviceDockedObserved && !carrier.serviceReturnActive()
 				&& !carrier.isDocked() && carrier.salvageState() == SalvageState.INTERCEPT;
 			if (load.isAlive() && state == SalvageState.INTERCEPT) {
@@ -771,18 +994,15 @@ final class MorrowgearRuntimeVerifier {
 			if (state == SalvageState.RETURN) {
 				double horizontal = carrier.position().multiply(1, 0, 1)
 					.distanceTo(Vec3.atCenterOf(dockPos).multiply(1, 0, 1));
-				returnCruiseObserved |= horizontal >= 8.0 && carrier.getDeltaMovement().length() >= 0.35;
+				// The standard fixture has only an 18 m return leg. Verify purposeful powered
+				// return here; long-distance cruise efficiency is covered by the vertical fixture.
+				returnCruiseObserved |= horizontal >= 6.0 && carrier.getDeltaMovement().length() >= 0.20;
 			}
-			if (!load.isAlive()) {
-				ItemStack output = level.getBlockEntity(dockPos) instanceof DockBlockEntity dock
-					? dock.getItem(DockBlockEntity.SLOT_RECOVERY_OUTPUT) : ItemStack.EMPTY;
-				if (!observed.contains(SalvageState.DELIVER)) {
-					observed.add(SalvageState.DELIVER);
-					say("SALVAGE STATE DELIVER / Dock output committed");
-				}
+			loadRestoredObserved |= load.isAlive() && !load.isPowerLost();
+			loadMissionResumedObserved |= loadRestoredObserved && load.mode() == DroneMode.WAYPOINT
+				&& "VERIFY-SALVAGE-RESUME".equals(load.missionId());
+			if (loadRestoredObserved && carrier.salvageState() == SalvageState.IDLE) {
 				boolean transitions = observed.containsAll(EnumSet.allOf(SalvageState.class));
-				boolean outputReady = output.is(MorrowgearDrone.DRONE_UNIT)
-					&& StoredDroneState.read(output) != null;
 				boolean finalState = carrier.salvageState() == SalvageState.IDLE
 					&& carrier.hasDock() && carrier.mode() == DroneMode.DOCK;
 				boolean servicePass = !serviceScenario || serviceInjected && serviceReturnObserved
@@ -790,16 +1010,18 @@ final class MorrowgearRuntimeVerifier {
 				boolean verticalPass = !verticalScenario || verticalEscapeObserved;
 				if (transitions && carrierDeparted && inertialFallObserved && !suspendedBeforeHook
 					&& suspendedLoadObserved && returnedNearDock && returnCruiseObserved
-					&& outputReady && finalState && servicePass && verticalPass) {
+					&& load.isAlive() && loadRestoredObserved && loadMissionResumedObserved
+					&& finalState && servicePass && verticalPass) {
 					finish(true, "POWER LOSS FALL>IDLE>INTERCEPT"
 						+ (serviceScenario ? ">SERVICE>RESUME" : "")
-						+ ">HOOK>HOIST>RETURN>DELIVER / Dock output ready");
+						+ ">HOOK>HOIST>RETURN>DELIVER>SERVICE / entity mission resumed");
 				} else {
 					finish(false, "transition=" + transitions + " departed=" + carrierDeparted
 						+ " fall=" + inertialFallObserved + " preHookSuspended=" + suspendedBeforeHook
 						+ " suspended=" + suspendedLoadObserved + " returned=" + returnedNearDock
 						+ " cruise=" + returnCruiseObserved
-						+ " output=" + outputReady + " final=" + finalState
+						+ " entity=" + load.isAlive() + "/" + loadRestoredObserved
+						+ " resumed=" + loadMissionResumedObserved + " final=" + finalState
 						+ " vertical=" + verticalPass + "/" + verticalEscapeObserved
 						+ " service=" + servicePass + "/" + serviceReturnObserved
 						+ "/" + serviceDockedObserved + "/" + serviceResumeObserved);
@@ -815,7 +1037,9 @@ final class MorrowgearRuntimeVerifier {
 			complete = true;
 			result = "SALVAGE " + (pass ? "PASS" : "FAIL") + " / " + detail;
 			say(result);
-			if (pass && carrier.isAlive()) carrier.discard();
+			if (carrier.isAlive()) carrier.discard();
+			if (load.isAlive()) load.discard();
+			MorrowgearDrone.removeDock(level, dockPos, false);
 		}
 
 		private void say(String message) {
@@ -838,38 +1062,50 @@ final class MorrowgearRuntimeVerifier {
 		private final ServerPlayer player;
 		private final DroneEntity laser;
 		private final DroneEntity gun;
+		private final List<DroneEntity> additionalLasers = new ArrayList<>();
 		private final LivingEntity target;
 		private final long endTick;
 
-		private VisualEffectSession(ServerPlayer player) {
+		private VisualEffectSession(ServerPlayer player, CombatState state, int distance, int count) {
 			this.player = player;
 			ServerLevel level = player.level();
 			Vec3 forward = player.getLookAngle().multiply(1, 0, 1);
 			if (forward.lengthSqr() < 0.01) forward = new Vec3(0, 0, 1);
 			forward = forward.normalize();
 			Vec3 right = new Vec3(-forward.z, 0, forward.x);
-			Vec3 targetPos = player.position().add(forward.scale(22.0));
-			Zombie zombie = new Zombie(level);
-			zombie.setPos(targetPos.x, player.getY(), targetPos.z);
-			zombie.setNoAi(true);
-			zombie.setInvulnerable(true);
-			level.addFreshEntity(zombie);
-			target = zombie;
-			laser = visualDrone(level, player, player.position().add(forward.scale(7.0))
+			Vec3 targetPos = player.position().add(forward.scale(distance + 15.0));
+			// A render probe must survive Peaceful mode and stay at the sampled aim point.
+			ArmorStand stand = new ArmorStand(level, targetPos.x, player.getY(), targetPos.z);
+			stand.setNoGravity(true);
+			stand.setInvulnerable(true);
+			level.addFreshEntity(stand);
+			target = stand;
+			laser = visualDrone(level, player, player.position().add(forward.scale(distance))
 				.add(right.scale(-3.0)).add(0, 4.0, 0), "VERIFY-EFFECT-LASER");
-			gun = visualDrone(level, player, player.position().add(forward.scale(7.0))
+			gun = visualDrone(level, player, player.position().add(forward.scale(distance))
 				.add(right.scale(3.0)).add(0, 4.0, 0), "VERIFY-EFFECT-GUN");
 			laser.assignSecurityLoadout(SecurityLoadout.LASER);
 			gun.assignSecurityLoadout(SecurityLoadout.AUTOCANNON);
-			laser.holdCombatVisualForVerification(CombatState.LASER_FIRE,
-				CombatWeapon.LASER, target, 160);
+			laser.holdCombatVisualForVerification(state,
+				CombatWeapon.LASER, target, 1200);
+			for (int i = 1; i < count; i++) {
+				DroneEntity extra = visualDrone(level, player,
+					player.position().add(forward.scale(distance + (i / 4) * 3.0))
+						.add(right.scale(-3.0 + (i % 4) * 2.0)).add(0, 4.0 + (i / 4) * 2.0, 0),
+					"VERIFY-EFFECT-LASER-" + i);
+				extra.assignSecurityLoadout(SecurityLoadout.LASER);
+				extra.holdCombatVisualForVerification(state, CombatWeapon.LASER, target, 1200);
+				additionalLasers.add(extra);
+			}
+			if (count > 1) gun.setPos(gun.getX(), gun.getY() + 6.0, gun.getZ());
 			gun.holdCombatVisualForVerification(CombatState.GUN_RUN,
-				CombatWeapon.AUTOCANNON, target, 160);
-			endTick = level.getGameTime() + 160L;
+				CombatWeapon.AUTOCANNON, target, 1200);
+			endTick = level.getGameTime() + 1200L;
 		}
 
 		private boolean tick() {
-			if (!player.isAlive() || player.level().getGameTime() < endTick) return false;
+			if (player.isAlive() && player.level() == laser.level() && !player.hasDisconnected()
+				&& target.isAlive() && player.level().getGameTime() < endTick) return false;
 			cleanup();
 			player.sendSystemMessage(Component.literal("[MORROWGEAR VERIFY] EFFECTS COMPLETE / probes removed"));
 			return true;
@@ -878,6 +1114,7 @@ final class MorrowgearRuntimeVerifier {
 		private void cleanup() {
 			if (laser != null) laser.discard();
 			if (gun != null) gun.discard();
+			additionalLasers.forEach(DroneEntity::discard);
 			if (target != null) target.discard();
 		}
 
@@ -954,6 +1191,9 @@ final class MorrowgearRuntimeVerifier {
 		private double casMaximumRange;
 		private double casMinimumHeight;
 		private double casMaximumHeight;
+		private long casLastObservedShotTick;
+		private int casObservedShots;
+		private boolean casRearwardShotObserved;
 		private final Set<String> adaptiveLaserFiringGroups = new HashSet<>();
 		private boolean adaptiveCrossingGunShotObserved;
 		private LivingEntity adaptiveLaserDecoy;
@@ -1051,6 +1291,7 @@ final class MorrowgearRuntimeVerifier {
 				}
 			}
 			long elapsed = level.getGameTime() - startedTick;
+			if (elapsed % 100L == 0L) logNavigationDiagnostics(step.name, elapsed);
 			if (step.ready == null && elapsed < step.waitTicks) return;
 			if (step.ready != null && !step.ready.getAsBoolean() && elapsed < step.waitTicks) return;
 			try {
@@ -1588,8 +1829,10 @@ final class MorrowgearRuntimeVerifier {
 				if (drone.combatShotAge() <= 1) observedCombatShot = true;
 				if (drone.combatState() == CombatState.LASER_CHARGE
 					|| drone.combatState() == CombatState.LASER_FIRE) {
-					laserOrbitSamples++;
-					maxLaserOrbitSpeed = Math.max(maxLaserOrbitSpeed, drone.getDeltaMovement().length());
+					if (!drone.laserIngressForVerification(level)) {
+						laserOrbitSamples++;
+						maxLaserOrbitSpeed = Math.max(maxLaserOrbitSpeed, drone.getDeltaMovement().length());
+					}
 				}
 			}
 			observeLaserFormation();
@@ -1721,6 +1964,11 @@ final class MorrowgearRuntimeVerifier {
 			}
 			adaptiveRechargeOriginal = drones.getFirst();
 			adaptiveRechargeOriginal.assignDock(docks.getFirst());
+			if (!(level.getBlockEntity(docks.getFirst()) instanceof DockBlockEntity rechargeDock))
+				throw new IllegalStateException("adaptive recharge Dock missing");
+			// Case 04 verifies rotation, not inventory ingestion. Seed the persisted remainder
+			// of one opened cell so service timing is deterministic across an already-used Dock.
+			rechargeDock.setSupplyCreditsForVerification(DockSupplyPolicy.LASER_CELL_ENERGY - 1, 0, 0);
 			LivingEntity target = spawnZombie(anchor.getX() + 0.5, anchor.getY(), anchor.getZ() + 0.5);
 			if (target.getAttribute(Attributes.MAX_HEALTH) != null) {
 				target.getAttribute(Attributes.MAX_HEALTH).setBaseValue(20.0);
@@ -2006,6 +2254,11 @@ final class MorrowgearRuntimeVerifier {
 					&& drone.hasPatrolRoute() && !drone.emergencyInterceptActive() && !drone.combatActive());
 
 			if (adaptiveRechargeOriginal != null && adaptiveRechargeOriginal.groupId().equals("VERIFY-ADAPT-ROTATION")) {
+				if ((level.getGameTime() - startedTick) % 100L == 0L) {
+					MorrowgearDrone.LOGGER.info("[MORROWGEAR VERIFY] RECHARGE DIAG {} {}",
+						adaptiveRechargeOriginal.unitId(),
+						adaptiveRechargeOriginal.rechargeDecisionDiagnosticForVerification());
+				}
 				Set<UUID> activeNow = drones.stream().filter(drone -> drone.groupId().equals("VERIFY-ADAPT-ROTATION")
 					&& drone.combatActive()).map(DroneEntity::getUUID).collect(java.util.stream.Collectors.toSet());
 				if (adaptiveInitialResponders.isEmpty() && activeNow.size() >= 3) adaptiveInitialResponders.addAll(activeNow);
@@ -2152,6 +2405,9 @@ final class MorrowgearRuntimeVerifier {
 			casMaximumRange = 0.0;
 			casMinimumHeight = Double.POSITIVE_INFINITY;
 			casMaximumHeight = Double.NEGATIVE_INFINITY;
+			casLastObservedShotTick = Long.MIN_VALUE;
+			casObservedShots = 0;
+			casRearwardShotObserved = false;
 		}
 
 		private void observeLinearAutocannonStrike() {
@@ -2166,6 +2422,15 @@ final class MorrowgearRuntimeVerifier {
 			double relativeY = gunner.getY() - combatProbe.getY();
 			casMinimumHeight = Math.min(casMinimumHeight, relativeY);
 			casMaximumHeight = Math.max(casMaximumHeight, relativeY);
+			if (gunner.combatShotTick() != casLastObservedShotTick && gunner.combatShotAge() <= 1) {
+				casLastObservedShotTick = gunner.combatShotTick();
+				casObservedShots++;
+				Vec3 muzzle = gunner.position();
+				Vec3 aim = muzzle.add(gunner.combatVisualAim());
+				if (!CombatPolicy.forwardFiringSolution(muzzle, gunner.getDeltaMovement(), aim)) {
+					casRearwardShotObserved = true;
+				}
+			}
 		}
 
 		private void assertLinearAutocannonStrike() {
@@ -2178,6 +2443,8 @@ final class MorrowgearRuntimeVerifier {
 				"linear autocannon impacts did not produce bounded terrain damage");
 			require(casMinimumWeaponPower < casInitialWeaponPower,
 				"weapon power did not drain during autocannon fire");
+			require(casObservedShots > 0, "CAS produced no observable forward gun burst");
+			require(!casRearwardShotObserved, "autocannon fired outside its forward CAS cone");
 			require(casMinimumFlightPower > 0,
 				"flight reserve was exhausted while weapon power remained independently available");
 			require(casMinimumFlightPower != casMinimumWeaponPower,
@@ -2213,19 +2480,11 @@ final class MorrowgearRuntimeVerifier {
 				.filter(drone -> drone.combatState() == CombatState.LASER_FIRE).toList();
 			simultaneousLaserFire = Math.max(simultaneousLaserFire, firing.size());
 			if (firing.size() != formation.size() || firing.size() < 2) return;
-			List<Double> angles = firing.stream().map(drone -> Math.atan2(
-				drone.getZ() - combatProbe.getZ(), drone.getX() - combatProbe.getX()))
-				.sorted().toList();
-			double ideal = Math.PI * 2.0 / angles.size();
-			double error = 0.0;
-			for (int index = 0; index < angles.size(); index++) {
-				double current = angles.get(index);
-				double next = index + 1 < angles.size() ? angles.get(index + 1)
-					: angles.getFirst() + Math.PI * 2.0;
-				error = Math.max(error, Math.abs((next - current) - ideal));
-			}
+			double error = CombatPolicy.laserFormationGapError(
+				firing.stream().map(DroneEntity::position).toList(), combatProbe.position());
 			bestLaserGapError = Math.min(bestLaserGapError, error);
-			laserSpacingStableTicks = error <= 0.38 ? laserSpacingStableTicks + 1 : 0;
+			laserSpacingStableTicks = error <= CombatPolicy.LASER_FORMATION_MAX_GAP_ERROR
+				? laserSpacingStableTicks + 1 : 0;
 			maxLaserSpacingStableTicks = Math.max(maxLaserSpacingStableTicks,
 				laserSpacingStableTicks);
 		}
@@ -2294,7 +2553,7 @@ final class MorrowgearRuntimeVerifier {
 		private void assertLaserFormation() {
 			require(simultaneousLaserFire == 4,
 				"laser formation did not reach four-aircraft simultaneous fire: " + simultaneousLaserFire);
-			require(bestLaserGapError <= 0.38,
+			require(bestLaserGapError <= CombatPolicy.LASER_FORMATION_MAX_GAP_ERROR,
 				"laser formation angular spacing remained uneven: " + bestLaserGapError);
 			require(maxLaserSpacingStableTicks >= 40,
 				"laser formation did not sustain even spacing for 40 ticks: "
@@ -3070,6 +3329,9 @@ final class MorrowgearRuntimeVerifier {
 			}
 			DroneEntity drone = drones.get(4);
 			reset(drone);
+			// Fleet setup cycles index 4 to SECURITY. This case owns navigation geometry,
+			// so do not let ambient theater dispatch replace its Dock route mid-approach.
+			drone.assignRole(DroneRole.FIELD);
 			drone.assignDock(dock);
 			drone.setPos(dock.getX() - 7.5, dock.getY() + 2.0, dock.getZ() + 0.5);
 			drone.setMode(DroneMode.DOCK);
@@ -3080,6 +3342,8 @@ final class MorrowgearRuntimeVerifier {
 			DroneEntity drone = drones.get(4);
 			boolean docked = drone.isDocked();
 			double distance = drone.position().distanceTo(Vec3.atCenterOf(dock));
+			MorrowgearDrone.LOGGER.info("[MORROWGEAR VERIFY] NAV FINAL dock {} {}",
+				drone.unitId(), drone.navigationDiagnosticForVerification());
 			clearVolume(dock, 8, 0, 8);
 			require(docked, "drone did not find the only open east approach; distance=" + String.format("%.2f", distance));
 		}
@@ -3136,6 +3400,10 @@ final class MorrowgearRuntimeVerifier {
 			List<DroneEntity> wing = drones.subList(13, 17);
 			long crossed = wing.stream().filter(drone -> drone.getX() > wall.getX() + 2.0).count();
 			long alive = wing.stream().filter(DroneEntity::isAlive).count();
+			for (DroneEntity drone : wing) {
+				MorrowgearDrone.LOGGER.info("[MORROWGEAR VERIFY] NAV FINAL large {} {}",
+					drone.unitId(), drone.navigationDiagnosticForVerification());
+			}
 			clearGiantWall(wall);
 			require(crossed == wing.size(), "large obstacle trapped formation: " + crossed + "/" + wing.size());
 			require(alive == wing.size(), "large obstacle destroyed formation members: " + alive + "/" + wing.size());
@@ -3195,6 +3463,19 @@ final class MorrowgearRuntimeVerifier {
 			require(!atomicDockProbe.hasDock(), "drone retained removed dock assignment");
 			require(countNearbyItem(MorrowgearDrone.DOCK_ITEM, atomicDock) == atomicDockDropsBefore + 1,
 				"dock removal did not produce exactly one kit");
+		}
+
+		private void logNavigationDiagnostics(String caseName, long elapsed) {
+			if (caseName.equals("dock return with roof and blocked approaches")) {
+				DroneEntity drone = drones.get(4);
+				MorrowgearDrone.LOGGER.info("[MORROWGEAR VERIFY] NAV DIAG t={} dock {} {}",
+					elapsed, drone.unitId(), drone.navigationDiagnosticForVerification());
+			} else if (caseName.equals("large obstacle strategic reroute")) {
+				for (DroneEntity drone : drones.subList(13, 17)) {
+					MorrowgearDrone.LOGGER.info("[MORROWGEAR VERIFY] NAV DIAG t={} large {} {}",
+						elapsed, drone.unitId(), drone.navigationDiagnosticForVerification());
+				}
+			}
 		}
 
 		private void storeTemporaryDrone() {

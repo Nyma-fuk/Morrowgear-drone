@@ -47,4 +47,64 @@ final class GuardDispatchPolicyTest {
 		assertEquals(List.of("TEMP", "ORIGINAL"), GuardDispatchPolicy.selected(candidates, 2, false).stream()
 			.map(GuardDispatchPolicy.Candidate::unitId).toList());
 	}
+
+	@Test void theaterPlanKeepsRearmedOriginalOnMissionWhenReliefOwnsTheFront() {
+		assertTrue(GuardDispatchPolicy.reliefHolds(true, true, true, false, false));
+	}
+
+	@Test void observedStrengthOverridesAStalePlanThatStillAssignsTheRearmedOriginal() {
+		assertTrue(GuardDispatchPolicy.reliefHolds(true, true, true, true, true));
+	}
+
+	@Test void actualVacancyStillRecallsTheRearmedOriginal() {
+		assertTrue(!GuardDispatchPolicy.reliefHolds(true, true, true, true, false));
+		assertTrue(!GuardDispatchPolicy.reliefHolds(true, false, true, false, true));
+	}
+
+	@Test void localStrengthRemainsFallbackWithoutATheaterPlan() {
+		assertTrue(GuardDispatchPolicy.reliefHolds(true, true, false, false, true));
+		assertTrue(!GuardDispatchPolicy.reliefHolds(true, true, false, false, false));
+	}
+
+	@Test void rechargeCompletionInheritsOnlyAnObservedReliefMissionAndOtherwiseFallsBackSafely() {
+		assertEquals(GuardDispatchPolicy.RechargeCompletion.INHERIT_RELIEF_MISSION,
+			GuardDispatchPolicy.rechargeCompletion(true, true, true, true, true, true));
+		assertEquals(GuardDispatchPolicy.RechargeCompletion.RESUME_ORIGINAL_MISSION,
+			GuardDispatchPolicy.rechargeCompletion(true, true, true, true, true, false));
+		assertEquals(GuardDispatchPolicy.RechargeCompletion.RECLAIM_COMBAT,
+			GuardDispatchPolicy.rechargeCompletion(true, false, true, true, false, false));
+		assertEquals(GuardDispatchPolicy.RechargeCompletion.RESUME_ORIGINAL_MISSION,
+			GuardDispatchPolicy.rechargeCompletion(false, false, true, false, false, false));
+	}
+
+	@Test void cachedRedispatchHoldIsBoundedAndPlayerEmergencyBypassesIt() {
+		assertTrue(GuardDispatchPolicy.suppressCachedRedispatch(100, 110, false));
+		assertTrue(GuardDispatchPolicy.suppressCachedRedispatch(110, 110, false));
+		assertTrue(!GuardDispatchPolicy.suppressCachedRedispatch(111, 110, false));
+		assertTrue(!GuardDispatchPolicy.suppressCachedRedispatch(100, 110, true));
+	}
+
+	@Test void actualReliefCoverageOutlivesTheaterCacheButNotItsRealCommitment() {
+		assertTrue(GuardDispatchPolicy.suppressReliefRedispatch(true, false, true, true));
+		assertTrue(!GuardDispatchPolicy.suppressReliefRedispatch(false, false, true, true));
+		assertTrue(!GuardDispatchPolicy.suppressReliefRedispatch(true, true, true, true));
+		assertTrue(!GuardDispatchPolicy.suppressReliefRedispatch(true, false, false, true));
+		assertTrue(!GuardDispatchPolicy.suppressReliefRedispatch(true, false, true, false));
+	}
+
+	@Test void onlyAnActiveSameTargetAircraftOutsideServiceCountsAsRelief() {
+		assertTrue(GuardDispatchPolicy.activeRelief(true, true, false, false));
+		assertTrue(!GuardDispatchPolicy.activeRelief(false, true, false, false));
+		assertTrue(!GuardDispatchPolicy.activeRelief(true, false, false, false));
+		assertTrue(!GuardDispatchPolicy.activeRelief(true, true, true, false));
+		assertTrue(!GuardDispatchPolicy.activeRelief(true, true, false, true));
+	}
+
+	@Test void anInterceptingReliefRemainsCommittedBetweenWeaponPasses() {
+		assertTrue(GuardDispatchPolicy.committedRelief(false, true, false, true, false, false));
+		assertTrue(GuardDispatchPolicy.committedRelief(true, false, true, false, false, false));
+		assertTrue(!GuardDispatchPolicy.committedRelief(false, true, false, false, false, false));
+		assertTrue(!GuardDispatchPolicy.committedRelief(true, false, true, false, true, false));
+		assertTrue(!GuardDispatchPolicy.committedRelief(true, false, true, false, false, true));
+	}
 }

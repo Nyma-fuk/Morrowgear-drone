@@ -1,0 +1,33 @@
+{
+  "passed": true,
+  "glbSha256": "daa4608612fde873e156da32f624f22d301139a3f1c44e3ea2728670a1f69e9a",
+  "regions": [
+    {
+      "name": "bay0",
+      "rays": 169,
+      "blocked": []
+    },
+    {
+      "name": "bay1",
+      "rays": 169,
+      "blocked": []
+    },
+    {
+      "name": "bay2",
+      "rays": 169,
+      "blocked": []
+    },
+    {
+      "name": "bay3",
+      "rays": 169,
+      "blocked": []
+    },
+    {
+      "name": "boarding",
+      "rays": 169,
+      "blocked": []
+    }
+  ],
+  "protectedAssetsUnchanged": true,
+  "inspectionVisibility": "Hull and duct covers hidden; remaining native parts not moved or scaled"
+}

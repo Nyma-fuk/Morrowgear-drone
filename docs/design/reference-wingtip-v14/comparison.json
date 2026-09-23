@@ -1,0 +1,34 @@
+{
+  "scope": "Fixed-camera silhouettes only; no aerodynamic or full likeness proof.",
+  "sourceAnnotationReviewed": false,
+  "visualApproval": false,
+  "before": {
+    "silhouetteIoU": 0.8862349739296632,
+    "meanContourErrorPx": 14.983388900756836,
+    "p95ContourErrorPx": 50.179847717285156
+  },
+  "after": {
+    "silhouetteIoU": 0.9316359357182152,
+    "meanContourErrorPx": 8.582216262817383,
+    "p95ContourErrorPx": 22.772096633911133
+  },
+  "regions": {
+    "left-tip": {
+      "beforeIoU": 0.7944619089024145,
+      "afterIoU": 0.8940858716854945
+    },
+    "right-tip": {
+      "beforeIoU": 0.697980485591105,
+      "afterIoU": 0.808096719568385
+    },
+    "aft-fairings": {
+      "beforeIoU": 0.592348169261127,
+      "afterIoU": 0.91964266494457
+    }
+  },
+  "sha256": {
+    "airframe.blend": "f54c3025c241db5d3332486872d5118da60b4ae18e4730193be41db0f7d0e2d9",
+    "hero.png": "7e4e88575903b62881c30aa3d0ad2144d7a7acd40db6aa754a8f5a034d9fe124",
+    "hull-mesh.json": "a3fbb523061c052fba3cf0530bd50e36b8fa9141d48c1d996fe9cf249a319484"
+  }
+}

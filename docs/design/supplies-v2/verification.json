@@ -1,0 +1,277 @@
+{
+  "passed": true,
+  "errors": [],
+  "models": [
+    {
+      "id": "autocannon_magazine",
+      "passed": true,
+      "sourceSha256": "1ddc326f43656d6fc5f316351b3ab6724b2c89e2dd68e29d01add9b2d1e62b54",
+      "glbBoundsError": 0.0,
+      "resourceSha256": "c64f449d8808f403096de36c45a2a70e2ae7fbae97f46403a8814f49f8dc94fe",
+      "resourceEqualsCanonical128": true,
+      "resourceSize": [
+        128,
+        128
+      ],
+      "resourceRGBA": true,
+      "triangles": 29368,
+      "icons": {
+        "16": {
+          "size": [
+            16,
+            16
+          ],
+          "occupiedPixels": 89,
+          "clipped": false,
+          "rgba": true
+        },
+        "32": {
+          "size": [
+            32,
+            32
+          ],
+          "occupiedPixels": 405,
+          "clipped": false,
+          "rgba": true
+        },
+        "64": {
+          "size": [
+            64,
+            64
+          ],
+          "occupiedPixels": 1500,
+          "clipped": false,
+          "rgba": true
+        },
+        "128": {
+          "size": [
+            128,
+            128
+          ],
+          "occupiedPixels": 5783,
+          "clipped": false,
+          "rgba": true
+        }
+      }
+    },
+    {
+      "id": "laser_cell",
+      "passed": true,
+      "sourceSha256": "c1ac1fe972d65804baff314c73e5f101712dd7ac4901c784daad9f506b529173",
+      "glbBoundsError": 0.0,
+      "resourceSha256": "3c9c8e17a06d6d66196ae0f41691b82be725cba491e8f5c0ce97de1fced7fb7a",
+      "resourceEqualsCanonical128": true,
+      "resourceSize": [
+        128,
+        128
+      ],
+      "resourceRGBA": true,
+      "triangles": 15216,
+      "icons": {
+        "16": {
+          "size": [
+            16,
+            16
+          ],
+          "occupiedPixels": 107,
+          "clipped": false,
+          "rgba": true
+        },
+        "32": {
+          "size": [
+            32,
+            32
+          ],
+          "occupiedPixels": 473,
+          "clipped": false,
+          "rgba": true
+        },
+        "64": {
+          "size": [
+            64,
+            64
+          ],
+          "occupiedPixels": 1772,
+          "clipped": false,
+          "rgba": true
+        },
+        "128": {
+          "size": [
+            128,
+            128
+          ],
+          "occupiedPixels": 6925,
+          "clipped": false,
+          "rgba": true
+        }
+      }
+    },
+    {
+      "id": "micro_missile_pack",
+      "passed": true,
+      "sourceSha256": "9c93a19b54ae50e7af80f18b08ea6b60b95275e90ef6e801b4e815e9ebacfa4a",
+      "glbBoundsError": 0.0,
+      "resourceSha256": "08670e57f272b842b5167864389c228f145bafea9ca11983b64ccae871580882",
+      "resourceEqualsCanonical128": true,
+      "resourceSize": [
+        128,
+        128
+      ],
+      "resourceRGBA": true,
+      "triangles": 15740,
+      "icons": {
+        "16": {
+          "size": [
+            16,
+            16
+          ],
+          "occupiedPixels": 102,
+          "clipped": false,
+          "rgba": true
+        },
+        "32": {
+          "size": [
+            32,
+            32
+          ],
+          "occupiedPixels": 487,
+          "clipped": false,
+          "rgba": true
+        },
+        "64": {
+          "size": [
+            64,
+            64
+          ],
+          "occupiedPixels": 1845,
+          "clipped": false,
+          "rgba": true
+        },
+        "128": {
+          "size": [
+            128,
+            128
+          ],
+          "occupiedPixels": 7181,
+          "clipped": false,
+          "rgba": true
+        }
+      },
+      "fiveCapsuleFronts": [
+        {
+          "xz": [
+            -0.53,
+            1.37
+          ],
+          "hit": true,
+          "frontY": -0.5,
+          "object": "Missile_2"
+        },
+        {
+          "xz": [
+            0,
+            1.37
+          ],
+          "hit": true,
+          "frontY": -0.5,
+          "object": "Missile_1"
+        },
+        {
+          "xz": [
+            0.53,
+            1.37
+          ],
+          "hit": true,
+          "frontY": -0.5,
+          "object": "Missile_2"
+        },
+        {
+          "xz": [
+            -0.29,
+            0.55
+          ],
+          "hit": true,
+          "frontY": -0.5,
+          "object": "Missile_4"
+        },
+        {
+          "xz": [
+            0.29,
+            0.55
+          ],
+          "hit": true,
+          "frontY": -0.5,
+          "object": "Missile_4"
+        }
+      ],
+      "capsuleProfile": {
+        "source": "src\\client\\java\\jp\\morrowgear\\drone\\client\\MissileRenderState.java",
+        "sourceSha256": "60e1d4da4883683e77a086d38050c624fe804faa9b9af7466c6b01933b80e4e2",
+        "sides": 8,
+        "length": 0.8,
+        "diameter": 0.38,
+        "rings": [
+          [
+            -0.4,
+            0.1,
+            3160640
+          ],
+          [
+            -0.34,
+            0.1,
+            5464940
+          ],
+          [
+            -0.34,
+            0.16,
+            6715264
+          ],
+          [
+            -0.28,
+            0.19,
+            8754846
+          ],
+          [
+            -0.1,
+            0.19,
+            4608860
+          ],
+          [
+            -0.1,
+            0.165,
+            2239024
+          ],
+          [
+            -0.02,
+            0.165,
+            4608860
+          ],
+          [
+            -0.02,
+            0.19,
+            10924986
+          ],
+          [
+            0.24,
+            0.19,
+            7899537
+          ],
+          [
+            0.34,
+            0.16,
+            6649727
+          ],
+          [
+            0.4,
+            0.11,
+            12240331
+          ]
+        ],
+        "nativeFrontY": -0.5,
+        "storedState": "no exhaust; non-flashing red identification band"
+      }
+    }
+  ],
+  "referenceSha256": "118e33e3393d3ad6d7154752dfdee17e1ee177f926f294309c5cad3b8f6db11f",
+  "scope": "Native GLB readback and model-derived RGBA resources; no game launch"
+}

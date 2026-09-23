@@ -1,5 +1,7 @@
 # Morrowgear: Drone Command
 
+演出・UI・機体動作の変更は、[実ゲーム観察を含む開発・修正手順](docs/design/VISUAL_ITERATION_PROCESS.md)に従い、実画面で観察、比較、修正、再確認する。自動試験のPASSだけで視覚品質を合格としない。
+
 制御アーキテクチャ、Waypoint/Wing同期、通信断時の挙動、および実ドローンへ展開する場合の設計差分は、[Morrowgear Drone 制御アーキテクチャ・実機化設計指針](docs/architecture/MORROWGEAR_DRONE_CONTROL_ARCHITECTURE.md)を参照してください。
 
 ## v0.19.1 Autonomous Operations
@@ -76,10 +78,10 @@
 ## Minecraft Launcher
 
 - 公式Launcherの起動構成`Morrowgear Drone (Latest)`は専用ゲームディレクトリ`%APPDATA%\.minecraft\morrowgear`を使用します。
-- `gradlew.bat build`が成功すると、配布用JARを一時ファイルで完全検証してから、専用`mods`フォルダの`morrowgear-drone-latest.jar`へ原子的に同期します。MinecraftがJARを使用中の場合は既存ファイルへ一切書き込まず、検証済み更新を保留します。Minecraft終了後の次回ビルドで安全に反映されます。
+- 通常の`gradlew.bat build`はビルド・検証のみを行います。統合とデザイン承認が済んだ変更は、Minecraft終了後に`gradlew.bat build -Plauncher_release_ready=true`で反映します。全件試験の成功後、配布用JARを一時ファイルで完全検証してから、専用`mods`フォルダの`morrowgear-drone-latest.jar`へ原子的に同期します。MinecraftがJARを使用中の場合は既存ファイルへ一切書き込まず、検証済み更新を保留します。
 - 過去の`morrowgear-drone-*.jar`は同期時に削除するため、複数バージョンの同時読込を防ぎます。
-- Launcherから`Morrowgear Drone (Latest)`を選んで起動すると、最後に成功したビルドを読み込みます。
-- 自動同期だけを再実行する場合は`gradlew.bat syncLauncherMod`を使用します。
+- Launcherから`Morrowgear Drone (Latest)`を選んで起動すると、最後に同期に成功したビルドを読み込みます。
+- 同期を再実行する場合は、Minecraft終了後に`gradlew.bat syncLauncherMod -Plauncher_release_ready=true`を使用します。この操作でも全件試験を確認します。
 
 ## v0.11.2 Scout Data Link and Field Choreography
 

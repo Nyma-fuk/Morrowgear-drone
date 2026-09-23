@@ -1,0 +1,200 @@
+{
+  "status": "PROPOSAL_NOT_APPROVED",
+  "passed": true,
+  "errors": [],
+  "states": [
+    {
+      "frame": 1,
+      "state": "closed",
+      "bounds": [
+        -24.0,
+        -16.0,
+        0.0,
+        24.0,
+        16.0,
+        14.0
+      ],
+      "dimensions": [
+        48.0,
+        32.0,
+        14.0
+      ],
+      "mirrorError": 0.0
+    },
+    {
+      "frame": 40,
+      "state": "service",
+      "bounds": [
+        -24.0,
+        -16.0,
+        0.0,
+        24.0,
+        16.0,
+        14.0
+      ],
+      "dimensions": [
+        48.0,
+        32.0,
+        14.0
+      ],
+      "mirrorError": 0.0
+    },
+    {
+      "frame": 80,
+      "state": "active",
+      "bounds": [
+        -24.0,
+        -16.0,
+        0.0,
+        24.0,
+        16.0,
+        14.0
+      ],
+      "dimensions": [
+        48.0,
+        32.0,
+        14.0
+      ],
+      "mirrorError": 0.0
+    }
+  ],
+  "bays": [
+    {
+      "slot": 0,
+      "runtimeAnchor": [
+        -7.15,
+        2.4,
+        -5.2
+      ],
+      "clearVolumeBlender": [
+        -8.65,
+        -6.7,
+        2.4,
+        -5.65,
+        -3.7,
+        3.35
+      ],
+      "entryRays": 169,
+      "blockedRays": [],
+      "minimumCeilingZ": 5.6999993324279785,
+      "gearStowedWitnessBounds": [
+        -8.649999618530273,
+        -6.323111534118652,
+        2.659655809402466,
+        -5.650000095367432,
+        -4.076888084411621,
+        2.9805216789245605
+      ],
+      "witnessFits": true
+    },
+    {
+      "slot": 1,
+      "runtimeAnchor": [
+        7.15,
+        2.4,
+        -5.2
+      ],
+      "clearVolumeBlender": [
+        5.65,
+        -6.7,
+        2.4,
+        8.65,
+        -3.7,
+        3.35
+      ],
+      "entryRays": 169,
+      "blockedRays": [],
+      "minimumCeilingZ": 5.6999993324279785,
+      "gearStowedWitnessBounds": [
+        5.650000095367432,
+        -6.323111534118652,
+        2.659655809402466,
+        8.649999618530273,
+        -4.076888084411621,
+        2.9805216789245605
+      ],
+      "witnessFits": true
+    },
+    {
+      "slot": 2,
+      "runtimeAnchor": [
+        -3.6,
+        2.4,
+        7.8
+      ],
+      "clearVolumeBlender": [
+        -5.1,
+        6.3,
+        2.4,
+        -2.1,
+        9.3,
+        3.35
+      ],
+      "entryRays": 169,
+      "blockedRays": [],
+      "minimumCeilingZ": 5.6999993324279785,
+      "gearStowedWitnessBounds": [
+        -5.099999904632568,
+        6.676888465881348,
+        2.659655809402466,
+        -2.0999999046325684,
+        8.923111915588379,
+        2.9805216789245605
+      ],
+      "witnessFits": true
+    },
+    {
+      "slot": 3,
+      "runtimeAnchor": [
+        3.6,
+        2.4,
+        7.8
+      ],
+      "clearVolumeBlender": [
+        2.1,
+        6.3,
+        2.4,
+        5.1,
+        9.3,
+        3.35
+      ],
+      "entryRays": 169,
+      "blockedRays": [],
+      "minimumCeilingZ": 5.6999993324279785,
+      "gearStowedWitnessBounds": [
+        2.0999999046325684,
+        6.676888465881348,
+        2.659655809402466,
+        5.099999904632568,
+        8.923111915588379,
+        2.9805216789245605
+      ],
+      "witnessFits": true
+    }
+  ],
+  "entityDimensions": [
+    3,
+    0.75,
+    3
+  ],
+  "overheadAllowance": 0.2,
+  "rotorCount": 2,
+  "rotorBlades": 24,
+  "landingGearCount": 0,
+  "mirrorObjects": 630,
+  "budget": {
+    "meshObjects": 630,
+    "evaluatedVertices": 443819,
+    "triangles": 769654,
+    "witnessTriangles": 707216,
+    "carrierOnlyTriangles": 62438,
+    "blendBytes": 6191332,
+    "glbBytes": 26669056
+  },
+  "limitations": [
+    "No runtime integration or in-game physics test.",
+    "Static end states; door transition is not a validated mechanism."
+  ],
+  "blendSha256": "7b2c0cdd9660dc400596efbc7a5bc88000ea31febac88309c5c040ac580f8b5b",
+  "glbSha256": "a22326daa0955f3bba0b3dada2bc80626d2babf6d7f297611f4247bde3c0364e"
+}

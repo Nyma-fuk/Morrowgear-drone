@@ -42,6 +42,45 @@ final class GuardDispatchPolicy {
 		return List.copyOf(selected);
 	}
 
+	static boolean reliefHolds(boolean liveEngagement, boolean activeRelief,
+		boolean theaterPlanKnown, boolean originalAssigned, boolean observedStrength) {
+		if (!liveEngagement || !activeRelief) return false;
+		// The allocator is cached. Actual strength on the target is newer evidence than a
+		// plan which still contains the aircraft that is completing service.
+		return observedStrength || theaterPlanKnown && !originalAssigned;
+	}
+
+	static RechargeCompletion rechargeCompletion(boolean liveEngagement, boolean activeRelief,
+		boolean theaterPlanKnown, boolean originalAssigned, boolean observedStrength,
+		boolean reliefMissionAvailable) {
+		if (reliefHolds(liveEngagement, activeRelief, theaterPlanKnown, originalAssigned, observedStrength)) {
+			return reliefMissionAvailable ? RechargeCompletion.INHERIT_RELIEF_MISSION
+				: RechargeCompletion.RESUME_ORIGINAL_MISSION;
+		}
+		return liveEngagement ? RechargeCompletion.RECLAIM_COMBAT
+			: RechargeCompletion.RESUME_ORIGINAL_MISSION;
+	}
+
+	static boolean suppressCachedRedispatch(long now, long holdUntil, boolean playerEmergency) {
+		return !playerEmergency && now <= holdUntil;
+	}
+
+	static boolean suppressReliefRedispatch(boolean sameTarget, boolean playerEmergency,
+		boolean reliefCommitted, boolean committedStrength) {
+		return sameTarget && !playerEmergency && reliefCommitted && committedStrength;
+	}
+
+	static boolean activeRelief(boolean combatActive, boolean sameTarget,
+		boolean docked, boolean serviceReturn) {
+		return combatActive && sameTarget && !docked && !serviceReturn;
+	}
+
+	static boolean committedRelief(boolean combatActive, boolean emergencyInterceptActive,
+		boolean sameCombatTarget, boolean sameEmergencyTarget, boolean docked, boolean serviceReturn) {
+		return !docked && !serviceReturn
+			&& (combatActive && sameCombatTarget || emergencyInterceptActive && sameEmergencyTarget);
+	}
+
 	private static List<Candidate> rankEligible(List<Candidate> candidates, int minimumBattery) {
 		return candidates.stream().filter(candidate -> candidate.recoveryLevel() <= 0
 				&& candidate.battery() >= minimumBattery
@@ -64,4 +103,6 @@ final class GuardDispatchPolicy {
 	record Candidate(String unitId, boolean sameWing, boolean idle, boolean activeMission,
 		boolean docked, boolean rechargeReclaim, boolean engaged, int battery, int weaponPower,
 		int recoveryLevel, double distanceSquared) {}
+
+	enum RechargeCompletion { INHERIT_RELIEF_MISSION, RESUME_ORIGINAL_MISSION, RECLAIM_COMBAT }
 }

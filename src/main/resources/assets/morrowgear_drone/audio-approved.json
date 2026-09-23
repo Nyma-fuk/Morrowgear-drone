@@ -1,0 +1,132 @@
+{
+  "approval": "2026-09-22",
+  "sample_rate": 48000,
+  "assets": {
+    "flight_idle": {
+      "source": "weapon-acoustics-proposal/hybrid-hover",
+      "sha256": "9f81f235856e0e45f6d44206798061eee37079cf832ce724b43d082304fe5f63",
+      "duration": 8,
+      "loop": true,
+      "attenuation_distance": 48
+    },
+    "flight_cruise": {
+      "source": "weapon-acoustics-proposal/hybrid-cruise",
+      "sha256": "7ec9c5005e0979a3fe8763be233850b55048c980320ed1ab202ea3cbb2273fa0",
+      "duration": 8,
+      "loop": true,
+      "attenuation_distance": 64
+    },
+    "autocannon_burst": {
+      "source": "rotary-laser-v3/autocannon_start",
+      "sha256": "8c24bc89a2d23f6b9d4ac275f0fc115f1910cd0fac43db55ce23cf4abd489e58",
+      "duration": 0.12,
+      "loop": false,
+      "attenuation_distance": 64
+    },
+    "autocannon_start": {
+      "source": "rotary-laser-v3/autocannon_start",
+      "sha256": "8c24bc89a2d23f6b9d4ac275f0fc115f1910cd0fac43db55ce23cf4abd489e58",
+      "duration": 0.12,
+      "loop": false,
+      "attenuation_distance": 64
+    },
+    "autocannon_fire": {
+      "source": "rotary-laser-v3/autocannon_fire",
+      "sha256": "73d68e1f033ce05c0c59a096f07e3e173ba49815a60afa0bc1b212b790d7184e",
+      "duration": 1.2,
+      "loop": true,
+      "attenuation_distance": 64
+    },
+    "autocannon_stop": {
+      "source": "rotary-laser-v3/autocannon_stop",
+      "sha256": "4b958f966e505cfecaa3047dc6b707413bab0d48bf081456cde769dcb6a87b41",
+      "duration": 0.38,
+      "loop": false,
+      "attenuation_distance": 64
+    },
+    "autocannon_impact": {
+      "source": "weapon-pressure-v2/autocannon_impact",
+      "sha256": "a555b179e1aa32496d4a1689216e307045d8b87bbd05bfb2d64500a106878ace",
+      "duration": 0.23,
+      "loop": false,
+      "attenuation_distance": 40
+    },
+    "laser_charge": {
+      "source": "rotary-laser-v3/laser_charge",
+      "sha256": "37def43db58e5b635d00d19d643abf431bae73366894db821b0bb09fbc3dd5cc",
+      "duration": 2.75,
+      "loop": false,
+      "attenuation_distance": 36
+    },
+    "laser_discharge": {
+      "source": "rotary-laser-v3/laser_discharge",
+      "sha256": "a41ecbdb8500d2f7cd84c2738d8147c623f4e5bd5a0bb4d35530aac46383d6ab",
+      "duration": 0.42,
+      "loop": false,
+      "attenuation_distance": 48
+    },
+    "laser_fire": {
+      "source": "laser-edge-v4/laser_fire",
+      "sha256": "64125f11afed44f2247f6305168193326fae95f60cf1a1387e1cd3eadeac95ba",
+      "duration": 1.6,
+      "loop": true,
+      "attenuation_distance": 48
+    },
+    "laser_shutdown": {
+      "source": "rotary-laser-v3/laser_shutdown",
+      "sha256": "6f298077cf172ec9d5520438c3e33e1c302efd7afc299360b51f197aeb2d039d",
+      "duration": 2.2,
+      "loop": false,
+      "attenuation_distance": 40
+    },
+    "laser_hit": {
+      "source": "weapon-pressure-v2/laser_hit",
+      "sha256": "32b37b99915d69c4b489afa9289eb18471a7d812126ccba84aed3f7f2654a4a7",
+      "duration": 0.45,
+      "loop": false,
+      "attenuation_distance": 40
+    },
+    "missile_launch": {
+      "source": "weapon-pressure-v2/missile_launch",
+      "sha256": "d0abf043e8aca1fca6f394b2216c486ce64e2c25e9d37a6a1dc0b436d75bb931",
+      "duration": 0.2,
+      "loop": false,
+      "attenuation_distance": 64
+    },
+    "missile_ignition": {
+      "source": "weapon-pressure-v2/missile_ignition",
+      "sha256": "f581e84224288537d7ce6d6e176ec160ee5c1ae16dadf46fc5c03a8d1588191c",
+      "duration": 0.4,
+      "loop": false,
+      "attenuation_distance": 64
+    },
+    "missile_motor": {
+      "source": "weapon-pressure-v2/missile_motor",
+      "sha256": "9388b5e885c340ad0f3ae0ef43d0304cbef110a83f1b148655be792ff9016204",
+      "duration": 1.6,
+      "loop": true,
+      "attenuation_distance": 64
+    },
+    "missile_impact": {
+      "source": "weapon-pressure-v2/missile_impact",
+      "sha256": "d6729888ee84ffe928afe85343122e47be22f97fb8b843cde33d4a06ffa34d4e",
+      "duration": 0.25,
+      "loop": false,
+      "attenuation_distance": 48
+    },
+    "missile_explosion": {
+      "source": "weapon-pressure-v2/missile_explosion",
+      "sha256": "c543c3b8c0808c4d4b97f1cd769eb3f9fa8eac645c53afd51a82e2bc8d49c2ec",
+      "duration": 3.2,
+      "loop": false,
+      "attenuation_distance": 80
+    },
+    "missile_debris": {
+      "source": "weapon-pressure-v2/missile_debris",
+      "sha256": "be2e804d2f8ac3a08a97c021b508601b7b74e489c1ac9bb6fbe7b77c27c8b735",
+      "duration": 3.2,
+      "loop": false,
+      "attenuation_distance": 48
+    }
+  }
+}

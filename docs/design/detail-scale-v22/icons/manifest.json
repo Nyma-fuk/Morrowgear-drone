@@ -1,0 +1,113 @@
+{
+  "stage": "not installed",
+  "portraits": "Rendered from V22 canonical meshes",
+  "mapMarkers": "Orthographic mesh alpha, nose up",
+  "roleGlyphs": "Abstract mechanical signs, not a claim of mesh silhouettes",
+  "assets": [
+    {
+      "role": "field",
+      "masterSha256": "09d3d00f63137a44edf6c7f0ea2553534d7aeb7ba978f77970c7eda2e7849d44",
+      "sizes": [
+        24,
+        32,
+        48,
+        64,
+        128
+      ],
+      "masterSize": [
+        512,
+        512
+      ]
+    },
+    {
+      "role": "scout",
+      "masterSha256": "34e09ceedfff4f3de77ee83b9767dc40a98f2dbb79b4683a149e9b20765b8e0c",
+      "sizes": [
+        24,
+        32,
+        48,
+        64,
+        128
+      ],
+      "masterSize": [
+        512,
+        512
+      ]
+    },
+    {
+      "role": "cargo",
+      "masterSha256": "bbd5d491bf3463e8d16cf9966574e44212565525cee2d60e7aed313329a779c5",
+      "sizes": [
+        24,
+        32,
+        48,
+        64,
+        128
+      ],
+      "masterSize": [
+        512,
+        512
+      ]
+    },
+    {
+      "role": "engineer",
+      "masterSha256": "0c2e5d60fed85f00514413b337f85691dde6e10733225b846fe30a036bcf61b3",
+      "sizes": [
+        24,
+        32,
+        48,
+        64,
+        128
+      ],
+      "masterSize": [
+        512,
+        512
+      ]
+    },
+    {
+      "role": "security",
+      "masterSha256": "cb54cdcfc7bd82797ca9cab0ac8cb9366d4c2100650b74dffb2245a5f86bd8dc",
+      "sizes": [
+        24,
+        32,
+        48,
+        64,
+        128
+      ],
+      "masterSize": [
+        512,
+        512
+      ]
+    },
+    {
+      "role": "salvage",
+      "masterSha256": "fafa4b8b5f183b49e4474b56fc3f13045f4d129aeb1363a6b4ea71ae3784c69d",
+      "sizes": [
+        24,
+        32,
+        48,
+        64,
+        128
+      ],
+      "masterSize": [
+        512,
+        512
+      ]
+    },
+    {
+      "role": "dock",
+      "masterSha256": "91a154631f11fe437da5aee732e56e07034be42ced3e18af6dc1806fc0de1ca3",
+      "sizes": [
+        24,
+        32,
+        48,
+        64,
+        128
+      ],
+      "masterSize": [
+        512,
+        512
+      ]
+    }
+  ]
+}

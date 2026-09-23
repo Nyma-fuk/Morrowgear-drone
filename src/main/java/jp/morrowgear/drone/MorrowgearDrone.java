@@ -20,6 +20,7 @@ import jp.morrowgear.drone.item.SolarServiceStationItem;
 import jp.morrowgear.drone.network.DroneCommandPayload;
 import jp.morrowgear.drone.network.FleetOperationPayload;
 import jp.morrowgear.drone.network.PowerLostBeaconPayload;
+import jp.morrowgear.drone.network.SupplyNetworkConfigPayload;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
@@ -49,6 +50,7 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -75,7 +77,7 @@ public final class MorrowgearDrone implements ModInitializer {
 	public static final EntityType<DroneEntity> DRONE = registerEntity(
 		"field_drone",
 		EntityType.Builder.<DroneEntity>of(DroneEntity::new, MobCategory.MISC)
-			.sized(1.45f, 0.7f)
+			.sized(3.0f, 0.75f)
 			.clientTrackingRange(12)
 			.updateInterval(2)
 	);
@@ -124,12 +126,33 @@ public final class MorrowgearDrone implements ModInitializer {
 	public static final SoundEvent FLIGHT_IDLE_SOUND = registerSound("flight_idle", 48.0f);
 	public static final SoundEvent FLIGHT_CRUISE_SOUND = registerSound("flight_cruise", 64.0f);
 	public static final SoundEvent AUTOCANNON_BURST_SOUND = registerSound("autocannon_burst", 64.0f);
+	public static final SoundEvent AUTOCANNON_START_SOUND = registerSound("autocannon_start", 64.0f);
+	public static final SoundEvent AUTOCANNON_FIRE_SOUND = registerSound("autocannon_fire", 64.0f);
+	public static final SoundEvent AUTOCANNON_STOP_SOUND = registerSound("autocannon_stop", 64.0f);
+	public static final SoundEvent AUTOCANNON_IMPACT_SOUND = registerSound("autocannon_impact", 40.0f);
 	public static final SoundEvent LASER_CHARGE_SOUND = registerSound("laser_charge", 36.0f);
 	public static final SoundEvent LASER_FIRE_SOUND = registerSound("laser_fire", 48.0f);
 	public static final SoundEvent LASER_HIT_SOUND = registerSound("laser_hit", 40.0f);
 	public static final SoundEvent LASER_SHUTDOWN_SOUND = registerSound("laser_shutdown", 40.0f);
+	public static final SoundEvent CARRIER_FLIGHT_IDLE_SOUND = registerSound("carrier_flight_idle", 192.0f);
+	public static final SoundEvent CARRIER_FLIGHT_CRUISE_SOUND = registerSound("carrier_flight_cruise", 192.0f);
+	public static final SoundEvent CARRIER_LASER_CHARGE_SOUND = registerSound("carrier_laser_charge", 160.0f);
+	public static final SoundEvent CARRIER_LASER_FIRE_SOUND = registerSound("carrier_laser_fire", 192.0f);
+	public static final SoundEvent CARRIER_LASER_HIT_SOUND = registerSound("carrier_laser_hit", 128.0f);
+	public static final SoundEvent CARRIER_LASER_COOLDOWN_SOUND = registerSound("carrier_laser_cooldown", 128.0f);
+	public static final SoundEvent MISSILE_LAUNCH_SOUND = registerSound("missile_launch", 64.0f);
+	public static final SoundEvent MISSILE_IGNITION_SOUND = registerSound("missile_ignition", 64.0f);
+	public static final SoundEvent MISSILE_MOTOR_SOUND = registerSound("missile_motor", 64.0f);
+	public static final SoundEvent MISSILE_IMPACT_SOUND = registerSound("missile_impact", 48.0f);
+	public static final SoundEvent MISSILE_EXPLOSION_SOUND = registerSound("missile_explosion", 80.0f);
+	public static final SoundEvent LASER_DISCHARGE_SOUND = Registry.register(BuiltInRegistries.SOUND_EVENT,
+		Identifier.fromNamespaceAndPath(MOD_ID, "laser_discharge"), DroneAudioSounds.LASER_DISCHARGE);
+	public static final SoundEvent MISSILE_DEBRIS_SOUND = Registry.register(BuiltInRegistries.SOUND_EVENT,
+		Identifier.fromNamespaceAndPath(MOD_ID, "missile_debris"), DroneAudioSounds.MISSILE_DEBRIS);
 	public static final Block[] DOCK_PARTS = new Block[9];
+	public static final Block[] WIDE_DOCK_PARTS = new Block[25];
 	public static final DockCenterBlock DOCK_CENTER;
+	public static final DockCenterBlock WIDE_DOCK_CENTER;
 	public static final Item DRONE_UNIT;
 	public static final Item DOCK_ITEM;
 	public static final BlockEntityType<DockBlockEntity> DOCK_BLOCK_ENTITY;
@@ -144,17 +167,34 @@ public final class MorrowgearDrone implements ModInitializer {
 		}
 		DOCK_CENTER = registerBlock("dock_part_4", DockCenterBlock::new, dockProperties());
 		DOCK_PARTS[4] = DOCK_CENTER;
+		for (int i = 0; i < WIDE_DOCK_PARTS.length; i++) {
+			if (i == 12) continue;
+			int x = i % 5 - 2, z = i / 5 - 2;
+			WIDE_DOCK_PARTS[i] = registerBlock("dock_wide_part_" + i,
+				properties -> new DockPartBlock(properties, x, z, 5), dockProperties());
+		}
+		WIDE_DOCK_CENTER = registerBlock("dock_wide_part_12", properties -> new DockCenterBlock(properties, 5), dockProperties());
+		WIDE_DOCK_PARTS[12] = WIDE_DOCK_CENTER;
 		DRONE_UNIT = registerItem("field_drone_unit", DroneUnitItem::new, new Item.Properties().stacksTo(1));
 		DOCK_ITEM = registerItem("dock_item", DockKitItem::new, new Item.Properties().stacksTo(16));
 		DOCK_BLOCK_ENTITY = Registry.register(
 			BuiltInRegistries.BLOCK_ENTITY_TYPE,
 			Identifier.fromNamespaceAndPath(MOD_ID, "dock"),
-			FabricBlockEntityTypeBuilder.create(DockBlockEntity::new, DOCK_CENTER).build()
+			FabricBlockEntityTypeBuilder.create(DockBlockEntity::new, DOCK_CENTER, WIDE_DOCK_CENTER).build()
 		);
 	}
 
 	@Override
 	public void onInitialize() {
+		SupplyItems.register();
+		DockMenu.register();
+		DockAllocationRuntime.register();
+		jp.morrowgear.drone.carrier.CarrierModule.register();
+		CarrierRuntimeVerification.register();
+		OperationCommunicationsServer.register();
+		SupplyNetworkTransport.register();
+		CarrierDroneServiceAdapter.install();
+		MissileAudioController.register();
 		FabricDefaultAttributeRegistry.register(DRONE, DroneEntity.createAttributes());
 		FabricDefaultAttributeRegistry.register(SOLAR_SERVICE_STATION, SolarServiceStationEntity.createAttributes());
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(entries -> {
@@ -168,6 +208,9 @@ public final class MorrowgearDrone implements ModInitializer {
 			entries.accept(SALVAGE_MODULE);
 			entries.accept(RECOVERY_TOOL);
 			entries.accept(POWER_CELL);
+			entries.accept(SupplyItems.AUTOCANNON_MAGAZINE);
+			entries.accept(SupplyItems.LASER_CELL);
+			entries.accept(SupplyItems.MICRO_MISSILE_PACK);
 			entries.accept(RAW_MORROW_COMPOSITE);
 			entries.accept(MORROW_ALLOY);
 			entries.accept(LIGHTWEIGHT_FRAME);
@@ -186,6 +229,9 @@ public final class MorrowgearDrone implements ModInitializer {
 		PayloadTypeRegistry.serverboundPlay().register(DroneCommandPayload.TYPE, DroneCommandPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(FleetOperationPayload.TYPE, FleetOperationPayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(PowerLostBeaconPayload.TYPE, PowerLostBeaconPayload.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(SupplyNetworkConfigPayload.TYPE, SupplyNetworkConfigPayload.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(SupplyNetworkConfigPayload.TYPE, (payload, context) ->
+			context.server().execute(() -> payload.apply(context.player())));
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
 			ServerPlayer player = handler.getPlayer();
 			for (PowerLostBeaconData.Beacon beacon : PowerLostBeaconData.get(server).forOwner(player.getUUID())) {
@@ -200,6 +246,11 @@ public final class MorrowgearDrone implements ModInitializer {
 			if (!DroneCommandPolicy.acceptablePayload(payload.action())) return;
 			Entity entity = player.level().getEntity(payload.entityId());
 			if (!(entity instanceof DroneEntity drone) || !drone.isOwnedBy(player)) return;
+			if (payload.action().startsWith("capacity_upgrade:")) {
+				try { upgradeCapacity(player, drone, Integer.parseInt(payload.action().substring(17))); }
+				catch (NumberFormatException ignored) { }
+				return;
+			}
 			if (payload.action().startsWith("weapon_module:")) {
 				String loadoutId = payload.action().substring("weapon_module:".length());
 				if (SecurityLoadout.isValidId(loadoutId)) {
@@ -378,19 +429,19 @@ public final class MorrowgearDrone implements ModInitializer {
 				return;
 			}
 			if (!DroneCommandPolicy.isSimpleAction(payload.action())) return;
-			if (payload.action().equals("dock") && !drone.hasDock()) {
-				player.sendSystemMessage(Component.literal("[MORROWGEAR] " + drone.unitId() + " / Dock未割当"));
-				return;
-			}
+			// Return is also a request for a free berth; an existing reservation is not required.
 			if (payload.action().equals("standby") || payload.action().equals("return")
 				|| payload.action().equals("dock") || payload.action().equals("orbit")) {
 				drone.clearFieldOperation();
 				drone.clearSecurityPatrol();
 				if (MissionCommandPolicy.preemptsCargoRoute(payload.action())) drone.pauseCargoRoute();
 			}
-			drone.setMode(DroneMode.fromAction(payload.action()));
+			if (payload.action().equals("dock")) drone.requestManualDockReturn();
+			else drone.setMode(DroneMode.fromAction(payload.action()));
 		});
 		MorrowgearRuntimeVerifier.register();
+		DockMenuRuntimeVerification.register();
+		DesignVerificationSession.register();
 		MorrowgearBaseGenerator.register();
 
 		LOGGER.info("Morrowgear Drone Command initialized for Minecraft 26.2");
@@ -580,7 +631,8 @@ public final class MorrowgearDrone implements ModInitializer {
 		}
 		DroneEntity drone = DRONE.create(level, EntitySpawnReason.TRIGGERED);
 		if (drone == null) return false;
-		drone.setPos(dockPos.getX() + 0.5, dockPos.getY() + 0.45, dockPos.getZ() + 0.5);
+		double deckHeight = level.getBlockState(dockPos).is(WIDE_DOCK_CENTER) ? 0.316 : 0.344;
+		drone.setPos(dockPos.getX() + 0.5, dockPos.getY() + deckHeight, dockPos.getZ() + 0.5);
 		drone.initializeOwner(player);
 		StoredDroneState stored = StoredDroneState.read(sourceStack);
 		if (stored != null) {
@@ -697,6 +749,38 @@ public final class MorrowgearDrone implements ModInitializer {
 			+ " / WEAPON " + requestedLoadout.displayName()));
 	}
 
+	public static void upgradeCapacity(ServerPlayer player, DroneEntity drone, int expectedTier) {
+		if (!drone.isOwnedBy(player) || drone.role() != DroneRole.SECURITY || !drone.isDocked()
+			|| !drone.hasDock() || drone.capacityTier() != expectedTier || expectedTier >= PayloadCapacity.MAX_TIER
+			|| !(player.level().getBlockEntity(drone.dockPos()) instanceof DockBlockEntity dock)
+			|| !dock.isOwnedBy(player)) return;
+		int alloy = expectedTier == 0 ? 8 : 16;
+		int diamonds = expectedTier == 0 ? 1 : 4;
+		int redstone = expectedTier == 0 ? 2 : 4;
+		int scrap = expectedTier == 0 ? 0 : 2;
+		java.util.Map<Item, Integer> cost = java.util.Map.of(MORROW_ALLOY, alloy, Items.DIAMOND, diamonds,
+			Items.REDSTONE_BLOCK, redstone, Items.NETHERITE_SCRAP, scrap);
+		if (!player.isCreative() && cost.entrySet().stream().anyMatch(entry -> {
+			int found = 0;
+			for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+				ItemStack stack = player.getInventory().getItem(i);
+				if (stack.is(entry.getKey())) found += stack.getCount();
+			}
+			return found < entry.getValue();
+		})) {
+			player.sendSystemMessage(Component.literal("[MORROWGEAR] CAPACITY / 合金 " + alloy
+				+ " / ダイヤ " + diamonds + " / レッドストーンブロック " + redstone + " / ネザライトの欠片 " + scrap));
+			return;
+		}
+		if (!player.isCreative()) cost.forEach((item, count) -> {
+			for (int i = 0; i < count; i++) consumeOne(player, item);
+		});
+		drone.upgradePayloadCapacity();
+		player.sendSystemMessage(Component.literal("[MORROWGEAR] " + drone.unitId() + " / CAPACITY "
+			+ drone.capacityTier() + " / GUN " + drone.gunCapacity() + " / MSL " + drone.missileCapacity()
+			+ " / ENERGY " + drone.weaponCapacity() + " / 残量は補給してください"));
+	}
+
 	private static void returnInstalledModule(ServerPlayer player, DroneEntity drone) {
 		returnCargo(player, drone);
 		if (!player.isCreative()) {
@@ -710,7 +794,7 @@ public final class MorrowgearDrone implements ModInitializer {
 	static void storeDrone(ServerPlayer player, DroneEntity drone) {
 		ItemStack installedModule = moduleForRole(drone.role()) == null
 			? ItemStack.EMPTY : new ItemStack(moduleForRole(drone.role()));
-		List<ItemStack> returned = DroneStoragePolicy.returnedItems(new ItemStack(DRONE_UNIT), installedModule,
+		List<ItemStack> returned = DroneStoragePolicy.returnedItems(drone.createStoredChassis(), installedModule,
 			drone.removeAllCargo(), player.isCreative());
 		if (!player.isCreative()) {
 			giveModule(player, moduleForLoadout(drone.securityLoadout()));
@@ -903,16 +987,21 @@ public final class MorrowgearDrone implements ModInitializer {
 	}
 
 	public static List<DockBlockEntity> findDocks(ServerLevel level, ServerPlayer player, int range) {
+		return findDocks(level, player, player.blockPosition(), range);
+	}
+
+	public static List<DockBlockEntity> findDocks(ServerLevel level, ServerPlayer player,
+		BlockPos origin, int range) {
 		List<DockBlockEntity> docks = new ArrayList<>();
 		int chunkRadius = Math.max(1, (range + 15) / 16);
-		int centerX = player.chunkPosition().x();
-		int centerZ = player.chunkPosition().z();
+		int centerX = origin.getX() >> 4;
+		int centerZ = origin.getZ() >> 4;
 		for (int x = centerX - chunkRadius; x <= centerX + chunkRadius; x++) {
 			for (int z = centerZ - chunkRadius; z <= centerZ + chunkRadius; z++) {
 				if (!level.hasChunk(x, z)) continue;
 				for (BlockEntity blockEntity : level.getChunk(x, z).getBlockEntities().values()) {
 					if (blockEntity instanceof DockBlockEntity dock && dock.isOwnedBy(player)
-						&& dock.getBlockPos().distSqr(player.blockPosition()) <= range * range) docks.add(dock);
+						&& dock.getBlockPos().distSqr(origin) <= range * range) docks.add(dock);
 				}
 			}
 		}
@@ -921,21 +1010,23 @@ public final class MorrowgearDrone implements ModInitializer {
 	}
 
 	public static void removeDock(ServerLevel level, BlockPos center, boolean drop) {
+		boolean wide = level.getBlockState(center).is(WIDE_DOCK_CENTER);
+		Block[] parts = wide ? WIDE_DOCK_PARTS : DOCK_PARTS;
+		int side = wide ? 5 : 3;
 		if (level.getBlockEntity(center) instanceof DockBlockEntity dock) {
+			DockAllocationRuntime.invalidate(level, dock.ownerId());
 			for (int slot = 0; slot < dock.getContainerSize(); slot++) {
 				ItemStack stack = dock.removeItemNoUpdate(slot);
 				if (!stack.isEmpty()) Block.popResource(level, center.above(), stack);
 			}
 		}
 		boolean found = false;
-		for (int i = 0; i < DOCK_PARTS.length; i++) {
-			BlockPos part = center.offset(i % 3 - 1, 0, i / 3 - 1);
+		for (int i = 0; i < parts.length; i++) {
+			BlockPos part = center.offset(i % side - side / 2, 0, i / side - side / 2);
 			Block stateBlock = level.getBlockState(part).getBlock();
-			for (Block dockPart : DOCK_PARTS) {
-				if (stateBlock != dockPart) continue;
+			if (stateBlock == parts[i]) {
 				found = true;
 				level.removeBlock(part, false);
-				break;
 			}
 		}
 		for (Entity entity : level.getAllEntities()) {

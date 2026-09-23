@@ -1,0 +1,242 @@
+{
+  "passed": true,
+  "errors": [],
+  "revision": "V28_APPROVED_RUNTIME_01",
+  "sourceSha256": "ef1acbde829ed663f07e5a25511bf891c3165aa61182100565ab7bb410b43f43",
+  "source": "docs\\design\\carrier-v28-intake-proposal\\carrier-v28-intake-proposal.blend",
+  "native": {
+    "passed": true,
+    "errors": [],
+    "boundsBlender": [
+      -13.0,
+      -25.0,
+      0.0,
+      13.0,
+      25.0,
+      11.0
+    ],
+    "mirrorError": 0.0,
+    "triangles": 24704,
+    "meshObjects": 393,
+    "bays": [
+      {
+        "slot": 0,
+        "rays": 169,
+        "blocked": []
+      },
+      {
+        "slot": 1,
+        "rays": 169,
+        "blocked": []
+      },
+      {
+        "slot": 2,
+        "rays": 169,
+        "blocked": []
+      },
+      {
+        "slot": 3,
+        "rays": 169,
+        "blocked": []
+      }
+    ],
+    "reference": "C:\\Users\\fukud\\.codex\\generated_images\\019ff8b6-65ab-7b61-9327-249478654bda\\exec-0f667897-253c-40df-8bf5-f0e636268628.png",
+    "referenceSha256": "3ba1db98f8bdab73c79c0887a475c6d7ecb387be03bb2e559f04af9c626f5eb4",
+    "boardingReceiver": {
+      "rays": 169,
+      "blocked": [],
+      "clearTop": 4.4
+    },
+    "revision": "V28_APPROVED_RUNTIME_01",
+    "scope": "Native geometry, 676 service + 169 boarding entry rays; no moving mechanism claim"
+  },
+  "runtime": [
+    {
+      "passed": true,
+      "errors": [],
+      "format": "MGM4",
+      "vertices": 71040,
+      "triangles": 23680,
+      "byteLength": 6109476,
+      "sha256": "098d276abfb996eb15628c3895d263a393c24fb955abc269e4fd9527cebdd075",
+      "runtimeBounds": [
+        -13.0,
+        0.0,
+        -25.0,
+        13.0,
+        11.0,
+        25.0
+      ],
+      "mirrorError": 0.0,
+      "rotorCenters": 2,
+      "groups": [
+        0
+      ],
+      "posesIdentical": true,
+      "luminousVertices": {
+        "0": 63480,
+        "1": 3120,
+        "2": 4440
+      },
+      "apertures": [
+        {
+          "name": "bay0",
+          "rays": 169,
+          "blocked": 0
+        },
+        {
+          "name": "bay1",
+          "rays": 169,
+          "blocked": 0
+        },
+        {
+          "name": "bay2",
+          "rays": 169,
+          "blocked": 0
+        },
+        {
+          "name": "bay3",
+          "rays": 169,
+          "blocked": 0
+        },
+        {
+          "name": "boarding",
+          "rays": 169,
+          "blocked": 0
+        }
+      ]
+    },
+    {
+      "passed": true,
+      "errors": [],
+      "format": "MGM4",
+      "vertices": 38616,
+      "triangles": 12872,
+      "byteLength": 3321012,
+      "sha256": "3b8b8faa65ade809fea2d3344e02d01689f13b28cd1c1f5e460fb97358ee43c3",
+      "runtimeBounds": [
+        -13.0,
+        0.0,
+        -25.0,
+        13.0,
+        11.0,
+        25.0
+      ],
+      "mirrorError": 0.0,
+      "rotorCenters": 2,
+      "groups": [
+        0
+      ],
+      "posesIdentical": true,
+      "luminousVertices": {
+        "0": 31056,
+        "1": 3120,
+        "2": 4440
+      },
+      "apertures": [
+        {
+          "name": "bay0",
+          "rays": 169,
+          "blocked": 0
+        },
+        {
+          "name": "bay1",
+          "rays": 169,
+          "blocked": 0
+        },
+        {
+          "name": "bay2",
+          "rays": 169,
+          "blocked": 0
+        },
+        {
+          "name": "bay3",
+          "rays": 169,
+          "blocked": 0
+        },
+        {
+          "name": "boarding",
+          "rays": 169,
+          "blocked": 0
+        }
+      ]
+    }
+  ],
+  "canonicalGeometryMatches": [
+    {
+      "passed": true,
+      "triangleMultisetMatchesCanonical": true,
+      "canonicalTriangles": 23680,
+      "runtimeTriangles": 23680,
+      "allIntakePartsIncluded": true,
+      "intakeParts": [
+        "IntakeIntegratedArmorLip",
+        "IntakeDuctWalls",
+        "IntakeBellyTransition",
+        "IntakeServiceIsolationBulkhead",
+        "IntakeCentralDivider",
+        "IntakeRecessedGuideVane",
+        "IntakeRecessedGuideVane.001",
+        "IntakeRecessedGuideVane.002",
+        "IntakeAftHeatMatrix",
+        "IntakeAftFlowStraightener",
+        "IntakeAftFlowStraightener.001",
+        "IntakeAftFlowStraightener.002"
+      ],
+      "positionPrecision": 1e-05,
+      "sourceSha256": "ef1acbde829ed663f07e5a25511bf891c3165aa61182100565ab7bb410b43f43"
+    },
+    {
+      "passed": true,
+      "triangleMultisetMatchesCanonical": true,
+      "canonicalTriangles": 12872,
+      "runtimeTriangles": 12872,
+      "allIntakePartsIncluded": true,
+      "intakeParts": [
+        "IntakeIntegratedArmorLip",
+        "IntakeDuctWalls",
+        "IntakeBellyTransition",
+        "IntakeServiceIsolationBulkhead",
+        "IntakeCentralDivider",
+        "IntakeRecessedGuideVane",
+        "IntakeRecessedGuideVane.001",
+        "IntakeRecessedGuideVane.002",
+        "IntakeAftHeatMatrix",
+        "IntakeAftFlowStraightener",
+        "IntakeAftFlowStraightener.001",
+        "IntakeAftFlowStraightener.002"
+      ],
+      "positionPrecision": 1e-05,
+      "sourceSha256": "ef1acbde829ed663f07e5a25511bf891c3165aa61182100565ab7bb410b43f43"
+    }
+  ],
+  "icons": [
+    {
+      "size": 16,
+      "occupiedPixels": 81,
+      "clipped": false,
+      "rgba": true
+    },
+    {
+      "size": 32,
+      "occupiedPixels": 276,
+      "clipped": false,
+      "rgba": true
+    },
+    {
+      "size": 64,
+      "occupiedPixels": 1006,
+      "clipped": false,
+      "rgba": true
+    },
+    {
+      "size": 128,
+      "occupiedPixels": 3803,
+      "clipped": false,
+      "rgba": true
+    }
+  ],
+  "canonicalFilesUnchanged": true,
+  "previousRuntimePreservedUntilValidation": true,
+  "scope": "Approved canonical geometry, MGM4/atlas/icon readback; no game launch"
+}

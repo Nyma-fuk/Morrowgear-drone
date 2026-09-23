@@ -1,0 +1,19 @@
+{
+  "source": "docs\\design\\detail-scale-v22\\field\\airframe.glb",
+  "sourceSha256": "51a437c792ab76c8b63f40089e9ec83cf02cdd7924d6aaaad37987ef1b52bb2b",
+  "sourceBoundsBlender": [
+    -1.5,
+    -1.1231118440628052,
+    0.25965577363967896,
+    1.5,
+    1.1231118440628052,
+    0.5805216431617737
+  ],
+  "gearStowedMeshHeight": 0.3208658695220947,
+  "entityHeight": 0.75,
+  "serviceClearHeight": 0.95,
+  "actualMeshFitsHeight": true,
+  "deckWitnessCount": 4,
+  "runtimeIncluded": false,
+  "scale": 1
+}

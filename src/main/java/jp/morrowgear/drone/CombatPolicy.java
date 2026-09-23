@@ -1,5 +1,6 @@
 package jp.morrowgear.drone;
 
+import java.util.Arrays;
 import java.util.List;
 
 import net.minecraft.util.Mth;
@@ -12,26 +13,37 @@ public final class CombatPolicy {
 	static final float LASER_SYNC_GAIN_PER_ADDITIONAL_UNIT = 0.34f;
 	static final int GUN_CAPACITY = 240;
 	static final int AUTOCANNON_FIRE_INTERVAL_TICKS = 2;
-	static final int MISSILE_CAPACITY = 4;
+	static final int MISSILE_CAPACITY = 45;
 	static final int LASER_SWITCH_HEAT = 900;
 	static final int LASER_FIRE_HEAT_PER_TICK = 7;
 	static final int LASER_FIRE_POWER_PER_TICK = 3;
 	static final int LASER_SYNC_WINDOW_TICKS = 24;
 	static final int LASER_RELEASE_TIMEOUT_TICKS = 60;
+	static final double LASER_FORMATION_MAX_GAP_ERROR = 0.38;
 	static final int AUTO_WEAPON_RESERVE = 15;
 	static final int URGENT_SORTIE_POWER = 65;
+	static final double COMMITTED_TRACKING_RANGE = 128.0;
 	static final double CAS_PATH_SPEED = 0.90;
 	static final long CAS_ACCELERATION_TICKS = 36L;
-	static final double CAS_TRAIL_DISTANCE = 3.2;
+	static final double CAS_TRAIL_DISTANCE = 6.0;
 	static final double CAS_LONGITUDINAL_RADIUS = 52.0;
 	static final double CAS_LATERAL_RADIUS = 11.5;
-	static final double CAS_LANE_SPACING = 1.45;
+	static final double CAS_LANE_SPACING = 3.4;
 	static final double CAS_BREAKAWAY_EXIT_DISTANCE = 17.0;
+	static final double CAS_ATTACK_HEIGHT = 12.0;
+	static final double LASER_INGRESS_HEIGHT = 20.0;
+	static final double LASER_INGRESS_RADIUS = 18.0;
+	static final double LASER_INGRESS_DISTANCE = 26.0;
 	private static final int CAS_ARC_SAMPLES = 1024;
 	private static final double[] CAS_ARC_LENGTHS = buildCasArcLengths();
 	private static final double CAS_ARC_TOTAL = CAS_ARC_LENGTHS[CAS_ARC_SAMPLES];
 
 	private CombatPolicy() {}
+
+	static boolean refreshCommittedContact(CombatState state, double distanceSquared, boolean lineOfSight) {
+		return state != null && state.active() && lineOfSight && distanceSquared >= 0.0
+			&& distanceSquared <= COMMITTED_TRACKING_RANGE * COMMITTED_TRACKING_RANGE;
+	}
 
 	static int requiredAttackers(int contacts, float targetHealth, int available) {
 		if (contacts <= 0 || available <= 0) return 0;
@@ -165,7 +177,7 @@ public final class CombatPolicy {
 			-2.5, 2.5) * CAS_LANE_SPACING;
 		double layer = Math.floorDiv(Math.max(0, elementIndex), 4);
 		double normalizedDistance = Math.abs(longitudinal) / CAS_LONGITUDINAL_RADIUS;
-		double attackHeight = 3.2 + Math.pow(normalizedDistance, 1.55) * 12.5;
+		double attackHeight = CAS_ATTACK_HEIGHT + Math.pow(normalizedDistance, 1.55) * 18.0;
 		return target.add(forward.scale(longitudinal)).add(right.scale(lateral + lane))
 			.add(0, attackHeight + airspace.heightOffset() + layer * 0.7, 0);
 	}
@@ -192,7 +204,7 @@ public final class CombatPolicy {
 		int elementCount) {
 		Vec3 forward = horizontalUnit(escapeDirection);
 		Vec3 right = new Vec3(-forward.z, 0, forward.x);
-		double lane = (elementIndex - (Math.max(1, elementCount) - 1) / 2.0) * 2.1;
+		double lane = (elementIndex - (Math.max(1, elementCount) - 1) / 2.0) * 5.0;
 		return origin.add(forward.scale(25.0)).add(right.scale(lane)).add(0, 9.0, 0);
 	}
 
@@ -219,13 +231,14 @@ public final class CombatPolicy {
 
 	static boolean casGunWindow(long passTicks, int elementIndex, AirspaceSlot airspace) {
 		double phase = casPhase(passTicks, elementIndex, airspace);
-		return Math.abs(Math.sin(phase)) < 0.34 && Math.abs(Math.cos(phase)) > 0.93;
+		double sin = Math.sin(phase);
+		double cos = Math.cos(phase);
+		return sin * cos < 0.0 && Math.abs(sin) < 0.48 && Math.abs(cos) > 0.86;
 	}
 
 	static Vec3 casStrikePoint(Vec3 target, Vec3 attackAxis, int elementIndex,
 		long passTicks, AirspaceSlot airspace) {
-		// Airspace separates aircraft, but it must not rotate the weapon's target line.
-		Vec3 forward = horizontalUnit(attackAxis);
+		Vec3 forward = rotateHorizontal(horizontalUnit(attackAxis), airspace.axisAngle());
 		double phase = casPhase(passTicks, elementIndex, airspace);
 		double longitudinal = Math.sin(phase) * CAS_LONGITUDINAL_RADIUS;
 		double direction = Math.signum(Math.cos(phase));
@@ -270,7 +283,22 @@ public final class CombatPolicy {
 		Vec3 flight = velocity;
 		Vec3 shot = aim.subtract(muzzle);
 		if (flight.lengthSqr() < 0.01 || shot.lengthSqr() < 0.01) return false;
-		return flight.normalize().dot(shot.normalize()) >= 0.18;
+		return flight.normalize().dot(shot.normalize()) >= 0.72;
+	}
+
+	static boolean laserIngressRequired(Vec3 aircraft, Vec3 targetCenter, AirspaceSlot airspace) {
+		double horizontalDistance = aircraft.subtract(targetCenter).multiply(1, 0, 1).length();
+		double minimumOrbitHeight = targetCenter.y + 8.0 + airspace.heightOffset();
+		return horizontalDistance > LASER_INGRESS_DISTANCE || aircraft.y < minimumOrbitHeight - 1.0;
+	}
+
+	static Vec3 laserIngressWaypoint(Vec3 aircraft, Vec3 targetCenter, AirspaceSlot airspace) {
+		double cruiseY = targetCenter.y + LASER_INGRESS_HEIGHT + airspace.heightOffset();
+		if (aircraft.y < cruiseY - 2.0) return new Vec3(aircraft.x, cruiseY, aircraft.z);
+		Vec3 outward = horizontalUnit(aircraft.subtract(targetCenter));
+		double radius = LASER_INGRESS_RADIUS + airspace.radiusOffset();
+		Vec3 staging = targetCenter.add(outward.scale(radius));
+		return new Vec3(staging.x, cruiseY, staging.z);
 	}
 
 	public static TracerSegment tracerSegment(Vec3 muzzle, Vec3 aim, int age) {
@@ -294,12 +322,12 @@ public final class CombatPolicy {
 	static Vec3 laserOrbit(Vec3 targetCenter, int slot, int count, long tick, int charge,
 		AirspaceSlot airspace) {
 		int safeCount = Math.max(1, count);
-		double phase = tick * 0.043 + Math.floorMod(slot, safeCount) * Math.PI * 2.0 / safeCount
+		double phase = tick * (0.32 / (10.0 + airspace.radiusOffset())) + Math.floorMod(slot, safeCount) * Math.PI * 2.0 / safeCount
 			+ airspace.phaseOffset();
 		double progress = Mth.clamp(charge / 1000.0, 0.0, 1.0);
 		double eased = progress * progress * (3.0 - 2.0 * progress);
-		double radius = Mth.lerp(eased, 4.8, 6.2) + airspace.radiusOffset();
-		double height = Mth.lerp(eased, 1.15, 5.4) + airspace.heightOffset();
+		double radius = Mth.lerp(eased, 8.0, 10.0) + airspace.radiusOffset();
+		double height = Mth.lerp(eased, 6.0, 10.0) + airspace.heightOffset();
 		return targetCenter.add(Math.cos(phase) * radius, height, Math.sin(phase) * radius);
 	}
 
@@ -338,9 +366,42 @@ public final class CombatPolicy {
 	}
 
 	static boolean laserFallbackReleaseReady(long waitTicks, double range,
-		double slotError, boolean lineClear) {
+		double slotError, boolean lineClear, boolean formationSpacingReady) {
 		if (waitTicks < LASER_RELEASE_TIMEOUT_TICKS || !lineClear) return false;
-		return firingSolution(range, 8.5, slotError, 1.65, 24.0).permitted();
+		// Absolute phase may lag a moving orbit while every member remains evenly spaced.
+		// Release that coherent element, but never promote a clustered element into fire.
+		return (slotError <= 1.65 || formationSpacingReady)
+			&& firingSolution(range, 15.0, slotError, 1.65, 48.0).permitted();
+	}
+
+	static boolean sameLaserFormation(String ownManeuverKey, String candidateManeuverKey) {
+		return ownManeuverKey != null && !ownManeuverKey.isBlank()
+			&& ownManeuverKey.equals(candidateManeuverKey);
+	}
+
+	static boolean laserFormationSpacingReady(List<Vec3> positions, Vec3 center,
+		double maximumGapError) {
+		return laserFormationGapError(positions, center) <= Math.max(0.0, maximumGapError);
+	}
+
+	static double laserFormationGapError(List<Vec3> positions, Vec3 center) {
+		if (positions == null || center == null || positions.isEmpty()) return Double.POSITIVE_INFINITY;
+		if (positions.size() == 1) return 0.0;
+		double[] angles = new double[positions.size()];
+		for (int index = 0; index < positions.size(); index++) {
+			Vec3 position = positions.get(index);
+			if (position == null || !Double.isFinite(position.x) || !Double.isFinite(position.z))
+				return Double.POSITIVE_INFINITY;
+			angles[index] = Math.atan2(position.z - center.z, position.x - center.x);
+		}
+		Arrays.sort(angles);
+		double ideal = Math.PI * 2.0 / angles.length;
+		double error = 0.0;
+		for (int index = 0; index < angles.length; index++) {
+			double next = index + 1 < angles.length ? angles[index + 1] : angles[0] + Math.PI * 2.0;
+			error = Math.max(error, Math.abs(next - angles[index] - ideal));
+		}
+		return error;
 	}
 
 	static boolean autocannonImpactAcceptable(Vec3 intendedAim, Vec3 impact,
@@ -367,19 +428,19 @@ public final class CombatPolicy {
 		AirspaceSlot airspace) {
 		Vec3 outward = rotateHorizontal(horizontalUnit(from.subtract(target)), airspace.axisAngle());
 		Vec3 right = new Vec3(-outward.z, 0, outward.x);
-		double spacing = (slot - (Math.max(1, count) - 1) / 2.0) * 2.2;
-		return target.add(outward.scale(10.0)).add(right.scale(spacing))
-			.add(0, 5.5 + airspace.heightOffset(), 0);
+		double spacing = (slot - (Math.max(1, count) - 1) / 2.0) * AirframeEnvelope.SLOT_DISTANCE;
+		return target.add(outward.scale(32.0)).add(right.scale(spacing))
+			.add(0, 16.0 + airspace.heightOffset(), 0);
 	}
 
 	static Vec3 entryApproach(Vec3 target, Vec3 from, AirspaceSlot airspace) {
 		Vec3 outward = rotateHorizontal(horizontalUnit(from.subtract(target)), airspace.axisAngle());
-		return target.add(outward.scale(6.5)).add(0, 3.2 + airspace.heightOffset(), 0);
+		return target.add(outward.scale(14.0)).add(0, 9.0 + airspace.heightOffset(), 0);
 	}
 
 	static Vec3 egress(Vec3 target, Vec3 from, AirspaceSlot airspace) {
 		Vec3 outward = rotateHorizontal(horizontalUnit(from.subtract(target)), airspace.axisAngle());
-		return target.add(outward.scale(12.0)).add(0, 6.0 + airspace.heightOffset(), 0);
+		return target.add(outward.scale(38.0)).add(0, 18.0 + airspace.heightOffset(), 0);
 	}
 
 	static AirspaceSlot airspaceSlot(List<String> maneuverKeys, String ownKey) {
@@ -442,7 +503,7 @@ public final class CombatPolicy {
 		double longitudinal = Math.sin(phase) * CAS_LONGITUDINAL_RADIUS;
 		double lateral = Math.sin(phase) * Math.cos(phase) * CAS_LATERAL_RADIUS;
 		double normalizedDistance = Math.abs(longitudinal) / CAS_LONGITUDINAL_RADIUS;
-		double height = 3.2 + Math.pow(normalizedDistance, 1.55) * 12.5;
+		double height = CAS_ATTACK_HEIGHT + Math.pow(normalizedDistance, 1.55) * 18.0;
 		return new Vec3(longitudinal, height, lateral);
 	}
 
@@ -461,11 +522,11 @@ public final class CombatPolicy {
 		}
 
 		static AirspaceSlot single() { return new AirspaceSlot(0, 1); }
-		double heightOffset() { return Math.floorMod(index, LANE_BANDS) * 2.35; }
+		double heightOffset() { return Math.floorMod(index, LANE_BANDS) * AirframeEnvelope.LAYER_HEIGHT; }
 		double radiusOffset() {
 			int heightBand = Math.floorMod(index, LANE_BANDS);
 			int radiusBand = Math.floorMod(heightBand + index / LANE_BANDS, LANE_BANDS);
-			return radiusBand * 1.35;
+			return radiusBand * 4.0;
 		}
 		double phaseOffset() { return index * GOLDEN_ANGLE; }
 		double axisAngle() { return index * GOLDEN_ANGLE; }

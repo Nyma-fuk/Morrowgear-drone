@@ -1,0 +1,1127 @@
+{
+  "checks": {
+    "bilateralGeometry": true,
+    "finiteCoordinates": true,
+    "planformAndFanCirclesRetained": true,
+    "allFunctionalComponentsRetained": true,
+    "rotorPartsRetained": true,
+    "twelveMirroredBladePairsRetained": true,
+    "watertightHull": true,
+    "positiveHullVolume": true,
+    "orientationPreservingField": true,
+    "wingtipTopBelow010": true,
+    "wingtipRiseRemoved": true,
+    "tipLandmarksCoplanar": true,
+    "centralBodyThicknessReduced": true,
+    "intakeOpen": true,
+    "exhaustOpen": true,
+    "throatsRemainUnblocked": true
+  },
+  "passed": true,
+  "mirrorError": 1.0662663498806069e-06,
+  "nonmanifoldHullEdges": 0,
+  "measurements": {
+    "span": 8.899999618530273,
+    "planformMaxDisplacement": 0.0,
+    "centralBodyHeightBefore": 1.1198863983154297,
+    "centralBodyHeightAfter": 0.7391250431537628,
+    "tipTopBefore": 0.5122976899147034,
+    "tipTopAfter": 0.03999999910593033,
+    "bodyHeightScale": 0.66,
+    "tipSectionHeightScale": 0.3
+  },
+  "tipBefore": [
+    [
+      3.9492404460906982,
+      0.2770915627479553,
+      0.30180099606513977
+    ],
+    [
+      4.449999809265137,
+      1.1103216409683228,
+      0.29112541675567627
+    ],
+    [
+      4.133680820465088,
+      2.3137197494506836,
+      0.5122976899147034
+    ],
+    [
+      3.8399507999420166,
+      2.1453208923339844,
+      0.4513808786869049
+    ]
+  ],
+  "tipAfter": [
+    [
+      3.9492404460906982,
+      0.2770915627479553,
+      0.03999999910593033
+    ],
+    [
+      4.449999809265137,
+      1.1103216409683228,
+      0.03999999910593033
+    ],
+    [
+      4.133680820465088,
+      2.3137197494506836,
+      0.03999999910593033
+    ],
+    [
+      3.8399507999420166,
+      2.1453208923339844,
+      0.03999999910593033
+    ]
+  ],
+  "probes": [
+    {
+      "type": "intake",
+      "depth": 0.9315159320831299,
+      "expectedDepth": 0.9315161148383514,
+      "start": [
+        -0.32486891746520996,
+        1.2990000247955322,
+        0.2916259467601776
+      ],
+      "hit": [
+        -0.30399948358535767,
+        2.225637197494507,
+        0.19872668385505676
+      ]
+    },
+    {
+      "type": "intake",
+      "depth": 0.9317426681518555,
+      "expectedDepth": 0.9317429524176307,
+      "start": [
+        -0.32486891746520996,
+        1.2990000247955322,
+        0.31888067722320557
+      ],
+      "hit": [
+        -0.3039993345737457,
+        2.22564435005188,
+        0.22380590438842773
+      ]
+    },
+    {
+      "type": "intake",
+      "depth": 0.3661665916442871,
+      "expectedDepth": 0.3661662642430573,
+      "start": [
+        -0.32486891746520996,
+        1.2990000247955322,
+        0.3461354374885559
+      ],
+      "hit": [
+        -0.3155834376811981,
+        1.662821888923645,
+        0.3058188855648041
+      ]
+    },
+    {
+      "type": "intake",
+      "depth": 0.9365053772926331,
+      "expectedDepth": 0.9365055225591032,
+      "start": [
+        -0.48730334639549255,
+        1.2990000247955322,
+        0.2916259467601776
+      ],
+      "hit": [
+        -0.4559977650642395,
+        2.2303600311279297,
+        0.19872227311134338
+      ]
+    },
+    {
+      "type": "intake",
+      "depth": 0.9367309808731079,
+      "expectedDepth": 0.9367309880187984,
+      "start": [
+        -0.48730334639549255,
+        1.2990000247955322,
+        0.31888067722320557
+      ],
+      "hit": [
+        -0.4559975266456604,
+        2.2303671836853027,
+        0.22380134463310242
+      ]
+    },
+    {
+      "type": "intake",
+      "depth": 0.3654603958129883,
+      "expectedDepth": 0.36546005472033316,
+      "start": [
+        -0.48730334639549255,
+        1.2990000247955322,
+        0.3461354374885559
+      ],
+      "hit": [
+        -0.47347503900527954,
+        1.6619985103607178,
+        0.30610811710357666
+      ]
+    },
+    {
+      "type": "intake",
+      "depth": 0.9416314959526062,
+      "expectedDepth": 0.9416317462558929,
+      "start": [
+        -0.6497378349304199,
+        1.2990000247955322,
+        0.2916259467601776
+      ],
+      "hit": [
+        -0.6079989671707153,
+        2.235107660293579,
+        0.19872677326202393
+      ]
+    },
+    {
+      "type": "intake",
+      "depth": 0.9418411254882812,
+      "expectedDepth": 0.9418411077202073,
+      "start": [
+        -0.6497378349304199,
+        1.2990000247955322,
+        0.31888067722320557
+      ],
+      "hit": [
+        -0.607999324798584,
+        2.235100269317627,
+        0.2238074094057083
+      ]
+    },
+    {
+      "type": "intake",
+      "depth": 0.36631932854652405,
+      "expectedDepth": 0.3663186374684836,
+      "start": [
+        -0.6497378349304199,
+        1.2990000247955322,
+        0.3461354374885559
+      ],
+      "hit": [
+        -0.6313584446907043,
+        1.6626757383346558,
+        0.3062349557876587
+      ]
+    },
+    {
+      "type": "exhaust",
+      "depth": 0.8995221853256226,
+      "expectedDepth": 0.8995220769746131,
+      "start": [
+        0.0,
+        3.2369894981384277,
+        0.005016000010073185
+      ],
+      "hit": [
+        0.0,
+        2.3374671936035156,
+        0.005016000010073185
+      ]
+    },
+    {
+      "type": "exhaust",
+      "depth": 0.8995674848556519,
+      "expectedDepth": 0.8995675982085187,
+      "start": [
+        0.0,
+        3.2369894981384277,
+        0.0501599982380867
+      ],
+      "hit": [
+        0.0,
+        2.3374218940734863,
+        0.0501599982380867
+      ]
+    },
+    {
+      "type": "exhaust",
+      "depth": 0.8995301723480225,
+      "expectedDepth": 0.8995301609718525,
+      "start": [
+        0.0,
+        3.2369894981384277,
+        0.1003199964761734
+      ],
+      "hit": [
+        0.0,
+        2.3374593257904053,
+        0.1003199964761734
+      ]
+    },
+    {
+      "type": "exhaust",
+      "depth": 1.0780893564224243,
+      "expectedDepth": 1.0780892297090536,
+      "start": [
+        -0.19200000166893005,
+        3.2242462635040283,
+        0.005016000010073185
+      ],
+      "hit": [
+        -0.19200000166893005,
+        2.1461567878723145,
+        0.005016000010073185
+      ]
+    },
+    {
+      "type": "exhaust",
+      "depth": 1.0765448808670044,
+      "expectedDepth": 1.0765449998648495,
+      "start": [
+        -0.19200000166893005,
+        3.2242462635040283,
+        0.0501599982380867
+      ],
+      "hit": [
+        -0.19200000166893005,
+        2.1477012634277344,
+        0.0501599982380867
+      ]
+    },
+    {
+      "type": "exhaust",
+      "depth": 1.0773838758468628,
+      "expectedDepth": 1.0773837540621962,
+      "start": [
+        -0.19200000166893005,
+        3.2242462635040283,
+        0.1003199964761734
+      ],
+      "hit": [
+        -0.19200000166893005,
+        2.146862506866455,
+        0.1003199964761734
+      ]
+    },
+    {
+      "type": "exhaust",
+      "depth": 1.0552390813827515,
+      "expectedDepth": 1.0552392152344952,
+      "start": [
+        -0.5360000133514404,
+        3.2013959884643555,
+        0.005016000010073185
+      ],
+      "hit": [
+        -0.5360000133514404,
+        2.1461567878723145,
+        0.005016000010073185
+      ]
+    },
+    {
+      "type": "exhaust",
+      "depth": 1.053475022315979,
+      "expectedDepth": 1.0534749160047063,
+      "start": [
+        -0.5360000133514404,
+        3.2013959884643555,
+        0.0501599982380867
+      ],
+      "hit": [
+        -0.5360000133514404,
+        2.147921085357666,
+        0.0501599982380867
+      ]
+    },
+    {
+      "type": "exhaust",
+      "depth": 1.05486261844635,
+      "expectedDepth": 1.054862509441865,
+      "start": [
+        -0.5360000133514404,
+        3.2013959884643555,
+        0.1003199964761734
+      ],
+      "hit": [
+        -0.5360000133514404,
+        2.146533489227295,
+        0.1003199964761734
+      ]
+    },
+    {
+      "type": "exhaust",
+      "depth": 0.5418605208396912,
+      "expectedDepth": 0.5418603410244989,
+      "start": [
+        -0.6800000071525574,
+        3.19183087348938,
+        0.005016000010073185
+      ],
+      "hit": [
+        -0.6800000071525574,
+        2.649970293045044,
+        0.005016000010073185
+      ]
+    },
+    {
+      "type": "exhaust",
+      "depth": 0.7772766351699829,
+      "expectedDepth": 0.7772767694648026,
+      "start": [
+        -0.6800000071525574,
+        3.19183087348938,
+        0.0501599982380867
+      ],
+      "hit": [
+        -0.6800000071525574,
+        2.4145541191101074,
+        0.0501599982380867
+      ]
+    },
+    {
+      "type": "exhaust",
+      "depth": 0.6155920624732971,
+      "expectedDepth": 0.6155920048890392,
+      "start": [
+        -0.6800000071525574,
+        3.19183087348938,
+        0.1003199964761734
+      ],
+      "hit": [
+        -0.6800000071525574,
+        2.5762388706207275,
+        0.1003199964761734
+      ]
+    },
+    {
+      "type": "intake",
+      "depth": 0.9315153360366821,
+      "expectedDepth": 0.9315156289392005,
+      "start": [
+        0.32486891746520996,
+        1.2990000247955322,
+        0.2916259467601776
+      ],
+      "hit": [
+        0.30399948358535767,
+        2.2256364822387695,
+        0.19872677326202393
+      ]
+    },
+    {
+      "type": "intake",
+      "depth": 0.9317276477813721,
+      "expectedDepth": 0.9317275953790833,
+      "start": [
+        0.32486891746520996,
+        1.2990000247955322,
+        0.31888067722320557
+      ],
+      "hit": [
+        0.303999662399292,
+        2.2256293296813965,
+        0.2238074243068695
+      ]
+    },
+    {
+      "type": "intake",
+      "depth": 0.3661665916442871,
+      "expectedDepth": 0.3661662642430573,
+      "start": [
+        0.32486891746520996,
+        1.2990000247955322,
+        0.3461354374885559
+      ],
+      "hit": [
+        0.3155834376811981,
+        1.662821888923645,
+        0.3058188855648041
+      ]
+    },
+    {
+      "type": "intake",
+      "depth": 0.9365054368972778,
+      "expectedDepth": 0.9365055210674047,
+      "start": [
+        0.48730334639549255,
+        1.2990000247955322,
+        0.2916259467601776
+      ],
+      "hit": [
+        0.4559977650642395,
+        2.2303600311279297,
+        0.19872228801250458
+      ]
+    },
+    {
+      "type": "intake",
+      "depth": 0.9367312788963318,
+      "expectedDepth": 0.9367312107254608,
+      "start": [
+        0.48730334639549255,
+        1.2990000247955322,
+        0.31888067722320557
+      ],
+      "hit": [
+        0.4559975266456604,
+        2.230367422103882,
+        0.22380134463310242
+      ]
+    },
+    {
+      "type": "intake",
+      "depth": 0.3654603958129883,
+      "expectedDepth": 0.36546005472033316,
+      "start": [
+        0.48730334639549255,
+        1.2990000247955322,
+        0.3461354374885559
+      ],
+      "hit": [
+        0.47347503900527954,
+        1.6619985103607178,
+        0.30610811710357666
+      ]
+    },
+    {
+      "type": "intake",
+      "depth": 0.941632091999054,
+      "expectedDepth": 0.9416322269349455,
+      "start": [
+        0.6497378349304199,
+        1.2990000247955322,
+        0.2916259467601776
+      ],
+      "hit": [
+        0.6079989671707153,
+        2.2351083755493164,
+        0.19872668385505676
+      ]
+    },
+    {
+      "type": "intake",
+      "depth": 0.9418565630912781,
+      "expectedDepth": 0.9418564798525764,
+      "start": [
+        0.6497378349304199,
+        1.2990000247955322,
+        0.31888067722320557
+      ],
+      "hit": [
+        0.6079986691474915,
+        2.2351157665252686,
+        0.22380587458610535
+      ]
+    },
+    {
+      "type": "intake",
+      "depth": 0.36631932854652405,
+      "expectedDepth": 0.3663186374684836,
+      "start": [
+        0.6497378349304199,
+        1.2990000247955322,
+        0.3461354374885559
+      ],
+      "hit": [
+        0.6313584446907043,
+        1.6626757383346558,
+        0.3062349557876587
+      ]
+    },
+    {
+      "type": "exhaust",
+      "depth": 0.8995221853256226,
+      "expectedDepth": 0.8995220769746131,
+      "start": [
+        0.0,
+        3.2369894981384277,
+        0.005016000010073185
+      ],
+      "hit": [
+        0.0,
+        2.3374671936035156,
+        0.005016000010073185
+      ]
+    },
+    {
+      "type": "exhaust",
+      "depth": 0.8995674848556519,
+      "expectedDepth": 0.8995675982085187,
+      "start": [
+        0.0,
+        3.2369894981384277,
+        0.0501599982380867
+      ],
+      "hit": [
+        0.0,
+        2.3374218940734863,
+        0.0501599982380867
+      ]
+    },
+    {
+      "type": "exhaust",
+      "depth": 0.8995301723480225,
+      "expectedDepth": 0.8995301609718525,
+      "start": [
+        0.0,
+        3.2369894981384277,
+        0.1003199964761734
+      ],
+      "hit": [
+        0.0,
+        2.3374593257904053,
+        0.1003199964761734
+      ]
+    },
+    {
+      "type": "exhaust",
+      "depth": 1.0781610012054443,
+      "expectedDepth": 1.0781609902387015,
+      "start": [
+        0.19200000166893005,
+        3.2242462635040283,
+        0.005016000010073185
+      ],
+      "hit": [
+        0.19200000166893005,
+        2.146085262298584,
+        0.005016000010073185
+      ]
+    },
+    {
+      "type": "exhaust",
+      "depth": 1.0769121646881104,
+      "expectedDepth": 1.0769121839554046,
+      "start": [
+        0.19200000166893005,
+        3.2242462635040283,
+        0.0501599982380867
+      ],
+      "hit": [
+        0.19200000166893005,
+        2.147334098815918,
+        0.0501599982380867
+      ]
+    },
+    {
+      "type": "exhaust",
+      "depth": 1.0770165920257568,
+      "expectedDepth": 1.0770165647155534,
+      "start": [
+        0.19200000166893005,
+        3.2242462635040283,
+        0.1003199964761734
+      ],
+      "hit": [
+        0.19200000166893005,
+        2.1472296714782715,
+        0.1003199964761734
+      ]
+    },
+    {
+      "type": "exhaust",
+      "depth": 1.0556395053863525,
+      "expectedDepth": 1.0556395013512185,
+      "start": [
+        0.5360000133514404,
+        3.2013959884643555,
+        0.005016000010073185
+      ],
+      "hit": [
+        0.5360000133514404,
+        2.145756483078003,
+        0.005016000010073185
+      ]
+    },
+    {
+      "type": "exhaust",
+      "depth": 1.054390788078308,
+      "expectedDepth": 1.054390929169052,
+      "start": [
+        0.5360000133514404,
+        3.2013959884643555,
+        0.0501599982380867
+      ],
+      "hit": [
+        0.5360000133514404,
+        2.147005081176758,
+        0.0501599982380867
+      ]
+    },
+    {
+      "type": "exhaust",
+      "depth": 1.0539659261703491,
+      "expectedDepth": 1.0539660211330357,
+      "start": [
+        0.5360000133514404,
+        3.2013959884643555,
+        0.1003199964761734
+      ],
+      "hit": [
+        0.5360000133514404,
+        2.147429943084717,
+        0.1003199964761734
+      ]
+    },
+    {
+      "type": "exhaust",
+      "depth": 0.5420273542404175,
+      "expectedDepth": 0.5420272403413683,
+      "start": [
+        0.6800000071525574,
+        3.19183087348938,
+        0.005016000010073185
+      ],
+      "hit": [
+        0.6800000071525574,
+        2.649803638458252,
+        0.005016000010073185
+      ]
+    },
+    {
+      "type": "exhaust",
+      "depth": 0.7772766351699829,
+      "expectedDepth": 0.7772767694648026,
+      "start": [
+        0.6800000071525574,
+        3.19183087348938,
+        0.0501599982380867
+      ],
+      "hit": [
+        0.6800000071525574,
+        2.4145541191101074,
+        0.0501599982380867
+      ]
+    },
+    {
+      "type": "exhaust",
+      "depth": 0.615662693977356,
+      "expectedDepth": 0.6156628040382909,
+      "start": [
+        0.6800000071525574,
+        3.19183087348938,
+        0.1003199964761734
+      ],
+      "hit": [
+        0.6800000071525574,
+        2.5761680603027344,
+        0.1003199964761734
+      ]
+    }
+  ],
+  "componentChanges": {
+    "I01_ShoulderIntake_Interior": {
+      "vertices": 6,
+      "maxDisplacement": 0.16584795731511934
+    },
+    "I01_ShoulderIntake_Bezel": {
+      "vertices": 64,
+      "maxDisplacement": 0.2175965638625916
+    },
+    "H04_CenterLatch": {
+      "vertices": 56,
+      "maxDisplacement": 0.19481998333832604
+    },
+    "H05_LatchInset": {
+      "vertices": 56,
+      "maxDisplacement": 0.1965200005118735
+    },
+    "H03_CrownJoint.002": {
+      "vertices": 152,
+      "maxDisplacement": 0.23289999149942034
+    },
+    "H03_CrownJoint.003": {
+      "vertices": 152,
+      "maxDisplacement": 0.24990001556635713
+    },
+    "H04_CenterLatch.001": {
+      "vertices": 56,
+      "maxDisplacement": 0.24072000219650067
+    },
+    "H05_LatchInset.001": {
+      "vertices": 56,
+      "maxDisplacement": 0.24241998496565084
+    },
+    "H03_CrownJoint.004": {
+      "vertices": 152,
+      "maxDisplacement": 0.22949999532200926
+    },
+    "W01_PanelJoint_00": {
+      "vertices": 592,
+      "maxDisplacement": 0.1295717645034188
+    },
+    "W01_PanelJoint_01": {
+      "vertices": 592,
+      "maxDisplacement": 0.18128159634011756
+    },
+    "W05_FlushFastener.001": {
+      "vertices": 112,
+      "maxDisplacement": 0.24479999764787605
+    },
+    "W05_FlushFastener.002": {
+      "vertices": 112,
+      "maxDisplacement": 0.23337420732826342
+    },
+    "W05_FlushFastener.003": {
+      "vertices": 112,
+      "maxDisplacement": 0.08150333023599056
+    },
+    "W05_FlushFastener.004": {
+      "vertices": 112,
+      "maxDisplacement": 0.12337413290070808
+    },
+    "W04_TipMark": {
+      "vertices": 448,
+      "maxDisplacement": 0.29694920164676347
+    },
+    "W07_TipPanelJoint": {
+      "vertices": 592,
+      "maxDisplacement": 0.4551687191356216
+    },
+    "W08_TipFold": {
+      "vertices": 160,
+      "maxDisplacement": 0.4231917882467392
+    },
+    "R01_DuctWall": {
+      "vertices": 768,
+      "maxDisplacement": 0.11866000429392295
+    },
+    "R02_RecessedLip": {
+      "vertices": 768,
+      "maxDisplacement": 0.12138000233391359
+    },
+    "R03_LowerLip": {
+      "vertices": 768,
+      "maxDisplacement": 0.06187999996239533
+    },
+    "R04_Hub": {
+      "vertices": 256,
+      "maxDisplacement": 0.0952000043993987
+    },
+    "R05_HubCap": {
+      "vertices": 256,
+      "maxDisplacement": 0.11134999880144078
+    },
+    "R06_Blade_00": {
+      "vertices": 192,
+      "maxDisplacement": 0.0941800050955583
+    },
+    "R06_Blade_01": {
+      "vertices": 192,
+      "maxDisplacement": 0.0941800050955583
+    },
+    "R06_Blade_02": {
+      "vertices": 192,
+      "maxDisplacement": 0.0941800050955583
+    },
+    "R06_Blade_03": {
+      "vertices": 192,
+      "maxDisplacement": 0.0941800050955583
+    },
+    "R06_Blade_04": {
+      "vertices": 192,
+      "maxDisplacement": 0.0941800050955583
+    },
+    "R06_Blade_05": {
+      "vertices": 192,
+      "maxDisplacement": 0.0941800050955583
+    },
+    "R06_Blade_06": {
+      "vertices": 192,
+      "maxDisplacement": 0.0941800050955583
+    },
+    "R06_Blade_07": {
+      "vertices": 192,
+      "maxDisplacement": 0.0941800050955583
+    },
+    "R06_Blade_08": {
+      "vertices": 192,
+      "maxDisplacement": 0.0941800050955583
+    },
+    "R06_Blade_09": {
+      "vertices": 192,
+      "maxDisplacement": 0.0941800050955583
+    },
+    "R06_Blade_10": {
+      "vertices": 192,
+      "maxDisplacement": 0.0941800050955583
+    },
+    "R06_Blade_11": {
+      "vertices": 192,
+      "maxDisplacement": 0.0941800050955583
+    },
+    "R07_Stator": {
+      "vertices": 112,
+      "maxDisplacement": 0.04756734579498725
+    },
+    "R07_Stator.001": {
+      "vertices": 112,
+      "maxDisplacement": 0.04756733111071115
+    },
+    "R07_Stator.002": {
+      "vertices": 112,
+      "maxDisplacement": 0.04756733111071115
+    },
+    "R07_Stator.003": {
+      "vertices": 112,
+      "maxDisplacement": 0.0475673237685714
+    },
+    "R07_Stator.004": {
+      "vertices": 112,
+      "maxDisplacement": 0.04756733111071115
+    },
+    "R07_Stator.005": {
+      "vertices": 112,
+      "maxDisplacement": 0.04756733111071115
+    },
+    "W02_MachinedEdge": {
+      "vertices": 988,
+      "maxDisplacement": 0.2684357119490699
+    },
+    "W02_MachinedEdge.001": {
+      "vertices": 324,
+      "maxDisplacement": 0.2825037772846037
+    },
+    "W02_MachinedEdge.002": {
+      "vertices": 324,
+      "maxDisplacement": 0.4756334974254215
+    },
+    "W02_MachinedEdge.003": {
+      "vertices": 324,
+      "maxDisplacement": 0.4756334974254215
+    },
+    "W02_MachinedEdge.004": {
+      "vertices": 428,
+      "maxDisplacement": 0.41768085511438974
+    },
+    "W06_ProposedElevonHinge.001": {
+      "vertices": 3472,
+      "maxDisplacement": 0.16031971590819583
+    },
+    "H03_CrownJoint": {
+      "vertices": 152,
+      "maxDisplacement": 0.06255713846119991
+    },
+    "H03_CrownJoint.001": {
+      "vertices": 152,
+      "maxDisplacement": 0.15444308608661392
+    },
+    "W05_FlushFastener": {
+      "vertices": 112,
+      "maxDisplacement": 0.1630499965787482
+    },
+    "S01_VisorRecess": {
+      "vertices": 14,
+      "maxDisplacement": 0.04236400193409981
+    },
+    "S02_VisorOptic": {
+      "vertices": 14,
+      "maxDisplacement": 0.03266719650620214
+    },
+    "S03_ChinHousing": {
+      "vertices": 56,
+      "maxDisplacement": 0.14024999738717034
+    },
+    "S04_ChinBezel": {
+      "vertices": 56,
+      "maxDisplacement": 0.13089999237548655
+    },
+    "S05_ChinGlass": {
+      "vertices": 56,
+      "maxDisplacement": 0.12036001657386526
+    },
+    "S06_CheekPanel": {
+      "vertices": 112,
+      "maxDisplacement": 0.10579439945702192
+    },
+    "S07_CheekLatch": {
+      "vertices": 112,
+      "maxDisplacement": 0.09049440687998833
+    },
+    "S08_FlankPort": {
+      "vertices": 112,
+      "maxDisplacement": 0.09094670432659048
+    },
+    "S09_FlankPortFrame": {
+      "vertices": 112,
+      "maxDisplacement": 0.09112000496802922
+    },
+    "H03_CrownJoint.005": {
+      "vertices": 152,
+      "maxDisplacement": 0.12057974768897849
+    },
+    "W02_MachinedEdge.005": {
+      "vertices": 432,
+      "maxDisplacement": 0.08134640627446778
+    },
+    "W06_ProposedElevonHinge": {
+      "vertices": 3472,
+      "maxDisplacement": 0.07292730993125242
+    },
+    "H01_ContinuousLiftingBody": {
+      "vertices": 57972,
+      "maxDisplacement": 0.4693334921504469
+    },
+    "H06_NoseChamfer": {
+      "vertices": 736,
+      "maxDisplacement": 0.25022792856688625
+    },
+    "H07_ShoulderJoint": {
+      "vertices": 592,
+      "maxDisplacement": 0.22235346166400724
+    },
+    "P01_IntakeCowl": {
+      "vertices": 166,
+      "maxDisplacement": 0.21035635330850952
+    },
+    "P02_IntakeLip": {
+      "vertices": 32,
+      "maxDisplacement": 0.21035635330850952
+    },
+    "P03_IntakeThroat": {
+      "vertices": 64,
+      "maxDisplacement": 0.19467819209986242
+    },
+    "P04_IntakeBack": {
+      "vertices": 16,
+      "maxDisplacement": 0.1260992015076154
+    },
+    "P05_WingCowlBlend": {
+      "vertices": 828,
+      "maxDisplacement": 0.19541150444820088
+    },
+    "P05_WingCowlBlend.001": {
+      "vertices": 828,
+      "maxDisplacement": 0.19541150444820088
+    },
+    "P06_IntakeGuide": {
+      "vertices": 16,
+      "maxDisplacement": 0.14935520359163929
+    },
+    "P06_IntakeGuide.001": {
+      "vertices": 16,
+      "maxDisplacement": 0.14935520359163929
+    },
+    "P07_CowlWarning": {
+      "vertices": 8,
+      "maxDisplacement": 0.1832056000629781
+    },
+    "P10_ExhaustRim": {
+      "vertices": 16,
+      "maxDisplacement": 0.08165439827195727
+    },
+    "P11_ExhaustThroat": {
+      "vertices": 32,
+      "maxDisplacement": 0.07751999784018261
+    },
+    "P12_ExhaustBack": {
+      "vertices": 8,
+      "maxDisplacement": 0.07751999784018261
+    },
+    "P13_HeatPetal": {
+      "vertices": 4,
+      "maxDisplacement": 0.021447200339202062
+    },
+    "P13_HeatPetal.001": {
+      "vertices": 4,
+      "maxDisplacement": 0.021447200339202062
+    },
+    "P13_HeatPetal.002": {
+      "vertices": 4,
+      "maxDisplacement": 0.021447200339202062
+    },
+    "P13_HeatPetal.003": {
+      "vertices": 4,
+      "maxDisplacement": 0.021447200339202062
+    },
+    "P13_HeatPetal.004": {
+      "vertices": 4,
+      "maxDisplacement": 0.021447200339202062
+    },
+    "P13_HeatPetal.005": {
+      "vertices": 4,
+      "maxDisplacement": 0.021447200339202062
+    },
+    "P13_HeatPetal.006": {
+      "vertices": 4,
+      "maxDisplacement": 0.021447200339202062
+    },
+    "P13_HeatPetal.007": {
+      "vertices": 4,
+      "maxDisplacement": 0.021447200339202062
+    },
+    "P13_HeatPetal.008": {
+      "vertices": 4,
+      "maxDisplacement": 0.07054319880656247
+    },
+    "P13_HeatPetal.009": {
+      "vertices": 4,
+      "maxDisplacement": 0.07054319880656247
+    },
+    "P13_HeatPetal.010": {
+      "vertices": 4,
+      "maxDisplacement": 0.07054319880656247
+    },
+    "P13_HeatPetal.011": {
+      "vertices": 4,
+      "maxDisplacement": 0.07054319880656247
+    },
+    "P13_HeatPetal.012": {
+      "vertices": 4,
+      "maxDisplacement": 0.07054319880656247
+    },
+    "P13_HeatPetal.013": {
+      "vertices": 4,
+      "maxDisplacement": 0.07054319880656247
+    },
+    "P13_HeatPetal.014": {
+      "vertices": 4,
+      "maxDisplacement": 0.07054319880656247
+    },
+    "P13_HeatPetal.015": {
+      "vertices": 4,
+      "maxDisplacement": 0.07054319880656247
+    },
+    "P14_InternalMixer": {
+      "vertices": 16,
+      "maxDisplacement": 0.06460000410701824
+    },
+    "P14_InternalMixer.001": {
+      "vertices": 16,
+      "maxDisplacement": 0.06460000410701824
+    },
+    "P14_InternalMixer.002": {
+      "vertices": 16,
+      "maxDisplacement": 0.06460000410701824
+    },
+    "P15_ExhaustApron": {
+      "vertices": 42,
+      "maxDisplacement": 0.04338674272261981
+    },
+    "B01_ConformalServicePanel_0": {
+      "vertices": 306,
+      "maxDisplacement": 0.13725578555088508
+    },
+    "B01_ConformalServicePanel_1": {
+      "vertices": 306,
+      "maxDisplacement": 0.13347268112027427
+    },
+    "B01_ConformalServicePanel_2": {
+      "vertices": 306,
+      "maxDisplacement": 0.12077946794831163
+    },
+    "B01_ConformalServicePanel_3": {
+      "vertices": 306,
+      "maxDisplacement": 0.09303565362836666
+    }
+  },
+  "redundantRaisedEdgeTrimRemoved": [
+    "W02_MachinedEdge",
+    "W02_MachinedEdge.001",
+    "W02_MachinedEdge.002",
+    "W02_MachinedEdge.003",
+    "W02_MachinedEdge.004",
+    "W02_MachinedEdge.005"
+  ],
+  "sourceSha256": "fb6a9fb4efe8ad534f1b9cc5ab78970e0bf50372ab551515a6cb56e9e08bdae2",
+  "gameVerified": false,
+  "referenceFidelityApproved": false,
+  "aerodynamicsSimulated": false
+}

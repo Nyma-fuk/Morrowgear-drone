@@ -1,0 +1,10 @@
+{
+  "role": "engineer",
+  "verticesChecked": 7640,
+  "tolerance": 1e-05,
+  "geometrySymmetryPass": true,
+  "errors": [],
+  "visualApproval": false,
+  "gameVerified": false,
+  "animationVerified": false
+}

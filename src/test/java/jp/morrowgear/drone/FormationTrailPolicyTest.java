@@ -99,4 +99,21 @@ final class FormationTrailPolicyTest {
 			DroneMode.STANDBY, CombatState.IDLE, 1, DroneEntity.MISSION_ORBIT,
 			false, false, false, 0, -1, false, true, false));
 	}
+
+	@Test
+	void closeCombatStatesOverrideLoopRoutesAndCatchUpWithoutChangingThePolicy() {
+		for (CombatState combat : CombatState.values()) {
+			if (!combat.active() || combat == CombatState.FLARE_ENTRY) continue;
+			assertEquals(FormationTrailPolicy.TrailStyle.NONE, FormationTrailPolicy.style(
+				DroneMode.WAYPOINT, combat, 8, DroneEntity.MISSION_MOVING,
+				false, false, true, 4, 1, true, false, false), combat.name());
+		}
+	}
+
+	@Test
+	void singleScoutLoopRouteKeepsNavigationTrails() {
+		assertEquals(FormationTrailPolicy.TrailStyle.NAVIGATION, FormationTrailPolicy.style(
+			DroneMode.WAYPOINT, CombatState.IDLE, 1, DroneEntity.MISSION_MOVING,
+			false, false, false, 4, -1, false, false, false));
+	}
 }

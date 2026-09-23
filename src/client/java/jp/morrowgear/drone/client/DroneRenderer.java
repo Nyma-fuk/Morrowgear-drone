@@ -8,6 +8,7 @@ import java.util.Map;
 import jp.morrowgear.drone.DroneEntity;
 import jp.morrowgear.drone.DroneRole;
 import jp.morrowgear.drone.FlightAttitude;
+import jp.morrowgear.drone.FlightPresentation;
 import jp.morrowgear.drone.MorrowgearDrone;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -22,27 +23,27 @@ import net.minecraft.world.phys.Vec3;
 public final class DroneRenderer extends EntityRenderer<DroneEntity, DroneRenderState> {
 	private static final Identifier WHITE_TEXTURE = Identifier.fromNamespaceAndPath(
 		MorrowgearDrone.MOD_ID, "textures/entity/emissive_white.png");
-	private final Map<DroneRole, DroneMesh> meshes = new EnumMap<>(DroneRole.class);
+	private final Map<DroneRole, RuntimeMesh> meshes = new EnumMap<>(DroneRole.class);
+	private final Map<DroneRole, RuntimeMesh> distantMeshes = new EnumMap<>(DroneRole.class);
+	private final Map<DroneRole, RuntimeMesh> farMeshes = new EnumMap<>(DroneRole.class);
+	private final Map<DroneEntity, Presentation> presentations = new java.util.WeakHashMap<>();
 
 	public DroneRenderer(EntityRendererProvider.Context context) {
 		super(context);
-		this.shadowRadius = 0.72f;
+		this.shadowRadius = 1.25f;
 		ResourceManager resources = context.getResourceManager();
 		load(resources, DroneRole.FIELD, "field");
-		load(resources, DroneRole.CARGO, "field");
+		load(resources, DroneRole.CARGO, "cargo");
 		load(resources, DroneRole.SCOUT, "scout");
 		load(resources, DroneRole.ENGINEER, "engineer");
-		load(resources, DroneRole.SECURITY, "guard");
+		load(resources, DroneRole.SECURITY, "security");
 		load(resources, DroneRole.SALVAGE, "salvage");
 	}
 
 	private void load(ResourceManager resources, DroneRole role, String name) {
-		Identifier id = Identifier.fromNamespaceAndPath(MorrowgearDrone.MOD_ID, "models/entity/family_a_" + name + ".mgm");
-		try {
-			meshes.put(role, DroneMesh.read(resources.getResourceOrThrow(id).open()));
-		} catch (IOException exception) {
-			throw new IllegalStateException("Cannot load approved Morrowgear drone mesh " + id, exception);
-		}
+		meshes.put(role, RuntimeMesh.load(name));
+		distantMeshes.put(role, RuntimeMesh.load(name + "_lod"));
+		farMeshes.put(role, RuntimeMesh.load(name + "_far", name + "_lod"));
 	}
 
 	@Override
@@ -55,6 +56,15 @@ public final class DroneRenderer extends EntityRenderer<DroneEntity, DroneRender
 		super.extractRenderState(entity, state, partialTick);
 		state.docked = entity.isDocked();
 		state.powerLost = entity.isPowerLost();
+		boolean loweringGear = entity.isDocked() || (entity.mode() == jp.morrowgear.drone.DroneMode.RETURN
+			|| entity.mode() == jp.morrowgear.drone.DroneMode.DOCK)
+			&& entity.hasDock() && entity.position().distanceTo(Vec3.atCenterOf(entity.dockPos())) < 4;
+		boolean working = entity.engineerState() == jp.morrowgear.drone.EngineerState.REPAIRING
+			|| entity.fieldOperationState() == jp.morrowgear.drone.FieldOperationState.WORKING
+			|| entity.fieldOperationState() == jp.morrowgear.drone.FieldOperationState.PLANTING
+			|| entity.salvageState().ordinal() >= jp.morrowgear.drone.SalvageState.HOOK.ordinal();
+		boolean equipment = FlightPresentation.deployEquipment(entity.role(), entity.combatWeapon(),
+			entity.combatState(), state.docked, state.powerLost, working);
 		state.entityId = entity.getUUID();
 		state.role = entity.role();
 		state.combatState = entity.combatState();
@@ -78,66 +88,71 @@ public final class DroneRenderer extends EntityRenderer<DroneEntity, DroneRender
 					: combatTarget.position().add(0, combatTarget.getBbHeight() * 0.58, 0)
 						.subtract(entity.position());
 		state.heading = Mth.rotLerp(partialTick, entity.yRotO, entity.getYRot());
-		if (state.docked) {
-			state.flightPitch = 0;
-			state.flightRoll = 0;
-			return;
-		}
 		Vec3 velocity = entity.getDeltaMovement();
-		state.flightPitch = FlightAttitude.pitch(velocity, entity.getYRot());
-		state.flightRoll = FlightAttitude.roll(velocity, entity.getYRot());
-		if ((state.combatState == jp.morrowgear.drone.CombatState.LASER_CHARGE
-			|| state.combatState == jp.morrowgear.drone.CombatState.LASER_FIRE)
-			&& state.combatTargetOffset != null) {
-			double horizontal = state.combatTargetOffset.multiply(1, 0, 1).length();
-			state.flightPitch = Mth.clamp((float)(Math.atan2(
-				-state.combatTargetOffset.y, Math.max(0.01, horizontal)) * 0.45), -0.12f, 0.38f);
-		}
+		Presentation motion = presentations.computeIfAbsent(entity, ignored -> new Presentation(
+			entity.tickCount + partialTick, state.heading, loweringGear));
+		double now = entity.tickCount + partialTick, dt = Math.max(0, now - motion.time);
+		float yawRate = dt > .0001 && dt < 5 ? Mth.wrapDegrees(state.heading - motion.heading) / (float)dt : 0;
+		float pitch = state.docked || state.powerLost ? 0 : FlightAttitude.pitch(velocity, state.heading);
+		float roll = state.docked || state.powerLost ? 0
+			: FlightAttitude.coordinatedRoll(velocity, state.heading, yawRate);
+		motion.pitch = FlightPresentation.approach(motion.pitch, pitch, dt, 3.5, .035);
+		motion.roll = FlightPresentation.approach(motion.roll, roll, dt, 4, .045);
+		motion.gear = state.docked ? 1 : FlightPresentation.approach(motion.gear, loweringGear ? 1 : 0, dt, 5, .1);
+		motion.equipment = FlightPresentation.approach(motion.equipment, equipment ? 1 : 0, dt, 2.5, .16);
+		motion.heading = state.heading; motion.time = now;
+		state.flightPitch = state.docked ? 0 : motion.pitch;
+		state.flightRoll = state.docked ? 0 : motion.roll;
+		state.gearDeployment = motion.gear;
+		state.equipmentDeployment = motion.equipment;
+		if (state.combatTargetOffset != null) {
+			Vec3 worldAim = entity.position().add(state.combatTargetOffset);
+			if (state.combatState == jp.morrowgear.drone.CombatState.LASER_FIRE) {
+				if (motion.targetId != entity.combatTargetId() || motion.aim == null)
+					motion.aim = worldAim;
+				else motion.aim = motion.aim.lerp(worldAim, -Math.expm1(-Math.min(dt, 4) / 1.5));
+				worldAim = motion.aim;
+			} else motion.aim = null;
+			motion.targetId = entity.combatTargetId();
+			state.combatTargetOffset = worldAim.subtract(new Vec3(state.x, state.y, state.z));
+		} else { motion.aim = null; motion.targetId = -1; }
 	}
 
 	@Override
 	public void submit(DroneRenderState state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera) {
 		super.submit(state, poseStack, collector, camera);
 		if (!state.powerLost) {
-			FormationTrailController.render(state.entityId, new Vec3(state.x, state.y, state.z), poseStack, collector);
+			FormationTrailController.render(state, poseStack, collector,
+				camera.pos.subtract(new Vec3(state.x, state.y, state.z)));
 			CombatEffectRenderer.render(state, poseStack, collector,
+				camera.pos.subtract(new Vec3(state.x, state.y, state.z)));
+			ScoutScanRenderer.render(state, poseStack, collector,
 				camera.pos.subtract(new Vec3(state.x, state.y, state.z)));
 		}
 		SalvageEffectRenderer.render(state, poseStack, collector);
-		DroneMesh mesh = meshes.getOrDefault(state.role, meshes.get(DroneRole.FIELD));
+		RuntimeGeometryBudgetPolicy.Detail quality = RuntimeGeometryBudgetController.drone(state.entityId, camera.pos);
+		boolean distant = quality != RuntimeGeometryBudgetPolicy.Detail.FULL;
+		Map<DroneRole, RuntimeMesh> detail = quality == RuntimeGeometryBudgetPolicy.Detail.FAR ? farMeshes
+			: distant ? distantMeshes : meshes;
+		RuntimeMesh mesh = detail.getOrDefault(state.role, detail.get(DroneRole.FIELD));
 		poseStack.pushPose();
 		poseStack.mulPose(Axis.YP.rotationDegrees(-state.heading));
 		poseStack.mulPose(Axis.XP.rotation(state.flightPitch));
 		poseStack.mulPose(Axis.ZP.rotation(state.flightRoll));
 		float rotorAngle = state.docked || state.powerLost ? 0.0f : state.ageInTicks * 0.62f;
-		collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WHITE_TEXTURE),
-			(pose, consumer) -> mesh.render(pose, consumer, state.lightCoords, rotorAngle));
-		if (state.powerLost) {
-			// A disabled airframe retains only its unlit material pass.
-		} else if (state.combatState.active()) {
-			collector.submitCustomGeometry(poseStack, RenderTypes.entityTranslucentEmissive(WHITE_TEXTURE),
-				(pose, consumer) -> mesh.renderCombatEmissive(pose, consumer, rotorAngle, 1.0f, 255));
-			collector.submitCustomGeometry(poseStack, RenderTypes.entityTranslucentEmissive(WHITE_TEXTURE),
-				(pose, consumer) -> mesh.renderCombatEmissive(pose, consumer, rotorAngle, 1.035f, 82));
-		} else {
-			collector.submitCustomGeometry(poseStack, RenderTypes.entityTranslucentEmissive(WHITE_TEXTURE),
-				(pose, consumer) -> mesh.renderEmissive(pose, consumer, rotorAngle, 1.0f, 255));
-			collector.submitCustomGeometry(poseStack, RenderTypes.entityTranslucentEmissive(WHITE_TEXTURE),
-				(pose, consumer) -> mesh.renderEmissive(pose, consumer, rotorAngle, 1.025f, 72));
-		}
-		if (state.powerLost) {
-			// Turbine illumination and rotor motion stop with flight power.
-		} else if (state.combatState.active()) {
-			collector.submitCustomGeometry(poseStack, RenderTypes.entityTranslucentEmissive(WHITE_TEXTURE),
-				(pose, consumer) -> mesh.renderCombatTurbines(pose, consumer, rotorAngle, 1.0f, 245));
-			collector.submitCustomGeometry(poseStack, RenderTypes.entityTranslucentEmissive(WHITE_TEXTURE),
-				(pose, consumer) -> mesh.renderCombatTurbines(pose, consumer, rotorAngle, 1.07f, 72));
-		} else {
-			collector.submitCustomGeometry(poseStack, RenderTypes.entityTranslucentEmissive(WHITE_TEXTURE),
-				(pose, consumer) -> mesh.renderTurbines(pose, consumer, rotorAngle, 1.0f, 245));
-			collector.submitCustomGeometry(poseStack, RenderTypes.entityTranslucentEmissive(WHITE_TEXTURE),
-				(pose, consumer) -> mesh.renderTurbines(pose, consumer, rotorAngle, 1.06f, 64));
-		}
+		mesh.submit(poseStack, collector, state.lightCoords, rotorAngle,
+			state.gearDeployment, state.equipmentDeployment, !state.powerLost,
+			state.combatState.active(), !distant, !distant);
 		poseStack.popPose();
+	}
+
+	private static final class Presentation {
+		double time;
+		float heading, pitch, roll, gear, equipment;
+		Vec3 aim;
+		int targetId = -1;
+		Presentation(double time, float heading, boolean gear) {
+			this.time = time; this.heading = heading; this.gear = gear ? 1 : 0;
+		}
 	}
 }

@@ -1,0 +1,27 @@
+{
+  "revision": "V28_APPROVED_RUNTIME_01",
+  "passed": true,
+  "sourceSha256": "ef1acbde829ed663f07e5a25511bf891c3165aa61182100565ab7bb410b43f43",
+  "assets": [
+    {
+      "path": "models/runtime/carrier.mgm",
+      "sha256": "098d276abfb996eb15628c3895d263a393c24fb955abc269e4fd9527cebdd075"
+    },
+    {
+      "path": "models/runtime/carrier_lod.mgm",
+      "sha256": "3b8b8faa65ade809fea2d3344e02d01689f13b28cd1c1f5e460fb97358ee43c3"
+    },
+    {
+      "path": "textures/runtime/carrier.png",
+      "sha256": "8ba450ee51a26fe08ce023242567165491af92d28ffb1dc8fbbbf92d6ef9c0a4"
+    },
+    {
+      "path": "textures/runtime/carrier_lod.png",
+      "sha256": "81dc2657fc1463e59d78c98964bc7f33e45a63bebed25eea35c1b70598793a68"
+    },
+    {
+      "path": "textures/item/carrier_unit.png",
+      "sha256": "641b7419e49dd483633c64be7e1fc1533fe8c9538e1dd7c747e410f010ebd63c"
+    }
+  ]
+}

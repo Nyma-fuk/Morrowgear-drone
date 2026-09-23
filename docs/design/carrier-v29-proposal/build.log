@@ -1,0 +1,1578 @@
+C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\tools\drone-design\blender\build_carrier_v29_proposal.py:26: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  mat.use_nodes = True
+GEOMETRY_VALIDATION {"proposalOnly": true, "axes": {"front": "-Y", "up": "+Z", "mirror": "X=0"}, "bounds": [[-25.0, 25.0], [-16.0, 15.992500305175781], [-0.10000000149011612, 6.949999809265137]], "dimensions": [50.0, 31.99250030517578, 7.049999810755253], "symmetryMaxError": 0.0, "evaluatedVertices": 24970, "polygons": 19774, "nonManifoldEdgesByObject": {}, "bayApproachChecks": [{"centerX": -15, "approachSamplesClear": true, "samples": 9}, {"centerX": -10, "approachSamplesClear": true, "samples": 9}, {"centerX": 10, "approachSamplesClear": true, "samples": 9}, {"centerX": 15, "approachSamplesClear": true, "samples": 9}], "beamOrigin": [0, 0, -0.1], "bayClearEnvelope": [3.5, 4.0, 2.3], "revision": "V29_REFINED_SWEEP_02", "surfacePanelCount": 496, "rearNozzleCount": 8, "maximumWingRootThickness": 3.85, "exhaustDuctChecks": [{"centerX": -8.2, "ductSamplesClear": true, "samples": 2}, {"centerX": 8.2, "ductSamplesClear": true, "samples": 2}, {"centerX": -12.6, "ductSamplesClear": true, "samples": 2}, {"centerX": 12.6, "ductSamplesClear": true, "samples": 2}, {"centerX": -17.2, "ductSamplesClear": true, "samples": 2}, {"centerX": 17.2, "ductSamplesClear": true, "samples": 2}, {"centerX": -2.1, "ductSamplesClear": true, "samples": 2}, {"centerX": 2.1, "ductSamplesClear": true, "samples": 2}], "passed": true}
+C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\tools\drone-design\blender\build_carrier_v29_proposal.py:401: DeprecationWarning: 'World.use_nodes' is expected to be removed in Blender 6.0
+  scene.world.use_nodes=True
+00:11.141  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v29-proposal\hero.png'
+Info: Saved as "carrier-v29-proposal.blend"
+INFO Draco is available, use library at C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\work\blender-portable\blender-5.2.0-windows-x64\5.2\scripts\addons_core\io_scene_gltf2\bf_intern_draco_bridge.dll
+INFO MeshOptimizer is available, use library at C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\work\blender-portable\blender-5.2.0-windows-x64\5.2\scripts\addons_core\io_scene_gltf2\bf_intern_meshopt_bridge.dll
+07:36:00 | INFO: Starting glTF 2.0 export
+07:36:00 | INFO: Extracting primitive: Aft_avionics_streamlined_spine
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Aft_control_window
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Aft_control_window.001
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Aft_control_window.002
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Aft_control_window.003
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Aft_control_window.004
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Aft_control_window.005
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Aft_control_window.006
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Aft_maintenance_stencil
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Aft_maintenance_stencil.001
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Aft_maintenance_stencil.002
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Aft_maintenance_stencil.003
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Aft_maintenance_stencil.004
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Aft_maintenance_stencil.005
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Aft_maintenance_stencil.006
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Aft_maintenance_stencil.007
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Aft_maintenance_stencil.008
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Aft_maintenance_stencil.009
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Aft_maintenance_stencil.010
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Aft_maintenance_stencil.011
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Aft_maintenance_stencil.012
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Aft_maintenance_stencil.013
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Aft_maintenance_stencil.014
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Aft_maintenance_stencil.015
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Aft_vector_nozzle_open_duct
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Aft_vector_nozzle_open_duct.001
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Aft_vector_nozzle_open_duct.002
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Aft_vector_nozzle_open_duct.003
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bay_0_aft_service_bulkhead
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bay_0_internal_floor
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bay_1_aft_service_bulkhead
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bay_1_internal_floor
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bay_docking_rail
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bay_docking_rail.001
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bay_docking_rail.002
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bay_docking_rail.003
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bay_recessed_guidance
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bay_recessed_guidance.001
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bay_recessed_guidance.002
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bay_recessed_guidance.003
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bay_service_console
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bay_service_console.001
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bay_threshold_service_mark
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bay_threshold_service_mark.001
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bay_threshold_service_mark.002
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bay_threshold_service_mark.003
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bay_threshold_service_mark.004
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bay_threshold_service_mark.005
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bay_threshold_service_mark.006
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bay_threshold_service_mark.007
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bay_threshold_service_mark.008
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bay_threshold_service_mark.009
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bay_threshold_service_mark.010
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bay_threshold_service_mark.011
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bridge_hatch_lock
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bridge_hatch_lock.001
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bridge_hatch_lock.002
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bridge_hatch_lock.003
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bridge_individual_glazing_recess
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bridge_individual_glazing_recess.001
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bridge_individual_glazing_recess.002
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bridge_individual_glazing_recess.003
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bridge_individual_glazing_recess.004
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bridge_individual_glazing_recess.005
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bridge_individual_glazing_recess.006
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bridge_individual_glazing_recess.007
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bridge_individual_glazing_recess.008
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bridge_individual_glazing_recess.009
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bridge_individual_glazing_recess.010
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bridge_individual_glazing_recess.011
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bridge_individual_glazing_recess.012
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bridge_individual_glazing_recess.013
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bridge_individual_glazing_recess.014
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bridge_individual_glazing_recess.015
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bridge_individual_glazing_recess.016
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bridge_individual_window
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bridge_individual_window.001
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bridge_individual_window.002
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bridge_individual_window.003
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bridge_individual_window.004
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bridge_individual_window.005
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bridge_individual_window.006
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bridge_individual_window.007
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bridge_individual_window.008
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bridge_individual_window.009
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bridge_individual_window.010
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bridge_individual_window.011
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bridge_individual_window.012
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bridge_individual_window.013
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bridge_individual_window.014
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bridge_individual_window.015
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bridge_individual_window.016
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bridge_service_hatch
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bridge_service_hatch.001
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bridge_service_hatch.002
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Bridge_service_hatch.003
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Cassette_cooling_fin
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Cassette_cooling_fin.001
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Cassette_cooling_fin.002
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Cassette_cooling_fin.003
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Cassette_cooling_fin.004
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Cassette_cooling_fin.005
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Cassette_cooling_fin.006
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Cassette_cooling_fin.007
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Cassette_cooling_fin.008
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Cassette_cooling_fin.009
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Cassette_cooling_fin.010
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Cassette_cooling_fin.011
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Cassette_cooling_fin.012
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Cassette_cooling_fin.013
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Cassette_cooling_fin.014
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Cassette_cooling_fin.015
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Cassette_cooling_fin.016
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Cassette_cooling_fin.017
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Cassette_cooling_fin.018
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Cassette_cooling_fin.019
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Compact_emitter_gimbal
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.001
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.002
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.003
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.004
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.005
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.006
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.007
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.008
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.009
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.010
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.011
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.012
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.013
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.014
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.015
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.016
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.017
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.018
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.019
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.020
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.021
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.022
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.023
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.024
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.025
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.026
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.027
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.028
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.029
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.030
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.031
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.032
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.033
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.034
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.035
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.036
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.037
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.038
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.039
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.040
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.041
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.042
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.043
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.044
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.045
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.046
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.047
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.048
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.049
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.050
+07:36:00 | INFO: Primitives created: 1
+07:36:00 | INFO: Extracting primitive: Dorsal_fitted_panel.051
+07:36:00 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.052
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.053
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.054
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.055
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.056
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.057
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.058
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.059
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.060
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.061
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.062
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.063
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.064
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.065
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.066
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.067
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.068
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.069
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.070
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.071
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.072
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.073
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.074
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.075
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.076
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.077
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.078
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.079
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.080
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.081
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.082
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.083
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.084
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.085
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.086
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.087
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.088
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.089
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.090
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.091
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.092
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.093
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.094
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.095
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.096
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.097
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.098
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.099
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.100
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.101
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.102
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.103
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.104
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.105
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.106
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.107
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.108
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.109
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.110
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.111
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.112
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.113
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.114
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.115
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.116
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.117
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.118
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.119
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.120
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.121
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.122
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.123
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.124
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.125
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.126
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Dorsal_fitted_panel.127
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Emitter_conductor
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Emitter_diagonal_hanger
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Emitter_diagonal_hanger.001
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Emitter_hydraulic_ram
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Emitter_hydraulic_ram.001
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Emitter_optical_surface
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Emitter_service_segment
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Emitter_service_segment.001
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Emitter_service_segment.002
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Emitter_service_segment.003
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Emitter_service_segment.004
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Emitter_service_segment.005
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Emitter_service_segment.006
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Emitter_service_segment.007
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Emitter_service_segment.008
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Emitter_service_segment.009
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Exhaust_vector_vane
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Exhaust_vector_vane.001
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Exhaust_vector_vane.002
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Exhaust_vector_vane.003
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Exhaust_vector_vane.004
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Exhaust_vector_vane.005
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Exhaust_vector_vane.006
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Exhaust_vector_vane.007
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Exhaust_vector_vane.008
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Exhaust_vector_vane.009
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Exhaust_vector_vane.010
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Exhaust_vector_vane.011
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Flush_maintenance_handrail
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Flush_maintenance_handrail.001
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Flush_maintenance_handrail.002
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Flush_maintenance_handrail.003
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Forward_swept_V_command_bridge
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.001
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.002
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.003
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.004
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.005
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.006
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.007
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.008
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.009
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.010
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.011
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.012
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.013
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.014
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.015
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.016
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.017
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.018
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.019
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.020
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.021
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.022
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.023
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.024
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.025
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.026
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.027
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.028
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.029
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.030
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.031
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.032
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.033
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.034
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.035
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.036
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.037
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.038
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.039
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.040
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.041
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.042
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.043
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.044
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.045
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.046
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.047
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.048
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.049
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.050
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Inset_radiator_lamella.051
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Keel_flush_access_plate
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Keel_flush_access_plate.001
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Keel_flush_access_plate.002
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Keel_flush_access_plate.003
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Keel_flush_access_plate.004
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Keel_flush_access_plate.005
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Keel_flush_plate_latch
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Keel_flush_plate_latch.001
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Keel_flush_plate_latch.002
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Keel_flush_plate_latch.003
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Keel_flush_plate_latch.004
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Keel_flush_plate_latch.005
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Leading_edge_armor
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Leading_edge_armor.001
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Leading_edge_armor.002
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Leading_edge_armor.003
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Leading_edge_armor.004
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Leading_edge_armor.005
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Leading_edge_armor.006
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Leading_edge_armor.007
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Leading_edge_armor.008
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Leading_edge_armor.009
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Leading_edge_armor.010
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Leading_edge_armor.011
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Leading_edge_armor.012
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Leading_edge_armor.013
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Leading_edge_armor.014
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Leading_edge_armor.015
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Low_profile_open_structural_well
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Nozzle_actuator
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Nozzle_actuator.001
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Nozzle_actuator.002
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Nozzle_actuator.003
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Nozzle_actuator.004
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Nozzle_actuator.005
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Nozzle_actuator.006
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Nozzle_actuator.007
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Protected_power_line
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Protected_power_line.001
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Protected_power_line.002
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Protected_power_line.003
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.001
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.002
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.003
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.004
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.005
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.006
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.007
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.008
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.009
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.010
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.011
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.012
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.013
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.014
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.015
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.016
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.017
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.018
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.019
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.020
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.021
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.022
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.023
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.024
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.025
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.026
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.027
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.028
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.029
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.030
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.031
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.032
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.033
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.034
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.035
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.036
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.037
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.038
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.039
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.040
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.041
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.042
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.043
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_panel_lock.044
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_ventral_service_cassette
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_ventral_service_cassette.001
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_ventral_service_cassette.002
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Recessed_ventral_service_cassette.003
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Scale_observation_window
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Scale_observation_window.001
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Scale_observation_window.002
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Scale_observation_window.003
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Scale_observation_window.004
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Scale_observation_window.005
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Scale_observation_window.006
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Scale_observation_window.007
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Scale_observation_window.008
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Scale_observation_window.009
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Scale_observation_window.010
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Scale_observation_window.011
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Scale_observation_window.012
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Scale_observation_window.013
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Scale_observation_window.014
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Scale_observation_window.015
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Scale_observation_window.016
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Scale_observation_window.017
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Scale_observation_window.018
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Scale_observation_window.019
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Scale_observation_window.020
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Scale_observation_window.021
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Scale_observation_window.022
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Scale_observation_window.023
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Scale_observation_window.024
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Scale_observation_window.025
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Scale_observation_window.026
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Scale_observation_window.027
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Scale_observation_window.028
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Scale_observation_window.029
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Scale_observation_window.030
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Scale_observation_window.031
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Scale_observation_window.032
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Span_lower_chord
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Span_lower_chord.001
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Span_lower_chord.002
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Span_lower_chord.003
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Span_lower_chord.004
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Span_lower_chord.005
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Span_lower_chord.006
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Span_lower_chord.007
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Span_lower_chord.008
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Span_lower_chord.009
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Span_lower_chord.010
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Span_lower_chord.011
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Span_upper_chord
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Span_upper_chord.001
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Span_upper_chord.002
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Span_upper_chord.003
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Span_upper_chord.004
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Span_upper_chord.005
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Span_upper_chord.006
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Span_upper_chord.007
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Span_upper_chord.008
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Span_upper_chord.009
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Span_upper_chord.010
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Span_upper_chord.011
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Swept_loadbearing_monocoque
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Tapered_aft_command_keel
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Thruster_recessed_throat
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Thruster_recessed_throat.001
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Thruster_recessed_throat.002
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Thruster_recessed_throat.003
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Triangulated_span_web
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Triangulated_span_web.001
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Triangulated_span_web.002
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Triangulated_span_web.003
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Triangulated_span_web.004
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Triangulated_span_web.005
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Triangulated_span_web.006
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Triangulated_span_web.007
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Triangulated_span_web.008
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Triangulated_span_web.009
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Triangulated_span_web.010
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Triangulated_span_web.011
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Truss_vertical_tie
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Truss_vertical_tie.001
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Truss_vertical_tie.002
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Truss_vertical_tie.003
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Truss_vertical_tie.004
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Truss_vertical_tie.005
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Truss_vertical_tie.006
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Truss_vertical_tie.007
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Truss_vertical_tie.008
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Truss_vertical_tie.009
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Truss_vertical_tie.010
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Truss_vertical_tie.011
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.001
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.002
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.003
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.004
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.005
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.006
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.007
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.008
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.009
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.010
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.011
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.012
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.013
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.014
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.015
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.016
+07:36:01 | INFO: Primitives created: 0
+07:36:01 | WARNING: Mesh 'Ventral_fitted_panel.016' has no primitives and will be omitted.
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.017
+07:36:01 | INFO: Primitives created: 0
+07:36:01 | WARNING: Mesh 'Ventral_fitted_panel.017' has no primitives and will be omitted.
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.018
+07:36:01 | INFO: Primitives created: 0
+07:36:01 | WARNING: Mesh 'Ventral_fitted_panel.018' has no primitives and will be omitted.
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.019
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.020
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.021
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.022
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.023
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.024
+07:36:01 | INFO: Primitives created: 0
+07:36:01 | WARNING: Mesh 'Ventral_fitted_panel.024' has no primitives and will be omitted.
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.025
+07:36:01 | INFO: Primitives created: 0
+07:36:01 | WARNING: Mesh 'Ventral_fitted_panel.025' has no primitives and will be omitted.
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.026
+07:36:01 | INFO: Primitives created: 0
+07:36:01 | WARNING: Mesh 'Ventral_fitted_panel.026' has no primitives and will be omitted.
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.027
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.028
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.029
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.030
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.031
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.032
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.033
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.034
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.035
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.036
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.037
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.038
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.039
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.040
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.041
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.042
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.043
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.044
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.045
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.046
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.047
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.048
+07:36:01 | INFO: Primitives created: 0
+07:36:01 | WARNING: Mesh 'Ventral_fitted_panel.048' has no primitives and will be omitted.
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.049
+07:36:01 | INFO: Primitives created: 0
+07:36:01 | WARNING: Mesh 'Ventral_fitted_panel.049' has no primitives and will be omitted.
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.050
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.051
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.052
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.053
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.054
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.055
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.056
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.057
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.058
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.059
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.060
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.061
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.062
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.063
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.064
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.065
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.066
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.067
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.068
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.069
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.070
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.071
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.072
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.073
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.074
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.075
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.076
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.077
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.078
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.079
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.080
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.081
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.082
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.083
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.084
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.085
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.086
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.087
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.088
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.089
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.090
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.091
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.092
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.093
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.094
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.095
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.096
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.097
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.098
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.099
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.100
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.101
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.102
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.103
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.104
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.105
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.106
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.107
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.108
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.109
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.110
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.111
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.112
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.113
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.114
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.115
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.116
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.117
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.118
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.119
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.120
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.121
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.122
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.123
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.124
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.125
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.126
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Ventral_fitted_panel.127
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Well_inset_inner_reveal
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Well_radial_service_panel
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Well_radial_service_panel.001
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Well_radial_service_panel.002
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Well_radial_service_panel.003
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Well_radial_service_panel.004
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Well_radial_service_panel.005
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Well_radial_service_panel.006
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Well_radial_service_panel.007
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Well_radial_service_panel.008
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Well_radial_service_panel.009
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Well_radial_service_panel.010
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Well_radial_service_panel.011
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Well_radial_service_panel.012
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Well_radial_service_panel.013
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Well_status_recess
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Well_status_recess.001
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Well_status_recess.002
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Well_status_recess.003
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Well_status_recess.004
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Well_status_recess.005
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Well_status_recess.006
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Well_status_recess.007
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Well_status_recess.008
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Well_status_recess.009
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Well_status_recess.010
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Well_status_recess.011
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Well_status_recess.012
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Well_status_recess.013
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Wing_service_stencil
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Wing_service_stencil.001
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Wing_service_stencil.002
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Wing_service_stencil.003
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Wing_service_stencil.004
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Wing_service_stencil.005
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Wing_service_stencil.006
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Wing_service_stencil.007
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Extracting primitive: Wing_service_stencil.008
+07:36:01 | INFO: Primitives created: 1
+07:36:01 | INFO: Finished glTF 2.0 export in 0.7245335578918457 s
+00:17.594  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v29-proposal\front.png'
+00:23.484  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v29-proposal\rear.png'
+00:31.625  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v29-proposal\top.png'
+00:40.469  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v29-proposal\bottom.png'
+00:46.563  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v29-proposal\left.png'
+00:52.531  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v29-proposal\right.png'
+01:00.781  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v29-proposal\underside.png'
+01:08.109  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v29-proposal\rear-underside.png'
+01:16.188  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v29-proposal\beam-state.png'
+
+07:37:05 | INFO: Data are loaded, start creating Blender stuff
+07:37:05 | INFO: Blender create Mesh node Cylinder
+07:37:05 | INFO: Blender create Mesh node Cylinder.001
+07:37:05 | INFO: Blender create Mesh node Cylinder.004
+07:37:05 | INFO: Blender create Mesh node AFT_CassetteGasket
+07:37:05 | INFO: Blender create Mesh node Cylinder.006
+07:37:05 | INFO: Blender create Mesh node AFT_FastenerSlot
+07:37:05 | INFO: Blender create Mesh node AFT_FastenerSlot.001
+07:37:05 | INFO: Blender create Mesh node AFT_FastenerSlot.002
+07:37:05 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_00
+07:37:05 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_01
+07:37:05 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_02
+07:37:05 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_03
+07:37:05 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_04
+07:37:05 | INFO: Blender create Mesh node AFT_HeatExchangerThroat_05
+07:37:05 | INFO: Blender create Mesh node AFT_LouverEdge_00
+07:37:05 | INFO: Blender create Mesh node AFT_LouverEdge_01
+07:37:05 | INFO: Blender create Mesh node AFT_LouverEdge_02
+07:37:05 | INFO: Blender create Mesh node AFT_LouverEdge_03
+07:37:05 | INFO: Blender create Mesh node AFT_LouverEdge_04
+07:37:05 | INFO: Blender create Mesh node AFT_LouverEdge_05
+07:37:05 | INFO: Blender create Mesh node AFT_ReleaseLatch
+07:37:05 | INFO: Blender create Mesh node AFT_ServiceCassette
+07:37:05 | INFO: Blender create Mesh node Cylinder.005
+07:37:05 | INFO: Blender create Mesh node AFT_StatusLens
+07:37:05 | INFO: Blender create Mesh node AFT_StatusLens.001
+07:37:05 | INFO: Blender create Mesh node Cube.016
+07:37:05 | INFO: Blender create Mesh node FIELD_LinkRadome
+07:37:05 | INFO: Blender create Mesh node Cube.029
+07:37:05 | INFO: Blender create Mesh node Cube.030
+07:37:05 | INFO: Blender create Mesh node Cube.031
+07:37:05 | INFO: Blender create Mesh node Cube.014
+07:37:05 | INFO: Blender create Mesh node Cube.015
+07:37:05 | INFO: Blender create Mesh node Cube.013
+07:37:05 | INFO: Blender create Mesh node Cube.001
+07:37:06 | INFO: Blender create Mesh node Cube.008
+07:37:06 | INFO: Blender create Mesh node Cube.009
+07:37:06 | INFO: Blender create Mesh node Cube.002
+07:37:06 | INFO: Blender create Mesh node GEAR_FixedSocket_1
+07:37:06 | INFO: Blender create Mesh node GEAR_FixedSocket_-1
+07:37:06 | INFO: Blender create Mesh node Cube.010
+07:37:06 | INFO: Blender create Mesh node Cube.003
+07:37:06 | INFO: Blender create Mesh node Cube.012
+07:37:06 | INFO: Blender create Mesh node Cube.011
+07:37:06 | INFO: Blender create Mesh node Cube.006
+07:37:06 | INFO: Blender create Mesh node Cube.005
+07:37:06 | INFO: Blender create Mesh node GEAR_TelescopicStage_1_0
+07:37:06 | INFO: Blender create Mesh node GEAR_TelescopicStage_1_1
+07:37:06 | INFO: Blender create Mesh node Cylinder.008
+07:37:06 | INFO: Blender create Mesh node GEAR_TelescopicStage_-1_0
+07:37:06 | INFO: Blender create Mesh node GEAR_TelescopicStage_-1_1
+07:37:06 | INFO: Blender create Mesh node Cylinder.007
+07:37:06 | INFO: Blender create Mesh node H01_ContinuousLiftingBody_Mesh.001
+07:37:06 | INFO: Blender create Mesh node H03_CrownJoint.006
+07:37:06 | INFO: Blender create Mesh node H03_CrownJoint.007
+07:37:06 | INFO: Blender create Mesh node H03_CrownJoint.002
+07:37:06 | INFO: Blender create Mesh node H03_CrownJoint.003
+07:37:06 | INFO: Blender create Mesh node H03_CrownJoint.004
+07:37:06 | INFO: Blender create Mesh node H03_CrownJoint.008
+07:37:06 | INFO: Blender create Mesh node Cube.004
+07:37:06 | INFO: Blender create Mesh node Cube.018
+07:37:06 | INFO: Blender create Mesh node Cube.017
+07:37:06 | INFO: Blender create Mesh node Cube.019
+07:37:06 | INFO: Blender create Mesh node H06_NoseChamfer.002
+07:37:06 | INFO: Blender create Mesh node H07_ShoulderJoint.002
+07:37:06 | INFO: Blender create Mesh node I01_ShoulderIntake_Bezel.002
+07:37:06 | INFO: Blender create Mesh node I01_ShoulderIntake_Interior_Mesh.001
+07:37:06 | INFO: Blender create Mesh node P01_IntakeCowl.001
+07:37:06 | INFO: Blender create Mesh node P02_IntakeLip.001
+07:37:06 | INFO: Blender create Mesh node P03_IntakeThroat.001
+07:37:06 | INFO: Blender create Mesh node P04_IntakeBack.001
+07:37:06 | INFO: Blender create Mesh node P05_WingCowlBlend.002
+07:37:06 | INFO: Blender create Mesh node P05_WingCowlBlend.003
+07:37:06 | INFO: Blender create Mesh node P06_IntakeGuide.002
+07:37:06 | INFO: Blender create Mesh node P06_IntakeGuide.003
+07:37:06 | INFO: Blender create Mesh node P07_CowlWarning.001
+07:37:06 | INFO: Blender create Mesh node P10_ExhaustRim.001
+07:37:06 | INFO: Blender create Mesh node P11_ExhaustThroat.001
+07:37:06 | INFO: Blender create Mesh node P12_ExhaustBack.001
+07:37:06 | INFO: Blender create Mesh node P13_HeatPetal.016
+07:37:06 | INFO: Blender create Mesh node P13_HeatPetal.017
+07:37:06 | INFO: Blender create Mesh node P13_HeatPetal.018
+07:37:06 | INFO: Blender create Mesh node P13_HeatPetal.019
+07:37:06 | INFO: Blender create Mesh node P13_HeatPetal.020
+07:37:06 | INFO: Blender create Mesh node P13_HeatPetal.021
+07:37:06 | INFO: Blender create Mesh node P13_HeatPetal.022
+07:37:06 | INFO: Blender create Mesh node P13_HeatPetal.023
+07:37:06 | INFO: Blender create Mesh node P13_HeatPetal.024
+07:37:06 | INFO: Blender create Mesh node P13_HeatPetal.025
+07:37:06 | INFO: Blender create Mesh node P13_HeatPetal.026
+07:37:06 | INFO: Blender create Mesh node P13_HeatPetal.027
+07:37:06 | INFO: Blender create Mesh node P13_HeatPetal.028
+07:37:06 | INFO: Blender create Mesh node P13_HeatPetal.029
+07:37:06 | INFO: Blender create Mesh node P13_HeatPetal.030
+07:37:06 | INFO: Blender create Mesh node P13_HeatPetal.031
+07:37:06 | INFO: Blender create Mesh node P14_InternalMixer.003
+07:37:06 | INFO: Blender create Mesh node P14_InternalMixer.004
+07:37:06 | INFO: Blender create Mesh node P14_InternalMixer.005
+07:37:06 | INFO: Blender create Mesh node P15_ExhaustApron.001
+07:37:06 | INFO: Blender create Mesh node R01_DuctWall_Mesh.001
+07:37:06 | INFO: Blender create Mesh node R02_RecessedLip_Mesh.001
+07:37:06 | INFO: Blender create Mesh node R03_LowerLip_Mesh.001
+07:37:06 | INFO: Blender create Mesh node Cylinder.002
+07:37:06 | INFO: Blender create Mesh node Cylinder.003
+07:37:06 | INFO: Blender create Mesh node R06_Blade_00_Mesh.001
+07:37:06 | INFO: Blender create Mesh node R06_Blade_01_Mesh.001
+07:37:06 | INFO: Blender create Mesh node R06_Blade_02_Mesh.001
+07:37:06 | INFO: Blender create Mesh node R06_Blade_03_Mesh.001
+07:37:06 | INFO: Blender create Mesh node R06_Blade_04_Mesh.001
+07:37:06 | INFO: Blender create Mesh node R06_Blade_05_Mesh.001
+07:37:06 | INFO: Blender create Mesh node R06_Blade_06_Mesh.001
+07:37:06 | INFO: Blender create Mesh node R06_Blade_07_Mesh.001
+07:37:06 | INFO: Blender create Mesh node R06_Blade_08_Mesh.001
+07:37:06 | INFO: Blender create Mesh node R06_Blade_09_Mesh.001
+07:37:06 | INFO: Blender create Mesh node R06_Blade_10_Mesh.001
+07:37:06 | INFO: Blender create Mesh node R06_Blade_11_Mesh.001
+07:37:06 | INFO: Blender create Mesh node Cube.024
+07:37:06 | INFO: Blender create Mesh node Cube.025
+07:37:06 | INFO: Blender create Mesh node Cube.026
+07:37:06 | INFO: Blender create Mesh node Cube.027
+07:37:06 | INFO: Blender create Mesh node Cube.028
+07:37:06 | INFO: Blender create Mesh node Cube.035
+07:37:06 | INFO: Blender create Mesh node S01_VisorRecess_Mesh.002
+07:37:06 | INFO: Blender create Mesh node S02_VisorOptic_Mesh.002
+07:37:06 | INFO: Blender create Mesh node Cube.037
+07:37:06 | INFO: Blender create Mesh node Cube.038
+07:37:06 | INFO: Blender create Mesh node Cube.039
+07:37:06 | INFO: Blender create Mesh node Cube.040
+07:37:06 | INFO: Blender create Mesh node Cube.041
+07:37:06 | INFO: Blender create Mesh node Cube.042
+07:37:06 | INFO: Blender create Mesh node Cube.043
+07:37:06 | INFO: Blender create Mesh node Cylinder.001
+07:37:06 | INFO: Blender create Mesh node Cylinder.004
+07:37:06 | INFO: Blender create Mesh node Cylinder
+07:37:06 | INFO: Blender create Mesh node Cylinder.006
+07:37:06 | INFO: Blender create Mesh node Cylinder.005
+07:37:06 | INFO: Blender create Mesh node Cube.015
+07:37:06 | INFO: Blender create Mesh node Cube.014
+07:37:06 | INFO: Blender create Mesh node Cube.008
+07:37:06 | INFO: Blender create Mesh node Cube.001
+07:37:06 | INFO: Blender create Mesh node Cube.009
+07:37:06 | INFO: Blender create Mesh node Cube.002
+07:37:06 | INFO: Blender create Mesh node Cube.010
+07:37:06 | INFO: Blender create Mesh node Cube.003
+07:37:06 | INFO: Blender create Mesh node Cube.012
+07:37:06 | INFO: Blender create Mesh node Cube.011
+07:37:06 | INFO: Blender create Mesh node Cube.006
+07:37:06 | INFO: Blender create Mesh node Cube.005
+07:37:06 | INFO: Blender create Mesh node Cylinder.008
+07:37:06 | INFO: Blender create Mesh node Cylinder.007
+07:37:06 | INFO: Blender create Mesh node V22_AvionicsServiceLockSlot
+07:37:06 | INFO: Blender create Mesh node Cylinder.011
+07:37:06 | INFO: Blender create Mesh node V22_AvionicsServiceSeal
+07:37:06 | INFO: Blender create Mesh node V22_AvionicsServiceSkin
+07:37:06 | INFO: Blender create Mesh node Cylinder.012
+07:37:06 | INFO: Blender create Mesh node Cylinder.013
+07:37:06 | INFO: Blender create Mesh node Cylinder.014
+07:37:06 | INFO: Blender create Mesh node Cylinder.015
+07:37:06 | INFO: Blender create Mesh node Cylinder.016
+07:37:06 | INFO: Blender create Mesh node Cylinder.017
+07:37:06 | INFO: Blender create Mesh node Cylinder.018
+07:37:06 | INFO: Blender create Mesh node Cylinder.019
+07:37:06 | INFO: Blender create Mesh node Cylinder.020
+07:37:06 | INFO: Blender create Mesh node Cylinder.021
+07:37:06 | INFO: Blender create Mesh node Cylinder.022
+07:37:06 | INFO: Blender create Mesh node Cylinder.023
+07:37:06 | INFO: Blender create Mesh node V22_FanFastenerSlot
+07:37:06 | INFO: Blender create Mesh node V22_FanFastenerSlot.001
+07:37:06 | INFO: Blender create Mesh node V22_FanFastenerSlot.002
+07:37:06 | INFO: Blender create Mesh node V22_FanFastenerSlot.003
+07:37:06 | INFO: Blender create Mesh node V22_FanFastenerSlot.004
+07:37:06 | INFO: Blender create Mesh node V22_FanFastenerSlot.005
+07:37:06 | INFO: Blender create Mesh node V22_FanFastenerSlot.006
+07:37:06 | INFO: Blender create Mesh node V22_FanFastenerSlot.007
+07:37:06 | INFO: Blender create Mesh node V22_FanFastenerSlot.008
+07:37:06 | INFO: Blender create Mesh node V22_FanFastenerSlot.009
+07:37:06 | INFO: Blender create Mesh node V22_FanFastenerSlot.010
+07:37:06 | INFO: Blender create Mesh node V22_FanFastenerSlot.011
+07:37:06 | INFO: Blender create Mesh node V22_FanServiceRim
+07:37:06 | INFO: Blender create Mesh node V22_FanServiceRim.001
+07:37:06 | INFO: Blender create Mesh node V22_ForwardAccessLockSlot
+07:37:06 | INFO: Blender create Mesh node Cylinder.009
+07:37:06 | INFO: Blender create Mesh node V22_ForwardAccessSeal
+07:37:06 | INFO: Blender create Mesh node V22_ForwardAccessSkin
+07:37:06 | INFO: Blender create Mesh node V22_OutboardAccessLockSlot
+07:37:06 | INFO: Blender create Mesh node Cylinder.010
+07:37:06 | INFO: Blender create Mesh node V22_OutboardAccessSeal
+07:37:06 | INFO: Blender create Mesh node V22_OutboardAccessSkin
+07:37:06 | INFO: Blender create Mesh node V22_ReleaseWitness
+07:37:06 | INFO: Blender create Mesh node V22_ReleaseWitness.001
+07:37:06 | INFO: Blender create Mesh node W01_PanelJoint_00.002
+07:37:06 | INFO: Blender create Mesh node W01_PanelJoint_01.002
+07:37:06 | INFO: Blender create Mesh node W04_TipMark.001
+07:37:06 | INFO: Blender create Mesh node Cube.036
+07:37:06 | INFO: Blender create Mesh node Cube.020
+07:37:06 | INFO: Blender create Mesh node Cube.021
+07:37:06 | INFO: Blender create Mesh node Cube.022
+07:37:06 | INFO: Blender create Mesh node Cube.023
+07:37:06 | INFO: Blender create Mesh node W06_ProposedElevonHinge.002
+07:37:06 | INFO: Blender create Mesh node W06_ProposedElevonHinge.001
+07:37:06 | INFO: Blender create Mesh node W07_TipPanelJoint.002
+07:37:06 | INFO: Blender create Mesh node W08_TipFold.002
+07:37:06 | INFO: glTF import finished in 0.62s

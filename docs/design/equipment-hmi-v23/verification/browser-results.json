@@ -1,0 +1,421 @@
+{
+  "scope": "Interactive design prototype; not Minecraft client",
+  "tests": [
+    {
+      "key": "tactical",
+      "viewport": "1440x900",
+      "broken": [],
+      "buttons": [],
+      "heading": "ユニット",
+      "overflow": false,
+      "width": 1440,
+      "pass": true
+    },
+    {
+      "key": "wings",
+      "viewport": "1440x900",
+      "broken": [],
+      "buttons": [],
+      "heading": "Wing管理",
+      "overflow": false,
+      "width": 1440,
+      "pass": true
+    },
+    {
+      "key": "missions",
+      "viewport": "1440x900",
+      "broken": [],
+      "buttons": [],
+      "heading": "任務管理",
+      "overflow": false,
+      "width": 1440,
+      "pass": true
+    },
+    {
+      "key": "supply",
+      "viewport": "1440x900",
+      "broken": [],
+      "buttons": [],
+      "heading": "Dock・補給",
+      "overflow": false,
+      "width": 1440,
+      "pass": true
+    },
+    {
+      "key": "salvage",
+      "viewport": "1440x900",
+      "broken": [],
+      "buttons": [],
+      "heading": "救難・回収",
+      "overflow": false,
+      "width": 1440,
+      "pass": true
+    },
+    {
+      "key": "items",
+      "viewport": "1440x900",
+      "broken": [],
+      "buttons": [],
+      "heading": "機器・アイテム",
+      "overflow": false,
+      "width": 1440,
+      "pass": true
+    },
+    {
+      "key": "settings",
+      "viewport": "1440x900",
+      "broken": [],
+      "buttons": [],
+      "heading": "表示・HMI設定",
+      "overflow": false,
+      "width": 1440,
+      "pass": true
+    },
+    {
+      "key": "tactical",
+      "viewport": "390x844",
+      "broken": [],
+      "buttons": [],
+      "overflow": false,
+      "width": 390,
+      "pass": true
+    },
+    {
+      "key": "wings",
+      "viewport": "390x844",
+      "broken": [],
+      "buttons": [],
+      "overflow": false,
+      "width": 390,
+      "pass": true
+    },
+    {
+      "key": "missions",
+      "viewport": "390x844",
+      "broken": [],
+      "buttons": [],
+      "overflow": false,
+      "width": 390,
+      "pass": true
+    },
+    {
+      "key": "supply",
+      "viewport": "390x844",
+      "broken": [],
+      "buttons": [],
+      "overflow": false,
+      "width": 390,
+      "pass": true
+    },
+    {
+      "key": "salvage",
+      "viewport": "390x844",
+      "broken": [],
+      "buttons": [],
+      "overflow": false,
+      "width": 390,
+      "pass": true
+    },
+    {
+      "key": "visor",
+      "viewport": "390x844",
+      "broken": [],
+      "buttons": [],
+      "overflow": false,
+      "width": 390,
+      "pass": true
+    },
+    {
+      "key": "items",
+      "viewport": "390x844",
+      "broken": [],
+      "buttons": [],
+      "overflow": false,
+      "width": 390,
+      "pass": true
+    },
+    {
+      "key": "settings",
+      "viewport": "390x844",
+      "broken": [],
+      "buttons": [],
+      "overflow": false,
+      "width": 390,
+      "pass": true
+    },
+    {
+      "test": "route edit/add/reorder/altitude/ACK",
+      "pass": true,
+      "evidence": "route-dialog.jpg; revision 2; M-4 on selected units"
+    },
+    {
+      "test": "pointer drag to full Wing rejects and preserves source",
+      "pass": true
+    },
+    {
+      "test": "pointer drag outside Wing leaves membership",
+      "pass": true
+    },
+    {
+      "test": "pointer drag joins active Wing and enters REJOIN",
+      "pass": true
+    },
+    {
+      "test": "100 units filtered all selects 17 Scouts",
+      "pass": true
+    },
+    {
+      "test": "sort and last page preserve 17 selected IDs",
+      "pass": true
+    },
+    {
+      "test": "offline disables command on actual screen",
+      "pass": true
+    },
+    {
+      "test": "permission denial disables command on actual screen",
+      "pass": true
+    },
+    {
+      "test": "cargo full destination visibly rejects",
+      "pass": true
+    },
+    {
+      "test": "salvage plan identifies lost target and launch Dock",
+      "pass": true
+    },
+    {
+      "test": "tactical 1920x1080",
+      "pass": true,
+      "broken": [],
+      "buttons": [],
+      "overflow": false
+    },
+    {
+      "test": "wings 1920x1080",
+      "pass": true,
+      "broken": [],
+      "buttons": [],
+      "overflow": false
+    },
+    {
+      "test": "missions 1920x1080",
+      "pass": true,
+      "broken": [],
+      "buttons": [],
+      "overflow": false
+    },
+    {
+      "test": "supply 1920x1080",
+      "pass": true,
+      "broken": [],
+      "buttons": [],
+      "overflow": false
+    },
+    {
+      "test": "salvage 1920x1080",
+      "pass": true,
+      "broken": [],
+      "buttons": [],
+      "overflow": false
+    },
+    {
+      "test": "items 1920x1080",
+      "pass": true,
+      "broken": [],
+      "buttons": [],
+      "overflow": false
+    },
+    {
+      "test": "settings 1920x1080",
+      "pass": true,
+      "broken": [],
+      "buttons": [],
+      "overflow": false
+    },
+    {
+      "test": "tactical 960x600",
+      "pass": true,
+      "broken": [],
+      "buttons": [],
+      "overflow": false
+    },
+    {
+      "test": "wings 960x600",
+      "pass": true,
+      "broken": [],
+      "buttons": [],
+      "overflow": false
+    },
+    {
+      "test": "missions 960x600",
+      "pass": true,
+      "broken": [],
+      "buttons": [],
+      "overflow": false
+    },
+    {
+      "test": "supply 960x600",
+      "pass": true,
+      "broken": [],
+      "buttons": [],
+      "overflow": false
+    },
+    {
+      "test": "salvage 960x600",
+      "pass": true,
+      "broken": [],
+      "buttons": [],
+      "overflow": false
+    },
+    {
+      "test": "items 960x600",
+      "pass": true,
+      "broken": [],
+      "buttons": [],
+      "overflow": false
+    },
+    {
+      "test": "settings 960x600",
+      "pass": true,
+      "broken": [],
+      "buttons": [],
+      "overflow": false
+    },
+    {
+      "test": "tactical 390x844",
+      "pass": true,
+      "broken": [],
+      "buttons": [],
+      "overflow": false
+    },
+    {
+      "test": "wings 390x844",
+      "pass": true,
+      "broken": [],
+      "buttons": [],
+      "overflow": false
+    },
+    {
+      "test": "missions 390x844",
+      "pass": true,
+      "broken": [],
+      "buttons": [],
+      "overflow": false
+    },
+    {
+      "test": "supply 390x844",
+      "pass": true,
+      "broken": [],
+      "buttons": [],
+      "overflow": false
+    },
+    {
+      "test": "salvage 390x844",
+      "pass": true,
+      "broken": [],
+      "buttons": [],
+      "overflow": false
+    },
+    {
+      "test": "items 390x844",
+      "pass": true,
+      "broken": [],
+      "buttons": [],
+      "overflow": false
+    },
+    {
+      "test": "settings 390x844",
+      "pass": true,
+      "broken": [],
+      "buttons": [],
+      "overflow": false
+    },
+    {
+      "test": "390px roster / map / command navigation",
+      "pass": true
+    },
+    {
+      "test": "390px HUD scene loads eight 3D models with capped markers",
+      "pass": true
+    },
+    {
+      "test": "3D HUD labels have positive camera depth, move in both axes, and cap at eight",
+      "pass": true,
+      "evidence": "visor-frame-a.jpg / visor-frame-b.jpg / visor-camera.jpg"
+    },
+    {
+      "test": "18px readability setting changes roster text without button overflow",
+      "pass": true
+    },
+    {
+      "test": "Dock item seven-view switch resolves actual-model images",
+      "pass": true
+    },
+    {
+      "test": "final tactical 1440x900",
+      "pass": true,
+      "broken": [],
+      "buttons": [],
+      "overflow": false
+    },
+    {
+      "test": "final wings 1440x900",
+      "pass": true,
+      "broken": [],
+      "buttons": [],
+      "overflow": false
+    },
+    {
+      "test": "final missions 1440x900",
+      "pass": true,
+      "broken": [],
+      "buttons": [],
+      "overflow": false
+    },
+    {
+      "test": "final supply 1440x900",
+      "pass": true,
+      "broken": [],
+      "buttons": [],
+      "overflow": false
+    },
+    {
+      "test": "final salvage 1440x900",
+      "pass": true,
+      "broken": [],
+      "buttons": [],
+      "overflow": false
+    },
+    {
+      "test": "final items 1440x900",
+      "pass": true,
+      "broken": [],
+      "buttons": [],
+      "overflow": false
+    },
+    {
+      "test": "final settings 1440x900",
+      "pass": true,
+      "broken": [],
+      "buttons": [],
+      "overflow": false
+    },
+    {
+      "test": "final mixed-role HUD loads, caps markers, shows combat front identity",
+      "pass": true
+    },
+    {
+      "test": "zero-unit HUD contains zero aircraft and markers",
+      "pass": true
+    },
+    {
+      "test": "256-unit all selection; mixed Wing summary",
+      "pass": true
+    },
+    {
+      "test": "final pointer drag rejects overflow and does not swallow next navigation",
+      "pass": true
+    }
+  ]
+}

@@ -15,7 +15,7 @@ final class SecurityPatrolPolicyTest {
 		Vec3 opposite = SecurityPatrolPolicy.patrolPosition(anchor, 2, 4, 0, 12);
 
 		assertTrue(first.distanceTo(opposite) > 14.0);
-		assertEquals(67.8, first.y, 0.001);
+		assertEquals(72.0, first.y, 0.001);
 	}
 
 	@Test

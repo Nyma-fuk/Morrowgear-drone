@@ -1,1 +1,6 @@
-{"parent":"minecraft:item/generated","textures":{"layer0":"morrowgear_drone:item/autocannon_module"}}
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "morrowgear_drone:item/autocannon_module"
+  }
+}

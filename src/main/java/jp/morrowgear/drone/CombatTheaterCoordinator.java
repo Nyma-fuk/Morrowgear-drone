@@ -11,7 +11,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 
 final class CombatTheaterCoordinator {
-	private static final long PLAN_TTL_TICKS = 10L;
 	private static final Map<Key, CachedPlan> PLANS = new HashMap<>();
 
 	private CombatTheaterCoordinator() {}
@@ -20,7 +19,7 @@ final class CombatTheaterCoordinator {
 		Key key = new Key(level.dimension().toString(), owner.getUUID());
 		long now = level.getGameTime();
 		CachedPlan cached = PLANS.get(key);
-		if (cached != null && now - cached.tick() < PLAN_TTL_TICKS) return cached.snapshot();
+		if (cached != null && now - cached.tick() < CombatTheaterPolicy.PLAN_TTL_TICKS) return cached.snapshot();
 
 		LivingEntity recentAttacker = owner.tickCount - owner.getLastHurtByMobTimestamp() <= 200
 			? owner.getLastHurtByMob() : null;
@@ -53,7 +52,7 @@ final class CombatTheaterCoordinator {
 		CombatTheaterPolicy.Plan plan = CombatTheaterPolicy.allocate(contacts, units);
 		String summary = summary(plan, units);
 		String fronts = fronts(plan);
-		Snapshot snapshot = new Snapshot(plan.assignments(), summary, fronts, plan.hostileCount(),
+		Snapshot snapshot = new Snapshot(now, plan.assignments(), summary, fronts, plan.hostileCount(),
 			plan.clusters().size(), plan.reserveCount());
 		PLANS.put(key, new CachedPlan(now, snapshot));
 		prune(now);
@@ -99,7 +98,7 @@ final class CombatTheaterCoordinator {
 
 	static void clear() { PLANS.clear(); }
 
-	record Snapshot(Map<String, CombatTheaterPolicy.Assignment> assignments, String summary,
+	record Snapshot(long plannedAt, Map<String, CombatTheaterPolicy.Assignment> assignments, String summary,
 		String fronts, int hostileCount, int clusterCount, int reserveCount) {
 		CombatTheaterPolicy.Assignment assignment(String unitId) { return assignments.get(unitId); }
 	}

@@ -1,0 +1,20 @@
+// Keep focused results separate from other agents' test runs in the shared checkout.
+allprojects {
+    plugins.withId('java') {
+        tasks.register('dockReturnTest', Test) {
+            dependsOn tasks.named('compileTestJava')
+            testClassesDirs = sourceSets.test.output.classesDirs
+            classpath = sourceSets.test.runtimeClasspath
+            useJUnitPlatform()
+            filter {
+                [ 'DynamicDockReturnContractTest', 'DockAllocationPolicyTest',
+                  'DockAllocationUiPolicyTest', 'DockApproachPlanTest', 'DockServicePolicyTest',
+                  'DockFinalApproachIntegrationTest', 'DroneCommandPolicyTest',
+                  'DroneTaskStackTest', 'AdaptiveRechargeEntitySequenceTest',
+                  'AdaptiveRechargeRuntimeStateTest', 'ReliefRotationIntegrationTest' ].each {
+                    includeTestsMatching("jp.morrowgear.drone.${it}")
+                }
+            }
+        }
+    }
+}

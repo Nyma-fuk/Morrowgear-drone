@@ -1,0 +1,32 @@
+{
+  "id": "laser_cell",
+  "passed": true,
+  "beamAnchor": null,
+  "beamAnchorError": 0,
+  "serviceBayAnchors": {},
+  "serviceBayAnchorError": 0,
+  "maxBoundsError": 0.0,
+  "maxPerPartBoundsError": 0.0,
+  "missingParts": [],
+  "sourceBounds": [
+    -0.3400000035762787,
+    -0.3400000035762787,
+    0.0,
+    0.3400000035762787,
+    0.3400000035762787,
+    1.5799999237060547
+  ],
+  "importBounds": [
+    -0.3400000035762787,
+    -0.3400000035762787,
+    0.0,
+    0.3400000035762787,
+    0.3400000035762787,
+    1.5799999237060547
+  ],
+  "sourceMeshCount": 14,
+  "importMeshCount": 14,
+  "state": "service / static GLB",
+  "frontAfterImport": "-Y",
+  "upAfterImport": "+Z"
+}

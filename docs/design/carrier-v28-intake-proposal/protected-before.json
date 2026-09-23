@@ -1,0 +1,17 @@
+{
+  "docs\\design\\carrier-v27\\carrier-v27.blend": "a7399cfb58f44cd94385c4b461f41fa65d3d6a1098507d8fea06c1079acddd90",
+  "docs\\design\\carrier-v27\\carrier-v27.glb": "22c1aca69773699f4a28570e9951471a5000dc79ae511bba837ba2e794cd5bdb",
+  "src\\main\\resources\\assets\\morrowgear_drone\\items\\carrier_console.json": "e5b5b11738ffbd8b4d34c8f2bd7c08ab3419767da452b1364c0d9721993b2510",
+  "src\\main\\resources\\assets\\morrowgear_drone\\items\\carrier_unit.json": "2ca2ba936c7f3f4726666c2f95a356c9b9e7d870564080cca8013f1f75ba0475",
+  "src\\main\\resources\\assets\\morrowgear_drone\\textures\\item\\carrier_console.png": "4b33757658e4981918222a4970407c024a420500d58f20b6da142129d7385000",
+  "src\\main\\resources\\assets\\morrowgear_drone\\textures\\item\\carrier_unit.png": "009c2f586d9269060f2f8ef51ba3cf432146381cbad2b9e41573c5a34ce6d5da",
+  "src\\main\\resources\\assets\\morrowgear_drone\\textures\\runtime\\carrier.png": "c6a9db9126cb9a7cb555ffa4124b76502ac17e3a95bbe7f0db9ea410c9142788",
+  "src\\main\\resources\\assets\\morrowgear_drone\\textures\\runtime\\carrier_lod.png": "82999e068560b547aaa01749c5e67a1a319f1b75ae51302d56d7d549d337a428",
+  "src\\main\\resources\\assets\\morrowgear_drone\\models\\item\\carrier_console.json": "78f077c0d9c78cd7326642ec9cf6c30c73414be1d9b3e170c15bd7e3b480ef76",
+  "src\\main\\resources\\assets\\morrowgear_drone\\models\\item\\carrier_unit.json": "56ddbab65f76067ebf45a407a995918b801c02ebeec9efd4eeaa3b0421a4538a",
+  "src\\main\\resources\\assets\\morrowgear_drone\\models\\runtime\\carrier.mgm": "168d3f254a54d471a4fe928fd579bd82fa138249e2efa8e54f15051ace648c68",
+  "src\\main\\resources\\assets\\morrowgear_drone\\models\\runtime\\carrier_lod.mgm": "ca298ad0b6fb726b5765b7aed32439895d60f1f24833883cdc8817e8d1460acb",
+  "src\\main\\resources\\assets\\morrowgear_drone\\textures\\item\\autocannon_magazine.png": "c64f449d8808f403096de36c45a2a70e2ae7fbae97f46403a8814f49f8dc94fe",
+  "src\\main\\resources\\assets\\morrowgear_drone\\textures\\item\\laser_cell.png": "3c9c8e17a06d6d66196ae0f41691b82be725cba491e8f5c0ce97de1fced7fb7a",
+  "src\\main\\resources\\assets\\morrowgear_drone\\textures\\item\\micro_missile_pack.png": "08670e57f272b842b5167864389c228f145bafea9ca11983b64ccae871580882"
+}

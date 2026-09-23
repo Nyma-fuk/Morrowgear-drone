@@ -1,0 +1,57 @@
+{
+  "id": "standard_battery_pack",
+  "status": "design candidate / not installed",
+  "checks": [
+    {
+      "frame": 1,
+      "vertices": 3024,
+      "bounds": [
+        -0.5600000023841858,
+        -0.4020000100135803,
+        0.0,
+        0.5600000023841858,
+        0.4235000014305115,
+        0.21000000834465027
+      ],
+      "mirrorError": 0.0,
+      "passed": true
+    },
+    {
+      "frame": 40,
+      "vertices": 3024,
+      "bounds": [
+        -0.5600000023841858,
+        -0.4020000100135803,
+        0.0,
+        0.5600000023841858,
+        0.4235000014305115,
+        0.21000000834465027
+      ],
+      "mirrorError": 0.0,
+      "passed": true
+    },
+    {
+      "frame": 80,
+      "vertices": 3024,
+      "bounds": [
+        -0.5600000023841858,
+        -0.4020000100135803,
+        0.0,
+        0.5600000023841858,
+        0.4235000014305115,
+        0.21000000834465027
+      ],
+      "mirrorError": 0.0,
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "axis": {
+    "symmetry": "X=0",
+    "front": "-Y",
+    "up": "+Z"
+  },
+  "legacy": false,
+  "blendSha256": "4db656d6cb919adb600d32a8a2f2484211de642c44edc0287d02bf99427fb1da",
+  "glbSha256": "0a91cfcdc590d51a2a07c4e61f5636655d4ffeabd53a4ab71cdb41c66317cfc0"
+}

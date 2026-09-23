@@ -1,0 +1,170 @@
+{
+  "status": "UNAPPROVED_GEOMETRY_HYPOTHESIS",
+  "boundary": [
+    [
+      0,
+      -2.66,
+      0.08
+    ],
+    [
+      0.59,
+      -2.62,
+      0.085
+    ],
+    [
+      0.94,
+      -2.34,
+      0.09
+    ],
+    [
+      1.3,
+      -2.1,
+      0.1
+    ],
+    [
+      4.20326628,
+      0.15709158,
+      0.30180101
+    ],
+    [
+      4.83663667,
+      0.91032177,
+      0.29112542
+    ],
+    [
+      4.20888248,
+      1.66371968,
+      0.5472977
+    ],
+    [
+      4.06503438,
+      1.12532096,
+      0.48638087
+    ],
+    [
+      2.61,
+      1.74,
+      0.12
+    ],
+    [
+      1.12,
+      2.3,
+      0.15
+    ],
+    [
+      0,
+      2.38,
+      0.12
+    ]
+  ],
+  "crown": [
+    [
+      -2.66,
+      -0.005
+    ],
+    [
+      -2.36,
+      0.18
+    ],
+    [
+      -1.7,
+      0.44
+    ],
+    [
+      -0.85,
+      0.67
+    ],
+    [
+      -0.25,
+      0.72
+    ],
+    [
+      0.7,
+      0.66
+    ],
+    [
+      1.32,
+      0.4
+    ],
+    [
+      1.78,
+      0.17
+    ],
+    [
+      2.38,
+      0.12
+    ]
+  ],
+  "belly": [
+    [
+      -2.66,
+      -0.28
+    ],
+    [
+      -2.1,
+      -0.39
+    ],
+    [
+      -1.0,
+      -0.4
+    ],
+    [
+      0.5,
+      -0.33
+    ],
+    [
+      1.32,
+      -0.15
+    ],
+    [
+      2.38,
+      -0.025
+    ]
+  ],
+  "fanCenter": [
+    1.91,
+    0.01826677
+  ],
+  "fanRadius": 0.9,
+  "fanLipTop": 0.357,
+  "wingDeck": 0.365,
+  "geometricSymmetry": true,
+  "isAerodynamicSimulation": false,
+  "rootBlendX": [
+    0.58,
+    1.26
+  ],
+  "thicknessRatioArtParameters": [
+    [
+      0,
+      0.16
+    ],
+    [
+      1.2,
+      0.16
+    ],
+    [
+      2.8,
+      0.14
+    ],
+    [
+      4.74,
+      0.11
+    ]
+  ],
+  "sectionLaw": "sqrt(u)*(1-u), normalized at u=1/3; finite edge thickness",
+  "controlAuthorityVerified": false,
+  "massPropertiesVerified": false,
+  "tipConstruction": "planar full-chord panel; mirrored",
+  "sourceEvidence": "single oblique image; corner correspondences are hypotheses",
+  "cameraRefitted": false,
+  "unseenViewsAreInferred": true,
+  "cameraParameters": [
+    0.5088105223432564,
+    0.47195985608949165,
+    188.62760203754445,
+    44.57453811036393,
+    717.16412071053,
+    437.29683806384077
+  ]
+}

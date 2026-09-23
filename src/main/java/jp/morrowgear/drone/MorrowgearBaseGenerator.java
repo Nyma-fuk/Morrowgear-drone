@@ -138,9 +138,9 @@ final class MorrowgearBaseGenerator {
 	}
 
 	private static void placeDock(ServerLevel level, ServerPlayer player, BlockPos center) {
-		for (int index = 0; index < MorrowgearDrone.DOCK_PARTS.length; index++) {
-			BlockPos part = center.offset(index % 3 - 1, 0, index / 3 - 1);
-			level.setBlockAndUpdate(part, MorrowgearDrone.DOCK_PARTS[index].defaultBlockState());
+		for (int index = 0; index < MorrowgearDrone.WIDE_DOCK_PARTS.length; index++) {
+			BlockPos part = center.offset(index % 5 - 2, 0, index / 5 - 2);
+			level.setBlockAndUpdate(part, MorrowgearDrone.WIDE_DOCK_PARTS[index].defaultBlockState());
 		}
 		if (level.getBlockEntity(center) instanceof DockBlockEntity dock) dock.initialize(player);
 	}
@@ -181,7 +181,7 @@ final class MorrowgearBaseGenerator {
 			if (drone == null) continue;
 			int wing = index / 8;
 			int slot = index % 8;
-			drone.setPos(dock.getX() + 0.5, dock.getY() + 0.29, dock.getZ() + 0.5);
+			drone.setPos(dock.getX() + 0.5, dock.getY() + 0.316, dock.getZ() + 0.5);
 			drone.initializeOwner(player);
 			drone.assignGroup(BASE_GROUP_PREFIX + WINGS[wing]);
 			drone.assignRole(WING_ROLES[slot]);
@@ -193,10 +193,11 @@ final class MorrowgearBaseGenerator {
 			if (level.getBlockEntity(dock) instanceof DockBlockEntity serviceDock) {
 				serviceDock.setItem(DockBlockEntity.SLOT_POWER_INPUT, new ItemStack(MorrowgearDrone.POWER_CELL, 16));
 				serviceDock.setItem(DockBlockEntity.SLOT_REPAIR, new ItemStack(Items.IRON_INGOT, 32));
+				serviceDock.setItem(DockBlockEntity.SUPPLY_BUFFER_START, new ItemStack(SupplyItems.LASER_CELL, 16));
 				if (SECURITY_LOADOUTS[slot] == SecurityLoadout.AUTOCANNON)
-					serviceDock.setItem(DockBlockEntity.SLOT_AMMUNITION, new ItemStack(Items.IRON_NUGGET, 64));
+					serviceDock.setItem(DockBlockEntity.SLOT_AMMUNITION, new ItemStack(SupplyItems.AUTOCANNON_MAGAZINE, 16));
 				else if (SECURITY_LOADOUTS[slot] == SecurityLoadout.MISSILE)
-					serviceDock.setItem(DockBlockEntity.SLOT_AMMUNITION, new ItemStack(Items.FIREWORK_ROCKET, 16));
+					serviceDock.setItem(DockBlockEntity.SLOT_AMMUNITION, new ItemStack(SupplyItems.MICRO_MISSILE_PACK, 16));
 			}
 		}
 	}

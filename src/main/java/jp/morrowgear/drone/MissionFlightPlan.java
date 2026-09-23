@@ -22,8 +22,8 @@ final class MissionFlightPlan {
 		if (underground || horizontalDistance(current, destination) <= ARRIVAL_APPROACH_DISTANCE) return destination;
 		Corridor corridor = corridor(level, current, destination);
 		double altitude = corridor.waterRatio() >= 0.7
-			? corridor.maximumSurfaceY() + 3.0
-			: corridor.maximumSurfaceY() + 7.0;
+			? corridor.maximumSurfaceY() + 5.0
+			: corridor.maximumSurfaceY() + 10.0;
 		altitude += Math.max(0.0, clearanceBoost);
 		altitude = Math.max(altitude, destination.y + 3.0);
 		Vec3 horizontal = destination.subtract(current).multiply(1, 0, 1);
@@ -46,7 +46,7 @@ final class MissionFlightPlan {
 		BlockPos targetBlock = target.blockPosition();
 		boolean submerged = level.getFluidState(targetBlock).is(FluidTags.WATER)
 			|| level.getFluidState(targetBlock).is(FluidTags.LAVA);
-		if (!submerged && !isUnderground(level, targetTop)) return targetTop.add(0, 4.5, 0);
+		if (!submerged && !isUnderground(level, targetTop)) return targetTop.add(0, AirframeEnvelope.ORBIT_HEIGHT, 0);
 
 		int surfaceY = level.getHeight(Heightmap.Types.WORLD_SURFACE,
 			targetBlock.getX(), targetBlock.getZ());
@@ -54,7 +54,7 @@ final class MissionFlightPlan {
 	}
 
 	static double observationAltitude(int worldSurfaceY) {
-		return worldSurfaceY + 2.4;
+		return worldSurfaceY + AirframeEnvelope.ORBIT_HEIGHT;
 	}
 
 	static double requiredOrbitCenterAltitude(ServerLevel level, Vec3 center, int count) {
@@ -64,7 +64,7 @@ final class MissionFlightPlan {
 		int samples = Math.max(16, Math.min(32, count * 4));
 		for (int index = 0; index < samples; index++) {
 			double angle = index * Math.PI * 2.0 / samples;
-			for (double radialOffset : new double[] {-0.9, 0.0, 0.9}) {
+			for (double radialOffset : new double[] {-1.6, 0.0, 1.6}) {
 				double sampleRadius = Math.max(0.0, radius + radialOffset);
 				int x = (int) Math.floor(center.x + Math.cos(angle) * sampleRadius);
 				int z = (int) Math.floor(center.z + Math.sin(angle) * sampleRadius);
@@ -73,7 +73,7 @@ final class MissionFlightPlan {
 			}
 		}
 		// The lowest orbit slot is 0.45 blocks below the center plane.
-		return Math.max(center.y, maximumSurface + 2.15 + 0.45);
+		return Math.max(center.y, maximumSurface + AirframeEnvelope.ORBIT_HEIGHT);
 	}
 
 	private static Corridor corridor(ServerLevel level, Vec3 current, Vec3 destination) {

@@ -5,6 +5,8 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.List;
 import jp.morrowgear.drone.BeamVisibilityPolicy;
 import jp.morrowgear.drone.CombatState;
+import jp.morrowgear.drone.DroneHardpoints;
+import jp.morrowgear.drone.EffectReadabilityPolicy;
 import jp.morrowgear.drone.MorrowgearDrone;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.SubmitNodeCollector;
@@ -26,16 +28,28 @@ final class CombatEffectRenderer {
 	static void render(DroneRenderState state, PoseStack poseStack, SubmitNodeCollector collector,
 		Vec3 cameraOffset) {
 		if (!state.combatState.active()) return;
-		Vec3 forward = forward(state.heading);
-		Vec3 gunOutlet = forward.scale(0.72).add(0, 0.22, 0);
-		Vec3 laserOutlet = forward.scale(0.08).add(0, 0.08, 0);
+		Vec3 forward = rotated(state, new Vec3(0, 0, 1));
+		Vec3 right = rotated(state, new Vec3(1, 0, 0));
+		Vec3 gunOutlet = rotated(state, ((int)(state.ageInTicks - state.combatShotAge) & 1) == 0
+			? DroneHardpoints.GUN_LEFT : DroneHardpoints.GUN_RIGHT);
+		Vec3 laserOutlet = rotated(state, DroneHardpoints.LASER);
+		if (state.combatState == CombatState.LASER_FIRE && state.combatTargetOffset != null) {
+			Minecraft client = Minecraft.getInstance();
+			if (client.level != null && client.player != null) {
+				Vec3 origin = new Vec3(state.x, state.y, state.z);
+				HitResult hit = client.level.clip(new ClipContext(origin.add(laserOutlet),
+					origin.add(state.combatTargetOffset), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, client.player));
+				if (hit.getType() != HitResult.Type.MISS) state.combatTargetOffset = hit.getLocation().subtract(origin);
+			}
+		}
+		double pixels = EffectProjection.pixelsPerBlock(new Vec3(state.x, state.y, state.z));
 		collector.submitCustomGeometry(poseStack, RenderTypes.entityTranslucentEmissive(WHITE_TEXTURE),
 			(pose, consumer) -> {
 				if (state.combatState == CombatState.FLARE_ENTRY) renderEntryPulse(
 					pose, consumer, laserOutlet, forward, state.combatStateAge);
 				if (state.combatState == CombatState.LASER_CHARGE) {
-					renderCharge(pose, consumer, laserOutlet, forward,
-						state.combatCharge / 1000.0, state.ageInTicks);
+					renderCharge(pose, consumer, laserOutlet, forward, right,
+						state.combatCharge / 1000.0, state.ageInTicks, pixels);
 				}
 				if (state.combatState == CombatState.LASER_FIRE && state.combatTargetOffset != null) {
 					renderLaserImpact(pose, consumer, laserOutlet,
@@ -52,7 +66,7 @@ final class CombatEffectRenderer {
 							state.combatTargetOffset, state.combatShotAge, cameraOffset);
 					} else {
 						renderHighOutputLaser(pose, consumer, laserOutlet,
-							state.combatTargetOffset, state.ageInTicks, cameraOffset);
+							state.combatTargetOffset, state.ageInTicks, cameraOffset, pixels);
 					}
 				});
 			if (state.combatState == CombatState.LASER_FIRE) {
@@ -61,7 +75,7 @@ final class CombatEffectRenderer {
 				if (!visibleSpans.isEmpty()) {
 					collector.submitCustomGeometry(poseStack, MorrowgearRenderTypes.visibleEnergyCore(),
 						(pose, consumer) -> renderVisibleLaser(pose, consumer, visibleSpans,
-							state.ageInTicks, cameraOffset));
+							state.ageInTicks, cameraOffset, pixels));
 				}
 			} else {
 				jp.morrowgear.drone.CombatPolicy.TracerSegment tracer =
@@ -104,8 +118,8 @@ final class CombatEffectRenderer {
 	}
 
 	private static void renderVisibleLaser(PoseStack.Pose pose, VertexConsumer consumer,
-		List<BeamSpan> spans, float age, Vec3 cameraOffset) {
-		double pulse = 0.5 + Math.sin(age * 0.62) * 0.5;
+		List<BeamSpan> spans, float age, Vec3 cameraOffset, double pixels) {
+		double pulse = 0.5 + Math.sin(age * 0.18) * 0.12;
 		for (BeamSpan span : spans) {
 			emitBeamRibbon(pose, consumer, span.start(), span.end(), cameraOffset,
 				(float)(0.58 + pulse * 0.08), 255, 18, 2, 46);
@@ -114,7 +128,7 @@ final class CombatEffectRenderer {
 			emitBeamRibbon(pose, consumer, span.start(), span.end(), cameraOffset,
 				(float)(0.15 + pulse * 0.018), 255, 178, 58, 230);
 			emitBeamRibbon(pose, consumer, span.start(), span.end(), cameraOffset,
-				0.058f, 255, 255, 246, 255);
+				EffectReadabilityPolicy.width(0.058f, pixels, 1.1f, 2.0f), 255, 255, 246, 255);
 		}
 	}
 
@@ -187,24 +201,31 @@ final class CombatEffectRenderer {
 	}
 
 	private static void renderCharge(PoseStack.Pose pose, VertexConsumer consumer,
-		Vec3 outlet, Vec3 forward, double charge, float age) {
-		Vec3 right = new Vec3(-forward.z, 0, forward.x);
-		double pulse = 0.92 + Math.sin(age * 0.28) * 0.08;
-		Vec3 lens = outlet.add(0, -0.012, 0);
-		emitDisc(pose, consumer, lens, right, forward, (0.17 + charge * 0.035) * pulse,
+		Vec3 outlet, Vec3 forward, Vec3 right, double charge, float age, double pixels) {
+		charge = Math.clamp(charge, 0, 1);
+		double pulse = 0.98 + Math.sin(age * 0.18) * 0.02;
+		Vec3 normal = right.cross(forward);
+		Vec3 lens = outlet.add(normal.scale(.003));
+		emitDisc(pose, consumer, lens, right, forward, (0.067 + charge * 0.018) * pulse,
 			255, 20, 3, (int)(72 + charge * 78));
-		emitDisc(pose, consumer, lens.add(0, -0.004, 0), right, forward,
-			(0.105 + charge * 0.03) * pulse, 255, (int)(66 + charge * 116), 12,
+		emitDisc(pose, consumer, lens.add(normal.scale(.002)), right, forward,
+			(0.036 + charge * 0.018) * pulse, 255, (int)(66 + charge * 116), 12,
 			(int)(125 + charge * 105));
-		emitDisc(pose, consumer, lens.add(0, -0.008, 0), right, forward,
-			(0.045 + charge * 0.027) * pulse, 255, 252, 224, (int)(155 + charge * 100));
-		emitRing(pose, consumer, lens, right, forward, (0.19 + charge * 0.025) * pulse,
-			(float)(0.018 + charge * 0.012), 255, 78, 8, (int)(145 + charge * 90));
+		emitDisc(pose, consumer, lens.add(normal.scale(.004)), right, forward,
+			EffectReadabilityPolicy.width((float)(0.012 + charge * 0.020), pixels, 1.1f, 1.6f)
+				* pulse, 255, 252, 224, (int)(70 + charge * 185));
+		emitRing(pose, consumer, lens, right, forward, .09 * pulse,
+			(float)(0.008 + charge * 0.005), 255, 78, 8,
+			(int)((145 + charge * 90) * EffectReadabilityPolicy.detail(pixels)));
+	}
+
+	private static Vec3 rotated(DroneRenderState state, Vec3 local) {
+		return DroneHardpoints.rotate(local, state.heading, state.flightPitch, state.flightRoll);
 	}
 
 	private static void renderHighOutputLaser(PoseStack.Pose pose, VertexConsumer consumer,
-		Vec3 outlet, Vec3 target, float age, Vec3 cameraOffset) {
-		double pulse = 0.5 + Math.sin(age * 0.62) * 0.5;
+		Vec3 outlet, Vec3 target, float age, Vec3 cameraOffset, double pixels) {
+		double pulse = 0.5 + Math.sin(age * 0.18) * 0.12;
 		emitBeamRibbon(pose, consumer, outlet, target, cameraOffset,
 			(float)(0.58 + pulse * 0.08), 255, 18, 2, 36);
 		emitBeamRibbon(pose, consumer, outlet, target, cameraOffset,
@@ -212,7 +233,7 @@ final class CombatEffectRenderer {
 		emitBeamRibbon(pose, consumer, outlet, target, cameraOffset,
 			(float)(0.145 + pulse * 0.016), 255, 178, 58, 210);
 		emitBeamRibbon(pose, consumer, outlet, target, cameraOffset,
-			0.052f, 255, 255, 246, 255);
+			EffectReadabilityPolicy.width(0.052f, pixels, 1.1f, 2.0f), 255, 255, 246, 255);
 	}
 
 	private static void renderLaserImpact(PoseStack.Pose pose, VertexConsumer consumer,
@@ -280,7 +301,7 @@ final class CombatEffectRenderer {
 			end.add(horizontal), end.subtract(horizontal), red, green, blue, alpha);
 	}
 
-	private static void emitBeamRibbon(PoseStack.Pose pose, VertexConsumer consumer,
+	static void emitBeamRibbon(PoseStack.Pose pose, VertexConsumer consumer,
 		Vec3 start, Vec3 end, Vec3 cameraOffset, float width,
 		int red, int green, int blue, int alpha) {
 		Vec3 delta = end.subtract(start);

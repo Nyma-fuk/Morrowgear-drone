@@ -1,0 +1,20 @@
+{
+  "bounds": [
+    -2.5,
+    -2.5,
+    0.0,
+    2.5,
+    2.5,
+    0.4100000262260437
+  ],
+  "symmetryError": 0.0,
+  "landingDeckZ": 0.3,
+  "footprintBlocks": [
+    5,
+    5
+  ],
+  "recommendedPitchBlocks": 7,
+  "continuousLandingDeckHalfWidth": 1.69,
+  "cornerColumns": 0,
+  "status": "design only / not installed"
+}

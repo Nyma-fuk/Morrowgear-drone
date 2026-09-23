@@ -82,12 +82,7 @@ final class FieldOperationRegistry {
 		Operation(FieldOperationType type, BlockPos anchor, int requestedRadius, long now) {
 			this.type = type;
 			this.anchor = anchor.immutable();
-			this.radius = switch (type) {
-				case ORE -> Math.max(12, Math.min(48, requestedRadius));
-				case FORESTRY -> Math.max(6, Math.min(24, requestedRadius));
-				case EXCAVATE -> Math.max(2, Math.min(8, requestedRadius));
-				default -> 0;
-			};
+			this.radius = DroneStatePolicy.fieldRadius(type, requestedRadius);
 			minX = anchor.getX() - radius;
 			minZ = anchor.getZ() - radius;
 			sizeX = radius * 2 + 1;
@@ -264,12 +259,7 @@ final class FieldOperationRegistry {
 		}
 
 		private boolean matches(FieldOperationType requestedType, BlockPos requestedAnchor, int requestedRadius) {
-			int normalizedRadius = switch (requestedType) {
-				case ORE -> Math.max(12, Math.min(48, requestedRadius));
-				case FORESTRY -> Math.max(6, Math.min(24, requestedRadius));
-				case EXCAVATE -> Math.max(2, Math.min(8, requestedRadius));
-				default -> 0;
-			};
+			int normalizedRadius = DroneStatePolicy.fieldRadius(requestedType, requestedRadius);
 			return type == requestedType && anchor.equals(requestedAnchor) && radius == normalizedRadius;
 		}
 

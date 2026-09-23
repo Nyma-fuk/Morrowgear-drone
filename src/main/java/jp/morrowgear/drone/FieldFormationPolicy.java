@@ -9,6 +9,9 @@ final class FieldFormationPolicy {
 	static Vec3 orbit(Vec3 center, int slot, int count, double radius, double height,
 		long gameTime, double angularSpeed, double phaseBias) {
 		int safeCount = Math.max(1, count);
+		radius = Math.max(radius, AirframeEnvelope.orbitRadius(safeCount));
+		height = Math.max(height, AirframeEnvelope.ORBIT_HEIGHT);
+		angularSpeed = AirframeEnvelope.angularSpeed(angularSpeed, radius);
 		double phase = gameTime * angularSpeed + phaseBias
 			+ Math.PI * 2.0 * Math.max(0, slot) / safeCount;
 		return center.add(Math.cos(phase) * radius, height, Math.sin(phase) * radius);

@@ -1,0 +1,737 @@
+Info: Applied modifier was not first, result may not be as expected
+Info: Applied modifier was not first, result may not be as expected
+Info: Saved as "carrier-v27.blend"
+INFO Draco is available, use library at C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\work\blender-portable\blender-5.2.0-windows-x64\5.2\scripts\addons_core\io_scene_gltf2\bf_intern_draco_bridge.dll
+INFO MeshOptimizer is available, use library at C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\work\blender-portable\blender-5.2.0-windows-x64\5.2\scripts\addons_core\io_scene_gltf2\bf_intern_meshopt_bridge.dll
+17:29:02 | INFO: Starting glTF 2.0 export
+17:29:02 | INFO: Extracting primitive: AmberExhaustCore.003
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: AmberExhaustCore.004
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: AmberExhaustCore.005
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: ArmoredDefenseMount.002
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: ArmoredDefenseMount.003
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: BellyAccessArmor.005
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: BellyAccessArmor.006
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: BellyAccessArmor.007
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: BellyAccessArmor.008
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: BellyAccessArmor.009
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: BellyAccessRecess.005
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: BellyAccessRecess.006
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: BellyAccessRecess.007
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: BellyAccessRecess.008
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: BellyAccessRecess.009
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: BellyCaptiveLock.005
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: BellyCaptiveLock.006
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: BellyCaptiveLock.007
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: BellyCaptiveLock.008
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: BellyCaptiveLock.009
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: BellyCoolingLouver.020
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: BellyCoolingLouver.021
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: BellyCoolingLouver.022
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: BellyCoolingLouver.023
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: BellyCoolingLouver.024
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: BellyCoolingLouver.025
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: BellyCoolingLouver.026
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: BellyCoolingLouver.027
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: BellyCoolingLouver.028
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: BellyCoolingLouver.029
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: BellyCoolingLouver.030
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: BellyCoolingLouver.031
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: BellyCoolingLouver.032
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: BellyCoolingLouver.033
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: BellyCoolingLouver.034
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: BellyCoolingLouver.035
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: BellyCoolingLouver.036
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: BellyCoolingLouver.037
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: BellyCoolingLouver.038
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: BellyCoolingLouver.039
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: BellyCoolingRecess.004
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: BellyCoolingRecess.005
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: BellyCoolingRecess.006
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: BellyCoolingRecess.007
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: BellyLongeron.004
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: BellyLongeron.005
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: BellyLongeron.006
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: BellyLongeron.007
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: CarrierContinuousHull.001
+17:29:02 | INFO: Primitives created: 2
+17:29:02 | INFO: Extracting primitive: CitadelAccessLock.004
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: CitadelAccessLock.005
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: CitadelAccessLock.006
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: CitadelAccessLock.007
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: CitadelArmoredAccess.004
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: CitadelArmoredAccess.005
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: CitadelArmoredAccess.006
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: CitadelArmoredAccess.007
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: CitadelButtress.003
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: CitadelButtress.004
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: CitadelButtress.005
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: CitadelNoseLight.001
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: CitadelNoseRecess.001
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: CitadelSensorTerrace.001
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: CitadelTerraceServicePlate.004
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: CitadelTerraceServicePlate.005
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: CitadelTerraceServicePlate.006
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: CitadelTerraceServicePlate.007
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: CitadelTerraceServiceSeal.004
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: CitadelTerraceServiceSeal.005
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: CitadelTerraceServiceSeal.006
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: CitadelTerraceServiceSeal.007
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckCenterDrain.005
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckCenterDrain.006
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckCenterDrain.007
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckCenterDrain.008
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckCenterDrain.009
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckExpansionJoint.003
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckExpansionJoint.004
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckExpansionJoint.005
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckMaintenanceLid.002
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckMaintenanceLid.003
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckMaintenanceSeal.002
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckMaintenanceSeal.003
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckPanelPlate.010
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckPanelPlate.011
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckPanelPlate.012
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckPanelPlate.013
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckPanelPlate.014
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckPanelPlate.015
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckPanelPlate.016
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckPanelPlate.017
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckPanelPlate.018
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckPanelPlate.019
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckPanelSeal.010
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckPanelSeal.011
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckPanelSeal.012
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckPanelSeal.013
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckPanelSeal.014
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckPanelSeal.015
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckPanelSeal.016
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckPanelSeal.017
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckPanelSeal.018
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckPanelSeal.019
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckThreshold.002
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckThreshold.003
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckWallBrace.010
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckWallBrace.011
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckWallBrace.012
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckWallBrace.013
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckWallBrace.014
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckWallBrace.015
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckWallBrace.016
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckWallBrace.017
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckWallBrace.018
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckWallBrace.019
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckWorklight.010
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckWorklight.011
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckWorklight.012
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckWorklight.013
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckWorklight.014
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckWorklight.015
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckWorklight.016
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckWorklight.017
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckWorklight.018
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeckWorklight.019
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeepHangarJamb.002
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DeepHangarJamb.003
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DefenseBarrel.004
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DefenseBarrel.005
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DefenseBarrel.006
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DefenseBarrel.007
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DefenseOptic.002
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DefenseOptic.003
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DefenseTurret.002
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: DefenseTurret.003
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: EmitterArmoredRing.001
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: EmitterBellyDatum.001
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: EmitterCyanSegment.012
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: EmitterCyanSegment.013
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: EmitterCyanSegment.014
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: EmitterCyanSegment.015
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: EmitterCyanSegment.016
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: EmitterCyanSegment.017
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: EmitterCyanSegment.018
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: EngineExhaustBack.001
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: EngineIntakeLouver.011
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: EngineIntakeLouver.012
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: EngineIntakeLouver.013
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: EngineIntakeLouver.014
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: EngineIntakeLouver.015
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: EngineIntakeLouver.016
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: EngineIntakeLouver.017
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: EngineIntakeLouver.018
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: EngineIntakeLouver.019
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: EngineIntakeLouver.020
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: EngineIntakeLouver.021
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: EngineLongArmorRail.002
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: EngineLongArmorRail.003
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: EngineOuterReinforcement.003
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: EngineOuterReinforcement.004
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: EngineOuterReinforcement.005
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: EngineRampAccess.002
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: EngineRampAccess.003
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: EngineRampAccessSeal.002
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: EngineRampAccessSeal.003
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: EngineTopVentBed.001
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: EngineVentAmberHeader.001
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: ExhaustVerticalFrame.002
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: ExhaustVerticalFrame.003
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: FlankArmoredFrame.004
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: FlankArmoredFrame.005
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: FlankArmoredFrame.006
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: FlankArmoredFrame.007
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: FlankCyanLight.003
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: FlankCyanLight.004
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: FlankCyanLight.005
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: FlankSensorBed.003
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: FlankSensorBed.004
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: FlankSensorBed.005
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: FlankServiceRecess.004
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: FlankServiceRecess.005
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: FlankServiceRecess.006
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: FlankServiceRecess.007
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: FlightDeckServicePipe.004
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: FlightDeckServicePipe.005
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: FlightDeckServicePipe.006
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: FlightDeckServicePipe.007
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: ForwardChineInlay.001
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: ForwardShoulderArmor.001
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: ForwardShoulderRecess.001
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: HangarArmoredLintel.001
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: HangarEntryLight.001
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: HangarFloor.001
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: HangarRearWall.001
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: HangarRoofRib.003
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: HangarRoofRib.004
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: HangarRoofRib.005
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: IntegratedEmitterHousing.001
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: IntegratedEmitterLens.001
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: LaneOneStroke.001
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: LaneZeroStroke.004
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: LaneZeroStroke.005
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: LaneZeroStroke.006
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: LaneZeroStroke.007
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: LaunchCenterDash.005
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: LaunchCenterDash.006
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: LaunchCenterDash.007
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: LaunchCenterDash.008
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: LaunchCenterDash.009
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: LaunchLane.002
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: LaunchLane.003
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: LaunchThresholdStripe.012
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: LaunchThresholdStripe.013
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: LaunchThresholdStripe.014
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: LaunchThresholdStripe.015
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: LaunchThresholdStripe.016
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: LaunchThresholdStripe.017
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: LaunchThresholdStripe.018
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: LaunchThresholdStripe.019
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: LaunchThresholdStripe.020
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: LaunchThresholdStripe.021
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: LaunchThresholdStripe.022
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: LaunchThresholdStripe.023
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: LongArmoredCentralCitadel.001
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: MassiveAftEnginePod.001
+17:29:02 | INFO: Primitives created: 2
+17:29:02 | INFO: Extracting primitive: OuterArmorPanel.004
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: OuterArmorPanel.005
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: OuterArmorPanel.006
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: OuterArmorPanel.007
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: OuterPanelJoint.004
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: OuterPanelJoint.005
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: OuterPanelJoint.006
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: OuterPanelJoint.007
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: PanelCaptiveLock.008
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: PanelCaptiveLock.009
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: PanelCaptiveLock.010
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: PanelCaptiveLock.011
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: PanelCaptiveLock.012
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: PanelCaptiveLock.013
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: PanelCaptiveLock.014
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: PanelCaptiveLock.015
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: PipeSupport.012
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: PipeSupport.013
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: PipeSupport.014
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: PipeSupport.015
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: PipeSupport.016
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: PipeSupport.017
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: PipeSupport.018
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: PipeSupport.019
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: PipeSupport.020
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: PipeSupport.021
+17:29:02 | INFO: Primitives created: 1
+17:29:02 | INFO: Extracting primitive: PipeSupport.022
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: PipeSupport.023
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: RearSpinePanel.004
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: RearSpinePanel.005
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: RearSpinePanel.006
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: RearSpinePanel.007
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: RearSpineSeal.004
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: RearSpineSeal.005
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: RearSpineSeal.006
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: RearSpineSeal.007
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: RecessedFlightDeck.001
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: RecessedVentHousing.003
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: RecessedVentHousing.004
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: RecessedVentHousing.005
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: SensorCyanDatum.001
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: SensorGlass.001
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: SensorMast.001
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: SensorMastBase.001
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: SensorRadome.002
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: SensorRadome.003
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: SensorRadomeCap.002
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: SensorRadomeCap.003
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: SensorRecess.001
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: ServiceCaptureRailAft.002
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: ServiceCaptureRailAft.003
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: ServiceCaptureRailForward.002
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: ServiceCaptureRailForward.003
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: ServiceCeilingAft.001
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: ServiceCeilingForward.001
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: ServiceCeilingLampAft.001
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: ServiceCeilingLampForward.001
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: ServiceContactAft.004
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: ServiceContactAft.005
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: ServiceContactAft.006
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: ServiceContactAft.007
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: ServiceContactForward.004
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: ServiceContactForward.005
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: ServiceContactForward.006
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: ServiceContactForward.007
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: SideCoolingFin.018
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: SideCoolingFin.019
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: SideCoolingFin.020
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: SideCoolingFin.021
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: SideCoolingFin.022
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: SideCoolingFin.023
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: SideCoolingFin.024
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: SideCoolingFin.025
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: SideCoolingFin.026
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: SideCoolingFin.027
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: SideCoolingFin.028
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: SideCoolingFin.029
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: SideCoolingFin.030
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: SideCoolingFin.031
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: SideCoolingFin.032
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: SideCoolingFin.033
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: SideCoolingFin.034
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: SideCoolingFin.035
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: SideSensorAperture.003
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: SideSensorAperture.004
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: SideSensorAperture.005
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: SideSensorFace.001
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: TelemetryCrossbar.002
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: TelemetryCrossbar.003
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: TelemetryPillar.002
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: TelemetryPillar.003
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: TieDown.006
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: TieDown.007
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: TieDown.008
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: TieDown.009
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: TieDown.010
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: TieDown.011
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Extracting primitive: UncrewedSensorCrown.001
+17:29:03 | INFO: Primitives created: 1
+17:29:03 | INFO: Finished glTF 2.0 export in 0.4710121154785156 s
+00:10.406  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v27\hero.png'
+00:16.734  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v27\front.png'
+00:23.750  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v27\rear.png'
+00:33.047  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v27\top.png'
+00:40.906  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v27\bottom.png'
+00:47.984  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v27\left.png'
+00:54.484  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v27\right.png'
+01:04.641  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v27\belly-hero.png'
+01:04.859  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v27\carrier-unit-16.png'
+01:05.047  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v27\carrier-unit-32.png'
+01:05.250  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v27\carrier-unit-64.png'
+01:05.641  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v27\carrier-unit-128.png'
+01:13.500  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v27\carrier-unit-1024.png'
+01:15.516  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v27\contact-sheet.png'
+01:16.141  render           | Saved: 'C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v27\reference-comparison.png'
+01:16.141  blend            | Read blend: "C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v27\carrier-v27.blend"
+
+Info: Baking map saved to internal image, save it externally or pack it
+CARRIER_RUNTIME carrier 18688 triangles
+01:19.266  blend            | Read blend: "C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v27\carrier-v27.blend"
+Info: Baking map saved to internal image, save it externally or pack it
+CARRIER_RUNTIME carrier_lod 9712 triangles
+01:20.453  blend            | Read blend: "C:\Users\fukud\Documents\Codex\2026-08-13\referenced-chatgpt-conversation-this-is-an\morrowgear-drone-java\docs\design\carrier-v27\carrier-v27.blend"
+Blender 5.2.0 LTS (hash fbe6228777e7 built 2026-07-14 01:35:40)
+Writing: C:\Users\fukud\AppData\Local\Temp\carrier-v27.crash.txt
+Error   : EXCEPTION_ACCESS_VIOLATION
+Address : 0x00007FF6D1CB400F
+Module  : blender.exe
+Thread  : 000007b4
+Error   : EXCEPTION_ACCESS_VIOLATION
+Address : 0x00007FF6D1CB400F
+Module  : blender.exe
+Thread  : 00008344
+Writing: C:\Users\fukud\AppData\Local\Temp\carrier-v27.crash.txt
+Error   : EXCEPTION_ACCESS_VIOLATION
+Writing: C:\Users\fukud\AppData\Local\Temp\carrier-v27.crash.txt
+Address : 0x00007FF6D1CB400F
+Module  : blender.exe
+Thread  : 000026e8
+Writing: C:\Users\fukud\AppData\Local\Temp\carrier-v27.crash.txt
+Error   : EXCEPTION_ACCESS_VIOLATION
+Address : 0x00007FF6D1CB400F
+Module  : blender.exe
+Thread  : 00005c0c
+Error   : EXCEPTION_ACCESS_VIOLATION
+Address : 0x00007FF6D1CB400F
+Module  : blender.exe
+Thread  : 00006ae8
+Writing: C:\Users\fukud\AppData\Local\Temp\carrier-v27.crash.txt
+Writing: C:\Users\fukud\AppData\Local\Temp\carrier-v27.crash.txt
+Error   : EXCEPTION_ACCESS_VIOLATION
+Address : 0x00007FF6D1CB400F
+Module  : blender.exe
+Thread  : 00007a3c
+Error   : EXCEPTION_ACCESS_VIOLATION
+Address : 0x00007FF6D1CB400F
+Module  : blender.exe
+Thread  : 000012a4
+Writing: C:\Users\fukud\AppData\Local\Temp\carrier-v27.crash.txt
+Error   : EXCEPTION_ACCESS_VIOLATION
+Address : 0x00007FF6D1CB400F
+Module  : blender.exe
+Thread  : 000007fc
+Writing: C:\Users\fukud\AppData\Local\Temp\carrier-v27.crash.txt
+Error   : EXCEPTION_ACCESS_VIOLATION
+Address : 0x00007FF6D1CB400F
+Module  : blender.exe
+Thread  : 000058ac
+Writing: C:\Users\fukud\AppData\Local\Temp\carrier-v27.crash.txt
+Writing: C:\Users\fukud\AppData\Local\Temp\carrier-v27.crash.txt
+Error   : EXCEPTION_ACCESS_VIOLATION
+Address : 0x00007FF6D1CB400F
+Module  : blender.exe
+Thread  : 00007280
+Error   : EXCEPTION_ACCESS_VIOLATION
+Address : 0x00007FF6D1CB400F
+Module  : blender.exe
+Thread  : 00004f18
+Writing: C:\Users\fukud\AppData\Local\Temp\carrier-v27.crash.txt
+Writing: C:\Users\fukud\AppData\Local\Temp\carrier-v27.crash.txt
+Error   : EXCEPTION_ACCESS_VIOLATION
+Address : 0x00007FF6D1CB400F
+Module  : blender.exe
+Thread  : 000018ac

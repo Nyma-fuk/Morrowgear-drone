@@ -64,7 +64,7 @@ final class AdaptiveFollowFormationTest {
 			18, 1.0, 11, true, false, false, 0.0);
 
 		assertTrue(large.radius() > small.radius());
-		assertTrue(large.radius() <= 7.4);
+		assertTrue(large.radius() <= 13.0);
 	}
 
 	@Test

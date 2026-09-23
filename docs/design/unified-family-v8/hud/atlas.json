@@ -1,0 +1,463 @@
+{
+  "width": 720,
+  "height": 576,
+  "padding": 4,
+  "sprites": {
+    "field": {
+      "x": 4,
+      "y": 4,
+      "width": 64,
+      "height": 64
+    },
+    "scout": {
+      "x": 76,
+      "y": 4,
+      "width": 64,
+      "height": 64
+    },
+    "cargo": {
+      "x": 148,
+      "y": 4,
+      "width": 64,
+      "height": 64
+    },
+    "engineer": {
+      "x": 220,
+      "y": 4,
+      "width": 64,
+      "height": 64
+    },
+    "security": {
+      "x": 292,
+      "y": 4,
+      "width": 64,
+      "height": 64
+    },
+    "salvage": {
+      "x": 364,
+      "y": 4,
+      "width": 64,
+      "height": 64
+    },
+    "unit": {
+      "x": 436,
+      "y": 4,
+      "width": 64,
+      "height": 64
+    },
+    "wing": {
+      "x": 508,
+      "y": 4,
+      "width": 64,
+      "height": 64
+    },
+    "all": {
+      "x": 580,
+      "y": 4,
+      "width": 64,
+      "height": 64
+    },
+    "leader": {
+      "x": 652,
+      "y": 4,
+      "width": 64,
+      "height": 64
+    },
+    "dock": {
+      "x": 4,
+      "y": 76,
+      "width": 64,
+      "height": 64
+    },
+    "solar_service": {
+      "x": 76,
+      "y": 76,
+      "width": 64,
+      "height": 64
+    },
+    "charging_relay": {
+      "x": 148,
+      "y": 76,
+      "width": 64,
+      "height": 64
+    },
+    "follow": {
+      "x": 220,
+      "y": 76,
+      "width": 64,
+      "height": 64
+    },
+    "standby": {
+      "x": 292,
+      "y": 76,
+      "width": 64,
+      "height": 64
+    },
+    "return": {
+      "x": 364,
+      "y": 76,
+      "width": 64,
+      "height": 64
+    },
+    "orbit": {
+      "x": 436,
+      "y": 76,
+      "width": 64,
+      "height": 64
+    },
+    "waypoint": {
+      "x": 508,
+      "y": 76,
+      "width": 64,
+      "height": 64
+    },
+    "track": {
+      "x": 580,
+      "y": 76,
+      "width": 64,
+      "height": 64
+    },
+    "scan": {
+      "x": 652,
+      "y": 76,
+      "width": 64,
+      "height": 64
+    },
+    "excavate": {
+      "x": 4,
+      "y": 148,
+      "width": 64,
+      "height": 64
+    },
+    "forestry": {
+      "x": 76,
+      "y": 148,
+      "width": 64,
+      "height": 64
+    },
+    "plant": {
+      "x": 148,
+      "y": 148,
+      "width": 64,
+      "height": 64
+    },
+    "transport": {
+      "x": 220,
+      "y": 148,
+      "width": 64,
+      "height": 64
+    },
+    "guard": {
+      "x": 292,
+      "y": 148,
+      "width": 64,
+      "height": 64
+    },
+    "intercept": {
+      "x": 364,
+      "y": 148,
+      "width": 64,
+      "height": 64
+    },
+    "gun": {
+      "x": 436,
+      "y": 148,
+      "width": 64,
+      "height": 64
+    },
+    "laser": {
+      "x": 508,
+      "y": 148,
+      "width": 64,
+      "height": 64
+    },
+    "missile": {
+      "x": 580,
+      "y": 148,
+      "width": 64,
+      "height": 64
+    },
+    "unarmed": {
+      "x": 652,
+      "y": 148,
+      "width": 64,
+      "height": 64
+    },
+    "auto": {
+      "x": 4,
+      "y": 220,
+      "width": 64,
+      "height": 64
+    },
+    "battery": {
+      "x": 76,
+      "y": 220,
+      "width": 64,
+      "height": 64
+    },
+    "weapon_energy": {
+      "x": 148,
+      "y": 220,
+      "width": 64,
+      "height": 64
+    },
+    "ammo": {
+      "x": 220,
+      "y": 220,
+      "width": 64,
+      "height": 64
+    },
+    "heat": {
+      "x": 292,
+      "y": 220,
+      "width": 64,
+      "height": 64
+    },
+    "health": {
+      "x": 364,
+      "y": 220,
+      "width": 64,
+      "height": 64
+    },
+    "link": {
+      "x": 436,
+      "y": 220,
+      "width": 64,
+      "height": 64
+    },
+    "link_lost": {
+      "x": 508,
+      "y": 220,
+      "width": 64,
+      "height": 64
+    },
+    "power_lost": {
+      "x": 580,
+      "y": 220,
+      "width": 64,
+      "height": 64
+    },
+    "recovery": {
+      "x": 652,
+      "y": 220,
+      "width": 64,
+      "height": 64
+    },
+    "warning": {
+      "x": 4,
+      "y": 292,
+      "width": 64,
+      "height": 64
+    },
+    "critical": {
+      "x": 76,
+      "y": 292,
+      "width": 64,
+      "height": 64
+    },
+    "hostile": {
+      "x": 148,
+      "y": 292,
+      "width": 64,
+      "height": 64
+    },
+    "friendly": {
+      "x": 220,
+      "y": 292,
+      "width": 64,
+      "height": 64
+    },
+    "operation": {
+      "x": 292,
+      "y": 292,
+      "width": 64,
+      "height": 64
+    },
+    "charge": {
+      "x": 364,
+      "y": 292,
+      "width": 64,
+      "height": 64
+    },
+    "rearm": {
+      "x": 436,
+      "y": 292,
+      "width": 64,
+      "height": 64
+    },
+    "store": {
+      "x": 508,
+      "y": 292,
+      "width": 64,
+      "height": 64
+    },
+    "chest": {
+      "x": 580,
+      "y": 292,
+      "width": 64,
+      "height": 64
+    },
+    "input": {
+      "x": 652,
+      "y": 292,
+      "width": 64,
+      "height": 64
+    },
+    "output": {
+      "x": 4,
+      "y": 364,
+      "width": 64,
+      "height": 64
+    },
+    "selected": {
+      "x": 76,
+      "y": 364,
+      "width": 64,
+      "height": 64
+    },
+    "select_all": {
+      "x": 148,
+      "y": 364,
+      "width": 64,
+      "height": 64
+    },
+    "pin": {
+      "x": 220,
+      "y": 364,
+      "width": 64,
+      "height": 64
+    },
+    "lock": {
+      "x": 292,
+      "y": 364,
+      "width": 64,
+      "height": 64
+    },
+    "zoom_in": {
+      "x": 364,
+      "y": 364,
+      "width": 64,
+      "height": 64
+    },
+    "zoom_out": {
+      "x": 436,
+      "y": 364,
+      "width": 64,
+      "height": 64
+    },
+    "center": {
+      "x": 508,
+      "y": 364,
+      "width": 64,
+      "height": 64
+    },
+    "layers": {
+      "x": 580,
+      "y": 364,
+      "width": 64,
+      "height": 64
+    },
+    "map": {
+      "x": 652,
+      "y": 364,
+      "width": 64,
+      "height": 64
+    },
+    "filter": {
+      "x": 4,
+      "y": 436,
+      "width": 64,
+      "height": 64
+    },
+    "sort": {
+      "x": 76,
+      "y": 436,
+      "width": 64,
+      "height": 64
+    },
+    "previous": {
+      "x": 148,
+      "y": 436,
+      "width": 64,
+      "height": 64
+    },
+    "next": {
+      "x": 220,
+      "y": 436,
+      "width": 64,
+      "height": 64
+    },
+    "up": {
+      "x": 292,
+      "y": 436,
+      "width": 64,
+      "height": 64
+    },
+    "down": {
+      "x": 364,
+      "y": 436,
+      "width": 64,
+      "height": 64
+    },
+    "add": {
+      "x": 436,
+      "y": 436,
+      "width": 64,
+      "height": 64
+    },
+    "remove": {
+      "x": 508,
+      "y": 436,
+      "width": 64,
+      "height": 64
+    },
+    "close": {
+      "x": 580,
+      "y": 436,
+      "width": 64,
+      "height": 64
+    },
+    "confirm": {
+      "x": 652,
+      "y": 436,
+      "width": 64,
+      "height": 64
+    },
+    "pause": {
+      "x": 4,
+      "y": 508,
+      "width": 64,
+      "height": 64
+    },
+    "play": {
+      "x": 76,
+      "y": 508,
+      "width": 64,
+      "height": 64
+    },
+    "settings": {
+      "x": 148,
+      "y": 508,
+      "width": 64,
+      "height": 64
+    },
+    "join": {
+      "x": 220,
+      "y": 508,
+      "width": 64,
+      "height": 64
+    },
+    "leave": {
+      "x": 292,
+      "y": 508,
+      "width": 64,
+      "height": 64
+    },
+    "help": {
+      "x": 364,
+      "y": 508,
+      "width": 64,
+      "height": 64
+    }
+  }
+}

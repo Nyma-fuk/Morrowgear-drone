@@ -1,0 +1,10 @@
+{
+  "role": "security",
+  "verticesChecked": 7608,
+  "tolerance": 1e-05,
+  "geometrySymmetryPass": true,
+  "errors": [],
+  "visualApproval": false,
+  "gameVerified": false,
+  "animationVerified": false
+}

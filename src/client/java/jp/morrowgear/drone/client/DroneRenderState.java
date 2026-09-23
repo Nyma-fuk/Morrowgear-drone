@@ -11,6 +11,8 @@ import net.minecraft.world.phys.Vec3;
 public final class DroneRenderState extends EntityRenderState {
 	public boolean docked;
 	public boolean powerLost;
+	public float gearDeployment;
+	public float equipmentDeployment;
 	public float heading;
 	public float flightPitch;
 	public float flightRoll;

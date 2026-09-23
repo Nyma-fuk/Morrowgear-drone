@@ -1,0 +1,11 @@
+{
+  "asset": "reference-airframe-v13",
+  "vertices": 53890,
+  "mirrorError": 8.280877068500558e-07,
+  "symmetryPass": true,
+  "boundsHeight": 1.1475000381469727,
+  "gameVerified": false,
+  "referenceFidelityApproved": false,
+  "glbTextureParityVerified": false,
+  "aerodynamicSimulationPerformed": false
+}

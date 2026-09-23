@@ -49,17 +49,21 @@ final class DroneCommandPolicyTest {
 	@Test
 	void rejectsRadiusBoundaryViolations() {
 		assertFalse(DroneCommandPolicy.validFieldRadius(FieldOperationType.ORE, 11));
-		assertFalse(DroneCommandPolicy.validFieldRadius(FieldOperationType.ORE, 49));
+		assertTrue(DroneCommandPolicy.validFieldRadius(FieldOperationType.ORE, 64));
+		assertFalse(DroneCommandPolicy.validFieldRadius(FieldOperationType.ORE, 65));
 		assertFalse(DroneCommandPolicy.validFieldRadius(FieldOperationType.FORESTRY, 5));
-		assertFalse(DroneCommandPolicy.validFieldRadius(FieldOperationType.FORESTRY, 25));
+		assertTrue(DroneCommandPolicy.validFieldRadius(FieldOperationType.FORESTRY, 40));
+		assertFalse(DroneCommandPolicy.validFieldRadius(FieldOperationType.FORESTRY, 41));
 		assertFalse(DroneCommandPolicy.validFieldRadius(FieldOperationType.EXCAVATE, 1));
+		assertTrue(DroneCommandPolicy.validFieldRadius(FieldOperationType.EXCAVATE, 8));
 		assertFalse(DroneCommandPolicy.validFieldRadius(FieldOperationType.EXCAVATE, 9));
 		assertFalse(DroneCommandPolicy.validFieldRadius(FieldOperationType.NONE, 8));
 		assertFalse(DroneCommandPolicy.validFieldRadius(null, 8));
 		assertFalse(DroneCommandPolicy.validSecurityRadius(5));
 		assertTrue(DroneCommandPolicy.validSecurityRadius(6));
 		assertTrue(DroneCommandPolicy.validSecurityRadius(32));
-		assertFalse(DroneCommandPolicy.validSecurityRadius(33));
+		assertTrue(DroneCommandPolicy.validSecurityRadius(64));
+		assertFalse(DroneCommandPolicy.validSecurityRadius(65));
 	}
 
 	@Test

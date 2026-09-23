@@ -1,0 +1,149 @@
+{
+  "passed": true,
+  "roles": {
+    "field": {
+      "landedBounds": [
+        -1.5,
+        -1.1231118440628052,
+        0.3154999911785126,
+        1.5,
+        1.1231118440628052,
+        0.8960216641426086
+      ],
+      "soleDeckGap": -8.821487429422348e-09,
+      "feetOnContinuousDeck": true,
+      "feetInsideContactPads": true,
+      "footBounds": [
+        -0.5222170948982239,
+        -0.7432436347007751,
+        0.3154999911785126,
+        0.5222170948982239,
+        0.5999762415885925,
+        0.35743123292922974
+      ],
+      "aircraftInside5x5": true,
+      "minimumSoleZForSideEntry": 0.54,
+      "approachCeilingAtRest": 0.8960216641426086
+    },
+    "scout": {
+      "landedBounds": [
+        -1.5,
+        -0.9942894577980042,
+        0.31550002098083496,
+        1.5,
+        0.9942894577980042,
+        0.8263853788375854
+      ],
+      "soleDeckGap": 2.0980834958272965e-08,
+      "feetOnContinuousDeck": true,
+      "feetInsideContactPads": true,
+      "footBounds": [
+        -0.45949187874794006,
+        -0.6478918790817261,
+        0.31550002098083496,
+        0.45949187874794006,
+        0.533989429473877,
+        0.3523947298526764
+      ],
+      "aircraftInside5x5": true,
+      "minimumSoleZForSideEntry": 0.54,
+      "approachCeilingAtRest": 0.8263853788375854
+    },
+    "cargo": {
+      "landedBounds": [
+        -1.5,
+        -1.079238772392273,
+        0.3154999911785126,
+        1.5,
+        1.079238772392273,
+        0.9270755052566528
+      ],
+      "soleDeckGap": -8.821487429422348e-09,
+      "feetOnContinuousDeck": true,
+      "feetInsideContactPads": true,
+      "footBounds": [
+        -0.5172783732414246,
+        -0.7278683185577393,
+        0.3154999911785126,
+        0.5172783732414246,
+        0.5901975631713867,
+        0.35579320788383484
+      ],
+      "aircraftInside5x5": true,
+      "minimumSoleZForSideEntry": 0.54,
+      "approachCeilingAtRest": 0.9270755052566528
+    },
+    "engineer": {
+      "landedBounds": [
+        -1.5,
+        -1.1007384061813354,
+        0.3154999911785126,
+        1.5,
+        1.1007384061813354,
+        0.8842353820800781
+      ],
+      "soleDeckGap": -8.821487429422348e-09,
+      "feetOnContinuousDeck": true,
+      "feetInsideContactPads": true,
+      "footBounds": [
+        -0.5118140578269958,
+        -0.7284374833106995,
+        0.3154999911785126,
+        0.5118140578269958,
+        0.5880241990089417,
+        0.356595903635025
+      ],
+      "aircraftInside5x5": true,
+      "minimumSoleZForSideEntry": 0.54,
+      "approachCeilingAtRest": 0.8842353820800781
+    },
+    "security": {
+      "landedBounds": [
+        -1.5,
+        -1.065366268157959,
+        0.3154999911785126,
+        1.5,
+        1.065366268157959,
+        0.8649808764457703
+      ],
+      "soleDeckGap": -8.821487429422348e-09,
+      "feetOnContinuousDeck": true,
+      "feetInsideContactPads": true,
+      "footBounds": [
+        -0.4953669309616089,
+        -0.7050292491912842,
+        0.3154999911785126,
+        0.4953669309616089,
+        0.5691280364990234,
+        0.35527530312538147
+      ],
+      "aircraftInside5x5": true,
+      "minimumSoleZForSideEntry": 0.54,
+      "approachCeilingAtRest": 0.8649808764457703
+    },
+    "salvage": {
+      "landedBounds": [
+        -1.5,
+        -1.03866446018219,
+        0.3154999911785126,
+        1.5,
+        1.0386645793914795,
+        0.9040831327438354
+      ],
+      "soleDeckGap": -8.821487429422348e-09,
+      "feetOnContinuousDeck": true,
+      "feetInsideContactPads": true,
+      "footBounds": [
+        -0.49783116579055786,
+        -0.700503945350647,
+        0.3154999911785126,
+        0.49783116579055786,
+        0.5680089592933655,
+        0.3542783558368683
+      ],
+      "aircraftInside5x5": true,
+      "minimumSoleZForSideEntry": 0.54,
+      "approachCeilingAtRest": 0.9040831327438354
+    }
+  }
+}

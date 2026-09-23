@@ -1,0 +1,374 @@
+{
+  "id": "chunkbuster",
+  "status": "PROPOSAL_AWAITING_SHOWN_USER_APPROVAL",
+  "passed": true,
+  "displayName": "Chunkbuster",
+  "errors": [],
+  "axis": {
+    "front": "-Y",
+    "up": "+Z",
+    "symmetry": "X=0",
+    "units": "blocks"
+  },
+  "states": [
+    {
+      "frame": 1,
+      "state": "closed",
+      "bounds": [
+        -24.0,
+        -16.0,
+        0.0,
+        24.0,
+        16.0,
+        7.0
+      ],
+      "dimensions": [
+        48.0,
+        32.0,
+        7.0
+      ],
+      "mirrorError": 0.0,
+      "vertices": 512994
+    },
+    {
+      "frame": 40,
+      "state": "service",
+      "bounds": [
+        -24.0,
+        -16.0,
+        0.0,
+        24.0,
+        16.0,
+        7.0
+      ],
+      "dimensions": [
+        48.0,
+        32.0,
+        7.0
+      ],
+      "mirrorError": 0.0,
+      "vertices": 512994
+    },
+    {
+      "frame": 80,
+      "state": "active",
+      "bounds": [
+        -24.0,
+        -16.0,
+        0.0,
+        24.0,
+        16.0,
+        7.0
+      ],
+      "dimensions": [
+        48.0,
+        32.0,
+        7.0
+      ],
+      "mirrorError": 0.0,
+      "vertices": 512994
+    }
+  ],
+  "meshObjects": 561,
+  "sharedMirrorObjects": 561,
+  "contacts": {
+    "mode": "floating / no ground contact",
+    "landingGearCount": 0,
+    "bayCaptureContacts": 16,
+    "rotorCount": 2,
+    "rotorBladeCount": 24,
+    "bayCount": 4,
+    "smallDroneCount": 4,
+    "clearances": {
+      "passed": true,
+      "bays": [
+        {
+          "slot": 0,
+          "row": "Forward",
+          "blenderClearVolume": [
+            -8.65,
+            -6.7,
+            2.4,
+            -5.65,
+            -3.7,
+            3.35
+          ],
+          "dockedBounds": [
+            -8.649999618530273,
+            -6.323111534118652,
+            2.659655809402466,
+            -5.650000095367432,
+            -4.076888084411621,
+            2.9805216789245605
+          ],
+          "unscaledV22Inside3x3": true,
+          "pocketXY": [
+            -9.45,
+            -8.1,
+            -4.8500000000000005,
+            -2.3000000000000003
+          ],
+          "lensPlanClearance": 0.3477276383959733,
+          "nearestRotorPlanClearance": 1.667873303325213,
+          "entryRaySamples": 169,
+          "blockedEntryRays": [],
+          "blockedFixtureRays": [],
+          "minimumReceivingCeilingZ": 3.436892032623291,
+          "ceilingUndersideZ": 3.4368922378196785,
+          "minimumRoofThicknessOverReceivingArea": 1.2925416203314937,
+          "entityHeight": 0.75,
+          "entityTopZ": 3.15,
+          "reservedOverheadClearance": 0.2,
+          "actualGearStowedMeshHeight": 0.3208658695220947,
+          "actualMeshHeadroom": 0.45637035369873047,
+          "captureAnchor": [
+            -7.150000095367432,
+            -5.199999809265137,
+            2.4000000953674316
+          ]
+        },
+        {
+          "slot": 1,
+          "row": "Forward",
+          "blenderClearVolume": [
+            5.65,
+            -6.7,
+            2.4,
+            8.65,
+            -3.7,
+            3.35
+          ],
+          "dockedBounds": [
+            5.650000095367432,
+            -6.323111534118652,
+            2.659655809402466,
+            8.649999618530273,
+            -4.076888084411621,
+            2.9805216789245605
+          ],
+          "unscaledV22Inside3x3": true,
+          "pocketXY": [
+            4.8500000000000005,
+            -8.1,
+            9.45,
+            -2.3000000000000003
+          ],
+          "lensPlanClearance": 0.3477276383959733,
+          "nearestRotorPlanClearance": 1.667873303325213,
+          "entryRaySamples": 169,
+          "blockedEntryRays": [],
+          "blockedFixtureRays": [],
+          "minimumReceivingCeilingZ": 3.436892032623291,
+          "ceilingUndersideZ": 3.4368922378196785,
+          "minimumRoofThicknessOverReceivingArea": 1.2925416203314937,
+          "entityHeight": 0.75,
+          "entityTopZ": 3.15,
+          "reservedOverheadClearance": 0.2,
+          "actualGearStowedMeshHeight": 0.3208658695220947,
+          "actualMeshHeadroom": 0.45637035369873047,
+          "captureAnchor": [
+            7.150000095367432,
+            -5.199999809265137,
+            2.4000000953674316
+          ]
+        },
+        {
+          "slot": 2,
+          "row": "Aft",
+          "blenderClearVolume": [
+            -5.1,
+            6.3,
+            2.4,
+            -2.1,
+            9.3,
+            3.35
+          ],
+          "dockedBounds": [
+            -5.099999904632568,
+            6.676888465881348,
+            2.659655809402466,
+            -2.0999999046325684,
+            8.923111915588379,
+            2.9805216789245605
+          ],
+          "unscaledV22Inside3x3": true,
+          "pocketXY": [
+            -5.7,
+            5.5,
+            -1.5,
+            10.1
+          ],
+          "lensPlanClearance": 0.68087712549569,
+          "nearestRotorPlanClearance": 0.6881757415681644,
+          "entryRaySamples": 169,
+          "blockedEntryRays": [],
+          "blockedFixtureRays": [],
+          "minimumReceivingCeilingZ": 3.436892032623291,
+          "ceilingUndersideZ": 3.4368922378196785,
+          "minimumRoofThicknessOverReceivingArea": 1.5805999012763179,
+          "entityHeight": 0.75,
+          "entityTopZ": 3.15,
+          "reservedOverheadClearance": 0.2,
+          "actualGearStowedMeshHeight": 0.3208658695220947,
+          "actualMeshHeadroom": 0.45637035369873047,
+          "captureAnchor": [
+            -3.5999999046325684,
+            7.800000190734863,
+            2.4000000953674316
+          ]
+        },
+        {
+          "slot": 3,
+          "row": "Aft",
+          "blenderClearVolume": [
+            2.1,
+            6.3,
+            2.4,
+            5.1,
+            9.3,
+            3.35
+          ],
+          "dockedBounds": [
+            2.0999999046325684,
+            6.676888465881348,
+            2.659655809402466,
+            5.099999904632568,
+            8.923111915588379,
+            2.9805216789245605
+          ],
+          "unscaledV22Inside3x3": true,
+          "pocketXY": [
+            1.5,
+            5.5,
+            5.7,
+            10.1
+          ],
+          "lensPlanClearance": 0.68087712549569,
+          "nearestRotorPlanClearance": 0.6881757415681644,
+          "entryRaySamples": 169,
+          "blockedEntryRays": [],
+          "blockedFixtureRays": [],
+          "minimumReceivingCeilingZ": 3.436892032623291,
+          "ceilingUndersideZ": 3.4368922378196785,
+          "minimumRoofThicknessOverReceivingArea": 1.5805999012763179,
+          "entityHeight": 0.75,
+          "entityTopZ": 3.15,
+          "reservedOverheadClearance": 0.2,
+          "actualGearStowedMeshHeight": 0.3208658695220947,
+          "actualMeshHeadroom": 0.45637035369873047,
+          "captureAnchor": [
+            3.5999999046325684,
+            7.800000190734863,
+            2.4000000953674316
+          ]
+        }
+      ],
+      "pairwise": [
+        {
+          "slots": [
+            0,
+            1
+          ],
+          "pocketsOverlap": false
+        },
+        {
+          "slots": [
+            0,
+            2
+          ],
+          "pocketsOverlap": false
+        },
+        {
+          "slots": [
+            0,
+            3
+          ],
+          "pocketsOverlap": false
+        },
+        {
+          "slots": [
+            1,
+            2
+          ],
+          "pocketsOverlap": false
+        },
+        {
+          "slots": [
+            1,
+            3
+          ],
+          "pocketsOverlap": false
+        },
+        {
+          "slots": [
+            2,
+            3
+          ],
+          "pocketsOverlap": false
+        }
+      ],
+      "ceilingOuterRoofClearance": [
+        {
+          "part": "BayCeilingForward",
+          "minimumOuterRoofMargin": 0.6423909664154053
+        },
+        {
+          "part": "BayCeilingAft",
+          "minimumOuterRoofMargin": 1.249166488647461
+        }
+      ],
+      "stowedShutterContainment": [
+        {
+          "part": "BayShutterForward",
+          "verticesOutsideOuterHull": 0
+        },
+        {
+          "part": "BayShutterForward.001",
+          "verticesOutsideOuterHull": 0
+        },
+        {
+          "part": "BayShutterForward.002",
+          "verticesOutsideOuterHull": 0
+        },
+        {
+          "part": "BayShutterForward.003",
+          "verticesOutsideOuterHull": 0
+        },
+        {
+          "part": "BayShutterForward.004",
+          "verticesOutsideOuterHull": 0
+        },
+        {
+          "part": "BayShutterAft",
+          "verticesOutsideOuterHull": 0
+        },
+        {
+          "part": "BayShutterAft.001",
+          "verticesOutsideOuterHull": 0
+        },
+        {
+          "part": "BayShutterAft.002",
+          "verticesOutsideOuterHull": 0
+        },
+        {
+          "part": "BayShutterAft.003",
+          "verticesOutsideOuterHull": 0
+        },
+        {
+          "part": "BayShutterAft.004",
+          "verticesOutsideOuterHull": 0
+        }
+      ],
+      "errors": [],
+      "scope": "3x3 vertical hull/fixture opening rays, full gear-stowed witness fit, roof thickness and plan separation; not continuous mechanism collision proof"
+    }
+  },
+  "capacity": null,
+  "limitations": [
+    "No runtime, launcher, installation or in-game validation.",
+    "Static GLB state exports; animated RuntimeDroneMesh adaptation is deferred.",
+    "No flight physics or arbitrary attitude collision proof."
+  ],
+  "blendSha256": "eb94cb2dbb79cdd8dd9a869a7a4177dd52d3464ec9ca33bed18751e043621366",
+  "glbSha256": "d04c602fafa28536f2de7aeab8ccbd0a227f857cef4dcec4dd07989f17eb7e6b"
+}

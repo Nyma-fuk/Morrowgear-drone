@@ -47,27 +47,27 @@ final class SwarmFormation {
 		Vec3 horizontal = forward.multiply(1, 0, 1);
 		if (horizontal.lengthSqr() < 0.001) horizontal = new Vec3(0, 0, 1);
 		horizontal = horizontal.normalize();
-		if (constrained) return horizontal.scale(-wingIndex * 4.0).add(0, (wingIndex % 2) * 1.2, 0);
+		if (constrained) return horizontal.scale(-wingIndex * WING_SIZE * AirframeEnvelope.SLOT_DISTANCE);
 		Vec3 right = new Vec3(-horizontal.z, 0, horizontal.x);
 		double centered = wingIndex - (wingCount - 1) * 0.5;
-		double lateral = centered * 8.5;
-		double vertical = (wingIndex % 3) * 3.4;
-		double longitudinal = -(wingIndex / 3) * 5.0;
+		double lateral = centered * 30.0;
+		double vertical = (wingIndex % 3) * AirframeEnvelope.LAYER_HEIGHT;
+		double longitudinal = -(wingIndex / 3) * 10.0;
 		return right.scale(lateral).add(horizontal.scale(longitudinal)).add(0, vertical, 0);
 	}
 
 	static Vec3 wingOrbitCenter(Vec3 center, int wingIndex) {
-		return center.add(0, Math.max(0, wingIndex) * 3.8, 0);
+		return center.add(0, Math.max(0, wingIndex) * AirframeEnvelope.LAYER_HEIGHT, 0);
 	}
 
 	static double wingArrivalRadius(int expected) {
 		int wings = wingCount(expected);
-		double outerAnchor = (wings - 1) * 0.5 * 8.5;
+		double outerAnchor = (wings - 1) * 0.5 * 30.0;
 		return outerAnchor + formationDiameter(Math.min(WING_SIZE, expected)) * 0.6 + 8.0;
 	}
 
 	static double orbitRadius(int count) {
-		return Math.max(5.4, count * 3.4 / (Math.PI * 2.0));
+		return AirframeEnvelope.orbitRadius(count);
 	}
 
 	static double layeredOrbitRadius(int count, int layerIndex, int layerCount) {
@@ -197,7 +197,7 @@ final class SwarmFormation {
 
 	static Vec3 orbitPosition(Vec3 center, int index, int count, long tick, double angularSpeed,
 		double phaseOffset, double radius) {
-		double angle = tick * angularSpeed + phaseOffset
+		double angle = tick * AirframeEnvelope.angularSpeed(angularSpeed, radius) + phaseOffset
 			- index * Math.PI * 2.0 / Math.max(1, count);
 		double vertical = (index % 3 - 1) * 0.45;
 		return center.add(Math.cos(angle) * radius, vertical, Math.sin(angle) * radius);
@@ -211,12 +211,12 @@ final class SwarmFormation {
 
 	static Vec3 orbitEntryPosition(Vec3 center, int index, int count, long tick,
 		double angularSpeed, double progress, double phaseOffset, double radius) {
-		double trailSpacing = Math.min(0.72, 3.4 / radius);
+		double trailSpacing = Math.min(0.72, AirframeEnvelope.SLOT_DISTANCE / radius);
 		double fullSpacing = Math.PI * 2.0 / Math.max(1, count);
 		double clamped = Math.max(0.0, Math.min(1.0, progress));
 		double eased = 1.0 - (1.0 - clamped) * (1.0 - clamped);
 		double spacing = trailSpacing + (fullSpacing - trailSpacing) * eased;
-		double angle = tick * angularSpeed + phaseOffset - index * spacing;
+		double angle = tick * AirframeEnvelope.angularSpeed(angularSpeed, radius) + phaseOffset - index * spacing;
 		double vertical = (index % 3 - 1) * 0.45;
 		return center.add(Math.cos(angle) * radius, vertical, Math.sin(angle) * radius);
 	}
@@ -235,25 +235,23 @@ final class SwarmFormation {
 		horizontal = horizontal.normalize();
 		Vec3 right = new Vec3(-horizontal.z, 0, horizontal.x);
 		if (constrained) {
-			double side = index % 2 == 0 ? -0.65 : 0.65;
-			int row = (index - 1) / 2 + 1;
-			return direction.scale(-row * 1.9).add(right.scale(side));
+			return direction.scale(-index * AirframeEnvelope.SLOT_DISTANCE);
 		}
 		double vertical = (index % 3 - 1) * 0.85;
 		return switch (patternFor(count)) {
 			case SOLO -> Vec3.ZERO;
-			case COLUMN -> direction.scale(-index * 2.4).add(0, vertical, 0);
+			case COLUMN -> direction.scale(-index * AirframeEnvelope.SLOT_DISTANCE).add(0, vertical, 0);
 			case DELTA -> {
 				int row = (index + 1) / 2;
 				double side = index % 2 == 1 ? -1.0 : 1.0;
-				double lateral = side * (2.4 + (row - 1) * 1.5);
-				yield direction.scale(-row * 2.4).add(right.scale(lateral)).add(0, vertical, 0);
+				double lateral = side * (4.0 + (row - 1) * 2.7);
+				yield direction.scale(-row * 4.3).add(right.scale(lateral)).add(0, vertical, 0);
 			}
 			case STAR -> {
 				int spoke = (index - 1) % 5;
 				int ring = (index - 1) / 5 + 1;
 				double angle = spoke * Math.PI * 2.0 / 5.0;
-				double radius = ring * 4.0;
+				double radius = ring * 6.0;
 				double centerBehind = radius + 1.8;
 				yield right.scale(Math.cos(angle) * radius)
 					.add(direction.scale(Math.sin(angle) * radius - centerBehind))

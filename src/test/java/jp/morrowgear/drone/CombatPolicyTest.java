@@ -167,11 +167,12 @@ final class CombatPolicyTest {
 	void casElementFollowsOneFigureEightWithOrderedTrailSlots() {
 		Vec3 target = new Vec3(10, 64, 10);
 		Vec3 first = CombatPolicy.casFormation(target, new Vec3(0, 0, 1), 0, 4, 80);
-		Vec3 later = CombatPolicy.casFormation(target, new Vec3(0, 0, 1), 0, 4, 220);
-		assertNotEquals(Math.signum(first.x - target.x), Math.signum(later.x - target.x));
+		assertTrue(java.util.stream.LongStream.range(81, 1800).anyMatch(tick ->
+			Math.signum(CombatPolicy.casFormation(target, new Vec3(0, 0, 1), 0, 4, tick).x - target.x)
+				!= Math.signum(first.x - target.x)), "both lobes must be flown within one full pass");
 		Vec3 leader = CombatPolicy.casFormation(target, new Vec3(0, 0, 1), 0, 4, 110);
 		Vec3 wingman = CombatPolicy.casFormation(target, new Vec3(0, 0, 1), 1, 4, 110);
-		assertTrue(leader.distanceTo(wingman) > 1.0 && leader.distanceTo(wingman) < 4.5);
+		assertTrue(leader.distanceTo(wingman) > 5.0 && leader.distanceTo(wingman) < 10.0);
 		assertTrue(java.util.stream.LongStream.range(0, 520)
 			.anyMatch(tick -> CombatPolicy.casGunWindow(tick, 0)));
 	}
@@ -322,11 +323,13 @@ final class CombatPolicyTest {
 	}
 
 	@Test
-	void chargedLaserCanReleaseAfterTimeoutWithoutPerfectSlotAlignment() {
-		assertTrue(!CombatPolicy.laserFallbackReleaseReady(59, 12.0, 5.0, true));
-		assertTrue(CombatPolicy.laserFallbackReleaseReady(60, 12.0, 5.0, true));
-		assertTrue(!CombatPolicy.laserFallbackReleaseReady(60, 25.0, 5.0, true));
-		assertTrue(!CombatPolicy.laserFallbackReleaseReady(60, 12.0, 5.0, false));
+	void chargedLaserTimeoutReleasesOnlyAircraftThatReachedItsSlot() {
+		assertTrue(!CombatPolicy.laserFallbackReleaseReady(59, 12.0, 5.0, true, true));
+		assertTrue(!CombatPolicy.laserFallbackReleaseReady(60, 12.0, 5.0, true, false));
+		assertTrue(CombatPolicy.laserFallbackReleaseReady(60, 12.0, 5.0, true, true));
+		assertTrue(CombatPolicy.laserFallbackReleaseReady(60, 36.0, 1.65, true, false));
+		assertTrue(!CombatPolicy.laserFallbackReleaseReady(60, 48.01, 5.0, true, true));
+		assertTrue(!CombatPolicy.laserFallbackReleaseReady(60, 12.0, 5.0, false, true));
 	}
 
 	@Test
@@ -397,8 +400,9 @@ final class CombatPolicyTest {
 			Vec3 orbit = CombatPolicy.laserOrbit(center, 0, 1, 80, 1000, airspace);
 			double radius = orbit.multiply(1, 0, 1).length();
 			double height = orbit.y - center.y;
-			assertTrue(radius < 11.0, "radius outside laser envelope: " + radius);
-			assertTrue(height < 12.5, "height outside laser envelope: " + height);
+			assertTrue(radius <= 22.001, "radius outside laser envelope: " + radius);
+			assertTrue(height <= 28.001, "height outside laser envelope: " + height);
+			assertTrue(orbit.distanceTo(center) < 48.0, "all allocated layers must be able to fire");
 			assertTrue(lanes.add(String.format(java.util.Locale.ROOT, "%.2f/%.2f",
 				airspace.heightOffset(), airspace.radiusOffset())));
 		}
@@ -455,7 +459,51 @@ final class CombatPolicyTest {
 		Vec3 muzzle = Vec3.ZERO;
 		Vec3 forward = new Vec3(0.8, -0.05, 0.0);
 		assertTrue(CombatPolicy.forwardFiringSolution(muzzle, forward, new Vec3(12, -3, 1)));
+		assertFalse(CombatPolicy.forwardFiringSolution(muzzle, forward, new Vec3(5, 0, 8)));
 		assertFalse(CombatPolicy.forwardFiringSolution(muzzle, forward, new Vec3(-4, -2, 0)));
 		assertFalse(CombatPolicy.forwardFiringSolution(muzzle, Vec3.ZERO, new Vec3(4, 0, 0)));
+	}
+
+	@Test
+	void casGunWindowExistsOnlyOnInboundLegs() {
+		Vec3 center = new Vec3(0, 64, 0);
+		Vec3 axis = new Vec3(0, 0, 1);
+		CombatPolicy.AirspaceSlot lane = new CombatPolicy.AirspaceSlot(2, 4);
+		int samples = 0;
+		int validFiringSolutions = 0;
+		for (long tick = 40; tick < 900; tick++) {
+			if (!CombatPolicy.casGunWindow(tick, 0, lane)) continue;
+			Vec3 position = CombatPolicy.casFormation(center, axis, 0, 1, tick, lane);
+			Vec3 velocity = CombatPolicy.casFormationVelocity(center, axis, 0, 1, tick, lane);
+			Vec3 horizontalToTarget = center.subtract(position).multiply(1, 0, 1);
+			assertTrue(velocity.multiply(1, 0, 1).dot(horizontalToTarget) > 0.0,
+				"gun window must close on the target at tick " + tick);
+			Vec3 strike = CombatPolicy.casStrikePoint(center, axis, 0, tick, lane);
+			if (CombatPolicy.forwardFiringSolution(position, velocity, strike)) validFiringSolutions++;
+			samples++;
+		}
+		assertTrue(samples > 10);
+		assertTrue(validFiringSolutions > 10,
+			"the strict forward cone must retain a usable inbound firing interval");
+	}
+
+	@Test
+	void laserInterceptClimbsBeforeCrossingToTheHighStandoffPoint() {
+		Vec3 center = new Vec3(0, 64, 0);
+		CombatPolicy.AirspaceSlot lane = new CombatPolicy.AirspaceSlot(1, 3);
+		Vec3 lowAndFar = new Vec3(60, 65, 0);
+		assertTrue(CombatPolicy.laserIngressRequired(lowAndFar, center, lane));
+		Vec3 climb = CombatPolicy.laserIngressWaypoint(lowAndFar, center, lane);
+		assertEquals(lowAndFar.x, climb.x, 0.0001);
+		assertEquals(lowAndFar.z, climb.z, 0.0001);
+		assertTrue(climb.y >= center.y + CombatPolicy.LASER_INGRESS_HEIGHT);
+
+		Vec3 highAndFar = new Vec3(60, climb.y, 0);
+		Vec3 staging = CombatPolicy.laserIngressWaypoint(highAndFar, center, lane);
+		assertTrue(staging.multiply(1, 0, 1).distanceTo(center.multiply(1, 0, 1)) >= 18.0);
+		assertTrue(staging.multiply(1, 0, 1).distanceTo(center.multiply(1, 0, 1)) < 23.0);
+
+		Vec3 established = new Vec3(10, center.y + 12.0 + lane.heightOffset(), 0);
+		assertFalse(CombatPolicy.laserIngressRequired(established, center, lane));
 	}
 }

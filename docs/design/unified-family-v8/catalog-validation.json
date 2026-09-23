@@ -1,0 +1,318 @@
+{
+  "modelCount": 30,
+  "itemCount": 23,
+  "hudGlyphCount": 76,
+  "issues": [],
+  "structuralChecksPass": true,
+  "modelChecks": [
+    {
+      "asset": "autocannon_module",
+      "vertices": 392,
+      "mirrorError": 2.107342389479072e-08,
+      "symmetryPass": true,
+      "boundsHeight": 1.2350000143051147,
+      "gameVerified": false,
+      "referenceFidelityApproved": false
+    },
+    {
+      "asset": "basic_control_board",
+      "vertices": 336,
+      "mirrorError": 1.4901161193847656e-08,
+      "symmetryPass": true,
+      "boundsHeight": 0.22999999299645424,
+      "gameVerified": false,
+      "referenceFidelityApproved": false
+    },
+    {
+      "asset": "cargo",
+      "vertices": 7592,
+      "mirrorError": 4.777680828738085e-07,
+      "symmetryPass": true,
+      "boundsHeight": 1.9318498969078064,
+      "gameVerified": false,
+      "referenceFidelityApproved": false,
+      "payloadGroundClearance": 0.32860004901885986,
+      "groundClearancePass": true
+    },
+    {
+      "asset": "cargo_module",
+      "vertices": 392,
+      "mirrorError": 2.9802322387695312e-08,
+      "symmetryPass": true,
+      "boundsHeight": 1.2350000143051147,
+      "gameVerified": false,
+      "referenceFidelityApproved": false
+    },
+    {
+      "asset": "charging_relay",
+      "vertices": 1472,
+      "mirrorError": 3.853666567010805e-05,
+      "symmetryPass": true,
+      "boundsHeight": 0.7524999678134918,
+      "gameVerified": false,
+      "referenceFidelityApproved": false
+    },
+    {
+      "asset": "controller",
+      "vertices": 640,
+      "mirrorError": 5.960464477539063e-08,
+      "symmetryPass": true,
+      "boundsHeight": 1.5,
+      "gameVerified": false,
+      "referenceFidelityApproved": false
+    },
+    {
+      "asset": "dock_item",
+      "vertices": 2576,
+      "mirrorError": 5.972094641037984e-08,
+      "symmetryPass": true,
+      "boundsHeight": 0.6499999761581421,
+      "gameVerified": false,
+      "referenceFidelityApproved": false
+    },
+    {
+      "asset": "engineer",
+      "vertices": 8362,
+      "mirrorError": 4.777677986567141e-07,
+      "symmetryPass": true,
+      "boundsHeight": 1.822499930858612,
+      "gameVerified": false,
+      "referenceFidelityApproved": false,
+      "payloadGroundClearance": 0.32796430587768555,
+      "groundClearancePass": true
+    },
+    {
+      "asset": "engineer_module",
+      "vertices": 448,
+      "mirrorError": 3.077594712408427e-08,
+      "symmetryPass": true,
+      "boundsHeight": 1.2350000143051147,
+      "gameVerified": false,
+      "referenceFidelityApproved": false
+    },
+    {
+      "asset": "field",
+      "vertices": 7354,
+      "mirrorError": 4.777676849698764e-07,
+      "symmetryPass": true,
+      "boundsHeight": 1.6584750413894653,
+      "gameVerified": false,
+      "referenceFidelityApproved": false,
+      "payloadGroundClearance": 0.5437250137329102,
+      "groundClearancePass": true
+    },
+    {
+      "asset": "flight_actuator",
+      "vertices": 192,
+      "mirrorError": 0.0,
+      "symmetryPass": true,
+      "boundsHeight": 1.3499999940395355,
+      "gameVerified": false,
+      "referenceFidelityApproved": false
+    },
+    {
+      "asset": "high_density_battery_pack",
+      "vertices": 336,
+      "mirrorError": 6.143906006172983e-08,
+      "symmetryPass": true,
+      "boundsHeight": 1.2350000143051147,
+      "gameVerified": false,
+      "referenceFidelityApproved": false
+    },
+    {
+      "asset": "laser_module",
+      "vertices": 320,
+      "mirrorError": 2.107342389479072e-08,
+      "symmetryPass": true,
+      "boundsHeight": 1.2350000143051147,
+      "gameVerified": false,
+      "referenceFidelityApproved": false
+    },
+    {
+      "asset": "lightweight_frame",
+      "vertices": 224,
+      "mirrorError": 0.0,
+      "symmetryPass": true,
+      "boundsHeight": 0.1599999964237213,
+      "gameVerified": false,
+      "referenceFidelityApproved": false
+    },
+    {
+      "asset": "micro_missile",
+      "vertices": 449,
+      "mirrorError": 3.0597986366842633e-09,
+      "symmetryPass": true,
+      "boundsHeight": 1.2100000083446503,
+      "gameVerified": false,
+      "referenceFidelityApproved": false
+    },
+    {
+      "asset": "missile_module",
+      "vertices": 283,
+      "mirrorError": 3.122362102203624e-08,
+      "symmetryPass": true,
+      "boundsHeight": 1.2350000143051147,
+      "gameVerified": false,
+      "referenceFidelityApproved": false
+    },
+    {
+      "asset": "morrow_alloy",
+      "vertices": 224,
+      "mirrorError": 1.4901161193847656e-08,
+      "symmetryPass": true,
+      "boundsHeight": 0.41999998688697815,
+      "gameVerified": false,
+      "referenceFidelityApproved": false
+    },
+    {
+      "asset": "power_cell",
+      "vertices": 224,
+      "mirrorError": 2.107342389479072e-08,
+      "symmetryPass": true,
+      "boundsHeight": 1.2350000143051147,
+      "gameVerified": false,
+      "referenceFidelityApproved": false
+    },
+    {
+      "asset": "raw_morrow_composite",
+      "vertices": 134,
+      "mirrorError": 6.664001972467304e-08,
+      "symmetryPass": true,
+      "boundsHeight": 0.8600000143051147,
+      "gameVerified": false,
+      "referenceFidelityApproved": false
+    },
+    {
+      "asset": "recovery_tool",
+      "vertices": 280,
+      "mirrorError": 2.9802322387695312e-08,
+      "symmetryPass": true,
+      "boundsHeight": 2.1250001192092896,
+      "gameVerified": false,
+      "referenceFidelityApproved": false
+    },
+    {
+      "asset": "reinforced_battery_pack",
+      "vertices": 280,
+      "mirrorError": 2.107342389479072e-08,
+      "symmetryPass": true,
+      "boundsHeight": 1.2350000143051147,
+      "gameVerified": false,
+      "referenceFidelityApproved": false
+    },
+    {
+      "asset": "salvage",
+      "vertices": 8368,
+      "mirrorError": 7.154109198381775e-07,
+      "symmetryPass": true,
+      "boundsHeight": 2.1323248744010925,
+      "gameVerified": false,
+      "referenceFidelityApproved": false,
+      "payloadGroundClearance": 0.1988999843597412,
+      "groundClearancePass": true
+    },
+    {
+      "asset": "salvage_module",
+      "vertices": 224,
+      "mirrorError": 2.107342389479072e-08,
+      "symmetryPass": true,
+      "boundsHeight": 1.2350000143051147,
+      "gameVerified": false,
+      "referenceFidelityApproved": false
+    },
+    {
+      "asset": "scout",
+      "vertices": 7330,
+      "mirrorError": 4.777677986567141e-07,
+      "symmetryPass": true,
+      "boundsHeight": 1.9683000445365906,
+      "gameVerified": false,
+      "referenceFidelityApproved": false,
+      "payloadGroundClearance": 0.7452000081539154,
+      "groundClearancePass": true
+    },
+    {
+      "asset": "scout_module",
+      "vertices": 416,
+      "mirrorError": 2.107342389479072e-08,
+      "symmetryPass": true,
+      "boundsHeight": 1.2350000143051147,
+      "gameVerified": false,
+      "referenceFidelityApproved": false
+    },
+    {
+      "asset": "security",
+      "vertices": 9701,
+      "mirrorError": 4.777677986567141e-07,
+      "symmetryPass": true,
+      "boundsHeight": 1.822499930858612,
+      "gameVerified": false,
+      "referenceFidelityApproved": false,
+      "payloadGroundClearance": 0.40998196601867676,
+      "groundClearancePass": true
+    },
+    {
+      "asset": "security_module",
+      "vertices": 229,
+      "mirrorError": 2.107342389479072e-08,
+      "symmetryPass": true,
+      "boundsHeight": 1.2350000143051147,
+      "gameVerified": false,
+      "referenceFidelityApproved": false
+    },
+    {
+      "asset": "solar_service_station",
+      "vertices": 48412,
+      "mirrorError": 0.0,
+      "symmetryPass": true,
+      "boundsHeight": 2.7574999928474426,
+      "gameVerified": false,
+      "referenceFidelityApproved": false
+    },
+    {
+      "asset": "standard_battery_pack",
+      "vertices": 224,
+      "mirrorError": 2.107342389479072e-08,
+      "symmetryPass": true,
+      "boundsHeight": 1.2350000143051147,
+      "gameVerified": false,
+      "referenceFidelityApproved": false
+    },
+    {
+      "asset": "tactical_visor",
+      "vertices": 456,
+      "mirrorError": 1.2287812012345967e-07,
+      "symmetryPass": true,
+      "boundsHeight": 0.45000000298023224,
+      "gameVerified": false,
+      "referenceFidelityApproved": false
+    }
+  ],
+  "itemHashes": {
+    "autocannon_module": "2ab097fd4ae127fd022d0f4ea18be84b9f7ab3225d9a903fbb2cb945b1a599a7",
+    "basic_control_board": "f4224e1142e4b8b03388c047ac2ea27a4f08a310da5aee95657bba47b54a9a3c",
+    "cargo_module": "75e069c9b3fd9ffa6da54534a61b48e73ba4d56ca5a1f1114acbca667d8ece50",
+    "controller": "401e0bc3e764f1c7f84e2516121c67260c3ea3b3945969d34ac8bddb94c8ff1b",
+    "dock_item": "c066f5f84e9649ad51e390a8f8fee2a961c0df2408dc3b56695759a5641a2954",
+    "engineer_module": "38a988e836cfba50b17104332a7f5a2a731bfed6e5d82c4597c78a97c5f9559a",
+    "field_drone_unit": "a390b2e3eb414cac0401f3be9318fdab4793cb6448326f24547a1ce2304d1b43",
+    "flight_actuator": "3bf6b993a5c8b60be9482d46e4e0bcb36e4c5751a1fa403ff782ac808486951f",
+    "high_density_battery_pack": "c8d45d844629e10c3be514a7435e5c32a41827842b484165d20dd48e4862d701",
+    "laser_module": "793092e3cb6bb0c380f26ea6a7223310bdc2e7f383569f51c10249b3c7bafa66",
+    "lightweight_frame": "47ef4589532bdeefd13b568540870155ea48f9471f758e1a131d62bd7b23bb0e",
+    "missile_module": "a7b4364277bde61e0ac0e0d6ff35f846ae12acc1cef06ebb0eb548a432418195",
+    "morrow_alloy": "3846398c67f501e89d1dbb3df9ef114b4e66537b7675e89134f42c44e42b8e36",
+    "power_cell": "b7672f5708a87b5d8b7b6f868eca926fe2a307cb0cc95c36416a1e1773b7f340",
+    "raw_morrow_composite": "02b803cb2bb75f2ad36f3aee1052b4120e0d5f80bcf66d0cab0d44935cbf7315",
+    "recovery_tool": "71453c04860c82b37ab4da6ba12547872eed62027c3a247bb22a06f5c0f43eea",
+    "reinforced_battery_pack": "ed08dd94f0a2a4f222ba788021624fbb2668dbbe5af86cdd2156fd10c3b7cae7",
+    "salvage_module": "a3741da60e012ec7d237fd39e20fc2c0e5c31d578341bab370c37eec94e01b5f",
+    "scout_module": "e6a8e069bf79b17d78509cfcefe1501a1b172b384272d07c6adcb7d6d098dff4",
+    "security_module": "b8b55655a47b6dd10230faf40889c39494c5f0f1bcf425164601796a7f055a85",
+    "solar_service_station": "e6e8d6ec44183540951b508d32f7583340130aabb27462c012a073e3066d863b",
+    "standard_battery_pack": "c64b51fc8b39c5e08f4f295ee1a628f325ed578605e221454829de97ca1017da",
+    "tactical_visor": "fd9ebd18efbe0f4c56a29c2f6ae776cba55f10ae271027f02ed4479c954fffad"
+  },
+  "gameVerified": false,
+  "referenceFidelityApproved": false
+}

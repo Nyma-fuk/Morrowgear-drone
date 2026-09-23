@@ -1,0 +1,68 @@
+{
+  "checks": {
+    "geometryPass": true,
+    "nineViewsFramed": true,
+    "nineViewsSameResolution": true,
+    "nineViewsFresh": true,
+    "baseAssetUnmodified": true,
+    "exportsPresent": true
+  },
+  "passed": true,
+  "bounds": {
+    "hero": [
+      116,
+      110,
+      1612,
+      719
+    ],
+    "front": [
+      99,
+      399,
+      1582,
+      528
+    ],
+    "right": [
+      312,
+      399,
+      1366,
+      528
+    ],
+    "rear-oblique": [
+      244,
+      253,
+      1614,
+      767
+    ],
+    "top": [
+      216,
+      25,
+      1465,
+      912
+    ],
+    "bottom": [
+      216,
+      25,
+      1465,
+      912
+    ],
+    "rear": [
+      99,
+      399,
+      1582,
+      528
+    ],
+    "left": [
+      315,
+      399,
+      1369,
+      528
+    ],
+    "underside": [
+      244,
+      253,
+      1614,
+      767
+    ]
+  },
+  "gameVerified": false
+}

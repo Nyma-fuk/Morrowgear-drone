@@ -1,3 +1,6 @@
 {
-  "model": { "type": "minecraft:model", "model": "morrowgear_drone:item/scout_module" }
+  "model": {
+    "type": "minecraft:model",
+    "model": "morrowgear_drone:item/scout_module"
+  }
 }

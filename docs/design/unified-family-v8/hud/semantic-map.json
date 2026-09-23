@@ -1,0 +1,29 @@
+{
+  "DroneRole": {
+    "FIELD": "field",
+    "SCOUT": "scout",
+    "CARGO": "cargo",
+    "ENGINEER": "engineer",
+    "SECURITY": "security",
+    "SALVAGE": "salvage"
+  },
+  "DroneMode": {
+    "STANDBY": "standby",
+    "FOLLOW": "follow",
+    "RETURN": "return",
+    "ORBIT": "orbit",
+    "DOCK": "dock",
+    "WAYPOINT": "waypoint"
+  },
+  "CombatState": {
+    "IDLE": "standby",
+    "FLARE_ENTRY": "intercept",
+    "GUN_RUN": "gun",
+    "LASER_CHARGE": "charge",
+    "LASER_FIRE": "laser",
+    "MISSILE_APPROACH": "missile",
+    "MISSILE_EGRESS": "return",
+    "RAM_APPROACH": "intercept",
+    "REJOIN": "join"
+  }
+}

@@ -1,0 +1,52 @@
+[
+  {
+    "view": "hero",
+    "passed": true,
+    "occupiedPixels": 346547
+  },
+  {
+    "view": "front",
+    "passed": true,
+    "occupiedPixels": 192836
+  },
+  {
+    "view": "rear",
+    "passed": true,
+    "occupiedPixels": 192836
+  },
+  {
+    "view": "top",
+    "passed": true,
+    "occupiedPixels": 498758
+  },
+  {
+    "view": "bottom",
+    "passed": true,
+    "occupiedPixels": 498758
+  },
+  {
+    "view": "left",
+    "passed": true,
+    "occupiedPixels": 149203
+  },
+  {
+    "view": "right",
+    "passed": true,
+    "occupiedPixels": 149190
+  },
+  {
+    "view": "belly-hero",
+    "passed": true,
+    "occupiedPixels": 326432
+  },
+  {
+    "view": "closed",
+    "passed": true,
+    "occupiedPixels": 326432
+  },
+  {
+    "view": "small-drone-comparison",
+    "passed": true,
+    "occupiedPixels": 472042
+  }
+]

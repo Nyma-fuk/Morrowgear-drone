@@ -1,0 +1,476 @@
+{
+  "suite": "HMI design simulator; not Minecraft runtime",
+  "total": 117,
+  "passed": 117,
+  "failed": [],
+  "results": [
+    {
+      "name": "0 units: unique IDs and eight-slot Wing capacity",
+      "pass": true
+    },
+    {
+      "name": "0 units: scoped all selection",
+      "pass": true
+    },
+    {
+      "name": "0 units: HUD bounded markers and fronts",
+      "pass": true
+    },
+    {
+      "name": "0 units: home bindings unique and service references valid",
+      "pass": true
+    },
+    {
+      "name": "1 units: unique IDs and eight-slot Wing capacity",
+      "pass": true
+    },
+    {
+      "name": "1 units: scoped all selection",
+      "pass": true
+    },
+    {
+      "name": "1 units: HUD bounded markers and fronts",
+      "pass": true
+    },
+    {
+      "name": "1 units: home bindings unique and service references valid",
+      "pass": true
+    },
+    {
+      "name": "8 units: unique IDs and eight-slot Wing capacity",
+      "pass": true
+    },
+    {
+      "name": "8 units: scoped all selection",
+      "pass": true
+    },
+    {
+      "name": "8 units: HUD bounded markers and fronts",
+      "pass": true
+    },
+    {
+      "name": "8 units: home bindings unique and service references valid",
+      "pass": true
+    },
+    {
+      "name": "9 units: unique IDs and eight-slot Wing capacity",
+      "pass": true
+    },
+    {
+      "name": "9 units: scoped all selection",
+      "pass": true
+    },
+    {
+      "name": "9 units: HUD bounded markers and fronts",
+      "pass": true
+    },
+    {
+      "name": "9 units: home bindings unique and service references valid",
+      "pass": true
+    },
+    {
+      "name": "24 units: unique IDs and eight-slot Wing capacity",
+      "pass": true
+    },
+    {
+      "name": "24 units: scoped all selection",
+      "pass": true
+    },
+    {
+      "name": "24 units: HUD bounded markers and fronts",
+      "pass": true
+    },
+    {
+      "name": "24 units: home bindings unique and service references valid",
+      "pass": true
+    },
+    {
+      "name": "100 units: unique IDs and eight-slot Wing capacity",
+      "pass": true
+    },
+    {
+      "name": "100 units: scoped all selection",
+      "pass": true
+    },
+    {
+      "name": "100 units: HUD bounded markers and fronts",
+      "pass": true
+    },
+    {
+      "name": "100 units: home bindings unique and service references valid",
+      "pass": true
+    },
+    {
+      "name": "256 units: unique IDs and eight-slot Wing capacity",
+      "pass": true
+    },
+    {
+      "name": "256 units: scoped all selection",
+      "pass": true
+    },
+    {
+      "name": "256 units: HUD bounded markers and fronts",
+      "pass": true
+    },
+    {
+      "name": "256 units: home bindings unique and service references valid",
+      "pass": true
+    },
+    {
+      "name": "filter field preserves existing selections",
+      "pass": true
+    },
+    {
+      "name": "filter scout preserves existing selections",
+      "pass": true
+    },
+    {
+      "name": "filter cargo preserves existing selections",
+      "pass": true
+    },
+    {
+      "name": "filter engineer preserves existing selections",
+      "pass": true
+    },
+    {
+      "name": "filter security preserves existing selections",
+      "pass": true
+    },
+    {
+      "name": "filter salvage preserves existing selections",
+      "pass": true
+    },
+    {
+      "name": "filtered all differs from global all",
+      "pass": true
+    },
+    {
+      "name": "page selection does not choose hidden rows",
+      "pass": true
+    },
+    {
+      "name": "sort keeps IDs selected",
+      "pass": true
+    },
+    {
+      "name": "shift range across pages",
+      "pass": true
+    },
+    {
+      "name": "range anchor hidden by filter",
+      "pass": true
+    },
+    {
+      "name": "checkbox toggle independent of ordering",
+      "pass": true
+    },
+    {
+      "name": "full Wing rejects join atomically",
+      "pass": true
+    },
+    {
+      "name": "leave Wing keeps individual mission",
+      "pass": true
+    },
+    {
+      "name": "join assigned Wing enters rejoin with that mission",
+      "pass": true
+    },
+    {
+      "name": "new manual Wing never exceeds eight",
+      "pass": true
+    },
+    {
+      "name": "new manual Wing supports nonconsecutive IDs",
+      "pass": true
+    },
+    {
+      "name": "deleted participant rejected before join",
+      "pass": true
+    },
+    {
+      "name": "removed beacon and pinned focus disappear together",
+      "pass": true
+    },
+    {
+      "name": "offline blocks follow",
+      "pass": true
+    },
+    {
+      "name": "permission blocks follow",
+      "pass": true
+    },
+    {
+      "name": "empty selection blocks follow",
+      "pass": true
+    },
+    {
+      "name": "offline blocks hold",
+      "pass": true
+    },
+    {
+      "name": "permission blocks hold",
+      "pass": true
+    },
+    {
+      "name": "empty selection blocks hold",
+      "pass": true
+    },
+    {
+      "name": "offline blocks return",
+      "pass": true
+    },
+    {
+      "name": "permission blocks return",
+      "pass": true
+    },
+    {
+      "name": "empty selection blocks return",
+      "pass": true
+    },
+    {
+      "name": "offline blocks route",
+      "pass": true
+    },
+    {
+      "name": "permission blocks route",
+      "pass": true
+    },
+    {
+      "name": "empty selection blocks route",
+      "pass": true
+    },
+    {
+      "name": "offline blocks move",
+      "pass": true
+    },
+    {
+      "name": "permission blocks move",
+      "pass": true
+    },
+    {
+      "name": "empty selection blocks move",
+      "pass": true
+    },
+    {
+      "name": "offline blocks work",
+      "pass": true
+    },
+    {
+      "name": "permission blocks work",
+      "pass": true
+    },
+    {
+      "name": "empty selection blocks work",
+      "pass": true
+    },
+    {
+      "name": "offline blocks cargo",
+      "pass": true
+    },
+    {
+      "name": "permission blocks cargo",
+      "pass": true
+    },
+    {
+      "name": "empty selection blocks cargo",
+      "pass": true
+    },
+    {
+      "name": "offline blocks guard",
+      "pass": true
+    },
+    {
+      "name": "permission blocks guard",
+      "pass": true
+    },
+    {
+      "name": "empty selection blocks guard",
+      "pass": true
+    },
+    {
+      "name": "offline blocks salvage",
+      "pass": true
+    },
+    {
+      "name": "permission blocks salvage",
+      "pass": true
+    },
+    {
+      "name": "empty selection blocks salvage",
+      "pass": true
+    },
+    {
+      "name": "offline blocks store",
+      "pass": true
+    },
+    {
+      "name": "permission blocks store",
+      "pass": true
+    },
+    {
+      "name": "empty selection blocks store",
+      "pass": true
+    },
+    {
+      "name": "offline blocks role",
+      "pass": true
+    },
+    {
+      "name": "permission blocks role",
+      "pass": true
+    },
+    {
+      "name": "empty selection blocks role",
+      "pass": true
+    },
+    {
+      "name": "pending command cannot be double submitted",
+      "pass": true
+    },
+    {
+      "name": "selected set is captured at command time",
+      "pass": true
+    },
+    {
+      "name": "rejected command does not mutate mission",
+      "pass": true
+    },
+    {
+      "name": "connection loss after send remains unconfirmed",
+      "pass": true
+    },
+    {
+      "name": "stale revision fails closed",
+      "pass": true
+    },
+    {
+      "name": "deleted target fails closed even with unchanged revision",
+      "pass": true
+    },
+    {
+      "name": "whole Wing route updates Wing board and unit mission consistently",
+      "pass": true
+    },
+    {
+      "name": "individual order does not overwrite entire Wing mission",
+      "pass": true
+    },
+    {
+      "name": "route 1 points accepted",
+      "pass": true
+    },
+    {
+      "name": "route 2 points accepted",
+      "pass": true
+    },
+    {
+      "name": "route 3 points accepted",
+      "pass": true
+    },
+    {
+      "name": "route 8 points accepted",
+      "pass": true
+    },
+    {
+      "name": "invalid route rejected 0",
+      "pass": true
+    },
+    {
+      "name": "invalid route rejected 9",
+      "pass": true
+    },
+    {
+      "name": "invalid route rejected 1",
+      "pass": true
+    },
+    {
+      "name": "invalid route rejected 1",
+      "pass": true
+    },
+    {
+      "name": "cargo same-container rejects",
+      "pass": true
+    },
+    {
+      "name": "cargo full target rejects",
+      "pass": true
+    },
+    {
+      "name": "cargo available route accepted",
+      "pass": true
+    },
+    {
+      "name": "airborne role change blocked",
+      "pass": true
+    },
+    {
+      "name": "docked role change valid and identity preserved",
+      "pass": true
+    },
+    {
+      "name": "invalid role rejected",
+      "pass": true
+    },
+    {
+      "name": "airborne itemization is not offered",
+      "pass": true
+    },
+    {
+      "name": "docked itemization removes marker source",
+      "pass": true
+    },
+    {
+      "name": "compact HUD retains rescue alert",
+      "pass": true
+    },
+    {
+      "name": "markers off does not hide critical beacon summary",
+      "pass": true
+    },
+    {
+      "name": "front priority and stable tie ordering",
+      "pass": true
+    },
+    {
+      "name": "0 units: front counts and Dock references use actual IDs",
+      "pass": true
+    },
+    {
+      "name": "8 units: front counts and Dock references use actual IDs",
+      "pass": true
+    },
+    {
+      "name": "24 units: front counts and Dock references use actual IDs",
+      "pass": true
+    },
+    {
+      "name": "100 units: front counts and Dock references use actual IDs",
+      "pass": true
+    },
+    {
+      "name": "256 units: front counts and Dock references use actual IDs",
+      "pass": true
+    },
+    {
+      "name": "guard accepts current front and preserves home Wing",
+      "pass": true
+    },
+    {
+      "name": "guard rejects a vanished front",
+      "pass": true
+    },
+    {
+      "name": "salvage carries target and destination into the mission",
+      "pass": true
+    },
+    {
+      "name": "salvage rejects a recovered or vanished beacon",
+      "pass": true
+    },
+    {
+      "name": "cargo rejects a missing container",
+      "pass": true
+    }
+  ]
+}

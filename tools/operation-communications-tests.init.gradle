@@ -1,0 +1,10 @@
+// Optional focused invocation while unrelated tests are being edited in the shared checkout.
+allprojects {
+    plugins.withId('java') {
+        tasks.named('compileTestJava', JavaCompile) {
+            setSource(fileTree('src/test/java') {
+                include 'jp/morrowgear/drone/Operation*.java'
+            })
+        }
+    }
+}

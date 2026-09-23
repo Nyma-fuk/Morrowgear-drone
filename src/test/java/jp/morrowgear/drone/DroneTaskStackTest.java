@@ -74,6 +74,22 @@ final class DroneTaskStackTest {
 	}
 
 	@Test
+	void completedReliefSkipsCombatAndRestoresUnderlyingSecurityMission() {
+		DroneTaskStack stack = new DroneTaskStack();
+		stack.suspend(new DroneTaskStack.Task(DroneTaskStack.Kind.SECURITY_PATROL,
+			DroneMode.STANDBY, SalvageState.IDLE, null, "relief-order"));
+		stack.suspend(new DroneTaskStack.Task(DroneTaskStack.Kind.COMBAT,
+			DroneMode.STANDBY, SalvageState.IDLE, UUID.randomUUID(), "front"));
+
+		DroneTaskStack.Task resumed = stack.resume(task -> task.kind() == DroneTaskStack.Kind.COMBAT
+			? java.util.Optional.empty() : java.util.Optional.of(task)).orElseThrow();
+
+		assertEquals(DroneTaskStack.Kind.SECURITY_PATROL, resumed.kind());
+		assertEquals("relief-order", resumed.missionId());
+		assertTrue(stack.resume().isEmpty());
+	}
+
+	@Test
 	void discardRemovesSupersededAssignmentsFromBothCollections() {
 		DroneTaskStack stack = new DroneTaskStack();
 		stack.suspend(new DroneTaskStack.Task(DroneTaskStack.Kind.ROUTE, DroneMode.WAYPOINT,

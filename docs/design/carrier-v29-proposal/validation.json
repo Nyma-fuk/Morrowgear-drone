@@ -1,0 +1,110 @@
+{
+  "proposalOnly": true,
+  "axes": {
+    "front": "-Y",
+    "up": "+Z",
+    "mirror": "X=0"
+  },
+  "bounds": [
+    [
+      -25.0,
+      25.0
+    ],
+    [
+      -16.0,
+      15.992500305175781
+    ],
+    [
+      -0.10000000149011612,
+      6.949999809265137
+    ]
+  ],
+  "dimensions": [
+    50.0,
+    31.99250030517578,
+    7.049999810755253
+  ],
+  "symmetryMaxError": 0.0,
+  "evaluatedVertices": 24970,
+  "polygons": 19774,
+  "nonManifoldEdgesByObject": {},
+  "bayApproachChecks": [
+    {
+      "centerX": -15,
+      "approachSamplesClear": true,
+      "samples": 9
+    },
+    {
+      "centerX": -10,
+      "approachSamplesClear": true,
+      "samples": 9
+    },
+    {
+      "centerX": 10,
+      "approachSamplesClear": true,
+      "samples": 9
+    },
+    {
+      "centerX": 15,
+      "approachSamplesClear": true,
+      "samples": 9
+    }
+  ],
+  "beamOrigin": [
+    0,
+    0,
+    -0.1
+  ],
+  "bayClearEnvelope": [
+    3.5,
+    4.0,
+    2.3
+  ],
+  "revision": "V29_REFINED_SWEEP_02",
+  "surfacePanelCount": 496,
+  "rearNozzleCount": 8,
+  "maximumWingRootThickness": 3.85,
+  "exhaustDuctChecks": [
+    {
+      "centerX": -8.2,
+      "ductSamplesClear": true,
+      "samples": 2
+    },
+    {
+      "centerX": 8.2,
+      "ductSamplesClear": true,
+      "samples": 2
+    },
+    {
+      "centerX": -12.6,
+      "ductSamplesClear": true,
+      "samples": 2
+    },
+    {
+      "centerX": 12.6,
+      "ductSamplesClear": true,
+      "samples": 2
+    },
+    {
+      "centerX": -17.2,
+      "ductSamplesClear": true,
+      "samples": 2
+    },
+    {
+      "centerX": 17.2,
+      "ductSamplesClear": true,
+      "samples": 2
+    },
+    {
+      "centerX": -2.1,
+      "ductSamplesClear": true,
+      "samples": 2
+    },
+    {
+      "centerX": 2.1,
+      "ductSamplesClear": true,
+      "samples": 2
+    }
+  ],
+  "passed": true
+}

@@ -1,0 +1,32 @@
+{
+  "id": "autocannon_magazine",
+  "passed": true,
+  "beamAnchor": null,
+  "beamAnchorError": 0,
+  "serviceBayAnchors": {},
+  "serviceBayAnchorError": 0,
+  "maxBoundsError": 0.0,
+  "maxPerPartBoundsError": 0.0,
+  "missingParts": [],
+  "sourceBounds": [
+    -0.6599607467651367,
+    -0.4020000100135803,
+    0.07000000029802322,
+    0.6599607467651367,
+    0.3100000023841858,
+    1.334999918937683
+  ],
+  "importBounds": [
+    -0.6599607467651367,
+    -0.4020000100135803,
+    0.07000000029802322,
+    0.6599607467651367,
+    0.3100000023841858,
+    1.334999918937683
+  ],
+  "sourceMeshCount": 24,
+  "importMeshCount": 24,
+  "state": "service / static GLB",
+  "frontAfterImport": "-Y",
+  "upAfterImport": "+Z"
+}

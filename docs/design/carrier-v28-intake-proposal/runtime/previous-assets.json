@@ -1,0 +1,7 @@
+{
+  "models/runtime/carrier.mgm": "168d3f254a54d471a4fe928fd579bd82fa138249e2efa8e54f15051ace648c68",
+  "models/runtime/carrier_lod.mgm": "ca298ad0b6fb726b5765b7aed32439895d60f1f24833883cdc8817e8d1460acb",
+  "textures/runtime/carrier.png": "c6a9db9126cb9a7cb555ffa4124b76502ac17e3a95bbe7f0db9ea410c9142788",
+  "textures/runtime/carrier_lod.png": "82999e068560b547aaa01749c5e67a1a319f1b75ae51302d56d7d549d337a428",
+  "textures/item/carrier_unit.png": "009c2f586d9269060f2f8ef51ba3cf432146381cbad2b9e41573c5a34ce6d5da"
+}

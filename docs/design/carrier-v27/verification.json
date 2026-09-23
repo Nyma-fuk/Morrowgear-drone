@@ -1,0 +1,312 @@
+{
+  "passed": true,
+  "errors": [],
+  "native": {
+    "passed": true,
+    "errors": [],
+    "boundsBlender": [
+      -13.0,
+      -25.0,
+      0.0,
+      13.0,
+      25.0,
+      11.0
+    ],
+    "mirrorError": 0.0,
+    "triangles": 24188,
+    "meshObjects": 385,
+    "bays": [
+      {
+        "slot": 0,
+        "rays": 169,
+        "blocked": []
+      },
+      {
+        "slot": 1,
+        "rays": 169,
+        "blocked": []
+      },
+      {
+        "slot": 2,
+        "rays": 169,
+        "blocked": []
+      },
+      {
+        "slot": 3,
+        "rays": 169,
+        "blocked": []
+      }
+    ],
+    "reference": "C:\\Users\\fukud\\.codex\\generated_images\\019ff8b6-65ab-7b61-9327-249478654bda\\exec-0f667897-253c-40df-8bf5-f0e636268628.png",
+    "referenceSha256": "3ba1db98f8bdab73c79c0887a475c6d7ecb387be03bb2e559f04af9c626f5eb4",
+    "boardingReceiver": {
+      "rays": 169,
+      "blocked": [],
+      "clearTop": 4.4
+    },
+    "revision": "V27_FUNCTIONAL_DETAIL_01",
+    "scope": "Native geometry, 676 service + 169 boarding entry rays; no moving mechanism claim"
+  },
+  "states": [
+    {
+      "frame": 1,
+      "bounds": [
+        -13.0,
+        -25.0,
+        0.0,
+        13.0,
+        25.0,
+        11.0
+      ]
+    },
+    {
+      "frame": 40,
+      "bounds": [
+        -13.0,
+        -25.0,
+        0.0,
+        13.0,
+        25.0,
+        11.0
+      ]
+    },
+    {
+      "frame": 80,
+      "bounds": [
+        -13.0,
+        -25.0,
+        0.0,
+        13.0,
+        25.0,
+        11.0
+      ]
+    }
+  ],
+  "glb": {
+    "boundsBlender": [
+      -13.0,
+      -25.0,
+      0.0,
+      13.0,
+      25.0,
+      11.0
+    ],
+    "mirrorError": 0.0,
+    "sha256": "22c1aca69773699f4a28570e9951471a5000dc79ae511bba837ba2e794cd5bdb"
+  },
+  "runtime": [
+    {
+      "passed": true,
+      "errors": [],
+      "format": "MGM4",
+      "vertices": 69864,
+      "triangles": 23288,
+      "byteLength": 6008340,
+      "sha256": "168d3f254a54d471a4fe928fd579bd82fa138249e2efa8e54f15051ace648c68",
+      "runtimeBounds": [
+        -13.0,
+        0.0,
+        -25.0,
+        13.0,
+        11.0,
+        25.0
+      ],
+      "mirrorError": 0.0,
+      "rotorCenters": 2,
+      "groups": [
+        0
+      ],
+      "posesIdentical": true,
+      "luminousVertices": {
+        "0": 62304,
+        "1": 3120,
+        "2": 4440
+      },
+      "apertures": [
+        {
+          "name": "bay0",
+          "rays": 169,
+          "blocked": 0
+        },
+        {
+          "name": "bay1",
+          "rays": 169,
+          "blocked": 0
+        },
+        {
+          "name": "bay2",
+          "rays": 169,
+          "blocked": 0
+        },
+        {
+          "name": "bay3",
+          "rays": 169,
+          "blocked": 0
+        },
+        {
+          "name": "boarding",
+          "rays": 169,
+          "blocked": 0
+        }
+      ]
+    },
+    {
+      "passed": true,
+      "errors": [],
+      "format": "MGM4",
+      "vertices": 37152,
+      "triangles": 12384,
+      "byteLength": 3195108,
+      "sha256": "ca298ad0b6fb726b5765b7aed32439895d60f1f24833883cdc8817e8d1460acb",
+      "runtimeBounds": [
+        -13.0,
+        0.0,
+        -25.0,
+        13.0,
+        11.0,
+        25.0
+      ],
+      "mirrorError": 0.0,
+      "rotorCenters": 2,
+      "groups": [
+        0
+      ],
+      "posesIdentical": true,
+      "luminousVertices": {
+        "0": 29592,
+        "1": 3120,
+        "2": 4440
+      },
+      "apertures": [
+        {
+          "name": "bay0",
+          "rays": 169,
+          "blocked": 0
+        },
+        {
+          "name": "bay1",
+          "rays": 169,
+          "blocked": 0
+        },
+        {
+          "name": "bay2",
+          "rays": 169,
+          "blocked": 0
+        },
+        {
+          "name": "bay3",
+          "rays": 169,
+          "blocked": 0
+        },
+        {
+          "name": "boarding",
+          "rays": 169,
+          "blocked": 0
+        }
+      ]
+    }
+  ],
+  "images": [
+    {
+      "path": "hero.png",
+      "size": [
+        1280,
+        1024
+      ],
+      "nonblank": true,
+      "occupiedPixels": 1310720
+    },
+    {
+      "path": "front.png",
+      "size": [
+        1280,
+        1024
+      ],
+      "nonblank": true,
+      "occupiedPixels": 88673
+    },
+    {
+      "path": "rear.png",
+      "size": [
+        1280,
+        1024
+      ],
+      "nonblank": true,
+      "occupiedPixels": 88673
+    },
+    {
+      "path": "top.png",
+      "size": [
+        1280,
+        1024
+      ],
+      "nonblank": true,
+      "occupiedPixels": 358630
+    },
+    {
+      "path": "bottom.png",
+      "size": [
+        1280,
+        1024
+      ],
+      "nonblank": true,
+      "occupiedPixels": 358630
+    },
+    {
+      "path": "left.png",
+      "size": [
+        1280,
+        1024
+      ],
+      "nonblank": true,
+      "occupiedPixels": 155319
+    },
+    {
+      "path": "right.png",
+      "size": [
+        1280,
+        1024
+      ],
+      "nonblank": true,
+      "occupiedPixels": 155295
+    },
+    {
+      "path": "carrier-unit-16.png",
+      "size": [
+        16,
+        16
+      ],
+      "nonblank": true,
+      "occupiedPixels": 81
+    },
+    {
+      "path": "carrier-unit-128.png",
+      "size": [
+        128,
+        128
+      ],
+      "nonblank": true,
+      "occupiedPixels": 3802
+    },
+    {
+      "path": "carrier-mgm-readback.png",
+      "size": [
+        1280,
+        1024
+      ],
+      "nonblank": true,
+      "occupiedPixels": 1310720
+    },
+    {
+      "path": "carrier_lod-mgm-readback.png",
+      "size": [
+        1280,
+        1024
+      ],
+      "nonblank": true,
+      "occupiedPixels": 1310720
+    }
+  ],
+  "sourceSha256": "a7399cfb58f44cd94385c4b461f41fa65d3d6a1098507d8fea06c1079acddd90",
+  "scope": "Static native and MGM geometry, atlas and image readback; no game launch or moving mechanism claim"
+}

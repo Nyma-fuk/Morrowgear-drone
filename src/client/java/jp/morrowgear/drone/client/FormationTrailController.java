@@ -2,9 +2,8 @@ package jp.morrowgear.drone.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Deque;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -12,10 +11,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import jp.morrowgear.drone.DroneEntity;
+import jp.morrowgear.drone.DroneHardpoints;
+import jp.morrowgear.drone.EffectReadabilityPolicy;
 import jp.morrowgear.drone.FormationLightTrailProfile;
+import jp.morrowgear.drone.FormationTrailHistory;
+import jp.morrowgear.drone.FormationTrailHistory.Point;
 import jp.morrowgear.drone.FormationTrailPolicy;
 import jp.morrowgear.drone.MorrowgearDrone;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -24,176 +28,138 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 final class FormationTrailController {
-	private static final double TRACKING_RADIUS = 96.0;
-	private static final int FULL_BRIGHT = 0x00F000F0;
+	private static final Vec3 LEFT_EXHAUST = DroneHardpoints.EXHAUST_LEFT;
+	private static final Vec3 RIGHT_EXHAUST = DroneHardpoints.EXHAUST_RIGHT;
 	private static final Identifier WHITE_TEXTURE = Identifier.fromNamespaceAndPath(
 		MorrowgearDrone.MOD_ID, "textures/entity/emissive_white.png");
 	private static final Map<UUID, TrailState> TRAILS = new HashMap<>();
+	private static ClientLevel trackedLevel;
+	private static long lastTick = Long.MIN_VALUE;
 
 	private FormationTrailController() {}
 
 	static void tick(Minecraft client) {
-		if (client.level == null || client.player == null || client.isPaused()) {
+		if (client.level != trackedLevel || client.level == null || client.player == null) {
 			TRAILS.clear();
-			return;
+			trackedLevel = client.level;
+			lastTick = Long.MIN_VALUE;
 		}
+		if (client.level == null || client.player == null || client.isPaused()) return;
 		long gameTick = client.level.getGameTime();
+		if (gameTick < lastTick) TRAILS.clear();
+		if (gameTick == lastTick) return;
+		lastTick = gameTick;
 		Set<UUID> visible = new HashSet<>();
-		AABB area = client.player.getBoundingBox().inflate(TRACKING_RADIUS);
-		for (DroneEntity drone : client.level.getEntitiesOfClass(DroneEntity.class, area, entity -> entity.isAlive())) {
+		AABB area = client.player.getBoundingBox().inflate(FormationLightTrailProfile.MAX_RENDER_DISTANCE);
+		List<DroneEntity> drones = client.level.getEntitiesOfClass(DroneEntity.class, area, entity -> entity.isAlive());
+		drones.sort(Comparator.comparingDouble((DroneEntity drone) -> client.player.distanceToSqr(drone))
+			.thenComparing(DroneEntity::getUUID));
+		for (DroneEntity drone : drones) {
 			UUID id = drone.getUUID();
-			visible.add(id);
-			if (drone.isPowerLost()) {
-				TRAILS.remove(id);
-				continue;
-			}
-			TrailState state = TRAILS.computeIfAbsent(id, ignored -> new TrailState());
+			if (drone.isPowerLost()) { TRAILS.remove(id); continue; }
+			if (drone.distanceToSqr(client.player) > FormationLightTrailProfile.MAX_RENDER_DISTANCE
+				* FormationLightTrailProfile.MAX_RENDER_DISTANCE) continue;
 			FormationTrailPolicy.TrailStyle style = FormationTrailPolicy.style(drone.mode(), drone.combatState(),
 				drone.missionExpected(), drone.missionStage(), drone.isDocked(), drone.serviceReturnActive(),
 				drone.formationCatchUp(), drone.patrolRouteSize(), drone.cohortRank(),
 				!drone.cohortLeaderId().isBlank(), drone.hasActiveFieldOperation(), drone.hasSecurityPatrol());
-			if (style != state.style) {
-				state.points.clear();
-				state.activeTicks = 0;
-			}
-			boolean active = style != FormationTrailPolicy.TrailStyle.NONE;
-			if (!active) state.points.clear();
-			state.activeThisTick = active;
-			state.style = style;
-			if (active) state.activeTicks++; else state.activeTicks = 0;
-			boolean immediate = style == FormationTrailPolicy.TrailStyle.COMBAT_ENTRY
-				|| style == FormationTrailPolicy.TrailStyle.SERVICE_RETURN
-				|| style == FormationTrailPolicy.TrailStyle.REJOIN;
-			boolean activated = active && (immediate
-				|| state.activeTicks > FormationTrailPolicy.activationDelay(drone.cohortRank()));
-			if (activated && drone.getDeltaMovement().lengthSqr() >= 0.0025)
-				sample(state, trailOrigin(drone), gameTick);
-			prune(state, gameTick);
+			if (style == FormationTrailPolicy.TrailStyle.NONE && !TRAILS.containsKey(id)) continue;
+			if (visible.size() >= FormationLightTrailProfile.MAX_TRACKED_DRONES) break;
+			visible.add(id);
+			TrailState state = TRAILS.computeIfAbsent(id, ignored -> new TrailState());
+			state.history.tick(style, drone.position(), DroneHardpoints.worldPosition(drone, LEFT_EXHAUST),
+				DroneHardpoints.worldPosition(drone, RIGHT_EXHAUST), gameTick,
+				drone.getDeltaMovement().lengthSqr() >= 0.0025, FormationTrailPolicy.activationDelay(drone.cohortRank()));
+			state.smoothed = smoothed(state.history.points());
 		}
-		TRAILS.entrySet().removeIf(entry -> !FormationLightTrailProfile.retainState(
-			visible.contains(entry.getKey()), entry.getValue().activeThisTick, !entry.getValue().points.isEmpty()));
+		TRAILS.entrySet().removeIf(entry -> !FormationLightTrailProfile.retainState(visible.contains(entry.getKey()),
+			entry.getValue().history.active(), entry.getValue().history.hasPoints()));
 	}
 
-	static void render(UUID entityId, Vec3 entityPosition, PoseStack poseStack, SubmitNodeCollector collector) {
-		TrailState state = entityId == null ? null : TRAILS.get(entityId);
+	static void render(DroneRenderState state, PoseStack stack, SubmitNodeCollector collector, Vec3 cameraOffset) {
+		Vec3 position = new Vec3(state.x, state.y, state.z);
+		render(state.entityId, position, stack, collector, position.add(cameraOffset),
+			position.add(DroneHardpoints.rotate(LEFT_EXHAUST, state.heading, state.flightPitch, state.flightRoll)),
+			position.add(DroneHardpoints.rotate(RIGHT_EXHAUST, state.heading, state.flightPitch, state.flightRoll)),
+			state.ageInTicks - Math.floor(state.ageInTicks));
+	}
+
+	// Compatibility for callers that have not yet switched to the interpolated hardpoint overload.
+	static void render(UUID id, Vec3 position, PoseStack stack, SubmitNodeCollector collector) {
+		render(id, position, stack, collector, Minecraft.getInstance().gameRenderer.mainCamera().position(), null, null, 0);
+	}
+
+	private static void render(UUID id, Vec3 position, PoseStack stack, SubmitNodeCollector collector,
+		Vec3 camera, Vec3 left, Vec3 right, double partialTick) {
+		TrailState state = id == null ? null : TRAILS.get(id);
 		Minecraft client = Minecraft.getInstance();
-		if (state == null || state.points.size() < 2 || client.level == null) return;
-		long now = client.level.getGameTime();
-		List<TrailPoint> points = smoothed(state.points);
-
-		poseStack.pushPose();
-		poseStack.translate(-entityPosition.x, -entityPosition.y, -entityPosition.z);
-		if (state.style == FormationTrailPolicy.TrailStyle.COMBAT_ENTRY) {
-			collector.submitCustomGeometry(poseStack, RenderTypes.entityTranslucentEmissive(WHITE_TEXTURE),
-				(pose, consumer) -> renderLayer(pose, consumer, points, now, 0.28f, 255, 42, 8, 84));
-			collector.submitCustomGeometry(poseStack, RenderTypes.entityTranslucentEmissive(WHITE_TEXTURE),
-				(pose, consumer) -> renderLayer(pose, consumer, points, now, 0.15f, 255, 118, 18, 228));
-			collector.submitCustomGeometry(poseStack, RenderTypes.entityTranslucentEmissive(WHITE_TEXTURE),
-				(pose, consumer) -> renderLayer(pose, consumer, points, now, 0.04f, 255, 238, 205, 255));
-		} else if (state.style == FormationTrailPolicy.TrailStyle.SERVICE_RETURN) {
-			collector.submitCustomGeometry(poseStack, RenderTypes.entityTranslucentEmissive(WHITE_TEXTURE),
-				(pose, consumer) -> renderLayer(pose, consumer, points, now, 0.24f, 255, 132, 18, 74));
-			collector.submitCustomGeometry(poseStack, RenderTypes.entityTranslucentEmissive(WHITE_TEXTURE),
-				(pose, consumer) -> renderLayer(pose, consumer, points, now, 0.11f, 255, 202, 82, 230));
-		} else if (state.style == FormationTrailPolicy.TrailStyle.REJOIN) {
-			collector.submitCustomGeometry(poseStack, RenderTypes.entityTranslucentEmissive(WHITE_TEXTURE),
-				(pose, consumer) -> renderLayer(pose, consumer, points, now, 0.24f, 36, 224, 142, 76));
-			collector.submitCustomGeometry(poseStack, RenderTypes.entityTranslucentEmissive(WHITE_TEXTURE),
-				(pose, consumer) -> renderLayer(pose, consumer, points, now, 0.10f, 178, 255, 218, 232));
-		} else if (state.style == FormationTrailPolicy.TrailStyle.CATCH_UP) {
-			collector.submitCustomGeometry(poseStack, RenderTypes.entityTranslucentEmissive(WHITE_TEXTURE),
-				(pose, consumer) -> renderLayer(pose, consumer, points, now, 0.30f, 12, 176, 246, 82));
-			collector.submitCustomGeometry(poseStack, RenderTypes.entityTranslucentEmissive(WHITE_TEXTURE),
-				(pose, consumer) -> renderLayer(pose, consumer, points, now, 0.13f, 128, 244, 255, 238));
-		} else {
-			collector.submitCustomGeometry(poseStack, RenderTypes.entityTranslucentEmissive(WHITE_TEXTURE),
-				(pose, consumer) -> renderLayer(pose, consumer, points, now, 0.24f, 18, 164, 232, 72));
-			collector.submitCustomGeometry(poseStack, RenderTypes.entityTranslucentEmissive(WHITE_TEXTURE),
-				(pose, consumer) -> renderLayer(pose, consumer, points, now, 0.14f, 8, 222, 255, 218));
-			collector.submitCustomGeometry(poseStack, RenderTypes.entityTranslucentEmissive(WHITE_TEXTURE),
-				(pose, consumer) -> renderLayer(pose, consumer, points, now, 0.035f, 238, 252, 255, 255));
+		if (state == null || state.smoothed.size() < 2 || client.level == null || client.level != trackedLevel) return;
+		double distance = camera.distanceTo(position);
+		float opacity = FormationLightTrailProfile.distanceAlpha(distance);
+		if (opacity <= 0) return;
+		double now = client.level.getGameTime() + partialTick;
+		List<Point> points = new ArrayList<>(state.smoothed);
+		if (left != null && right != null && state.history.emitting()) {
+			Point newest = points.getLast();
+			if (now - newest.tick() <= FormationLightTrailProfile.MAX_SAMPLE_INTERVAL + 1)
+				points.set(points.size() - 1, newest.at(left, right));
 		}
-		poseStack.popPose();
+		int stride = FormationLightTrailProfile.sampleStride(distance);
+		float coreWidth = EffectReadabilityPolicy.width(FormationLightTrailProfile.CORE_WIDTH,
+			EffectProjection.pixelsPerBlock(position), 0.9f, 1.7f);
+		stack.pushPose();
+		stack.translate(-position.x, -position.y, -position.z);
+		collector.submitCustomGeometry(stack, RenderTypes.entityTranslucentEmissive(WHITE_TEXTURE), (pose, out) -> {
+			renderLayer(pose, out, points, camera, now, stride, FormationLightTrailProfile.HALO_WIDTH, 50 * opacity, false);
+			renderLayer(pose, out, points, camera, now, stride, coreWidth, 172 * opacity, true);
+		});
+		stack.popPose();
 	}
 
-	private static void sample(TrailState state, Vec3 position, long tick) {
-		TrailPoint newest = state.points.peekLast();
-		if (newest != null && !FormationLightTrailProfile.shouldSample(position.distanceTo(newest.position), tick - newest.tick)) return;
-		state.points.addLast(new TrailPoint(position, tick));
-		while (state.points.size() > FormationLightTrailProfile.MAX_CONTROL_POINTS) state.points.removeFirst();
-	}
-
-	private static void prune(TrailState state, long now) {
-		while (!state.points.isEmpty()
-			&& now - state.points.peekFirst().tick >= FormationLightTrailProfile.LIFETIME_TICKS) {
-			state.points.removeFirst();
-		}
-	}
-
-	private static Vec3 trailOrigin(DroneEntity drone) {
-		Vec3 velocity = drone.getDeltaMovement();
-		Vec3 direction = velocity.lengthSqr() > 0.0001 ? velocity.normalize()
-			: new Vec3(0.0, 0.0, 1.0).yRot((float) Math.toRadians(-drone.getYRot()));
-		return drone.position().add(0.0, drone.getBbHeight() * 0.42, 0.0).subtract(direction.scale(0.82));
-	}
-
-	private static List<TrailPoint> smoothed(Deque<TrailPoint> source) {
-		List<TrailPoint> raw = new ArrayList<>(source);
+	private static List<Point> smoothed(List<Point> raw) {
 		if (raw.size() < 3) return raw;
-		List<TrailPoint> result = new ArrayList<>(raw.size());
-		result.add(raw.getFirst());
+		List<Point> result = new ArrayList<>(raw);
 		for (int index = 1; index < raw.size() - 1; index++) {
-			Vec3 position = raw.get(index - 1).position.scale(0.2)
-				.add(raw.get(index).position.scale(0.6))
-				.add(raw.get(index + 1).position.scale(0.2));
-			result.add(new TrailPoint(position, raw.get(index).tick));
+			Point a = raw.get(index - 1), b = raw.get(index), c = raw.get(index + 1);
+			if (a.strip() != b.strip() || b.strip() != c.strip()) continue;
+			result.set(index, b.at(a.left().scale(.2).add(b.left().scale(.6)).add(c.left().scale(.2)),
+				a.right().scale(.2).add(b.right().scale(.6)).add(c.right().scale(.2))));
 		}
-		result.add(raw.getLast());
-		return result;
+		return List.copyOf(result);
 	}
 
-	private static void renderLayer(PoseStack.Pose pose, VertexConsumer consumer, List<TrailPoint> points,
-		long now, float width, int red, int green, int blue, int baseAlpha) {
-		for (int index = 0; index < points.size() - 1; index++) {
-			TrailPoint start = points.get(index);
-			TrailPoint end = points.get(index + 1);
-			Vec3 delta = end.position.subtract(start.position);
-			if (delta.lengthSqr() < 0.000001) continue;
-			int alphaStart = Math.round(baseAlpha * FormationLightTrailProfile.alpha((int) (now - start.tick)));
-			int alphaEnd = Math.round(baseAlpha * FormationLightTrailProfile.alpha((int) (now - end.tick)));
-			if (alphaStart <= 0 && alphaEnd <= 0) continue;
-			Vec3 horizontal = new Vec3(-delta.z, 0.0, delta.x);
-			if (horizontal.lengthSqr() < 0.000001) horizontal = new Vec3(1.0, 0.0, 0.0);
-			horizontal = horizontal.normalize().scale(width * 0.5);
-			Vec3 vertical = new Vec3(0.0, width * 0.5, 0.0);
-			emitQuad(pose, consumer, start.position.subtract(vertical), start.position.add(vertical),
-				end.position.add(vertical), end.position.subtract(vertical), red, green, blue, alphaStart, alphaEnd);
-			emitQuad(pose, consumer, start.position.subtract(horizontal), start.position.add(horizontal),
-				end.position.add(horizontal), end.position.subtract(horizontal), red, green, blue, alphaStart, alphaEnd);
+	private static void renderLayer(PoseStack.Pose pose, VertexConsumer out, List<Point> points, Vec3 camera,
+		double now, int stride, float width, float opacity, boolean core) {
+		for (int index = 0; index < points.size() - 1; index += stride) {
+			int next = Math.min(points.size() - 1, index + stride);
+			Point start = points.get(index), end = points.get(next);
+			if (start.strip() != end.strip()) continue;
+			float fadeStart = start.alpha(now) * Math.min(1, index / 3.0f);
+			float fadeEnd = end.alpha(now) * Math.min(1, next / 3.0f);
+			for (int side = 0; side < 2; side++) {
+				Vec3 a = side == 0 ? start.left() : start.right(), b = side == 0 ? end.left() : end.right();
+				Vec3 axis = b.subtract(a).cross(camera.subtract(a));
+				if (axis.lengthSqr() < 0.000001) continue;
+				axis = axis.normalize().scale(width * .5);
+				Vec3 startAxis = axis.scale(.35 + .65 * fadeStart), endAxis = axis.scale(.35 + .65 * fadeEnd);
+				int colorA = core ? FormationLightTrailProfile.blendColor(start.color(), 0xFFFFFF, .58f) : start.color();
+				int colorB = core ? FormationLightTrailProfile.blendColor(end.color(), 0xFFFFFF, .58f) : end.color();
+				vertex(pose, out, a.subtract(startAxis), colorA, Math.round(opacity * fadeStart), 0, 0);
+				vertex(pose, out, a.add(startAxis), colorA, Math.round(opacity * fadeStart), 0, 1);
+				vertex(pose, out, b.add(endAxis), colorB, Math.round(opacity * fadeEnd), 1, 1);
+				vertex(pose, out, b.subtract(endAxis), colorB, Math.round(opacity * fadeEnd), 1, 0);
+			}
 		}
 	}
 
-	private static void emitQuad(PoseStack.Pose pose, VertexConsumer consumer, Vec3 a, Vec3 b, Vec3 c, Vec3 d,
-		int red, int green, int blue, int alphaStart, int alphaEnd) {
-		emitVertex(pose, consumer, a, red, green, blue, alphaStart, 0.0f, 0.0f);
-		emitVertex(pose, consumer, b, red, green, blue, alphaStart, 0.0f, 1.0f);
-		emitVertex(pose, consumer, c, red, green, blue, alphaEnd, 1.0f, 1.0f);
-		emitVertex(pose, consumer, d, red, green, blue, alphaEnd, 1.0f, 0.0f);
-	}
-
-	private static void emitVertex(PoseStack.Pose pose, VertexConsumer consumer, Vec3 point,
-		int red, int green, int blue, int alpha, float u, float v) {
-		consumer.addVertex(pose, (float) point.x, (float) point.y, (float) point.z)
-			.setColor(red, green, blue, alpha).setUv(u, v).setOverlay(OverlayTexture.NO_OVERLAY)
-			.setLight(FULL_BRIGHT).setNormal(pose, 0.0f, 1.0f, 0.0f);
+	private static void vertex(PoseStack.Pose pose, VertexConsumer out, Vec3 point, int rgb, int alpha, float u, float v) {
+		out.addVertex(pose, (float) point.x, (float) point.y, (float) point.z)
+			.setColor((rgb >> 16) & 255, (rgb >> 8) & 255, rgb & 255, alpha).setUv(u, v)
+			.setOverlay(OverlayTexture.NO_OVERLAY).setLight(0x00F000F0).setNormal(pose, 0, 1, 0);
 	}
 
 	private static final class TrailState {
-		private final Deque<TrailPoint> points = new ArrayDeque<>();
-		private int activeTicks;
-		private boolean activeThisTick;
-		private FormationTrailPolicy.TrailStyle style = FormationTrailPolicy.TrailStyle.NONE;
+		private final FormationTrailHistory history = new FormationTrailHistory();
+		private List<Point> smoothed = List.of();
 	}
-
-	private record TrailPoint(Vec3 position, long tick) {}
 }

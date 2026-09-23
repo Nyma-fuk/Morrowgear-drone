@@ -1,0 +1,57 @@
+{
+  "id": "high_density_battery_pack",
+  "status": "design candidate / not installed",
+  "checks": [
+    {
+      "frame": 1,
+      "vertices": 4848,
+      "bounds": [
+        -0.5600000023841858,
+        -0.4020000100135803,
+        0.0,
+        0.5600000023841858,
+        0.4235000014305115,
+        0.5699999928474426
+      ],
+      "mirrorError": 0.0,
+      "passed": true
+    },
+    {
+      "frame": 40,
+      "vertices": 4848,
+      "bounds": [
+        -0.5600000023841858,
+        -0.4020000100135803,
+        0.0,
+        0.5600000023841858,
+        0.4235000014305115,
+        0.5699999928474426
+      ],
+      "mirrorError": 0.0,
+      "passed": true
+    },
+    {
+      "frame": 80,
+      "vertices": 4848,
+      "bounds": [
+        -0.5600000023841858,
+        -0.4020000100135803,
+        0.0,
+        0.5600000023841858,
+        0.4235000014305115,
+        0.5699999928474426
+      ],
+      "mirrorError": 0.0,
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "axis": {
+    "symmetry": "X=0",
+    "front": "-Y",
+    "up": "+Z"
+  },
+  "legacy": false,
+  "blendSha256": "214091b7bfa238f02a4600302c8465c532180d3a5f9832cb3f91783d07866722",
+  "glbSha256": "83befff103322032002251fc9a20e756daa06351f8ad31b990d65ca7d9973732"
+}

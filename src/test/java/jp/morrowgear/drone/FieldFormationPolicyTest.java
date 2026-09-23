@@ -18,7 +18,7 @@ final class FieldFormationPolicyTest {
 			slots.add(target);
 			assertEquals(12.0, target.multiply(1, 0, 1)
 				.distanceTo(center.multiply(1, 0, 1)), 0.0001);
-			assertEquals(70.0, target.y, 0.0001);
+			assertEquals(72.0, target.y, 0.0001);
 		}
 		assertEquals(8, slots.size());
 	}

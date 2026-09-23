@@ -12,12 +12,19 @@ import java.util.Set;
 import net.minecraft.world.phys.Vec3;
 
 final class CombatTheaterPolicy {
+	static final long PLAN_TTL_TICKS = 10L;
 	static final double CLUSTER_HORIZONTAL_DISTANCE = 12.0;
 	static final double CLUSTER_VERTICAL_DISTANCE = 6.0;
 	static final int MAX_UNITS_PER_TARGET = 8;
 	private static final double RESERVE_RATIO = 0.20;
 
 	private CombatTheaterPolicy() {}
+
+	static boolean awaitingInitialPlan(CombatState state, long stateTick, long planTick, long now) {
+		// A plan computed before this sortie cannot release it before the next allocation.
+		return state == CombatState.FLARE_ENTRY && planTick <= stateTick
+			&& now >= stateTick && now - stateTick < PLAN_TTL_TICKS;
+	}
 
 	static Plan allocate(List<Contact> rawContacts, List<Unit> units) {
 		List<Contact> contacts = deduplicate(rawContacts);

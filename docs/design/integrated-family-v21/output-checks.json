@@ -1,0 +1,678 @@
+{
+  "passed": true,
+  "checks": {
+    "field": {
+      "geometryChecksPass": true,
+      "equipmentOpeningsHaveClearDepth": true,
+      "baseUnchanged": true,
+      "thirteenViewsFramed": true,
+      "thirteenViewsFresh": true,
+      "thirteenViewsSameResolution": true,
+      "blendAndGlbPresent": true,
+      "detailRenderFresh": true,
+      "singleCombinedAnimation": true,
+      "fourFeetAnimatedInExport": true,
+      "exportHasMirroredHierarchy": true
+    },
+    "scout": {
+      "geometryChecksPass": true,
+      "equipmentOpeningsHaveClearDepth": true,
+      "baseUnchanged": true,
+      "thirteenViewsFramed": true,
+      "thirteenViewsFresh": true,
+      "thirteenViewsSameResolution": true,
+      "blendAndGlbPresent": true,
+      "detailRenderFresh": true,
+      "singleCombinedAnimation": true,
+      "fourFeetAnimatedInExport": true,
+      "exportHasMirroredHierarchy": true,
+      "bodyActuallyReshaped": true
+    },
+    "cargo": {
+      "geometryChecksPass": true,
+      "equipmentOpeningsHaveClearDepth": true,
+      "baseUnchanged": true,
+      "thirteenViewsFramed": true,
+      "thirteenViewsFresh": true,
+      "thirteenViewsSameResolution": true,
+      "blendAndGlbPresent": true,
+      "detailRenderFresh": true,
+      "singleCombinedAnimation": true,
+      "fourFeetAnimatedInExport": true,
+      "exportHasMirroredHierarchy": true,
+      "bodyActuallyReshaped": true,
+      "bothHatchesAnimated": true
+    },
+    "engineer": {
+      "geometryChecksPass": true,
+      "equipmentOpeningsHaveClearDepth": true,
+      "baseUnchanged": true,
+      "thirteenViewsFramed": true,
+      "thirteenViewsFresh": true,
+      "thirteenViewsSameResolution": true,
+      "blendAndGlbPresent": true,
+      "detailRenderFresh": true,
+      "singleCombinedAnimation": true,
+      "fourFeetAnimatedInExport": true,
+      "exportHasMirroredHierarchy": true,
+      "bodyActuallyReshaped": true
+    },
+    "security": {
+      "geometryChecksPass": true,
+      "equipmentOpeningsHaveClearDepth": true,
+      "baseUnchanged": true,
+      "thirteenViewsFramed": true,
+      "thirteenViewsFresh": true,
+      "thirteenViewsSameResolution": true,
+      "blendAndGlbPresent": true,
+      "detailRenderFresh": true,
+      "singleCombinedAnimation": true,
+      "fourFeetAnimatedInExport": true,
+      "exportHasMirroredHierarchy": true,
+      "bodyActuallyReshaped": true,
+      "bothHatchesAnimated": true
+    },
+    "salvage": {
+      "geometryChecksPass": true,
+      "equipmentOpeningsHaveClearDepth": true,
+      "baseUnchanged": true,
+      "thirteenViewsFramed": true,
+      "thirteenViewsFresh": true,
+      "thirteenViewsSameResolution": true,
+      "blendAndGlbPresent": true,
+      "detailRenderFresh": true,
+      "singleCombinedAnimation": true,
+      "fourFeetAnimatedInExport": true,
+      "exportHasMirroredHierarchy": true,
+      "bodyActuallyReshaped": true
+    }
+  },
+  "measurements": {
+    "field": {
+      "bounds": {
+        "hero": [
+          463,
+          244,
+          1381,
+          585
+        ],
+        "landed": [
+          463,
+          244,
+          1381,
+          670
+        ],
+        "active": [
+          463,
+          263,
+          1381,
+          662
+        ],
+        "top-active": [
+          463,
+          215,
+          1381,
+          604
+        ],
+        "top": [
+          386,
+          127,
+          1295,
+          807
+        ],
+        "bottom": [
+          386,
+          127,
+          1295,
+          807
+        ],
+        "front": [
+          329,
+          365,
+          1352,
+          565
+        ],
+        "rear": [
+          329,
+          365,
+          1352,
+          565
+        ],
+        "left": [
+          457,
+          365,
+          1223,
+          565
+        ],
+        "right": [
+          458,
+          365,
+          1224,
+          565
+        ],
+        "rear-oblique": [
+          463,
+          292,
+          1381,
+          612
+        ],
+        "gear-stowed": [
+          463,
+          263,
+          1381,
+          662
+        ],
+        "right-stowed": [
+          458,
+          365,
+          1224,
+          476
+        ]
+      },
+      "body": {
+        "lowerSkinMaxDisplacement": 0.0,
+        "modifiedHullVertices": 0
+      },
+      "landed": {
+        "frame": 1,
+        "mirrorError": 1.040950337483082e-06,
+        "footContactZ": -1.0560945272445679,
+        "nonGearGroundClearance": 0.6807345151901245,
+        "gearPointsInsideFanFlow": 0,
+        "contactCount": 4,
+        "contactPlaneError": 0.0
+      },
+      "animatedNodes": 28,
+      "nodeCount": 196
+    },
+    "scout": {
+      "bounds": {
+        "hero": [
+          383,
+          216,
+          1480,
+          602
+        ],
+        "landed": [
+          383,
+          216,
+          1480,
+          690
+        ],
+        "active": [
+          383,
+          250,
+          1480,
+          700
+        ],
+        "top-active": [
+          383,
+          182,
+          1480,
+          621
+        ],
+        "top": [
+          279,
+          95,
+          1402,
+          837
+        ],
+        "bottom": [
+          279,
+          95,
+          1402,
+          837
+        ],
+        "front": [
+          209,
+          360,
+          1472,
+          577
+        ],
+        "rear": [
+          209,
+          360,
+          1472,
+          577
+        ],
+        "left": [
+          421,
+          360,
+          1259,
+          577
+        ],
+        "right": [
+          422,
+          360,
+          1259,
+          577
+        ],
+        "rear-oblique": [
+          383,
+          281,
+          1480,
+          642
+        ],
+        "gear-stowed": [
+          383,
+          250,
+          1480,
+          700
+        ],
+        "right-stowed": [
+          426,
+          360,
+          1259,
+          492
+        ]
+      },
+      "body": {
+        "lowerSkinMaxDisplacement": 0.2400000056996941,
+        "modifiedHullVertices": 4235
+      },
+      "landed": {
+        "frame": 1,
+        "mirrorError": 1.0662663498806069e-06,
+        "footContactZ": -1.1479287147521973,
+        "nonGearGroundClearance": 0.6440187096595764,
+        "gearPointsInsideFanFlow": 0,
+        "contactCount": 4,
+        "contactPlaneError": 0.0
+      },
+      "animatedNodes": 29,
+      "nodeCount": 195
+    },
+    "cargo": {
+      "bounds": {
+        "hero": [
+          394,
+          211,
+          1481,
+          666
+        ],
+        "landed": [
+          394,
+          211,
+          1481,
+          729
+        ],
+        "active": [
+          394,
+          240,
+          1481,
+          704
+        ],
+        "top-active": [
+          394,
+          177,
+          1481,
+          733
+        ],
+        "top": [
+          296,
+          72,
+          1385,
+          854
+        ],
+        "bottom": [
+          296,
+          72,
+          1385,
+          854
+        ],
+        "front": [
+          228,
+          356,
+          1453,
+          608
+        ],
+        "rear": [
+          228,
+          356,
+          1453,
+          608
+        ],
+        "left": [
+          395,
+          356,
+          1277,
+          608
+        ],
+        "right": [
+          404,
+          356,
+          1286,
+          608
+        ],
+        "rear-oblique": [
+          394,
+          272,
+          1481,
+          645
+        ],
+        "gear-stowed": [
+          394,
+          240,
+          1481,
+          704
+        ],
+        "right-stowed": [
+          404,
+          356,
+          1286,
+          553
+        ]
+      },
+      "body": {
+        "lowerSkinMaxDisplacement": 0.63999999191612,
+        "modifiedHullVertices": 5625
+      },
+      "landed": {
+        "frame": 1,
+        "mirrorError": 1.3072531146463007e-06,
+        "footContactZ": -1.3842742443084717,
+        "nonGearGroundClearance": 0.4179093837738037,
+        "gearPointsInsideFanFlow": 0,
+        "contactCount": 4,
+        "contactPlaneError": 0.0
+      },
+      "animatedNodes": 30,
+      "nodeCount": 216
+    },
+    "engineer": {
+      "bounds": {
+        "hero": [
+          425,
+          226,
+          1437,
+          629
+        ],
+        "landed": [
+          425,
+          226,
+          1437,
+          690
+        ],
+        "active": [
+          425,
+          250,
+          1437,
+          685
+        ],
+        "top-active": [
+          425,
+          194,
+          1437,
+          691
+        ],
+        "top": [
+          337,
+          95,
+          1344,
+          833
+        ],
+        "bottom": [
+          337,
+          95,
+          1344,
+          833
+        ],
+        "front": [
+          274,
+          360,
+          1407,
+          577
+        ],
+        "rear": [
+          274,
+          360,
+          1407,
+          577
+        ],
+        "left": [
+          421,
+          360,
+          1254,
+          577
+        ],
+        "right": [
+          427,
+          360,
+          1259,
+          577
+        ],
+        "rear-oblique": [
+          425,
+          281,
+          1437,
+          630
+        ],
+        "gear-stowed": [
+          425,
+          250,
+          1437,
+          685
+        ],
+        "right-stowed": [
+          427,
+          360,
+          1259,
+          525
+        ]
+      },
+      "body": {
+        "lowerSkinMaxDisplacement": 0.4800000113993882,
+        "modifiedHullVertices": 4654
+      },
+      "landed": {
+        "frame": 1,
+        "mirrorError": 1.0662663498806069e-06,
+        "footContactZ": -1.1479287147521973,
+        "nonGearGroundClearance": 0.3913722038269043,
+        "gearPointsInsideFanFlow": 0,
+        "contactCount": 4,
+        "contactPlaneError": 0.0
+      },
+      "animatedNodes": 50,
+      "nodeCount": 209
+    },
+    "security": {
+      "bounds": {
+        "hero": [
+          415,
+          223,
+          1449,
+          615
+        ],
+        "landed": [
+          415,
+          223,
+          1449,
+          690
+        ],
+        "active": [
+          415,
+          245,
+          1449,
+          689
+        ],
+        "top-active": [
+          415,
+          190,
+          1449,
+          634
+        ],
+        "top": [
+          320,
+          95,
+          1361,
+          833
+        ],
+        "bottom": [
+          320,
+          95,
+          1361,
+          833
+        ],
+        "front": [
+          255,
+          360,
+          1426,
+          577
+        ],
+        "rear": [
+          255,
+          360,
+          1426,
+          577
+        ],
+        "left": [
+          421,
+          360,
+          1254,
+          577
+        ],
+        "right": [
+          427,
+          360,
+          1259,
+          577
+        ],
+        "rear-oblique": [
+          415,
+          281,
+          1449,
+          633
+        ],
+        "gear-stowed": [
+          415,
+          250,
+          1449,
+          689
+        ],
+        "right-stowed": [
+          427,
+          360,
+          1259,
+          535
+        ]
+      },
+      "body": {
+        "lowerSkinMaxDisplacement": 0.3600000046690305,
+        "modifiedHullVertices": 4648
+      },
+      "landed": {
+        "frame": 1,
+        "mirrorError": 1.0662663498806069e-06,
+        "footContactZ": -1.1479287147521973,
+        "nonGearGroundClearance": 0.319243848323822,
+        "gearPointsInsideFanFlow": 0,
+        "contactCount": 4,
+        "contactPlaneError": 0.0
+      },
+      "animatedNodes": 31,
+      "nodeCount": 205
+    },
+    "salvage": {
+      "bounds": {
+        "hero": [
+          356,
+          195,
+          1534,
+          620
+        ],
+        "landed": [
+          356,
+          195,
+          1534,
+          745
+        ],
+        "active": [
+          356,
+          230,
+          1534,
+          781
+        ],
+        "top-active": [
+          356,
+          157,
+          1534,
+          865
+        ],
+        "top": [
+          243,
+          48,
+          1438,
+          875
+        ],
+        "bottom": [
+          243,
+          48,
+          1438,
+          875
+        ],
+        "front": [
+          168,
+          352,
+          1513,
+          618
+        ],
+        "rear": [
+          168,
+          352,
+          1513,
+          618
+        ],
+        "left": [
+          369,
+          352,
+          1301,
+          618
+        ],
+        "right": [
+          380,
+          352,
+          1312,
+          618
+        ],
+        "rear-oblique": [
+          356,
+          264,
+          1534,
+          661
+        ],
+        "gear-stowed": [
+          356,
+          230,
+          1534,
+          725
+        ],
+        "right-stowed": [
+          380,
+          352,
+          1312,
+          558
+        ]
+      },
+      "body": {
+        "lowerSkinMaxDisplacement": 0.5800000533153247,
+        "modifiedHullVertices": 3138
+      },
+      "landed": {
+        "frame": 1,
+        "mirrorError": 1.6093254089355469e-06,
+        "footContactZ": -1.4626295566558838,
+        "nonGearGroundClearance": 0.4546295404434204,
+        "gearPointsInsideFanFlow": 0,
+        "contactCount": 4,
+        "contactPlaneError": 0.0
+      },
+      "animatedNodes": 35,
+      "nodeCount": 198
+    }
+  },
+  "renderSource": "Real Blender mesh, no generated or retouched aircraft image",
+  "gameVerified": false,
+  "fullSweptCollisionVerified": false,
+  "aerodynamicsSimulated": false
+}

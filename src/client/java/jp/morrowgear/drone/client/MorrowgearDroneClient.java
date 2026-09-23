@@ -35,12 +35,33 @@ public final class MorrowgearDroneClient implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
+		OperationCommunicationsClient.register();
+		SupplyNetworkClient.register();
+		jp.morrowgear.drone.carrier.client.CarrierClientApi.register();
+		net.minecraft.client.gui.screens.MenuScreens.register(
+			jp.morrowgear.drone.carrier.CarrierModule.MENU, CarrierScreen::new);
+		net.minecraft.client.gui.screens.MenuScreens.register(jp.morrowgear.drone.DockMenu.TYPE, DockScreen::new);
+		DroneAudioController.register();
+		CarrierAudioController.register();
+		net.fabricmc.fabric.api.client.rendering.v1.BlockEntityRendererRegistry.register(
+			MorrowgearDrone.DOCK_BLOCK_ENTITY, context -> new DockRenderer());
+		net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin.register(plugin ->
+			plugin.modifyItemModelAfterBake().register((model, context) -> {
+				if (!context.itemId().getNamespace().equals(MorrowgearDrone.MOD_ID)) return model;
+				String name = context.itemId().getPath();
+				if (name.equals("carrier_console")) return new EquipmentItemModel(model, "controller");
+				return java.util.Set.of("controller", "tactical_visor", "recovery_tool").contains(name)
+					? new EquipmentItemModel(model, name) : model;
+			}));
 		EntityRenderers.register(MorrowgearDrone.DRONE, DroneRenderer::new);
+		EntityRenderers.register(jp.morrowgear.drone.carrier.CarrierModule.ENTITY, CarrierRenderer::new);
 		EntityRenderers.register(MorrowgearDrone.MISSILE, MissileRenderer::new);
 		EntityRenderers.register(MorrowgearDrone.SOLAR_SERVICE_STATION, SolarServiceStationRenderer::new);
 		EntityRenderers.register(MorrowgearDrone.CHARGING_RELAY, ChargingRelayRenderer::new);
 		HudElementRegistry.attachElementAfter(VanillaHudElements.CROSSHAIR,
 			Identifier.fromNamespaceAndPath(MorrowgearDrone.MOD_ID, "tactical_visor"), VISOR_HUD);
+		HudElementRegistry.attachElementAfter(VanillaHudElements.CROSSHAIR,
+			Identifier.fromNamespaceAndPath(MorrowgearDrone.MOD_ID, "operation_subtitle"), new OperationSubtitleOverlay());
 		ClientPlayNetworking.registerGlobalReceiver(PowerLostBeaconPayload.TYPE, (payload, context) ->
 			context.client().execute(() -> PowerLostBeaconStore.accept(payload)));
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> PowerLostBeaconStore.clear());
@@ -53,6 +74,8 @@ public final class MorrowgearDroneClient implements ClientModInitializer {
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			FormationTrailController.tick(client);
+			CarrierTrailController.tick(client);
+			ScoutScanRenderer.tick(client);
 			VISOR_HUD.tick(client);
 			while (OPEN_COMMAND.consumeClick()) {
 				if (client.player != null) client.setScreenAndShow(new TacticalScreen());

@@ -2,6 +2,10 @@ package jp.morrowgear.drone.block;
 
 import java.util.UUID;
 
+import jp.morrowgear.drone.DockMenu;
+import jp.morrowgear.drone.DockSupplyPolicy;
+import jp.morrowgear.drone.DockSupplyPolicy.SupplyKind;
+import jp.morrowgear.drone.DroneEntity;
 import jp.morrowgear.drone.MorrowgearDrone;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.BlockPos;
@@ -17,14 +21,14 @@ import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ChestMenu;
-import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 public final class DockBlockEntity extends BaseContainerBlockEntity {
 	public static final int SLOT_DRONE = 0;
@@ -43,7 +47,11 @@ public final class DockBlockEntity extends BaseContainerBlockEntity {
 	private static final int INVENTORY_SIZE = 27;
 	private static final int COMPATIBILITY_RESERVE = 2000;
 	private NonNullList<ItemStack> items = NonNullList.withSize(INVENTORY_SIZE, ItemStack.EMPTY);
-	private int storedPower = COMPATIBILITY_RESERVE;
+	private int storedPower;
+	private int fuelCredit;
+	private int weaponCredit;
+	private int autocannonCredit;
+	private int missileCredit;
 	private UUID owner = new UUID(0, 0);
 	private String ownerName = "";
 	private Direction facing = Direction.NORTH;
@@ -64,6 +72,8 @@ public final class DockBlockEntity extends BaseContainerBlockEntity {
 		return owner.equals(playerId);
 	}
 
+	public UUID ownerId() { return owner; }
+
 	public boolean matchesOwner(UUID playerId, String playerName) {
 		return isOwnedBy(playerId) || (!ownerName.isBlank() && ownerName.equalsIgnoreCase(playerName));
 	}
@@ -71,7 +81,7 @@ public final class DockBlockEntity extends BaseContainerBlockEntity {
 	public boolean isOwnedBy(ServerPlayer player) {
 		if (isOwnedBy(player.getUUID())) return true;
 		boolean sameNamedOwner = !ownerName.isBlank() && ownerName.equalsIgnoreCase(player.getScoreboardName());
-		boolean legacySingleplayer = player.level().getServer().isSingleplayer()
+		boolean legacySingleplayer = owner.equals(new UUID(0, 0)) && player.level().getServer().isSingleplayer()
 			&& player.level().getServer().getPlayerList().getPlayers().size() == 1;
 		if (!sameNamedOwner && !legacySingleplayer) return false;
 		initialize(player);
@@ -87,11 +97,34 @@ public final class DockBlockEntity extends BaseContainerBlockEntity {
 	}
 
 	public int storedPower() {
+		normalizePowerCapacity();
 		return storedPower;
 	}
 
+	public int storedFlightPower() { return storedPower(); }
+	public int flightFuelCredit() { normalizePowerCapacity(); return fuelCredit; }
+	public int storedWeaponPower() { return weaponCredit; }
+	public int weaponPowerCapacity() { return DockSupplyPolicy.LASER_CELL_ENERGY; }
+	public int autocannonCredit() { return autocannonCredit; }
+	public int missileCredit() { return missileCredit; }
+
 	public void setStoredPowerForVerification(int power) {
 		storedPower = Math.max(0, Math.min(powerCapacity(), power));
+		fuelCredit = 0;
+		setChanged();
+	}
+
+	public void setSupplyCreditsForVerification(int weapon, int gun, int missile) {
+		DockSupplyPolicy.PackCredits credits = new DockSupplyPolicy.PackCredits(weapon, gun, missile);
+		weaponCredit = credits.weapon();
+		autocannonCredit = credits.gun();
+		missileCredit = credits.missile();
+		setChanged();
+	}
+
+	public void restoreServiceSnapshotForVerification(CompoundTag tag, HolderLookup.Provider registries) {
+		loadAdditional(net.minecraft.world.level.storage.TagValueInput.create(
+			net.minecraft.util.ProblemReporter.DISCARDING, registries, tag));
 		setChanged();
 	}
 
@@ -105,6 +138,7 @@ public final class DockBlockEntity extends BaseContainerBlockEntity {
 
 	public boolean provideCharge(int amount) {
 		if (amount <= 0) return true;
+		if (amount > powerCapacity()) return false;
 		refillPowerFromInput(amount);
 		if (storedPower < amount) return false;
 		storedPower -= amount;
@@ -113,18 +147,24 @@ public final class DockBlockEntity extends BaseContainerBlockEntity {
 	}
 
 	public int provideWeaponCharge(int requested) {
+		DockSupplyPolicy.PackTransfer transfer = consumePack(SupplyKind.LASER, weaponCredit,
+			requested, DockSupplyPolicy.LASER_CELL_ENERGY);
+		weaponCredit = transfer.credit();
+		if (transfer.supplied() > 0) setChanged();
+		return transfer.supplied();
+	}
+
+	public int provideFlightCharge(int requested) {
 		int amount = Math.max(0, requested);
 		if (amount == 0) return 0;
-		refillPowerFromInput(2);
-		int supplied = Math.min(amount, storedPower / 2);
-		if (supplied <= 0) return 0;
-		storedPower -= supplied * 2;
-		setChanged();
+		refillPowerFromInput(amount);
+		int supplied = Math.min(amount, storedPower);
+		if (supplied > 0) { storedPower -= supplied; setChanged(); }
 		return supplied;
 	}
 
 	public float provideRepair(float missingHealth) {
-		if (missingHealth <= 0.0f) return 0.0f;
+		if (!Float.isFinite(missingHealth) || missingHealth <= 0.0f) return 0.0f;
 		ItemStack material = serviceStack(SLOT_REPAIR, DockBlockEntity::isRepairMaterial);
 		float repair = repairValue(material);
 		if (repair <= 0.0f) return 0.0f;
@@ -144,11 +184,19 @@ public final class DockBlockEntity extends BaseContainerBlockEntity {
 	}
 
 	public int provideAutocannonRounds(int missingRounds) {
-		return consumeAmmunition(Items.IRON_NUGGET, missingRounds, 24);
+		DockSupplyPolicy.PackTransfer transfer = consumePack(SupplyKind.GUN, autocannonCredit,
+			missingRounds, DockSupplyPolicy.MAGAZINE_ROUNDS);
+		autocannonCredit = transfer.credit();
+		if (transfer.supplied() > 0) setChanged();
+		return transfer.supplied();
 	}
 
 	public int provideMissiles(int missingMissiles) {
-		return consumeAmmunition(Items.FIREWORK_ROCKET, missingMissiles, 1);
+		DockSupplyPolicy.PackTransfer transfer = consumePack(SupplyKind.MISSILE, missileCredit,
+			missingMissiles, DockSupplyPolicy.MISSILE_PACK_ROUNDS);
+		missileCredit = transfer.credit();
+		if (transfer.supplied() > 0) setChanged();
+		return transfer.supplied();
 	}
 
 	public boolean hasRepairMaterial() {
@@ -156,27 +204,36 @@ public final class DockBlockEntity extends BaseContainerBlockEntity {
 	}
 
 	public boolean hasPowerSupply() {
-		// One residual energy unit cannot satisfy either the two-unit weapon conversion
-		// or the five-unit flight charging quantum. Treat it as exhausted so a docked
-		// aircraft can make a resource-limited sortie decision instead of waiting forever.
-		return storedPower >= 2 || !serviceStack(SLOT_POWER_INPUT, stack -> dockEnergy(stack) > 0).isEmpty();
+		return hasFlightPowerSupply();
+	}
+
+	public boolean hasFlightPowerSupply() {
+		return storedPower() > 0 || fuelCredit > 0 || supplyCount(SupplyKind.FUEL) > 0;
+	}
+
+	public boolean hasWeaponPowerSupply() {
+		return weaponCredit > 0 || supplyCount(SupplyKind.LASER) > 0;
+	}
+
+	public boolean completionResourceExhausted(boolean flightRequired, boolean weaponRequired,
+		boolean ammunitionRequired, boolean ammunitionAvailable) {
+		return DockSupplyPolicy.completionResourceExhausted(flightRequired, hasFlightPowerSupply(),
+			weaponRequired, hasWeaponPowerSupply(), ammunitionRequired, ammunitionAvailable);
 	}
 
 	public boolean hasAutocannonAmmunition() {
-		return !serviceStack(SLOT_AMMUNITION, stack -> stack.is(Items.IRON_NUGGET)).isEmpty();
+		return autocannonCredit > 0 || supplyCount(SupplyKind.GUN) > 0;
 	}
 
 	public boolean hasMissileAmmunition() {
-		return !serviceStack(SLOT_AMMUNITION, stack -> stack.is(Items.FIREWORK_ROCKET)).isEmpty();
+		return missileCredit > 0 || supplyCount(SupplyKind.MISSILE) > 0;
 	}
 
-	private int consumeAmmunition(net.minecraft.world.item.Item expected, int missing, int unitsPerItem) {
-		if (missing <= 0) return 0;
-		ItemStack ammunition = serviceStack(SLOT_AMMUNITION, stack -> stack.is(expected));
-		if (!ammunition.is(expected)) return 0;
-		ammunition.shrink(1);
-		setChanged();
-		return Math.min(missing, unitsPerItem);
+	private DockSupplyPolicy.PackTransfer consumePack(SupplyKind kind, int credit, int missing, int unitsPerItem) {
+		ItemStack pack = serviceStack(SLOT_AMMUNITION, stack -> DockSupplyPolicy.kind(stack) == kind);
+		DockSupplyPolicy.PackTransfer transfer = DockSupplyPolicy.takePack(credit, missing, unitsPerItem, !pack.isEmpty());
+		if (transfer.consumeItem()) pack.shrink(1);
+		return transfer;
 	}
 
 	private static float repairValue(ItemStack stack) {
@@ -191,13 +248,83 @@ public final class DockBlockEntity extends BaseContainerBlockEntity {
 	}
 
 	private void refillPowerFromInput(int minimumRequired) {
-		if (!jp.morrowgear.drone.DockServicePolicy.shouldLoadNextPowerCell(storedPower, minimumRequired)) return;
-		ItemStack input = serviceStack(SLOT_POWER_INPUT, stack -> dockEnergy(stack) > 0);
-		int energy = dockEnergy(input);
-		if (energy <= 0 || input.isEmpty()) return;
-		input.shrink(1);
-		storedPower = Math.min(powerCapacity(), storedPower + energy);
-		setChanged();
+		normalizePowerCapacity();
+		int target = Math.clamp(minimumRequired, 0, powerCapacity());
+		// The largest tank needs at most 23 charcoal items; work stays bounded even for huge requests.
+		while (storedPower < target) {
+			if (fuelCredit == 0) {
+				ItemStack input = serviceStack(SLOT_POWER_INPUT, stack -> dockEnergy(stack) > 0);
+				int energy = dockEnergy(input);
+				if (energy <= 0 || input.isEmpty()) return;
+				input.shrink(1);
+				fuelCredit = energy;
+			}
+			int transfer = Math.min(fuelCredit, powerCapacity() - storedPower);
+			storedPower += transfer;
+			fuelCredit -= transfer;
+			setChanged();
+		}
+	}
+
+	private void normalizePowerCapacity() {
+		DockSupplyPolicy.FlightReserve reserve = DockSupplyPolicy.normalizeFlight(storedPower, fuelCredit, powerCapacity());
+		if (storedPower == reserve.stored() && fuelCredit == reserve.credit()) return;
+		storedPower = reserve.stored();
+		fuelCredit = reserve.credit();
+		super.setChanged();
+	}
+
+	@Override
+	public void setChanged() {
+		normalizePowerCapacity();
+		super.setChanged();
+	}
+
+	public static boolean isSupply(ItemStack stack) {
+		return DockSupplyPolicy.kind(stack) != null;
+	}
+
+	public boolean insertSupply(ServerPlayer player, ItemStack held) {
+		if (!isOwnedBy(player) || !stillValid(player) || !isSupply(held)) return false;
+		int inserted = insertNetworkSupply(held);
+		player.sendSystemMessage(Component.literal("[MORROWGEAR] " + dockId() + (inserted > 0
+			? " / SUPPLY +" + inserted : " / SUPPLY BUFFER FULL")));
+		return true;
+	}
+
+	/** Physical items in service input/buffer slots only; opened-pack credits are reported separately. */
+	public int supplyCount(SupplyKind kind) {
+		int count = 0;
+		for (int slot = 0; slot < INVENTORY_SIZE; slot++) {
+			ItemStack stack = items.get(slot);
+			if (DockSupplyPolicy.isServiceSlot(slot, kind) && DockSupplyPolicy.kind(stack) == kind)
+				count += stack.getCount();
+		}
+		return count;
+	}
+
+	/** Server-thread API. Shrinks the caller's stack by the returned count; zero leaves it unchanged.
+	 * The logistics caller must authorize the route/owner before calling this method. */
+	public int insertNetworkSupply(ItemStack stack) {
+		if (!isSupply(stack) || isRemoved() || level != null && level.isClientSide()) return 0;
+		for (ItemStack existing : items) if (existing == stack) return 0;
+		int original = stack.getCount();
+		for (int pass = 0; pass < 2 && !stack.isEmpty(); pass++) {
+			for (int slot = SUPPLY_BUFFER_START; slot <= SUPPLY_BUFFER_END && !stack.isEmpty(); slot++) {
+				ItemStack existing = items.get(slot);
+				if ((pass == 0) == existing.isEmpty()) continue;
+				if (!existing.isEmpty() && !ItemStack.isSameItemSameComponents(existing, stack)) continue;
+				int limit = Math.min(getMaxStackSize(), stack.getMaxStackSize());
+				int transfer = Math.min(stack.getCount(), limit - existing.getCount());
+				if (transfer <= 0) continue;
+				if (existing.isEmpty()) items.set(slot, stack.copyWithCount(transfer));
+				else existing.grow(transfer);
+				stack.shrink(transfer);
+			}
+		}
+		int inserted = original - stack.getCount();
+		if (inserted > 0) setChanged();
+		return inserted;
 	}
 
 	private static int dockEnergy(ItemStack stack) {
@@ -212,6 +339,7 @@ public final class DockBlockEntity extends BaseContainerBlockEntity {
 	private ItemStack serviceStack(int preferredSlot, java.util.function.Predicate<ItemStack> predicate) {
 		ItemStack preferred = items.get(preferredSlot);
 		if (predicate.test(preferred)) return preferred;
+		// Legacy misplaced stacks remain extractable but recovery and installed equipment are never fuel.
 		for (int slot = SUPPLY_BUFFER_START; slot <= SUPPLY_BUFFER_END; slot++) {
 			ItemStack candidate = items.get(slot);
 			if (predicate.test(candidate)) return candidate;
@@ -220,7 +348,7 @@ public final class DockBlockEntity extends BaseContainerBlockEntity {
 	}
 
 	public boolean commission(ServerPlayer player) {
-		if (!isOwnedBy(player)) return false;
+		if (!isOwnedBy(player) || !stillValid(player)) return false;
 		ItemStack chassis = items.get(SLOT_DRONE);
 		if (!chassis.is(MorrowgearDrone.DRONE_UNIT)) return false;
 		if (!MorrowgearDrone.deployAtDock(player, chassis, worldPosition,
@@ -280,12 +408,32 @@ public final class DockBlockEntity extends BaseContainerBlockEntity {
 
 	@Override
 	protected AbstractContainerMenu createMenu(int syncId, Inventory inventory) {
-		return new ChestMenu(MenuType.GENERIC_9x3, syncId, inventory, this, 3);
+		return new DockMenu(syncId, inventory, this);
+	}
+
+	@Override
+	public boolean canOpen(Player player) {
+		return stillValid(player) && super.canOpen(player);
+	}
+
+	@Override
+	public boolean canPlaceItem(int slot, ItemStack stack) {
+		return DockSupplyPolicy.mayPlace(slot, stack);
 	}
 
 	@Override
 	public boolean stillValid(Player player) {
-		return matchesOwner(player.getUUID(), player.getScoreboardName()) && super.stillValid(player);
+		return level != null && player.level() == level && isOwnedBy(player.getUUID())
+			&& player.distanceToSqr(Vec3.atCenterOf(worldPosition)) <= 64.0 && super.stillValid(player);
+	}
+
+	public DroneEntity dockedDrone() {
+		if (level == null || level.isClientSide()) return null;
+		return level.getEntitiesOfClass(DroneEntity.class, new AABB(worldPosition).inflate(3),
+			drone -> drone.isAlive() && drone.isOwnedBy(owner) && drone.isDocked()
+				&& drone.hasDock() && drone.dockPos().equals(worldPosition)
+				&& drone.position().distanceToSqr(Vec3.atCenterOf(worldPosition)) <= 4)
+			.stream().min(java.util.Comparator.comparingInt(DroneEntity::getId)).orElse(null);
 	}
 
 	public String dockId() {
@@ -302,11 +450,14 @@ public final class DockBlockEntity extends BaseContainerBlockEntity {
 
 	@Override
 	protected void saveAdditional(ValueOutput output) {
+		normalizePowerCapacity();
 		super.saveAdditional(output);
 		output.putString("Owner", owner.toString());
 		output.putString("OwnerName", ownerName);
 		output.putString("Facing", facing.getSerializedName());
 		output.putInt("StoredPower", storedPower);
+		output.putInt("FuelCredit", fuelCredit);
+		new DockSupplyPolicy.PackCredits(weaponCredit, autocannonCredit, missileCredit).write(output);
 		ContainerHelper.saveAllItems(output, items);
 	}
 
@@ -321,9 +472,15 @@ public final class DockBlockEntity extends BaseContainerBlockEntity {
 		ownerName = input.getStringOr("OwnerName", "");
 		facing = Direction.byName(input.getStringOr("Facing", "north"));
 		if (facing == null || facing.getAxis().isVertical()) facing = Direction.NORTH;
-		storedPower = Math.max(0, input.getIntOr("StoredPower", COMPATIBILITY_RESERVE));
+		storedPower = input.getIntOr("StoredPower", COMPATIBILITY_RESERVE);
+		fuelCredit = input.getIntOr("FuelCredit", 0);
+		DockSupplyPolicy.PackCredits credits = DockSupplyPolicy.PackCredits.read(input);
+		weaponCredit = credits.weapon();
+		autocannonCredit = credits.gun();
+		missileCredit = credits.missile();
 		items = NonNullList.withSize(INVENTORY_SIZE, ItemStack.EMPTY);
 		ContainerHelper.loadAllItems(input, items);
+		normalizePowerCapacity();
 	}
 
 	@Override
