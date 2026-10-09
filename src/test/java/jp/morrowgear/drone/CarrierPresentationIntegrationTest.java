@@ -42,8 +42,8 @@ class CarrierPresentationIntegrationTest {
                 in.readInt(); assertEquals(0, in.readUnsignedByte());
                 int flag = in.readUnsignedByte(); assertTrue(flag <= 2); if (flag == 1) cyan++;
             }
-            assertArrayEquals(new float[]{-13, 0, -25}, min, .01f);
-            assertArrayEquals(new float[]{13, 11, 25}, max, .01f);
+            assertArrayEquals(new float[]{-25, .2f, -16.029f}, min, .012f);
+			assertArrayEquals(new float[]{25, 7.15f, 14.855f}, max, .012f);
             assertEquals(points, mirrored, "The model must remain bilaterally symmetric");
             assertTrue(cyan > 0); assertEquals(-1, in.read());
             var atlas = ImageIO.read(ASSETS.resolve("textures/runtime/" + name + ".png").toFile());
@@ -61,10 +61,11 @@ class CarrierPresentationIntegrationTest {
         assertTrue(renderer.contains("entity.beamPaths()"));
         assertTrue(renderer.contains("path.origin(), path.target()"));
         assertTrue(renderer.contains("path.toRenderLocal(origin)"));
-        assertTrue(renderer.contains("MorrowgearRenderTypes.energyBeam()"));
         assertTrue(renderer.contains("MorrowgearRenderTypes.visibleEnergyCore()"));
+		assertTrue(renderer.contains("MorrowgearRenderTypes.condensedBeam()"));
+		assertTrue(renderer.contains("MorrowgearRenderTypes.condensedCore()"));
         assertFalse(renderer.contains("NO_DEPTH"));
-        assertEquals(2, renderTypes.split("CompareOp.GREATER_THAN_OR_EQUAL", -1).length - 1);
+        assertEquals(4, renderTypes.split("CompareOp.GREATER_THAN_OR_EQUAL", -1).length - 1);
         assertFalse(renderTypes.contains("CompareOp.ALWAYS_PASS"));
         assertFalse(renderTypes.contains("CompareOp.LESS_THAN_OR_EQUAL"));
     }

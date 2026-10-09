@@ -44,5 +44,12 @@ public final class SupplyNetworkClient {
     public static Optional<SupplyNetworkStatusPayload.DockStatus> dock(long position) {
         return docks().stream().filter(dock -> dock.dock() == position).findFirst();
     }
+    public static List<SupplyNetworkStatusPayload.LogisticsNode> nodes() {
+        var player = Minecraft.getInstance().player;
+        if (snapshot == null || player == null || !snapshot.owner().equals(player.getUUID())
+            || !snapshot.dimension().equals(player.level().dimension().identifier().toString()) || now() - receivedAt > 5000)
+            return List.of();
+        return snapshot.nodes();
+    }
     private static long now() { return System.nanoTime() / 1_000_000; }
 }

@@ -1,12 +1,22 @@
 package jp.morrowgear.drone;
 
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
 public final class CombatPolicy {
+	static boolean recoveryAllowsAssignment(int recoveryLevel, boolean lockedLaserTarget,
+		boolean committedTarget) {
+		// Level 1 is a short collision/stall escape. Releasing an aircraft during that
+		// maneuver creates responder churn and can strand it in REJOIN.
+		return recoveryLevel <= 0 || lockedLaserTarget || committedTarget && recoveryLevel == 1;
+	}
+
 	static final int FLARE_ENTRY_TICKS = 18;
 	static final int LASER_BASE_CHARGE_TICKS = 64;
 	static final float LASER_BASE_PULSE_DAMAGE = 1.35f;
@@ -15,13 +25,19 @@ public final class CombatPolicy {
 	static final int AUTOCANNON_FIRE_INTERVAL_TICKS = 2;
 	static final int MISSILE_CAPACITY = 45;
 	static final int LASER_SWITCH_HEAT = 900;
+	static final int LASER_RESTART_HEAT = 420;
 	static final int LASER_FIRE_HEAT_PER_TICK = 7;
 	static final int LASER_FIRE_POWER_PER_TICK = 3;
 	static final int LASER_SYNC_WINDOW_TICKS = 24;
 	static final int LASER_RELEASE_TIMEOUT_TICKS = 60;
+	static final int LASER_ABSOLUTE_RELEASE_TIMEOUT_TICKS = 120;
+	static final double LASER_MAX_RANGE = 64.0;
 	static final double LASER_FORMATION_MAX_GAP_ERROR = 0.38;
 	static final int AUTO_WEAPON_RESERVE = 15;
+	static final int LASER_NORMAL_SORTIE_RESERVE = 65;
+	static final int LASER_DEGRADED_SORTIE_RESERVE = 35;
 	static final int URGENT_SORTIE_POWER = 65;
+	static final int RESOURCE_LIMITED_SORTIE_POWER = 35;
 	static final double COMMITTED_TRACKING_RANGE = 128.0;
 	static final double CAS_PATH_SPEED = 0.90;
 	static final long CAS_ACCELERATION_TICKS = 36L;
@@ -34,11 +50,43 @@ public final class CombatPolicy {
 	static final double LASER_INGRESS_HEIGHT = 20.0;
 	static final double LASER_INGRESS_RADIUS = 18.0;
 	static final double LASER_INGRESS_DISTANCE = 26.0;
+	static final double LASER_ORBIT_MIN_HEIGHT = 6.0;
+	static final double LASER_ORBIT_LINEAR_SPEED = 0.40;
+	static final double GUN_POSITIONING_SPEED = 1.24;
+	static final double LASER_POSITIONING_SPEED = 1.16;
+	static final double MISSILE_POSITIONING_SPEED = 1.30;
 	private static final int CAS_ARC_SAMPLES = 1024;
 	private static final double[] CAS_ARC_LENGTHS = buildCasArcLengths();
 	private static final double CAS_ARC_TOTAL = CAS_ARC_LENGTHS[CAS_ARC_SAMPLES];
 
 	private CombatPolicy() {}
+
+	static double gunFlightSpeed(double slotDistance, boolean breakaway) {
+		if (breakaway) return 1.14;
+		// Keep enough closure above the 0.90 moving CAS path after ingress. A 0.96
+		// cap left aircraft permanently several blocks behind the firing phase when
+		// the initial axis put the entry slot far from the launch point.
+		return slotDistance > 7.0 ? GUN_POSITIONING_SPEED : 1.10;
+	}
+
+	static double laserFlightSpeed(double slotDistance, boolean ingress) {
+		if (ingress) return LASER_POSITIONING_SPEED;
+		return slotDistance > 5.0 ? 0.88 : 0.68;
+	}
+
+	static double attackTransitionFlightSpeed(double distance) {
+		return distance > 12.0 ? 1.18 : 0.82;
+	}
+
+	static double rejoinFlightSpeed(double distance) {
+		if (distance > 24.0) return 1.16;
+		if (distance > 8.0) return 0.90;
+		return 0.64;
+	}
+
+	static double missileFlightSpeed(double slotDistance) {
+		return slotDistance > 8.0 ? MISSILE_POSITIONING_SPEED : 1.02;
+	}
 
 	static boolean refreshCommittedContact(CombatState state, double distanceSquared, boolean lineOfSight) {
 		return state != null && state.active() && lineOfSight && distanceSquared >= 0.0
@@ -70,27 +118,31 @@ public final class CombatPolicy {
 
 	static CombatWeapon weaponFor(SecurityLoadout loadout, int slot, int count,
 		float ownerHealthRatio, float targetHealth, int gunAmmo, int missiles, int laserHeat) {
-		if (loadout == null || loadout == SecurityLoadout.AUTO) {
-			return weaponFor(slot, count, ownerHealthRatio, targetHealth, gunAmmo, missiles, laserHeat);
-		}
-		return switch (loadout) {
-			case UNARMED -> CombatWeapon.NONE;
-			case AUTOCANNON -> gunAmmo > 0 ? CombatWeapon.AUTOCANNON : CombatWeapon.NONE;
-			case LASER -> laserHeat < LASER_SWITCH_HEAT ? CombatWeapon.LASER : CombatWeapon.NONE;
-			case MISSILE -> missiles > 0 ? CombatWeapon.MISSILE : CombatWeapon.NONE;
-			case AUTO -> throw new IllegalStateException("AUTO handled above");
+		SecurityLoadout doctrine = loadout == null ? SecurityLoadout.AUTO : loadout;
+		if (doctrine == SecurityLoadout.UNARMED) return CombatWeapon.NONE;
+		CombatWeapon preferred = doctrine.weapon();
+		if (preferred != null && weaponAvailable(preferred, gunAmmo, missiles, laserHeat)) return preferred;
+		return weaponFor(slot, count, ownerHealthRatio, targetHealth, gunAmmo, missiles, laserHeat);
+	}
+
+	private static boolean weaponAvailable(CombatWeapon weapon, int gunAmmo, int missiles, int laserHeat) {
+		return switch (weapon) {
+			case AUTOCANNON -> gunAmmo > 0;
+			case MISSILE -> missiles > 0;
+			case LASER -> laserHeat < LASER_SWITCH_HEAT;
+			default -> false;
 		};
 	}
 
 	static boolean hasUsableWeapon(SecurityLoadout loadout, int gunAmmo, int missiles, int laserHeat) {
 		SecurityLoadout selected = loadout == null ? SecurityLoadout.AUTO : loadout;
-		return switch (selected) {
-			case UNARMED -> false;
-			case AUTO -> gunAmmo > 0 || missiles > 0 || laserHeat < LASER_SWITCH_HEAT;
-			case AUTOCANNON -> gunAmmo > 0;
-			case LASER -> laserHeat < LASER_SWITCH_HEAT;
-			case MISSILE -> missiles > 0;
-		};
+		return selected.armed() && (gunAmmo > 0 || missiles > 0 || laserHeat < LASER_SWITCH_HEAT);
+	}
+
+	static boolean hasSustainedWeapon(SecurityLoadout loadout, int laserEnergy,
+		int gunAmmo, int missiles, int laserHeat) {
+		return loadout != SecurityLoadout.UNARMED && (gunAmmo > 0 || missiles > 0
+			|| laserEnergy >= AUTO_WEAPON_RESERVE && laserHeat < LASER_SWITCH_HEAT);
 	}
 
 	static int flightReserveForDock(double distance) {
@@ -105,18 +157,44 @@ public final class CombatPolicy {
 
 	static DroneServicePolicy.Need weaponServiceNeed(SecurityLoadout loadout, int weaponPower,
 		int gunAmmo, int missiles, int laserHeat) {
-		if (weaponPower < AUTO_WEAPON_RESERVE) return DroneServicePolicy.Need.WEAPON_POWER;
+		return weaponServiceNeed(loadout, 100, weaponPower, gunAmmo, missiles, laserHeat);
+	}
+
+	static DroneServicePolicy.Need weaponServiceNeed(SecurityLoadout loadout, int auxiliaryPower,
+		int weaponPower, int gunAmmo, int missiles, int laserHeat) {
 		SecurityLoadout selected = loadout == null ? SecurityLoadout.AUTO : loadout;
-		return switch (selected) {
-			case UNARMED -> DroneServicePolicy.Need.NONE;
-			case AUTOCANNON -> gunAmmo <= 0
-				? DroneServicePolicy.Need.AUTOCANNON_AMMO : DroneServicePolicy.Need.NONE;
-			case MISSILE -> missiles <= 0
-				? DroneServicePolicy.Need.MISSILE_AMMO : DroneServicePolicy.Need.NONE;
-			case LASER -> DroneServicePolicy.Need.NONE;
-			case AUTO -> hasUsableWeapon(selected, gunAmmo, missiles, laserHeat)
-				? DroneServicePolicy.Need.NONE : DroneServicePolicy.Need.WEAPON_REARM;
-		};
+		if (!selected.armed()) return DroneServicePolicy.Need.NONE;
+		WeaponServicePlan plan = servicePlan(selected, 100, auxiliaryPower, weaponPower,
+			gunAmmo, missiles, laserHeat, true, true);
+		if (!plan.returnRequired()) return DroneServicePolicy.Need.NONE;
+		if (weaponPower < AUTO_WEAPON_RESERVE && gunAmmo <= 0 && missiles <= 0)
+			return DroneServicePolicy.Need.WEAPON_POWER;
+		return DroneServicePolicy.Need.WEAPON_REARM;
+	}
+
+	static WeaponServicePlan servicePlan(SecurityLoadout loadout, int flightPower, int auxiliaryPower,
+		int laserEnergy, int gunAmmo, int missiles, int laserHeat, boolean missionValid,
+		boolean auxiliaryAirRecoveryPossible) {
+		SecurityLoadout doctrine = loadout == null ? SecurityLoadout.AUTO : loadout;
+		Set<CombatWeapon> installed = doctrine == SecurityLoadout.UNARMED ? Set.of()
+			: Set.of(CombatWeapon.LASER, CombatWeapon.AUTOCANNON, CombatWeapon.MISSILE);
+		EnumSet<CombatWeapon> temporary = EnumSet.noneOf(CombatWeapon.class);
+		if (laserHeat >= LASER_SWITCH_HEAT) temporary.add(CombatWeapon.LASER);
+		var resources = new WeaponServicePlan.Resources(
+			new WeaponServicePlan.Resource(Math.max(0, flightPower), DroneServicePolicy.NORMAL_SORTIE_POWER, 100),
+			new WeaponServicePlan.Resource(Math.max(0, auxiliaryPower), 3, 100),
+			new WeaponServicePlan.Resource(Math.max(0, laserEnergy), AUTO_WEAPON_RESERVE, 100),
+			new WeaponServicePlan.Resource(Math.max(0, gunAmmo), 1,
+				(int)Math.ceil(GUN_CAPACITY * 0.6)),
+			new WeaponServicePlan.Resource(Math.max(0, missiles), 1, 2));
+		var condition = new WeaponServicePlan.Condition(true, true, false, false,
+			false, false, 10);
+		var armament = new WeaponServicePlan.Armament(installed, installed, temporary,
+			doctrine, Optional.empty());
+		boolean persistentLoss = doctrine.armed() && laserEnergy < AUTO_WEAPON_RESERVE
+			&& gunAmmo <= 0 && missiles <= 0;
+		return WeaponServicePlan.evaluate(new WeaponServicePlan.Input(resources, condition,
+			armament, missionValid, auxiliaryAirRecoveryPossible, persistentLoss));
 	}
 
 	static boolean sortieReady(SecurityLoadout loadout, float healthRatio,
@@ -124,36 +202,29 @@ public final class CombatPolicy {
 		int gunAmmo, int missiles, int laserHeat, boolean urgent) {
 		int minimumPower = urgent ? URGENT_SORTIE_POWER : DroneServicePolicy.NORMAL_SORTIE_POWER;
 		if (healthRatio < DroneServicePolicy.MINIMUM_SORTIE_HEALTH_RATIO
-			|| flightPower < minimumPower || weaponPower < minimumPower) return false;
-		if (urgent) return hasUsableWeapon(loadout, gunAmmo, missiles, laserHeat);
-		SecurityLoadout selected = loadout == null ? SecurityLoadout.AUTO : loadout;
-		return switch (selected) {
-			case UNARMED -> false;
-			case AUTO -> gunAmmo >= (int)Math.ceil(GUN_CAPACITY * 0.6) && missiles >= 2;
-			case AUTOCANNON -> gunAmmo >= (int)Math.ceil(GUN_CAPACITY * 0.6);
-			case LASER -> laserHeat < LASER_SWITCH_HEAT;
-			case MISSILE -> missiles >= 2;
-		};
+			|| flightPower < minimumPower) return false;
+		if (loadout == SecurityLoadout.UNARMED) return false;
+		if (gunAmmo > 0 || missiles > 0) return true;
+		int laserReserve = urgent ? LASER_DEGRADED_SORTIE_RESERVE : LASER_NORMAL_SORTIE_RESERVE;
+		return weaponPower >= laserReserve && laserHeat < LASER_SWITCH_HEAT;
 	}
 
 	static boolean resourceLimitedSortieReady(SecurityLoadout loadout, float healthRatio,
 		int flightPower, int weaponPower, int gunAmmo, int missiles, int laserHeat,
 		boolean liveEngagement, boolean dockResourceExhausted) {
 		return liveEngagement && dockResourceExhausted
-			&& sortieReady(loadout, healthRatio, flightPower, weaponPower,
-				gunAmmo, missiles, laserHeat, true);
+			&& healthRatio >= DroneServicePolicy.MINIMUM_SORTIE_HEALTH_RATIO
+			&& flightPower >= RESOURCE_LIMITED_SORTIE_POWER
+			&& loadout != SecurityLoadout.UNARMED
+			&& (gunAmmo > 0 || missiles > 0
+				|| weaponPower >= LASER_DEGRADED_SORTIE_RESERVE && laserHeat < LASER_SWITCH_HEAT);
 	}
 
 	static boolean normalPayloadReady(SecurityLoadout loadout, int gunAmmo,
 		int missiles, int laserHeat) {
 		SecurityLoadout selected = loadout == null ? SecurityLoadout.AUTO : loadout;
-		return switch (selected) {
-			case UNARMED -> false;
-			case AUTO -> gunAmmo >= (int)Math.ceil(GUN_CAPACITY * 0.6) && missiles >= 2;
-			case AUTOCANNON -> gunAmmo >= (int)Math.ceil(GUN_CAPACITY * 0.6);
-			case LASER -> laserHeat < LASER_SWITCH_HEAT;
-			case MISSILE -> missiles >= 2;
-		};
+		return selected.armed() && (gunAmmo >= (int)Math.ceil(GUN_CAPACITY * 0.6)
+			|| missiles >= 2 || laserHeat < LASER_SWITCH_HEAT);
 	}
 
 	static boolean autocannonFireTick(int tickCount) {
@@ -286,9 +357,29 @@ public final class CombatPolicy {
 		return flight.normalize().dot(shot.normalize()) >= 0.72;
 	}
 
+	static boolean coordinatedForwardFiringSolution(Vec3 muzzle, Vec3 plannedVelocity,
+		Vec3 actualVelocity, Vec3 aim) {
+		if (!forwardFiringSolution(muzzle, plannedVelocity, aim)) return false;
+		Vec3 shot = aim.subtract(muzzle);
+		if (actualVelocity.lengthSqr() < 0.01 || shot.lengthSqr() < 0.01) return false;
+		// The planned CAS tangent remains the strict gun-line authority. The physical
+		// velocity only has to stay in the forward hemisphere while the large airframe
+		// rolls onto that tangent; this permits turn lag without ever firing rearward.
+		return actualVelocity.normalize().dot(shot.normalize()) > 0.05;
+	}
+
+	static boolean actualMotionFacesShot(Vec3 muzzle, Vec3 actualVelocity, Vec3 aim) {
+		Vec3 shot = aim.subtract(muzzle);
+		return actualVelocity.lengthSqr() >= 0.01 && shot.lengthSqr() >= 0.01
+			&& actualVelocity.normalize().dot(shot.normalize()) > 0.05;
+	}
+
 	static boolean laserIngressRequired(Vec3 aircraft, Vec3 targetCenter, AirspaceSlot airspace) {
 		double horizontalDistance = aircraft.subtract(targetCenter).multiply(1, 0, 1).length();
-		double minimumOrbitHeight = targetCenter.y + 8.0 + airspace.heightOffset();
+		// The charge orbit begins at +6 blocks. Requiring +8 here made an aircraft
+		// repeatedly abandon that valid orbit and climb back to the ingress lane.
+		double minimumOrbitHeight = targetCenter.y + LASER_ORBIT_MIN_HEIGHT
+			+ airspace.heightOffset();
 		return horizontalDistance > LASER_INGRESS_DISTANCE || aircraft.y < minimumOrbitHeight - 1.0;
 	}
 
@@ -322,7 +413,7 @@ public final class CombatPolicy {
 	static Vec3 laserOrbit(Vec3 targetCenter, int slot, int count, long tick, int charge,
 		AirspaceSlot airspace) {
 		int safeCount = Math.max(1, count);
-		double phase = tick * (0.32 / (10.0 + airspace.radiusOffset())) + Math.floorMod(slot, safeCount) * Math.PI * 2.0 / safeCount
+		double phase = tick * (LASER_ORBIT_LINEAR_SPEED / (10.0 + airspace.radiusOffset())) + Math.floorMod(slot, safeCount) * Math.PI * 2.0 / safeCount
 			+ airspace.phaseOffset();
 		double progress = Mth.clamp(charge / 1000.0, 0.0, 1.0);
 		double eased = progress * progress * (3.0 - 2.0 * progress);
@@ -359,19 +450,20 @@ public final class CombatPolicy {
 	static boolean laserReleaseReady(int memberCount, int readyCount,
 		boolean formationStarted, long waitTicks) {
 		if (memberCount <= 0 || readyCount <= 0) return false;
-		if (formationStarted || readyCount >= memberCount) return true;
-		if (waitTicks >= LASER_RELEASE_TIMEOUT_TICKS) return true;
-		int quorum = Math.max(1, (int)Math.ceil(memberCount * 0.75));
-		return waitTicks >= LASER_SYNC_WINDOW_TICKS && readyCount >= quorum;
+		// The caller has already verified this aircraft's charge, slot and line of
+		// sight. Later arrivals increase the synchronized count up to the 8-unit peak.
+		return true;
 	}
 
 	static boolean laserFallbackReleaseReady(long waitTicks, double range,
 		double slotError, boolean lineClear, boolean formationSpacingReady) {
 		if (waitTicks < LASER_RELEASE_TIMEOUT_TICKS || !lineClear) return false;
+		if (!Double.isFinite(range) || !Double.isFinite(slotError) || range > LASER_MAX_RANGE) return false;
 		// Absolute phase may lag a moving orbit while every member remains evenly spaced.
-		// Release that coherent element, but never promote a clustered element into fire.
-		return (slotError <= 1.65 || formationSpacingReady)
-			&& firingSolution(range, 15.0, slotError, 1.65, 48.0).permitted();
+		// Prefer a coherent release, then stop an individual aircraft from waiting forever:
+		// its remaining slot error is already converted into reduced firing accuracy.
+		return slotError <= 1.65 || formationSpacingReady
+			|| waitTicks >= LASER_ABSOLUTE_RELEASE_TIMEOUT_TICKS;
 	}
 
 	static boolean sameLaserFormation(String ownManeuverKey, String candidateManeuverKey) {
@@ -407,11 +499,11 @@ public final class CombatPolicy {
 	static boolean autocannonImpactAcceptable(Vec3 intendedAim, Vec3 impact,
 		Vec3 targetCenter) {
 		if (intendedAim == null || impact == null || targetCenter == null) return false;
-		double impactDeviation = impact.multiply(1, 0, 1)
-			.distanceTo(intendedAim.multiply(1, 0, 1));
+		double impactDeviation = impact.distanceTo(intendedAim);
 		double targetOffset = impact.multiply(1, 0, 1)
 			.distanceTo(targetCenter.multiply(1, 0, 1));
-		return impactDeviation <= 4.0 && targetOffset <= 10.0;
+		double verticalOffset = Math.abs(impact.y - targetCenter.y);
+		return impactDeviation <= 4.0 && targetOffset <= 10.0 && verticalOffset <= 6.0;
 	}
 
 	static int smoothLaserOrbitCharge(int current, int desired, long elapsedTicks) {

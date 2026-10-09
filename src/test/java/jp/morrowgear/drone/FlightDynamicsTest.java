@@ -334,6 +334,16 @@ class FlightDynamicsTest {
 	}
 
 	@Test
+	void collisionSweepKeepsTheFastestClearFractionBeforeAFullStop() {
+		Vec3 next = new Vec3(0.8, 0, 0);
+		Vec3 safe = FlightDynamics.collisionSafeVelocity(next, next, false,
+			step -> step.x <= 0.6001);
+		assertEquals(0.6, safe.x, 1.0e-9);
+		assertEquals(0.0, safe.y, 1.0e-9);
+		assertEquals(0.0, safe.z, 1.0e-9);
+	}
+
+	@Test
 	void departureGateEndsAboveRimAndNeverCapturesADistantAircraft() {
 		Vec3 deck = new Vec3(2, 120.316, 3);
 		assertEquals(deck.add(0, 0.55, 0), FlightDynamics.dockDepartureTarget(deck, deck));

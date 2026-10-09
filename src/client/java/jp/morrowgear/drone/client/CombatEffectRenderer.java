@@ -43,6 +43,8 @@ final class CombatEffectRenderer {
 			}
 		}
 		double pixels = EffectProjection.pixelsPerBlock(new Vec3(state.x, state.y, state.z));
+		RuntimeGeometryBudgetPolicy.Detail beamDetail = RuntimeGeometryBudgetController.drone(
+			state.entityId, new Vec3(state.x, state.y, state.z).add(cameraOffset));
 		collector.submitCustomGeometry(poseStack, RenderTypes.entityTranslucentEmissive(WHITE_TEXTURE),
 			(pose, consumer) -> {
 				if (state.combatState == CombatState.FLARE_ENTRY) renderEntryPulse(
@@ -59,23 +61,24 @@ final class CombatEffectRenderer {
 		if ((state.combatState == CombatState.GUN_RUN && state.combatShotAge <= 3
 			&& state.combatTargetOffset != null)
 			|| (state.combatState == CombatState.LASER_FIRE && state.combatTargetOffset != null)) {
-			collector.submitCustomGeometry(poseStack, MorrowgearRenderTypes.energyBeam(),
+			collector.submitCustomGeometry(poseStack, state.combatState == CombatState.LASER_FIRE
+				? MorrowgearRenderTypes.condensedBeam() : MorrowgearRenderTypes.energyBeam(),
 				(pose, consumer) -> {
 					if (state.combatState == CombatState.GUN_RUN) {
 						renderAutocannonTracer(pose, consumer, gunOutlet,
 							state.combatTargetOffset, state.combatShotAge, cameraOffset);
 					} else {
 						renderHighOutputLaser(pose, consumer, laserOutlet,
-							state.combatTargetOffset, state.ageInTicks, cameraOffset, pixels);
+							state.combatTargetOffset, state.ageInTicks, cameraOffset, pixels, beamDetail);
 					}
 				});
 			if (state.combatState == CombatState.LASER_FIRE) {
 				List<BeamSpan> visibleSpans = visibleBeamSpans(state, laserOutlet,
 					state.combatTargetOffset, cameraOffset);
 				if (!visibleSpans.isEmpty()) {
-					collector.submitCustomGeometry(poseStack, MorrowgearRenderTypes.visibleEnergyCore(),
+					collector.submitCustomGeometry(poseStack, MorrowgearRenderTypes.condensedCore(),
 						(pose, consumer) -> renderVisibleLaser(pose, consumer, visibleSpans,
-							state.ageInTicks, cameraOffset, pixels));
+							state.ageInTicks, cameraOffset, pixels, beamDetail));
 				}
 			} else {
 				jp.morrowgear.drone.CombatPolicy.TracerSegment tracer =
@@ -118,17 +121,11 @@ final class CombatEffectRenderer {
 	}
 
 	private static void renderVisibleLaser(PoseStack.Pose pose, VertexConsumer consumer,
-		List<BeamSpan> spans, float age, Vec3 cameraOffset, double pixels) {
-		double pulse = 0.5 + Math.sin(age * 0.18) * 0.12;
+		List<BeamSpan> spans, float age, Vec3 cameraOffset, double pixels,
+		RuntimeGeometryBudgetPolicy.Detail detail) {
 		for (BeamSpan span : spans) {
-			emitBeamRibbon(pose, consumer, span.start(), span.end(), cameraOffset,
-				(float)(0.58 + pulse * 0.08), 255, 18, 2, 46);
-			emitBeamRibbon(pose, consumer, span.start(), span.end(), cameraOffset,
-				(float)(0.32 + pulse * 0.035), 255, 52, 4, 142);
-			emitBeamRibbon(pose, consumer, span.start(), span.end(), cameraOffset,
-				(float)(0.15 + pulse * 0.018), 255, 178, 58, 230);
-			emitBeamRibbon(pose, consumer, span.start(), span.end(), cameraOffset,
-				EffectReadabilityPolicy.width(0.058f, pixels, 1.1f, 2.0f), 255, 255, 246, 255);
+			emitCondensedCore(pose, consumer, span.start(), span.end(), cameraOffset, age,
+				EffectReadabilityPolicy.width(0.058f, pixels, 1.1f, 2.0f), detail, false);
 		}
 	}
 
@@ -224,16 +221,10 @@ final class CombatEffectRenderer {
 	}
 
 	private static void renderHighOutputLaser(PoseStack.Pose pose, VertexConsumer consumer,
-		Vec3 outlet, Vec3 target, float age, Vec3 cameraOffset, double pixels) {
-		double pulse = 0.5 + Math.sin(age * 0.18) * 0.12;
-		emitBeamRibbon(pose, consumer, outlet, target, cameraOffset,
-			(float)(0.58 + pulse * 0.08), 255, 18, 2, 36);
-		emitBeamRibbon(pose, consumer, outlet, target, cameraOffset,
-			(float)(0.31 + pulse * 0.035), 255, 52, 4, 118);
-		emitBeamRibbon(pose, consumer, outlet, target, cameraOffset,
-			(float)(0.145 + pulse * 0.016), 255, 178, 58, 210);
-		emitBeamRibbon(pose, consumer, outlet, target, cameraOffset,
-			EffectReadabilityPolicy.width(0.052f, pixels, 1.1f, 2.0f), 255, 255, 246, 255);
+		Vec3 outlet, Vec3 target, float age, Vec3 cameraOffset, double pixels,
+		RuntimeGeometryBudgetPolicy.Detail detail) {
+		emitCondensedAtmosphere(pose, consumer, outlet, target, cameraOffset, age,
+			EffectReadabilityPolicy.width(0.58f, pixels, 1.1f, 1.35f), detail, false);
 	}
 
 	private static void renderLaserImpact(PoseStack.Pose pose, VertexConsumer consumer,
@@ -248,11 +239,92 @@ final class CombatEffectRenderer {
 
 	private static void renderImpact(PoseStack.Pose pose, VertexConsumer consumer,
 		Vec3 target, Vec3 side, Vec3 vertical, float age) {
-		double pulse = 0.94 + Math.sin(age * 0.9) * 0.08;
+		double pulse = 0.96 + Math.sin(age * 0.9) * 0.06;
 		emitDisc(pose, consumer, target, side, vertical, 0.13 * pulse,
 			255, 252, 232, 245);
 		emitRing(pose, consumer, target, side, vertical, 0.22 * pulse,
 			0.026f, 255, 94, 12, 185);
+		emitRing(pose, consumer, target, side, vertical,
+			.31 + .06 * Math.sin(age * .31), .018f, 105, 224, 255, 125);
+		for (int i = 0; i < 3; i++) {
+			double rise = ((age * .028 + i / 3.0) % 1.0);
+			Vec3 vapor = target.add(vertical.scale(.05 + rise * .48))
+				.add(side.scale(Math.sin(age * .12 + i * 2.1) * .07));
+			emitDisc(pose, consumer, vapor, side, vertical,
+				.055 + rise * .085, 205, 238, 242, (int)(62 * (1 - rise)));
+		}
+	}
+
+	static void emitCondensedAtmosphere(PoseStack.Pose pose, VertexConsumer consumer,
+		Vec3 start, Vec3 end, Vec3 cameraOffset, float age, float scale,
+		RuntimeGeometryBudgetPolicy.Detail detail, boolean carrier) {
+		var profile = HighEnergyBeamPolicy.profile(detail, carrier);
+		double pressure = .96 + Math.sin(age * .43) * .025;
+		emitBeamRibbon(pose, consumer, start, end, cameraOffset,
+			(float)(scale * profile.hazeScale() * pressure), 88, 198, 255, carrier ? 34 : 27);
+		emitBeamRibbon(pose, consumer, start, end, cameraOffset,
+			(float)(scale * .58 * pressure), 255, 27, 5, carrier ? 112 : 88);
+		emitBeamRibbon(pose, consumer, start, end, cameraOffset,
+			(float)(scale * .27), 255, 165, 42, 212);
+	}
+
+	static void emitCondensedCore(PoseStack.Pose pose, VertexConsumer consumer,
+		Vec3 start, Vec3 end, Vec3 cameraOffset, float age, float coreWidth,
+		RuntimeGeometryBudgetPolicy.Detail detail, boolean carrier) {
+		Vec3 delta = end.subtract(start);
+		double length = delta.length();
+		if (length < .001) return;
+		var profile = HighEnergyBeamPolicy.profile(detail, carrier);
+		float scale = carrier ? Math.max(coreWidth, .34f) : coreWidth;
+		emitBeamRibbon(pose, consumer, start, end, cameraOffset,
+			scale * 2.55f, 255, 142, 28, 230);
+		emitBeamRibbon(pose, consumer, start, end, cameraOffset,
+			scale, 255, 255, 248, 255);
+		Vec3 direction = delta.scale(1.0 / length);
+		Vec3[] basis = beamBasis(direction);
+		for (int packet = 0; packet < profile.compressionPackets(); packet++) {
+			double progress = HighEnergyBeamPolicy.packetProgress(age, packet,
+				profile.compressionPackets(), profile.packetSpeed());
+			Vec3 center = start.add(delta.scale(progress));
+			double envelope = Math.sin(Math.PI * progress);
+			// Compression fronts emerge inside the lens, expand through the ionized air,
+			// then collapse into the impact point instead of clipping through the hull.
+			double radius = scale * (carrier ? 5.4 : 3.7) * (.18 + .82 * envelope);
+			emitRing(pose, consumer, center, basis[0], basis[1], radius,
+				scale * (carrier ? .34f : .26f), 192, 244, 255,
+				(int)((carrier ? 210 : 175) * (.16 + .84 * envelope)));
+		}
+		for (int filament = 0; filament < profile.filaments(); filament++)
+			emitPlasmaFilament(pose, consumer, start, end, cameraOffset, age,
+				scale * (carrier ? 3.6 : 2.65), scale * .34f,
+				profile.filamentSegments(), filament, profile.filaments());
+	}
+
+	private static void emitPlasmaFilament(PoseStack.Pose pose, VertexConsumer consumer,
+		Vec3 start, Vec3 end, Vec3 cameraOffset, float age, double radius, float width,
+		int segments, int filament, int filamentCount) {
+		if (segments <= 0) return;
+		Vec3 delta = end.subtract(start), direction = delta.normalize();
+		Vec3[] basis = beamBasis(direction);
+		Vec3 previous = start;
+		for (int segment = 1; segment <= segments; segment++) {
+			double t = segment / (double)segments;
+			double envelope = Math.sin(Math.PI * t);
+			double phase = t * Math.PI * 8 - age * .42
+				+ filament * Math.PI * 2 / Math.max(1, filamentCount);
+			Vec3 next = start.add(delta.scale(t)).add(basis[0].scale(Math.cos(phase) * radius * envelope))
+				.add(basis[1].scale(Math.sin(phase) * radius * envelope));
+			emitBeamRibbon(pose, consumer, previous, next, cameraOffset, width,
+				105, 225, 255, 155);
+			previous = next;
+		}
+	}
+
+	private static Vec3[] beamBasis(Vec3 direction) {
+		Vec3 axisA = direction.cross(new Vec3(0, 1, 0));
+		if (axisA.lengthSqr() < .000001) axisA = direction.cross(new Vec3(1, 0, 0));
+		axisA = axisA.normalize();
+		return new Vec3[]{axisA, direction.cross(axisA).normalize()};
 	}
 
 	private static void emitRing(PoseStack.Pose pose, VertexConsumer consumer, Vec3 center,

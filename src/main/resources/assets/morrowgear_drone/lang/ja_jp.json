@@ -1,4 +1,6 @@
 {
+  "message.morrowgear_drone.carrier_console.no_recovery": "復旧対象の母艦がありません。近くの母艦を操作するにはスニークを解除してください。",
+  "message.morrowgear_drone.carrier_console.unavailable": "128ブロック以内に操作できる母艦がありません。距離と操作権限を確認してください。",
 	"container.morrowgear_drone.dock_service": "Dock整備・補給",
   "item.morrowgear_drone.controller": "Morrowgear フィールドコントローラー",
   "item.morrowgear_drone.field_drone_unit": "Morrowgear フィールドドローンユニット",
@@ -9,7 +11,7 @@
 	"item.morrowgear_drone.security_module": "Morrowgear Securityモジュール",
 	"item.morrowgear_drone.salvage_module": "Morrowgear Salvageモジュール",
 	"item.morrowgear_drone.recovery_tool": "Morrowgear 機体回収ツール",
-	"item.morrowgear_drone.power_cell": "Morrowgear パワーセル",
+	"item.morrowgear_drone.power_cell": "Morrowgear 推進パワーセル",
 	"item.morrowgear_drone.autocannon_magazine": "Morrowgear 機関砲弾倉",
 	"item.morrowgear_drone.laser_cell": "Morrowgear 兵装電力セル",
 	"item.morrowgear_drone.micro_missile_pack": "Morrowgear マイクロミサイル補給パック",
@@ -31,9 +33,9 @@
 	"item.morrowgear_drone.lightweight_frame": "Morrowgear 軽量フレーム",
 	"item.morrowgear_drone.basic_control_board": "Morrowgear 基礎制御基板",
 	"item.morrowgear_drone.flight_actuator": "Morrowgear 飛行アクチュエーター",
-	"item.morrowgear_drone.standard_battery_pack": "Morrowgear 標準バッテリーパック",
-	"item.morrowgear_drone.reinforced_battery_pack": "Morrowgear 強化バッテリーパック",
-	"item.morrowgear_drone.high_density_battery_pack": "Morrowgear 高密度バッテリーパック",
+	"item.morrowgear_drone.standard_battery_pack": "Morrowgear 標準飛行バッテリー",
+	"item.morrowgear_drone.reinforced_battery_pack": "Morrowgear 強化飛行バッテリー",
+	"item.morrowgear_drone.high_density_battery_pack": "Morrowgear 高密度飛行バッテリー",
 	"item.morrowgear_drone.autocannon_module": "Morrowgear 機関砲モジュール",
 	"item.morrowgear_drone.laser_module": "Morrowgear レーザーモジュール",
 	"item.morrowgear_drone.missile_module": "Morrowgear ミサイルモジュール",
@@ -43,6 +45,10 @@
 	"subtitles.morrowgear_drone.carrier_laser_fire": "母艦が高出力光線を照射する",
 	"subtitles.morrowgear_drone.carrier_laser_hit": "母艦の光線が着弾する",
 	"subtitles.morrowgear_drone.carrier_laser_cooldown": "母艦の照射機構が冷却する",
+	"subtitles.morrowgear_drone.carrier_mining_emitter": "母艦の収束照射口が順次起動する",
+	"subtitles.morrowgear_drone.carrier_mining_core": "母艦の採掘核がプラズマ化する",
+	"subtitles.morrowgear_drone.carrier_mining_release": "母艦が採掘核を解放する",
+	"subtitles.morrowgear_drone.carrier_mining_impact": "採掘核が地表を穿つ",
 	"subtitles.morrowgear_drone.flight_cruise": "ドローンが巡航する",
 	"subtitles.morrowgear_drone.autocannon_burst": "機関砲が連射される",
 	"subtitles.morrowgear_drone.laser_charge": "レーザー電力が圧縮される",
@@ -89,5 +95,6 @@
 	"communication.morrowgear_drone.return_started": "%s / %s機 / 帰還を開始",
 	"communication.morrowgear_drone.docked": "%s / %s機 / 着艦した",
 	"communication.morrowgear_drone.service_complete": "%s / %s機 / 補給を終えて再出撃",
-	"communication.morrowgear_drone.operation_complete": "%s / %s機 / 作業を完了"
+	"communication.morrowgear_drone.operation_complete": "%s / %s機 / 作業を完了",
+	"item.morrowgear_drone.operation_marker": "立体作業マーカー"
 }

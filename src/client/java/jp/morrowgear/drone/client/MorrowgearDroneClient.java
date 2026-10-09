@@ -3,6 +3,7 @@ package jp.morrowgear.drone.client;
 import com.mojang.blaze3d.platform.InputConstants;
 import jp.morrowgear.drone.MorrowgearDrone;
 import jp.morrowgear.drone.network.PowerLostBeaconPayload;
+import jp.morrowgear.drone.network.DroneCommandResultPayload;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
@@ -35,6 +36,8 @@ public final class MorrowgearDroneClient implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
+		ControllerVisorHistory.bind(VISOR_HUD::openCombatHistory);
+		TacticalContactClient.register();
 		OperationCommunicationsClient.register();
 		SupplyNetworkClient.register();
 		jp.morrowgear.drone.carrier.client.CarrierClientApi.register();
@@ -64,7 +67,14 @@ public final class MorrowgearDroneClient implements ClientModInitializer {
 			Identifier.fromNamespaceAndPath(MorrowgearDrone.MOD_ID, "operation_subtitle"), new OperationSubtitleOverlay());
 		ClientPlayNetworking.registerGlobalReceiver(PowerLostBeaconPayload.TYPE, (payload, context) ->
 			context.client().execute(() -> PowerLostBeaconStore.accept(payload)));
-		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> PowerLostBeaconStore.clear());
+		ClientPlayNetworking.registerGlobalReceiver(DroneCommandResultPayload.TYPE, (payload, context) ->
+			context.client().execute(() -> ControllerCommandResults.accept(payload)));
+		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+			PowerLostBeaconStore.clear();
+			ControllerCommandResults.clear();
+			TacticalContactClient.clear();
+		});
+		MorrowgearAutomationClient.register();
 
 		UseItemCallback.EVENT.register((player, level, hand) -> {
 			if (!level.isClientSide() || !player.getItemInHand(hand).is(MorrowgearDrone.CONTROLLER)) return InteractionResult.PASS;

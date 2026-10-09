@@ -3,6 +3,8 @@ package jp.morrowgear.drone.carrier;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
+import java.util.Map;
+import java.util.WeakHashMap;
 import jp.morrowgear.drone.DroneEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -15,12 +17,18 @@ final class CarrierExteriorSnapshot {
     static final int TERRAIN_SPACING = 4;
     static final int CANDIDATE_RADIUS = 64;
     static final int MAX_CANDIDATES = 32;
+    static final int TERRAIN_CACHE_TICKS = 40;
+    private static final Map<CarrierEntity, CachedTerrain> TERRAIN_CACHE = new WeakHashMap<>();
 
     private CarrierExteriorSnapshot() {}
 
     static CarrierViewPayload.Terrain terrain(CarrierEntity carrier) {
         if (carrier == null || !(carrier.level() instanceof ServerLevel level)) return CarrierViewPayload.Terrain.EMPTY;
         int centerX = carrier.blockPosition().getX(), centerZ = carrier.blockPosition().getZ();
+        CachedTerrain cached = TERRAIN_CACHE.get(carrier);
+        long now = level.getGameTime();
+        if (cached != null && now >= cached.tick && now - cached.tick < TERRAIN_CACHE_TICKS
+            && cached.centerX == centerX && cached.centerZ == centerZ) return cached.terrain;
         byte[] colors = new byte[TERRAIN_SIDE * TERRAIN_SIDE];
         int half = TERRAIN_SIDE / 2;
         BlockPos.MutableBlockPos position = new BlockPos.MutableBlockPos();
@@ -36,8 +44,10 @@ final class CarrierExteriorSnapshot {
             colors[row * TERRAIN_SIDE + column] = chunk.getBlockState(position).getMapColor(level, position)
                 .getPackedId(MapColor.Brightness.NORMAL);
         }
-        return new CarrierViewPayload.Terrain(level.dimension().identifier().toString(), centerX, centerZ,
+        CarrierViewPayload.Terrain terrain = new CarrierViewPayload.Terrain(level.dimension().identifier().toString(), centerX, centerZ,
             TERRAIN_SPACING, TERRAIN_SIDE, TERRAIN_SIDE, colors);
+        TERRAIN_CACHE.put(carrier, new CachedTerrain(now, centerX, centerZ, terrain));
+        return terrain;
     }
 
     // ChunkAccess already returns the top occupied block; Level#getHeight adds one to that value.
@@ -51,4 +61,6 @@ final class CarrierExteriorSnapshot {
             .stream().sorted(Comparator.comparing(DroneEntity::unitId)).limit(MAX_CANDIDATES)
             .map(drone -> new CarrierViewPayload.DroneCandidate(drone.getUUID(), drone.unitId())).toList();
     }
+
+    private record CachedTerrain(long tick, int centerX, int centerZ, CarrierViewPayload.Terrain terrain) {}
 }

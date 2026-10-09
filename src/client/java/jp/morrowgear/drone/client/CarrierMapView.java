@@ -66,6 +66,7 @@ final class CarrierMapView implements AutoCloseable {
             texture.upload();
         }
         g.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, map.x(), map.y(), 0, 0, map.width(), map.height(), columns, rows, columns, rows);
+        g.fill(map.x(), map.y(), map.right(), map.bottom(), 0x99121514);
         return true;
     }
     void drawEffects(GuiGraphicsExtractor g, Rect map, double centerX, double centerZ, double zoom,

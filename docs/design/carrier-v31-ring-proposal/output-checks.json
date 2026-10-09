@@ -1,0 +1,112 @@
+{
+  "images": {
+    "hero": {
+      "size": [
+        1400,
+        1000
+      ],
+      "visiblePixels": 257516,
+      "notClipped": true
+    },
+    "front": {
+      "size": [
+        1400,
+        1000
+      ],
+      "visiblePixels": 118497,
+      "notClipped": true
+    },
+    "rear": {
+      "size": [
+        1400,
+        1000
+      ],
+      "visiblePixels": 119823,
+      "notClipped": true
+    },
+    "top": {
+      "size": [
+        1400,
+        1000
+      ],
+      "visiblePixels": 497006,
+      "notClipped": true
+    },
+    "bottom": {
+      "size": [
+        1400,
+        1000
+      ],
+      "visiblePixels": 540766,
+      "notClipped": true
+    },
+    "left": {
+      "size": [
+        1400,
+        1000
+      ],
+      "visiblePixels": 79141,
+      "notClipped": true
+    },
+    "right": {
+      "size": [
+        1400,
+        1000
+      ],
+      "visiblePixels": 85065,
+      "notClipped": true
+    },
+    "underside": {
+      "size": [
+        1400,
+        1000
+      ],
+      "visiblePixels": 307240,
+      "notClipped": true
+    },
+    "bottom-functional-closeup": {
+      "size": [
+        1500,
+        1050
+      ],
+      "visiblePixels": 1378683,
+      "notClipped": false
+    },
+    "ring-functional-closeup": {
+      "size": [
+        1300,
+        1000
+      ],
+      "visiblePixels": 1095419,
+      "notClipped": false
+    },
+    "bay-intake-functional-closeup": {
+      "size": [
+        1500,
+        1000
+      ],
+      "visiblePixels": 531722,
+      "notClipped": false
+    },
+    "mining-active-state": {
+      "size": [
+        1400,
+        1200
+      ],
+      "visiblePixels": 229718,
+      "notClipped": false
+    },
+    "bay-scale-witness": {
+      "size": [
+        1600,
+        1000
+      ],
+      "visiblePixels": 234478,
+      "notClipped": false
+    }
+  },
+  "protectedFileCount": 381,
+  "protectedUnchanged": true,
+  "changedProtectedFiles": [],
+  "passed": true
+}

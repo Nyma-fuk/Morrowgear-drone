@@ -22,5 +22,9 @@
   "carrier_laser_charge":{"subtitle":"subtitles.morrowgear_drone.carrier_laser_charge","sounds":[{"name":"morrowgear_drone:laser_charge","attenuation_distance":160,"volume":1.1,"pitch":0.72}]},
   "carrier_laser_fire":{"subtitle":"subtitles.morrowgear_drone.carrier_laser_fire","sounds":[{"name":"morrowgear_drone:laser_fire","attenuation_distance":192,"volume":1.18,"pitch":0.7}]},
   "carrier_laser_hit":{"subtitle":"subtitles.morrowgear_drone.carrier_laser_hit","sounds":[{"name":"morrowgear_drone:laser_hit","attenuation_distance":128,"volume":1.12,"pitch":0.68}]},
-  "carrier_laser_cooldown":{"subtitle":"subtitles.morrowgear_drone.carrier_laser_cooldown","sounds":[{"name":"morrowgear_drone:laser_shutdown","attenuation_distance":128,"volume":1.08,"pitch":0.72}]}
+  "carrier_laser_cooldown":{"subtitle":"subtitles.morrowgear_drone.carrier_laser_cooldown","sounds":[{"name":"morrowgear_drone:laser_shutdown","attenuation_distance":128,"volume":1.08,"pitch":0.72}]},
+  "carrier_mining_emitter":{"subtitle":"subtitles.morrowgear_drone.carrier_mining_emitter","sounds":[{"name":"morrowgear_drone:carrier_mining_emitter","attenuation_distance":160}]},
+  "carrier_mining_core":{"subtitle":"subtitles.morrowgear_drone.carrier_mining_core","sounds":[{"name":"morrowgear_drone:carrier_mining_core","attenuation_distance":192}]},
+  "carrier_mining_release":{"subtitle":"subtitles.morrowgear_drone.carrier_mining_release","sounds":[{"name":"morrowgear_drone:carrier_mining_release","attenuation_distance":192}]},
+  "carrier_mining_impact":{"subtitle":"subtitles.morrowgear_drone.carrier_mining_impact","sounds":[{"name":"morrowgear_drone:carrier_mining_impact","attenuation_distance":224}]}
 }

@@ -61,9 +61,13 @@ public final class DockBlockEntity extends BaseContainerBlockEntity {
 	}
 
 	public void initialize(ServerPlayer player) {
+		initialize(player, player.getDirection());
+	}
+
+	public void initialize(ServerPlayer player, Direction facing) {
 		this.owner = player.getUUID();
 		this.ownerName = player.getScoreboardName();
-		this.facing = player.getDirection();
+		this.facing = facing == null || facing.getAxis().isVertical() ? Direction.NORTH : facing;
 		setChanged();
 		if (level != null) level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
 	}
@@ -73,6 +77,7 @@ public final class DockBlockEntity extends BaseContainerBlockEntity {
 	}
 
 	public UUID ownerId() { return owner; }
+	public String ownerName() { return ownerName; }
 
 	public boolean matchesOwner(UUID playerId, String playerName) {
 		return isOwnedBy(playerId) || (!ownerName.isBlank() && ownerName.equalsIgnoreCase(playerName));
@@ -237,10 +242,7 @@ public final class DockBlockEntity extends BaseContainerBlockEntity {
 	}
 
 	private static float repairValue(ItemStack stack) {
-		if (stack.is(MorrowgearDrone.MORROW_ALLOY)) return 20.0f;
-		if (stack.is(Items.IRON_INGOT)) return 8.0f;
-		if (stack.is(Items.COPPER_INGOT)) return 4.0f;
-		return 0.0f;
+		return DockSupplyPolicy.repairValue(DockSupplyPolicy.itemId(stack));
 	}
 
 	private static boolean isRepairMaterial(ItemStack stack) {
@@ -303,6 +305,12 @@ public final class DockBlockEntity extends BaseContainerBlockEntity {
 		return count;
 	}
 
+	/** Package-equivalent stock used by automation; opened credits and charged tanks are not ignored. */
+	public int effectiveSupplyCount(SupplyKind kind) {
+		return DockSupplyPolicy.packageEquivalent(kind, supplyCount(kind), storedPower() + flightFuelCredit(),
+			storedWeaponPower(), autocannonCredit(), missileCredit());
+	}
+
 	/** Server-thread API. Shrinks the caller's stack by the returned count; zero leaves it unchanged.
 	 * The logistics caller must authorize the route/owner before calling this method. */
 	public int insertNetworkSupply(ItemStack stack) {
@@ -328,12 +336,7 @@ public final class DockBlockEntity extends BaseContainerBlockEntity {
 	}
 
 	private static int dockEnergy(ItemStack stack) {
-		if (stack == null || stack.isEmpty()) return 0;
-		int battery = MorrowgearDrone.batteryEnergyForItem(stack.getItem());
-		if (battery > 0) return battery;
-		if (stack.is(Items.COAL)) return 1000;
-		if (stack.is(Items.CHARCOAL)) return 800;
-		return 0;
+		return DockSupplyPolicy.flightEnergy(DockSupplyPolicy.itemId(stack));
 	}
 
 	private ItemStack serviceStack(int preferredSlot, java.util.function.Predicate<ItemStack> predicate) {

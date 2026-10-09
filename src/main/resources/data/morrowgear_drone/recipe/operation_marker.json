@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [" C ", "RBR", " I "],
+  "key": {
+    "C": "minecraft:compass",
+    "R": "minecraft:redstone",
+    "B": "morrowgear_drone:basic_control_board",
+    "I": "minecraft:iron_ingot"
+  },
+  "result": {"id": "morrowgear_drone:operation_marker", "count": 1}
+}

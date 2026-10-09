@@ -9,6 +9,17 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 final class DockAllocationPolicyTest {
+	@Test void incompatibleSalvageDoesNotBlockOrdinaryServiceAndRejoinsWhenClear() {
+		UUID salvage = UUID.randomUUID(), service = UUID.randomUUID(), idle = UUID.randomUUID();
+		var requests = List.of(new DockAllocationPolicy.Request(salvage, 1, 3),
+			new DockAllocationPolicy.Request(service, 2, 2), new DockAllocationPolicy.Request(idle, 0, 1));
+		var narrowDock = java.util.Set.of(service, idle);
+		assertEquals(0, DockAllocationPolicy.queuePosition(requests, salvage, narrowDock));
+		assertEquals(1, DockAllocationPolicy.queuePosition(requests, service, narrowDock));
+		assertEquals(2, DockAllocationPolicy.queuePosition(requests, idle, narrowDock));
+		assertEquals(1, DockAllocationPolicy.queuePosition(requests, salvage, java.util.Set.of(salvage, service, idle)));
+		assertEquals(0, DockAllocationPolicy.queuePosition(requests, service, java.util.Set.of()));
+	}
 	@Test void queueIsPriorityThenFifoThenStableIdentity() {
 		UUID service = UUID.fromString("00000000-0000-0000-0000-000000000003");
 		UUID first = UUID.fromString("00000000-0000-0000-0000-000000000002");
@@ -37,5 +48,13 @@ final class DockAllocationPolicyTest {
 		assertEquals(14.0, DockAllocationPolicy.holdingSlot(8).radius());
 		assertEquals(18.0, DockAllocationPolicy.holdingSlot(9).radius());
 		assertEquals(14.0, DockAllocationPolicy.holdingSlot(9).height());
+	}
+
+	@Test void destroyedDockRebindsEveryStateThatStillDependsOnDockService() {
+		assertTrue(DockAllocationPolicy.replacementRequired(true, false, false, false));
+		assertTrue(DockAllocationPolicy.replacementRequired(false, true, false, false));
+		assertTrue(DockAllocationPolicy.replacementRequired(false, false, true, false));
+		assertTrue(DockAllocationPolicy.replacementRequired(false, false, false, true));
+		assertFalse(DockAllocationPolicy.replacementRequired(false, false, false, false));
 	}
 }

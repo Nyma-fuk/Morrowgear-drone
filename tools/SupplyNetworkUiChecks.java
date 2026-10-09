@@ -7,8 +7,8 @@ import jp.morrowgear.drone.SupplyNetworkUiPolicy.Rule;
 import jp.morrowgear.drone.SupplyNetworkUiPolicy.State;
 
 public final class SupplyNetworkUiChecks {
-    private static final List<Rule> RULES = List.of(new Rule(0, 16, 100), new Rule(1, 8, 80),
-        new Rule(2, 8, 70), new Rule(3, 4, 60), new Rule(4, 8, 90));
+    private static final List<Rule> RULES = List.of(new Rule(0, 16, 100, 100), new Rule(1, 8, 80, 80),
+        new Rule(2, 8, 70, 70), new Rule(3, 4, 60, 60), new Rule(4, 8, 90, 90));
     private static void check(boolean condition, String message) { if (!condition) throw new AssertionError(message); }
     public static void main(String[] args) {
         SupplyNetworkUiPolicy policy = new SupplyNetworkUiPolicy();
@@ -44,10 +44,10 @@ public final class SupplyNetworkUiChecks {
                 check(policy.state() == State.PENDING, "Different source must not acknowledge save");
             }
             case "changed_rules" -> {
-                var rules = new ArrayList<>(RULES); rules.set(0, new Rule(0, 17, 100));
+                var rules = new ArrayList<>(RULES); rules.set(0, new Rule(0, 17, 100, 100));
                 policy.accept(new Configuration(1, 2, true, rules), new Object());
                 check(policy.state() == State.PENDING, "Mismatching stock target must not acknowledge save");
-                rules.set(0, new Rule(0, 16, 99)); policy.accept(new Configuration(1, 2, true, rules), new Object());
+                rules.set(0, new Rule(0, 16, 100, 99)); policy.accept(new Configuration(1, 2, true, rules), new Object());
                 check(policy.state() == State.PENDING, "Mismatching priority must not acknowledge save");
             }
             case "enabled" -> {

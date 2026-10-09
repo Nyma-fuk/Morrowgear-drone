@@ -28,12 +28,34 @@ final class SupplyNetworkRegistryTest {
 		return registry.reserve(config, UUID.randomUUID(), SupplyKind.FUEL, "minecraft:coal", 16, 64, 64, 0).orElseThrow();
 	}
 
+	@Test void sourceAgnosticDockCanReserveAConcreteWarehousePerDelivery() {
+		Route automatic = new Route(owner, route.dimension(), Route.AUTO_SOURCE, route.dock());
+		Configuration config = configure(automatic);
+		Route selected = new Route(owner, route.dimension(), 77, route.dock());
+		Job job = registry.reserve(config, selected, UUID.randomUUID(), SupplyKind.FUEL,
+			"minecraft:coal", 16, 64, 64, 0).orElseThrow();
+		assertEquals(77, job.route().source());
+		assertTrue(registry.current(job));
+		assertEquals(Status.IN_TRANSIT, registry.status(automatic));
+	}
+
 	@Test void duplicateTicksCannotAssignTwoJobsToTheSameDock() {
 		Configuration config = configure(route);
 		Job first = reserve(config);
 		assertTrue(registry.reserve(config, UUID.randomUUID(), SupplyKind.FUEL, "minecraft:coal", 16, 64, 64, 1).isEmpty());
 		assertEquals(List.of(first), registry.jobs());
 		assertEquals(16, registry.incoming(route, SupplyKind.FUEL));
+	}
+
+	@Test void differentSupplyKindsCanApproachOneDockWithoutDuplicatingEitherManifest() {
+		Configuration config = configure(route);
+		assertTrue(registry.reserve(config, UUID.randomUUID(), SupplyKind.FUEL, "minecraft:coal",
+			16, 64, 64, 0).isPresent());
+		assertTrue(registry.reserve(config, UUID.randomUUID(), SupplyKind.MISSILE,
+			"morrowgear_drone:micro_missile_pack", 4, 32, 32, 0).isPresent());
+		assertTrue(registry.kindReserved(route, SupplyKind.FUEL));
+		assertTrue(registry.kindReserved(route, SupplyKind.MISSILE));
+		assertEquals(2, registry.jobs().size());
 	}
 
 	@Test void oneDroneCannotClaimAnotherDockWhileAssigned() {
@@ -184,6 +206,15 @@ final class SupplyNetworkRegistryTest {
 		assertFalse(restored.registry().loaded(job.token(), 16));
 		assertTrue(restored.registry().delivered(job.token(), 9));
 		assertTrue(restored.registry().jobs().isEmpty());
+	}
+
+	@Test void ownerScopedLogisticsNodesSurviveCodecRoundTrip() {
+		SupplyNetworkSavedData data = new SupplyNetworkSavedData();
+		data.registerNode(owner, route.dimension(), 1234L);
+		var json = SupplyNetworkSavedData.CODEC.encodeStart(JsonOps.INSTANCE, data).getOrThrow();
+		SupplyNetworkSavedData restored = SupplyNetworkSavedData.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow();
+		assertEquals(List.of(1234L), restored.nodes(owner, route.dimension()));
+		assertTrue(restored.nodes(UUID.randomUUID(), route.dimension()).isEmpty());
 	}
 
 	@Test void reloadWithReconfiguredRouteHoldsOldJobInsteadOfReassigningIt() {

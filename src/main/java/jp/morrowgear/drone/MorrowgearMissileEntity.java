@@ -159,7 +159,7 @@ public final class MorrowgearMissileEntity extends Entity {
 			followAttachment(level);
 			setDeltaMovement(Vec3.ZERO);
 			fuseTicks = MicroMissilePolicy.nextFuse(fuseTicks);
-			if (fuseTicks == 0) detonate(level);
+			if (fuseTicks == 0 && MissileDetonationRuntime.tryAcquire(level)) detonate(level);
 			return;
 		}
 		if (++flightTicks > MicroMissilePolicy.MAX_FLIGHT_TICKS) {

@@ -80,16 +80,25 @@ class CarrierWorkTest {
         var operation = new CarrierPolicy.Operation(UUID.randomUUID(), "minecraft:overworld", 0, 0, -64, 90);
         ship.progress = new CarrierPolicy.Progress(operation, 0, List.of());
         ship.miningScanGeneration = operation.generation();
-        for (int tick = 0; tick < 60; tick++) {
+        int fireStart = CarrierPolicy.SCAN_TICKS + CarrierPolicy.MINING_CHARGE_TICKS;
+        for (int tick = 0; tick < fireStart; tick++) {
             ship.miningScanTicks = tick;
-            assertEquals(tick < 40 ? CarrierPolicy.WorkPhase.SCAN : CarrierPolicy.WorkPhase.CHARGE, ship.workPhase());
-            assertEquals(tick < 40 ? tick : tick - 40, ship.workPhaseTick());
-            assertEquals(tick < 40 ? CarrierPolicy.SCAN_TICKS : CarrierPolicy.MINING_CHARGE_TICKS,
+            assertEquals(tick < CarrierPolicy.SCAN_TICKS
+                    ? CarrierPolicy.WorkPhase.SCAN : CarrierPolicy.WorkPhase.CHARGE,
+                ship.workPhase());
+            assertEquals(tick < CarrierPolicy.SCAN_TICKS
+                    ? tick : tick - CarrierPolicy.SCAN_TICKS,
+                ship.workPhaseTick());
+            assertEquals(tick < CarrierPolicy.SCAN_TICKS
+                    ? CarrierPolicy.SCAN_TICKS : CarrierPolicy.MINING_CHARGE_TICKS,
                 ship.workPhaseDuration());
         }
-        ship.miningScanTicks = 60;
+        ship.miningScanTicks = fireStart;
         assertEquals(CarrierPolicy.WorkPhase.FIRE, ship.workPhase());
-        assertEquals(0, ship.workPhaseDuration());
+        assertEquals(CarrierMiningEffectPolicy.RELEASE_TICKS, ship.workPhaseDuration());
+        assertEquals(0, ship.workPhaseTick());
+        ship.miningScanTicks += CarrierMiningEffectPolicy.RELEASE_TICKS;
+        assertEquals(CarrierMiningEffectPolicy.RELEASE_TICKS, ship.workPhaseTick());
         ship.stop(CarrierPolicy.Stop.PROTECTED);
         assertEquals(CarrierPolicy.WorkPhase.IDLE, ship.workPhase());
         assertEquals(0, ship.miningScanTicks);
@@ -102,7 +111,7 @@ class CarrierWorkTest {
     @Test void verticalColumnDoesNotBorrowObliqueForegroundOrSkipCursor() {
         var progress = progress(0, 0, 0, 4);
         var terrain = Terrain.strata(progress.operation());
-        var origin = new Vec3(8, 8.9, 8);
+        var origin = new Vec3(.1, 8.9, .1);
         BlockPos requested = requested(progress);
         var hit = terrain.ray(origin, requested);
         assertEquals(HitResult.Type.BLOCK, hit.getType());
@@ -155,7 +164,7 @@ class CarrierWorkTest {
         var terrain = Terrain.strata(progress.operation());
         for (int y = 5; y <= 8; y++) for (int z = 0; z < 16; z++)
             terrain.blocks.put(new BlockPos(4, y, z), Blocks.STONE.defaultBlockState());
-        var hit = terrain.ray(new Vec3(8, 8.9, 8), requested(progress));
+        var hit = terrain.ray(new Vec3(.1, 8.9, .1), requested(progress));
         assertEquals(HitResult.Type.BLOCK, hit.getType());
         assertTrue(hit.getBlockPos().getY() > 4);
         assertNull(CarrierWork.miningTarget(progress, hit));
@@ -242,10 +251,10 @@ class CarrierWorkTest {
                 new BlockPos(x, 7, z), new BlockPos(x, 5, z))) {
             assertNull(CarrierWork.miningTarget(progress, hit(outside)), outside::toString);
         }
-        var sealed = new CarrierPolicy.Progress(op, 0, List.of(17));
-        assertNull(CarrierWork.miningTarget(sealed, hit(new BlockPos(x + 1, 6, z + 1))));
+        var sealed = new CarrierPolicy.Progress(op, 0, List.of(op.column(0)));
+        assertNull(CarrierWork.miningTarget(sealed, hit(requested(progress))));
         assertNull(CarrierWork.miningTarget(new CarrierPolicy.Progress(op, op.volume(), List.of()), hit(requested(progress))));
-        assertNull(CarrierWork.miningTarget(new CarrierPolicy.Progress(op, 0, List.of(0)), hit(requested(progress))));
+        assertNull(CarrierWork.miningTarget(new CarrierPolicy.Progress(op, 0, List.of(op.column(0))), hit(requested(progress))));
     }
 
     @Test void realClipTraversesMixedTreesPlantsAndFallingTerrainToBedrock() {

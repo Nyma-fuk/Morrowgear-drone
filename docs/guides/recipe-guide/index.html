@@ -1,0 +1,830 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Morrowgear Recipe Systems</title>
+  <style>
+    :root { --bg:#09100f; --panel:#111b19; --panel2:#162320; --line:#31463f; --text:#eef7f2; --muted:#91a79f; --cyan:#63e7d2; --mint:#baf7bd; --amber:#ffbd59; --red:#ff6d68; }
+    * { box-sizing:border-box; }
+    body { margin:0; color:var(--text); background:radial-gradient(circle at 72% 0%, #19302a 0, transparent 28rem), var(--bg); font-family:"Yu Gothic UI","Noto Sans JP",sans-serif; letter-spacing:0; }
+    img { image-rendering:pixelated; }
+    .topbar { position:sticky; top:0; z-index:20; height:64px; padding:0 3vw; display:flex; align-items:center; justify-content:space-between; background:rgba(7,13,12,.94); border-bottom:1px solid var(--line); backdrop-filter:blur(14px); }
+    .brand { display:flex; align-items:center; gap:14px; }
+    .brand-mark { width:7px; height:34px; background:var(--cyan); box-shadow:0 0 20px rgba(99,231,210,.45); }
+    .brand strong { font-size:15px; } .brand small { display:block; color:var(--cyan); font-size:9px; margin-top:3px; }
+    .top-meta { color:var(--muted); font-size:12px; } .top-meta b { color:var(--amber); font-weight:600; }
+    main { width:min(1760px, 95vw); margin:0 auto; padding:42px 0 80px; }
+    .hero { display:grid; grid-template-columns:minmax(0,1.35fr) minmax(360px,.65fr); gap:46px; align-items:end; padding:36px 0 44px; border-bottom:1px solid var(--line); }
+    .kicker,.eyebrow { color:var(--cyan); font-size:10px; font-weight:700; text-transform:uppercase; }
+    h1 { font-size:clamp(38px,5vw,78px); line-height:1; margin:14px 0 18px; font-weight:780; }
+    .hero p { color:var(--muted); max-width:760px; line-height:1.8; margin:0; }
+    .hero-stats { display:grid; grid-template-columns:repeat(3,1fr); border:1px solid var(--line); background:rgba(17,27,25,.74); }
+    .hero-stats div { padding:20px; border-right:1px solid var(--line); } .hero-stats div:last-child{border-right:0}
+    .hero-stats strong { display:block; font-size:27px; color:var(--amber); } .hero-stats span { color:var(--muted); font-size:11px; }
+    .flow { margin:38px 0 58px; padding:24px; border:1px solid var(--line); background:linear-gradient(135deg,rgba(21,34,31,.94),rgba(10,17,16,.94)); }
+    .flow h2 { font-size:14px; margin:0 0 18px; color:var(--mint); }
+    .flow-line { display:grid; grid-template-columns:repeat(7,1fr); gap:8px; align-items:center; }
+    .flow-node { min-height:74px; padding:13px; border-left:3px solid var(--cyan); background:#0c1513; display:flex; flex-direction:column; justify-content:center; }
+    .flow-node strong { font-size:12px; } .flow-node small { color:var(--muted); margin-top:6px; line-height:1.35; }
+    .flow-node.final { border-color:var(--amber); }
+    .flow-arrow { text-align:center; color:var(--amber); font-size:22px; }
+    .recipe-section { margin:62px 0 0; }
+    .section-heading { display:flex; gap:18px; align-items:flex-start; margin-bottom:20px; }
+    .section-heading>span { color:var(--amber); font-size:12px; border:1px solid #745b32; padding:7px 9px; }
+    .section-heading h2 { margin:0; font-size:24px; } .section-heading p { margin:7px 0 0; color:var(--muted); font-size:13px; }
+    .recipe-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+    .recipe-card { min-width:0; border:1px solid var(--line); background:linear-gradient(160deg,rgba(22,35,32,.97),rgba(11,18,17,.98)); padding:18px; box-shadow:0 18px 50px rgba(0,0,0,.15); display:flex; flex-direction:column; }
+    .recipe-card__head { display:flex; justify-content:space-between; min-height:60px; gap:12px; border-bottom:1px solid #263b35; }
+    .recipe-card h3 { font-size:15px; margin:7px 0 15px; } .method { color:var(--muted); font-size:10px; border:1px solid var(--line); height:24px; padding:5px 8px; }
+    .recipe-assembly { min-height:190px; display:grid; grid-template-columns:158px 28px 1fr; align-items:center; gap:8px; padding:16px 0; }
+    .craft-grid { width:158px; height:158px; display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(3,1fr); gap:4px; padding:7px; background:#07100e; border:1px solid #314a43; }
+    .grid-cell.empty,.item-icon { position:relative; display:flex; align-items:center; justify-content:center; background:#15211e; border:1px solid #2b3f39; min-width:0; }
+    .grid-cell.empty { opacity:.42; } .item-icon img { width:78%; height:78%; object-fit:contain; filter:drop-shadow(0 3px 4px rgba(0,0,0,.55)); }
+    .item-icon .fallback { display:none; color:var(--cyan); font-size:10px; } .item-icon.missing .fallback { display:block; }
+    .stack-count { position:absolute; right:3px; bottom:0; font-size:12px; font-weight:800; text-shadow:1px 1px #000,-1px -1px #000; }
+    .assembly-arrow { color:var(--amber); font-size:36px; text-align:center; }
+    .recipe-output { display:flex; flex-direction:column; align-items:center; gap:9px; color:var(--muted); font-size:10px; }
+    .item-icon--large { width:88px; height:88px; background:radial-gradient(circle,#274139,#101916 66%); border-color:#4d6a61; }
+    .item-icon--tiny { width:25px; height:25px; flex:0 0 25px; background:#0c1513; } .item-icon--tiny .stack-count { font-size:9px; }
+    .ingredient-list { min-height:74px; display:flex; flex-wrap:wrap; align-content:flex-start; gap:6px; border-top:1px solid #263b35; padding-top:12px; }
+    .ingredient-chip { display:flex; align-items:center; gap:6px; padding:3px 7px 3px 3px; background:#0d1715; color:#afc0ba; font-size:9px; border:1px solid #253933; }
+    .usage-block { margin-top:14px; padding:13px 14px; border-left:3px solid var(--amber); background:#0a1311; }
+    .usage-meta { display:grid; grid-template-columns:auto auto 1fr; gap:8px; align-items:center; font-size:9px; }
+    .usage-meta>span { color:#08100e; background:var(--mint); padding:4px 6px; font-weight:800; }
+    .usage-meta>strong { color:var(--muted); font-weight:600; } .usage-meta>b { color:var(--amber); font-weight:700; }
+    .usage-block p { margin:10px 0 0; color:#c8d6d1; font-size:11px; line-height:1.65; }
+    .heat-flow { min-height:190px; display:grid; grid-template-columns:1fr 1.2fr 24px 1fr; gap:12px; align-items:center; }
+    .heat-input { display:flex; flex-direction:column; align-items:center; gap:8px; color:var(--muted); font-size:10px; }
+    .heat-methods { display:grid; gap:8px; } .heat-methods div { display:grid; grid-template-columns:30px 1fr auto; align-items:center; gap:7px; border:1px solid var(--line); padding:8px; background:#0c1513; }
+    .heat-methods strong { font-size:11px; } .heat-methods small { color:var(--amber); } .furnace-symbol { color:var(--cyan); font-size:20px; }
+    .recipe-note { color:var(--muted); font-size:10px; line-height:1.6; border-top:1px solid #263b35; padding-top:12px; margin:0; }
+    footer { margin-top:70px; padding-top:22px; border-top:1px solid var(--line); color:var(--muted); font-size:11px; display:flex; justify-content:space-between; }
+    @media (max-width:1200px) { .recipe-grid{grid-template-columns:repeat(2,minmax(0,1fr))} .flow-line{grid-template-columns:1fr} .flow-arrow{transform:rotate(90deg)} }
+    @media (max-width:720px) { main{width:92vw;padding-top:18px} .hero{grid-template-columns:1fr;gap:24px} .top-meta{display:none} .recipe-grid{grid-template-columns:1fr} .recipe-card{padding:14px} .recipe-assembly{grid-template-columns:148px 22px 1fr} .craft-grid{width:148px;height:148px} .hero-stats div{padding:13px} .hero-stats strong{font-size:20px} footer{display:block;line-height:1.8} }
+  </style>
+</head>
+<body>
+  <header class="topbar"><div class="brand"><span class="brand-mark"></span><div><strong>MORROWGEAR</strong><small>CRAFTING SYSTEMS / MC 26.2</small></div></div><div class="top-meta">RECIPE DEFINITIONS <b>29</b> · CRAFTABLE OUTPUTS <b>28</b></div></header>
+  <main>
+    <section class="hero">
+      <div><span class="kicker">FABRICATION REFERENCE / v0.20.4</span><h1>製造レシピ<br>ビジュアルガイド</h1><p>ゲームに収録されているレシピJSONから自動生成した一覧です。配置、必要数、完成数、熱処理時間を実データどおりに表示しています。</p></div>
+      <div class="hero-stats"><div><strong>29</strong><span>レシピ定義</span></div><div><strong>28</strong><span>製造アイテム</span></div><div><strong>5</strong><span>製造カテゴリ</span></div></div>
+    </section>
+    <section class="flow"><h2>推奨製造フロー</h2><div class="flow-line"><div class="flow-node"><strong>未焼結モロウ材</strong><small>鉄・銅・赤石・木炭</small></div><div class="flow-arrow">›</div><div class="flow-node"><strong>モロウ合金</strong><small>かまど / 溶鉱炉</small></div><div class="flow-arrow">›</div><div class="flow-node"><strong>基礎部品</strong><small>基板・フレーム・アクチュエーター</small></div><div class="flow-arrow">›</div><div class="flow-node final"><strong>機体と運用設備</strong><small>Drone・Dock・任務・兵装・母艦</small></div></div></section>
+    
+            <section class="recipe-section" id="section-01">
+              <div class="section-heading"><span>01</span><div><h2>基礎製造</h2><p>序盤から量産基盤まで。まず合金・フレーム・制御基板を整えます。</p></div></div>
+              <div class="recipe-grid">
+      <article class="recipe-card" data-stage="START" data-search="未焼結モロウ材">
+        <header class="recipe-card__head">
+          <div>
+            <span class="eyebrow">START · オーバーワールド</span>
+            <h3>未焼結モロウ材</h3>
+          </div>
+          <span class="method">不定形</span>
+        </header>
+        <div class="recipe-assembly">
+          <div class="craft-grid craft-grid--shapeless"><span class="item-icon item-icon--normal" title="鉄インゴット"><img src="assets/minecraft__iron_ingot.png" alt="鉄インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">IRO</span></span><span class="item-icon item-icon--normal" title="銅インゴット"><img src="assets/minecraft__copper_ingot.png" alt="銅インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COP</span></span><span class="item-icon item-icon--normal" title="銅インゴット"><img src="assets/minecraft__copper_ingot.png" alt="銅インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COP</span></span><span class="item-icon item-icon--normal" title="レッドストーンダスト"><img src="assets/minecraft__redstone.png" alt="レッドストーンダスト" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">RED</span></span><span class="item-icon item-icon--normal" title="木炭"><img src="assets/minecraft__charcoal.png" alt="木炭" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">CHA</span></span><span class="grid-cell empty"></span><span class="grid-cell empty"></span><span class="grid-cell empty"></span><span class="grid-cell empty"></span></div>
+          <span class="assembly-arrow" aria-hidden="true">›</span>
+          <div class="recipe-output">
+            <span class="item-icon item-icon--large" title="未焼結モロウ材"><img src="assets/morrowgear_drone__raw_morrow_composite.png" alt="未焼結モロウ材" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">RAW</span><span class="stack-count">2</span></span>
+            <span>完成 × 2</span>
+          </div>
+        </div>
+        <div class="ingredient-list"><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="鉄インゴット"><img src="assets/minecraft__iron_ingot.png" alt="鉄インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">IRO</span></span><span>鉄インゴット</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="銅インゴット"><img src="assets/minecraft__copper_ingot.png" alt="銅インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COP</span><span class="stack-count">2</span></span><span>銅インゴット</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="レッドストーンダスト"><img src="assets/minecraft__redstone.png" alt="レッドストーンダスト" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">RED</span></span><span>レッドストーンダスト</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="木炭"><img src="assets/minecraft__charcoal.png" alt="木炭" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">CHA</span></span><span>木炭</span></span></div>
+        
+        <div class="usage-block">
+          <div class="usage-meta"><span>中間素材</span><strong>使う場所</strong><b>かまど・溶鉱炉</b></div>
+          <p>燃料と一緒に精錬し、すべてのMorrowgear製造の基礎となるモロウ合金へ加工します。</p>
+        </div>
+    
+      </article>
+    
+      <article class="recipe-card recipe-card--furnace" data-stage="START" data-search="モロウ合金">
+        <header class="recipe-card__head">
+          <div>
+            <span class="eyebrow">START · 熱処理</span>
+            <h3>モロウ合金</h3>
+          </div>
+          <span class="method">2経路</span>
+        </header>
+        <div class="heat-flow">
+          <div class="heat-input"><span class="item-icon item-icon--large" title="未焼結モロウ材"><img src="assets/morrowgear_drone__raw_morrow_composite.png" alt="未焼結モロウ材" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">RAW</span></span><span>未焼結材</span></div>
+          <div class="heat-methods">
+            <div><span class="furnace-symbol">▦</span><strong>かまど</strong><small>8秒</small></div>
+            <div><span class="furnace-symbol">▣</span><strong>溶鉱炉</strong><small>4秒</small></div>
+          </div>
+          <span class="assembly-arrow" aria-hidden="true">›</span>
+          <div class="recipe-output"><span class="item-icon item-icon--large" title="モロウ合金"><img src="assets/morrowgear_drone__morrow_alloy.png" alt="モロウ合金" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">MOR</span></span><span>完成 × 1</span></div>
+        </div>
+        <p class="recipe-note">燃料は通常のかまど・溶鉱炉と同じ。溶鉱炉なら処理時間が半分になります。</p>
+        
+        <div class="usage-block">
+          <div class="usage-meta"><span>構造材・整備材</span><strong>使う場所</strong><b>クラフト / Dock整備スロット</b></div>
+          <p>機体・設備の構造材です。Dockでは1個につき機体耐久を20回復し、Security機の搭載量強化にも消費します。</p>
+        </div>
+    
+      </article>
+    
+      <article class="recipe-card" data-stage="START" data-search="Morrowgear 基礎制御基板">
+        <header class="recipe-card__head">
+          <div>
+            <span class="eyebrow">START · 序盤</span>
+            <h3>Morrowgear 基礎制御基板</h3>
+          </div>
+          <span class="method">3 × 3</span>
+        </header>
+        <div class="recipe-assembly">
+          <div class="craft-grid"><span class="item-icon item-icon--normal" title="銅インゴット"><img src="assets/minecraft__copper_ingot.png" alt="銅インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COP</span></span><span class="item-icon item-icon--normal" title="レッドストーンダスト"><img src="assets/minecraft__redstone.png" alt="レッドストーンダスト" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">RED</span></span><span class="item-icon item-icon--normal" title="銅インゴット"><img src="assets/minecraft__copper_ingot.png" alt="銅インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COP</span></span><span class="item-icon item-icon--normal" title="金塊"><img src="assets/minecraft__gold_nugget.png" alt="金塊" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">GOL</span></span><span class="item-icon item-icon--normal" title="レッドストーンダスト"><img src="assets/minecraft__redstone.png" alt="レッドストーンダスト" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">RED</span></span><span class="item-icon item-icon--normal" title="金塊"><img src="assets/minecraft__gold_nugget.png" alt="金塊" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">GOL</span></span><span class="item-icon item-icon--normal" title="銅インゴット"><img src="assets/minecraft__copper_ingot.png" alt="銅インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COP</span></span><span class="item-icon item-icon--normal" title="レッドストーンダスト"><img src="assets/minecraft__redstone.png" alt="レッドストーンダスト" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">RED</span></span><span class="item-icon item-icon--normal" title="銅インゴット"><img src="assets/minecraft__copper_ingot.png" alt="銅インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COP</span></span></div>
+          <span class="assembly-arrow" aria-hidden="true">›</span>
+          <div class="recipe-output">
+            <span class="item-icon item-icon--large" title="Morrowgear 基礎制御基板"><img src="assets/morrowgear_drone__basic_control_board.png" alt="Morrowgear 基礎制御基板" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BAS</span><span class="stack-count">2</span></span>
+            <span>完成 × 2</span>
+          </div>
+        </div>
+        <div class="ingredient-list"><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="銅インゴット"><img src="assets/minecraft__copper_ingot.png" alt="銅インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COP</span><span class="stack-count">4</span></span><span>銅インゴット</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="レッドストーンダスト"><img src="assets/minecraft__redstone.png" alt="レッドストーンダスト" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">RED</span><span class="stack-count">3</span></span><span>レッドストーンダスト</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="金塊"><img src="assets/minecraft__gold_nugget.png" alt="金塊" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">GOL</span><span class="stack-count">2</span></span><span>金塊</span></span></div>
+        
+        <div class="usage-block">
+          <div class="usage-meta"><span>電子部品</span><strong>使う場所</strong><b>各種クラフト</b></div>
+          <p>機体、役割モジュール、管制装置、サービスDockなどの制御中枢として使う共通基板です。</p>
+        </div>
+    
+      </article>
+    
+      <article class="recipe-card" data-stage="START" data-search="Morrowgear 軽量フレーム">
+        <header class="recipe-card__head">
+          <div>
+            <span class="eyebrow">START · 序盤</span>
+            <h3>Morrowgear 軽量フレーム</h3>
+          </div>
+          <span class="method">3 × 3</span>
+        </header>
+        <div class="recipe-assembly">
+          <div class="craft-grid"><span class="item-icon item-icon--normal" title="モロウ合金"><img src="assets/morrowgear_drone__morrow_alloy.png" alt="モロウ合金" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">MOR</span></span><span class="grid-cell empty"></span><span class="item-icon item-icon--normal" title="モロウ合金"><img src="assets/morrowgear_drone__morrow_alloy.png" alt="モロウ合金" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">MOR</span></span><span class="grid-cell empty"></span><span class="item-icon item-icon--normal" title="鉄塊"><img src="assets/minecraft__iron_nugget.png" alt="鉄塊" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">IRO</span></span><span class="grid-cell empty"></span><span class="item-icon item-icon--normal" title="モロウ合金"><img src="assets/morrowgear_drone__morrow_alloy.png" alt="モロウ合金" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">MOR</span></span><span class="grid-cell empty"></span><span class="item-icon item-icon--normal" title="モロウ合金"><img src="assets/morrowgear_drone__morrow_alloy.png" alt="モロウ合金" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">MOR</span></span></div>
+          <span class="assembly-arrow" aria-hidden="true">›</span>
+          <div class="recipe-output">
+            <span class="item-icon item-icon--large" title="Morrowgear 軽量フレーム"><img src="assets/morrowgear_drone__lightweight_frame.png" alt="Morrowgear 軽量フレーム" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">LIG</span><span class="stack-count">2</span></span>
+            <span>完成 × 2</span>
+          </div>
+        </div>
+        <div class="ingredient-list"><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="モロウ合金"><img src="assets/morrowgear_drone__morrow_alloy.png" alt="モロウ合金" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">MOR</span><span class="stack-count">4</span></span><span>モロウ合金</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="鉄塊"><img src="assets/minecraft__iron_nugget.png" alt="鉄塊" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">IRO</span></span><span>鉄塊</span></span></div>
+        
+        <div class="usage-block">
+          <div class="usage-meta"><span>機体部品</span><strong>使う場所</strong><b>各種クラフト</b></div>
+          <p>ドローン本体、Dock、役割・兵装モジュールの骨格に使う共通構造部品です。</p>
+        </div>
+    
+      </article>
+    
+      <article class="recipe-card" data-stage="START" data-search="Morrowgear 飛行アクチュエーター">
+        <header class="recipe-card__head">
+          <div>
+            <span class="eyebrow">START · 序盤</span>
+            <h3>Morrowgear 飛行アクチュエーター</h3>
+          </div>
+          <span class="method">3 × 3</span>
+        </header>
+        <div class="recipe-assembly">
+          <div class="craft-grid"><span class="item-icon item-icon--normal" title="鉄インゴット"><img src="assets/minecraft__iron_ingot.png" alt="鉄インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">IRO</span></span><span class="item-icon item-icon--normal" title="銅インゴット"><img src="assets/minecraft__copper_ingot.png" alt="銅インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COP</span></span><span class="item-icon item-icon--normal" title="鉄インゴット"><img src="assets/minecraft__iron_ingot.png" alt="鉄インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">IRO</span></span><span class="item-icon item-icon--normal" title="レッドストーンダスト"><img src="assets/minecraft__redstone.png" alt="レッドストーンダスト" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">RED</span></span><span class="item-icon item-icon--normal" title="Morrowgear 軽量フレーム"><img src="assets/morrowgear_drone__lightweight_frame.png" alt="Morrowgear 軽量フレーム" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">LIG</span></span><span class="item-icon item-icon--normal" title="レッドストーンダスト"><img src="assets/minecraft__redstone.png" alt="レッドストーンダスト" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">RED</span></span><span class="item-icon item-icon--normal" title="鉄インゴット"><img src="assets/minecraft__iron_ingot.png" alt="鉄インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">IRO</span></span><span class="item-icon item-icon--normal" title="銅インゴット"><img src="assets/minecraft__copper_ingot.png" alt="銅インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COP</span></span><span class="item-icon item-icon--normal" title="鉄インゴット"><img src="assets/minecraft__iron_ingot.png" alt="鉄インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">IRO</span></span></div>
+          <span class="assembly-arrow" aria-hidden="true">›</span>
+          <div class="recipe-output">
+            <span class="item-icon item-icon--large" title="Morrowgear 飛行アクチュエーター"><img src="assets/morrowgear_drone__flight_actuator.png" alt="Morrowgear 飛行アクチュエーター" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">FLI</span></span>
+            <span>完成 × 1</span>
+          </div>
+        </div>
+        <div class="ingredient-list"><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="鉄インゴット"><img src="assets/minecraft__iron_ingot.png" alt="鉄インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">IRO</span><span class="stack-count">4</span></span><span>鉄インゴット</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="銅インゴット"><img src="assets/minecraft__copper_ingot.png" alt="銅インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COP</span><span class="stack-count">2</span></span><span>銅インゴット</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="レッドストーンダスト"><img src="assets/minecraft__redstone.png" alt="レッドストーンダスト" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">RED</span><span class="stack-count">2</span></span><span>レッドストーンダスト</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="Morrowgear 軽量フレーム"><img src="assets/morrowgear_drone__lightweight_frame.png" alt="Morrowgear 軽量フレーム" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">LIG</span></span><span>Morrowgear 軽量フレーム</span></span></div>
+        
+        <div class="usage-block">
+          <div class="usage-meta"><span>飛行部品</span><strong>使う場所</strong><b>各種クラフト</b></div>
+          <p>姿勢制御と浮上機構を構成します。機体、浮遊サービス充電Dock、チャンクバスターの製造に使います。</p>
+        </div>
+    
+      </article>
+    
+      <article class="recipe-card" data-stage="START" data-search="Morrowgear 推進パワーセル">
+        <header class="recipe-card__head">
+          <div>
+            <span class="eyebrow">START · 序盤</span>
+            <h3>Morrowgear 推進パワーセル</h3>
+          </div>
+          <span class="method">3 × 3</span>
+        </header>
+        <div class="recipe-assembly">
+          <div class="craft-grid"><span class="item-icon item-icon--normal" title="銅インゴット"><img src="assets/minecraft__copper_ingot.png" alt="銅インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COP</span></span><span class="item-icon item-icon--normal" title="モロウ合金"><img src="assets/morrowgear_drone__morrow_alloy.png" alt="モロウ合金" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">MOR</span></span><span class="item-icon item-icon--normal" title="銅インゴット"><img src="assets/minecraft__copper_ingot.png" alt="銅インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COP</span></span><span class="item-icon item-icon--normal" title="レッドストーンダスト"><img src="assets/minecraft__redstone.png" alt="レッドストーンダスト" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">RED</span></span><span class="item-icon item-icon--normal" title="木炭"><img src="assets/minecraft__charcoal.png" alt="木炭" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">CHA</span></span><span class="item-icon item-icon--normal" title="レッドストーンダスト"><img src="assets/minecraft__redstone.png" alt="レッドストーンダスト" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">RED</span></span><span class="item-icon item-icon--normal" title="銅インゴット"><img src="assets/minecraft__copper_ingot.png" alt="銅インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COP</span></span><span class="item-icon item-icon--normal" title="モロウ合金"><img src="assets/morrowgear_drone__morrow_alloy.png" alt="モロウ合金" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">MOR</span></span><span class="item-icon item-icon--normal" title="銅インゴット"><img src="assets/minecraft__copper_ingot.png" alt="銅インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COP</span></span></div>
+          <span class="assembly-arrow" aria-hidden="true">›</span>
+          <div class="recipe-output">
+            <span class="item-icon item-icon--large" title="Morrowgear 推進パワーセル"><img src="assets/morrowgear_drone__power_cell.png" alt="Morrowgear 推進パワーセル" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">POW</span><span class="stack-count">2</span></span>
+            <span>完成 × 2</span>
+          </div>
+        </div>
+        <div class="ingredient-list"><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="銅インゴット"><img src="assets/minecraft__copper_ingot.png" alt="銅インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COP</span><span class="stack-count">4</span></span><span>銅インゴット</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="モロウ合金"><img src="assets/morrowgear_drone__morrow_alloy.png" alt="モロウ合金" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">MOR</span><span class="stack-count">2</span></span><span>モロウ合金</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="レッドストーンダスト"><img src="assets/minecraft__redstone.png" alt="レッドストーンダスト" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">RED</span><span class="stack-count">2</span></span><span>レッドストーンダスト</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="木炭"><img src="assets/minecraft__charcoal.png" alt="木炭" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">CHA</span></span><span>木炭</span></span></div>
+        
+        <div class="usage-block">
+          <div class="usage-meta"><span>飛行用補給品</span><strong>使う場所</strong><b>Dockの電力入力 / 自動補給バッファ</b></div>
+          <p>Dockへ投入すると1個につき飛行電力1200を供給します。浮遊DockやSalvageモジュールの製造にも使います。</p>
+        </div>
+    
+      </article>
+    
+      <article class="recipe-card" data-stage="START" data-search="Morrowgear 標準飛行バッテリー">
+        <header class="recipe-card__head">
+          <div>
+            <span class="eyebrow">START · 序盤</span>
+            <h3>Morrowgear 標準飛行バッテリー</h3>
+          </div>
+          <span class="method">3 × 3</span>
+        </header>
+        <div class="recipe-assembly">
+          <div class="craft-grid"><span class="item-icon item-icon--normal" title="銅インゴット"><img src="assets/minecraft__copper_ingot.png" alt="銅インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COP</span></span><span class="item-icon item-icon--normal" title="モロウ合金"><img src="assets/morrowgear_drone__morrow_alloy.png" alt="モロウ合金" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">MOR</span></span><span class="item-icon item-icon--normal" title="銅インゴット"><img src="assets/minecraft__copper_ingot.png" alt="銅インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COP</span></span><span class="item-icon item-icon--normal" title="レッドストーンダスト"><img src="assets/minecraft__redstone.png" alt="レッドストーンダスト" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">RED</span></span><span class="item-icon item-icon--normal" title="金インゴット"><img src="assets/minecraft__gold_ingot.png" alt="金インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">GOL</span></span><span class="item-icon item-icon--normal" title="レッドストーンダスト"><img src="assets/minecraft__redstone.png" alt="レッドストーンダスト" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">RED</span></span><span class="item-icon item-icon--normal" title="銅インゴット"><img src="assets/minecraft__copper_ingot.png" alt="銅インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COP</span></span><span class="item-icon item-icon--normal" title="モロウ合金"><img src="assets/morrowgear_drone__morrow_alloy.png" alt="モロウ合金" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">MOR</span></span><span class="item-icon item-icon--normal" title="銅インゴット"><img src="assets/minecraft__copper_ingot.png" alt="銅インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COP</span></span></div>
+          <span class="assembly-arrow" aria-hidden="true">›</span>
+          <div class="recipe-output">
+            <span class="item-icon item-icon--large" title="Morrowgear 標準飛行バッテリー"><img src="assets/morrowgear_drone__standard_battery_pack.png" alt="Morrowgear 標準飛行バッテリー" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">STA</span></span>
+            <span>完成 × 1</span>
+          </div>
+        </div>
+        <div class="ingredient-list"><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="銅インゴット"><img src="assets/minecraft__copper_ingot.png" alt="銅インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COP</span><span class="stack-count">4</span></span><span>銅インゴット</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="モロウ合金"><img src="assets/morrowgear_drone__morrow_alloy.png" alt="モロウ合金" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">MOR</span><span class="stack-count">2</span></span><span>モロウ合金</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="レッドストーンダスト"><img src="assets/minecraft__redstone.png" alt="レッドストーンダスト" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">RED</span><span class="stack-count">2</span></span><span>レッドストーンダスト</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="金インゴット"><img src="assets/minecraft__gold_ingot.png" alt="金インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">GOL</span></span><span>金インゴット</span></span></div>
+        
+        <div class="usage-block">
+          <div class="usage-meta"><span>容量部品</span><strong>使う場所</strong><b>Dockの機体・蓄電スロット / 着艦機へ使用</b></div>
+          <p>機体へ装着すると飛行電力容量1000。Dockへ装着すると蓄電上限を6000にします。機体の交換作業は着艦中のみ可能です。</p>
+        </div>
+    
+      </article>
+    
+      <article class="recipe-card" data-stage="NETHER" data-search="Morrowgear 強化飛行バッテリー">
+        <header class="recipe-card__head">
+          <div>
+            <span class="eyebrow">NETHER · ネザー到達後</span>
+            <h3>Morrowgear 強化飛行バッテリー</h3>
+          </div>
+          <span class="method">3 × 3</span>
+        </header>
+        <div class="recipe-assembly">
+          <div class="craft-grid"><span class="item-icon item-icon--normal" title="ネザークォーツ"><img src="assets/minecraft__quartz.png" alt="ネザークォーツ" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">QUA</span></span><span class="item-icon item-icon--normal" title="ブレイズロッド"><img src="assets/minecraft__blaze_rod.png" alt="ブレイズロッド" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BLA</span></span><span class="item-icon item-icon--normal" title="ネザークォーツ"><img src="assets/minecraft__quartz.png" alt="ネザークォーツ" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">QUA</span></span><span class="item-icon item-icon--normal" title="金インゴット"><img src="assets/minecraft__gold_ingot.png" alt="金インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">GOL</span></span><span class="item-icon item-icon--normal" title="Morrowgear 標準飛行バッテリー"><img src="assets/morrowgear_drone__standard_battery_pack.png" alt="Morrowgear 標準飛行バッテリー" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">STA</span></span><span class="item-icon item-icon--normal" title="金インゴット"><img src="assets/minecraft__gold_ingot.png" alt="金インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">GOL</span></span><span class="item-icon item-icon--normal" title="ネザークォーツ"><img src="assets/minecraft__quartz.png" alt="ネザークォーツ" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">QUA</span></span><span class="item-icon item-icon--normal" title="レッドストーンブロック"><img src="assets/minecraft__redstone_block.png" alt="レッドストーンブロック" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">RED</span></span><span class="item-icon item-icon--normal" title="ネザークォーツ"><img src="assets/minecraft__quartz.png" alt="ネザークォーツ" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">QUA</span></span></div>
+          <span class="assembly-arrow" aria-hidden="true">›</span>
+          <div class="recipe-output">
+            <span class="item-icon item-icon--large" title="Morrowgear 強化飛行バッテリー"><img src="assets/morrowgear_drone__reinforced_battery_pack.png" alt="Morrowgear 強化飛行バッテリー" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">REI</span></span>
+            <span>完成 × 1</span>
+          </div>
+        </div>
+        <div class="ingredient-list"><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="ネザークォーツ"><img src="assets/minecraft__quartz.png" alt="ネザークォーツ" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">QUA</span><span class="stack-count">4</span></span><span>ネザークォーツ</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="ブレイズロッド"><img src="assets/minecraft__blaze_rod.png" alt="ブレイズロッド" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BLA</span></span><span>ブレイズロッド</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="金インゴット"><img src="assets/minecraft__gold_ingot.png" alt="金インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">GOL</span><span class="stack-count">2</span></span><span>金インゴット</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="Morrowgear 標準飛行バッテリー"><img src="assets/morrowgear_drone__standard_battery_pack.png" alt="Morrowgear 標準飛行バッテリー" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">STA</span></span><span>Morrowgear 標準飛行バッテリー</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="レッドストーンブロック"><img src="assets/minecraft__redstone_block.png" alt="レッドストーンブロック" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">RED</span></span><span>レッドストーンブロック</span></span></div>
+        
+        <div class="usage-block">
+          <div class="usage-meta"><span>容量部品</span><strong>使う場所</strong><b>Dockの機体・蓄電スロット / 着艦機へ使用</b></div>
+          <p>機体へ装着すると飛行電力容量1800。Dockへ装着すると蓄電上限を10000にします。機体の交換作業は着艦中のみ可能です。</p>
+        </div>
+    
+      </article>
+    
+      <article class="recipe-card" data-stage="ADVANCED" data-search="Morrowgear 高密度飛行バッテリー">
+        <header class="recipe-card__head">
+          <div>
+            <span class="eyebrow">ADVANCED · 試練の間</span>
+            <h3>Morrowgear 高密度飛行バッテリー</h3>
+          </div>
+          <span class="method">3 × 3</span>
+        </header>
+        <div class="recipe-assembly">
+          <div class="craft-grid"><span class="item-icon item-icon--normal" title="ダイヤモンド"><img src="assets/minecraft__diamond.png" alt="ダイヤモンド" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">DIA</span></span><span class="item-icon item-icon--normal" title="ブリーズロッド"><img src="assets/minecraft__breeze_rod.png" alt="ブリーズロッド" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BRE</span></span><span class="item-icon item-icon--normal" title="ダイヤモンド"><img src="assets/minecraft__diamond.png" alt="ダイヤモンド" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">DIA</span></span><span class="item-icon item-icon--normal" title="レッドストーンブロック"><img src="assets/minecraft__redstone_block.png" alt="レッドストーンブロック" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">RED</span></span><span class="item-icon item-icon--normal" title="Morrowgear 強化飛行バッテリー"><img src="assets/morrowgear_drone__reinforced_battery_pack.png" alt="Morrowgear 強化飛行バッテリー" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">REI</span></span><span class="item-icon item-icon--normal" title="レッドストーンブロック"><img src="assets/minecraft__redstone_block.png" alt="レッドストーンブロック" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">RED</span></span><span class="item-icon item-icon--normal" title="ダイヤモンド"><img src="assets/minecraft__diamond.png" alt="ダイヤモンド" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">DIA</span></span><span class="item-icon item-icon--normal" title="ブリーズロッド"><img src="assets/minecraft__breeze_rod.png" alt="ブリーズロッド" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BRE</span></span><span class="item-icon item-icon--normal" title="ダイヤモンド"><img src="assets/minecraft__diamond.png" alt="ダイヤモンド" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">DIA</span></span></div>
+          <span class="assembly-arrow" aria-hidden="true">›</span>
+          <div class="recipe-output">
+            <span class="item-icon item-icon--large" title="Morrowgear 高密度飛行バッテリー"><img src="assets/morrowgear_drone__high_density_battery_pack.png" alt="Morrowgear 高密度飛行バッテリー" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">HIG</span></span>
+            <span>完成 × 1</span>
+          </div>
+        </div>
+        <div class="ingredient-list"><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="ダイヤモンド"><img src="assets/minecraft__diamond.png" alt="ダイヤモンド" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">DIA</span><span class="stack-count">4</span></span><span>ダイヤモンド</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="ブリーズロッド"><img src="assets/minecraft__breeze_rod.png" alt="ブリーズロッド" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BRE</span><span class="stack-count">2</span></span><span>ブリーズロッド</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="レッドストーンブロック"><img src="assets/minecraft__redstone_block.png" alt="レッドストーンブロック" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">RED</span><span class="stack-count">2</span></span><span>レッドストーンブロック</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="Morrowgear 強化飛行バッテリー"><img src="assets/morrowgear_drone__reinforced_battery_pack.png" alt="Morrowgear 強化飛行バッテリー" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">REI</span></span><span>Morrowgear 強化飛行バッテリー</span></span></div>
+        
+        <div class="usage-block">
+          <div class="usage-meta"><span>容量部品</span><strong>使う場所</strong><b>Dockの機体・蓄電スロット / 着艦機へ使用</b></div>
+          <p>機体へ装着すると飛行電力容量3000。Dockへ装着すると蓄電上限を18000にします。機体の交換作業は着艦中のみ可能です。</p>
+        </div>
+    
+      </article>
+    </div>
+            </section>
+            
+            <section class="recipe-section" id="section-02">
+              <div class="section-heading"><span>02</span><div><h2>管制・機体・基地設備</h2><p>機体を展開し、指揮・帰還・充電・回収を成立させる中核装備です。</p></div></div>
+              <div class="recipe-grid">
+      <article class="recipe-card" data-stage="START" data-search="Morrowgear フィールドコントローラー">
+        <header class="recipe-card__head">
+          <div>
+            <span class="eyebrow">START · 序盤</span>
+            <h3>Morrowgear フィールドコントローラー</h3>
+          </div>
+          <span class="method">3 × 3</span>
+        </header>
+        <div class="recipe-assembly">
+          <div class="craft-grid"><span class="item-icon item-icon--normal" title="ガラス板"><img src="assets/minecraft__glass_pane.png" alt="ガラス板" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">GLA</span></span><span class="item-icon item-icon--normal" title="銅インゴット"><img src="assets/minecraft__copper_ingot.png" alt="銅インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COP</span></span><span class="item-icon item-icon--normal" title="ガラス板"><img src="assets/minecraft__glass_pane.png" alt="ガラス板" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">GLA</span></span><span class="item-icon item-icon--normal" title="レッドストーンダスト"><img src="assets/minecraft__redstone.png" alt="レッドストーンダスト" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">RED</span></span><span class="item-icon item-icon--normal" title="Morrowgear 基礎制御基板"><img src="assets/morrowgear_drone__basic_control_board.png" alt="Morrowgear 基礎制御基板" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BAS</span></span><span class="item-icon item-icon--normal" title="レッドストーンダスト"><img src="assets/minecraft__redstone.png" alt="レッドストーンダスト" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">RED</span></span><span class="grid-cell empty"></span><span class="item-icon item-icon--normal" title="銅インゴット"><img src="assets/minecraft__copper_ingot.png" alt="銅インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COP</span></span><span class="grid-cell empty"></span></div>
+          <span class="assembly-arrow" aria-hidden="true">›</span>
+          <div class="recipe-output">
+            <span class="item-icon item-icon--large" title="Morrowgear フィールドコントローラー"><img src="assets/morrowgear_drone__controller.png" alt="Morrowgear フィールドコントローラー" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">CON</span></span>
+            <span>完成 × 1</span>
+          </div>
+        </div>
+        <div class="ingredient-list"><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="ガラス板"><img src="assets/minecraft__glass_pane.png" alt="ガラス板" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">GLA</span><span class="stack-count">2</span></span><span>ガラス板</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="銅インゴット"><img src="assets/minecraft__copper_ingot.png" alt="銅インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COP</span><span class="stack-count">2</span></span><span>銅インゴット</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="レッドストーンダスト"><img src="assets/minecraft__redstone.png" alt="レッドストーンダスト" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">RED</span><span class="stack-count">2</span></span><span>レッドストーンダスト</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="Morrowgear 基礎制御基板"><img src="assets/morrowgear_drone__basic_control_board.png" alt="Morrowgear 基礎制御基板" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BAS</span></span><span>Morrowgear 基礎制御基板</span></span></div>
+        
+        <div class="usage-block">
+          <div class="usage-meta"><span>指揮装備</span><strong>使う場所</strong><b>メインハンドで右クリック</b></div>
+          <p>統合戦術画面を開き、機体・Wing・任務・目的地・Dock・補給網・回収・母艦を操作します。電力喪失機の直接回収にも使えます。</p>
+        </div>
+    
+      </article>
+    
+      <article class="recipe-card" data-stage="START" data-search="Morrowgear フィールドドローンユニット">
+        <header class="recipe-card__head">
+          <div>
+            <span class="eyebrow">START · 序盤</span>
+            <h3>Morrowgear フィールドドローンユニット</h3>
+          </div>
+          <span class="method">3 × 3</span>
+        </header>
+        <div class="recipe-assembly">
+          <div class="craft-grid"><span class="item-icon item-icon--normal" title="Morrowgear 飛行アクチュエーター"><img src="assets/morrowgear_drone__flight_actuator.png" alt="Morrowgear 飛行アクチュエーター" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">FLI</span></span><span class="item-icon item-icon--normal" title="Morrowgear 軽量フレーム"><img src="assets/morrowgear_drone__lightweight_frame.png" alt="Morrowgear 軽量フレーム" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">LIG</span></span><span class="item-icon item-icon--normal" title="Morrowgear 飛行アクチュエーター"><img src="assets/morrowgear_drone__flight_actuator.png" alt="Morrowgear 飛行アクチュエーター" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">FLI</span></span><span class="item-icon item-icon--normal" title="銅インゴット"><img src="assets/minecraft__copper_ingot.png" alt="銅インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COP</span></span><span class="item-icon item-icon--normal" title="Morrowgear 標準飛行バッテリー"><img src="assets/morrowgear_drone__standard_battery_pack.png" alt="Morrowgear 標準飛行バッテリー" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">STA</span></span><span class="item-icon item-icon--normal" title="銅インゴット"><img src="assets/minecraft__copper_ingot.png" alt="銅インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COP</span></span><span class="item-icon item-icon--normal" title="Morrowgear 軽量フレーム"><img src="assets/morrowgear_drone__lightweight_frame.png" alt="Morrowgear 軽量フレーム" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">LIG</span></span><span class="item-icon item-icon--normal" title="Morrowgear 基礎制御基板"><img src="assets/morrowgear_drone__basic_control_board.png" alt="Morrowgear 基礎制御基板" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BAS</span></span><span class="item-icon item-icon--normal" title="Morrowgear 軽量フレーム"><img src="assets/morrowgear_drone__lightweight_frame.png" alt="Morrowgear 軽量フレーム" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">LIG</span></span></div>
+          <span class="assembly-arrow" aria-hidden="true">›</span>
+          <div class="recipe-output">
+            <span class="item-icon item-icon--large" title="Morrowgear フィールドドローンユニット"><img src="assets/morrowgear_drone__field_drone_unit.png" alt="Morrowgear フィールドドローンユニット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">FIE</span></span>
+            <span>完成 × 1</span>
+          </div>
+        </div>
+        <div class="ingredient-list"><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="Morrowgear 飛行アクチュエーター"><img src="assets/morrowgear_drone__flight_actuator.png" alt="Morrowgear 飛行アクチュエーター" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">FLI</span><span class="stack-count">2</span></span><span>Morrowgear 飛行アクチュエーター</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="Morrowgear 軽量フレーム"><img src="assets/morrowgear_drone__lightweight_frame.png" alt="Morrowgear 軽量フレーム" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">LIG</span><span class="stack-count">3</span></span><span>Morrowgear 軽量フレーム</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="銅インゴット"><img src="assets/minecraft__copper_ingot.png" alt="銅インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COP</span><span class="stack-count">2</span></span><span>銅インゴット</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="Morrowgear 標準飛行バッテリー"><img src="assets/morrowgear_drone__standard_battery_pack.png" alt="Morrowgear 標準飛行バッテリー" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">STA</span></span><span>Morrowgear 標準飛行バッテリー</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="Morrowgear 基礎制御基板"><img src="assets/morrowgear_drone__basic_control_board.png" alt="Morrowgear 基礎制御基板" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BAS</span></span><span>Morrowgear 基礎制御基板</span></span></div>
+        
+        <div class="usage-block">
+          <div class="usage-meta"><span>機体</span><strong>使う場所</strong><b>右クリック展開 / Dockの機体スロット</b></div>
+          <p>単体ならFIELD機として展開します。Dockでバッテリー・役割・兵装を組み合わせれば構成済み機として就役します。回収済み機体はDock整備後に再出撃します。</p>
+        </div>
+    
+      </article>
+    
+      <article class="recipe-card" data-stage="EXPAND" data-search="Morrowgear ドローンDock">
+        <header class="recipe-card__head">
+          <div>
+            <span class="eyebrow">EXPAND · 拠点拡張</span>
+            <h3>Morrowgear ドローンDock</h3>
+          </div>
+          <span class="method">3 × 3</span>
+        </header>
+        <div class="recipe-assembly">
+          <div class="craft-grid"><span class="item-icon item-icon--normal" title="Morrowgear 軽量フレーム"><img src="assets/morrowgear_drone__lightweight_frame.png" alt="Morrowgear 軽量フレーム" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">LIG</span></span><span class="item-icon item-icon--normal" title="鉄インゴット"><img src="assets/minecraft__iron_ingot.png" alt="鉄インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">IRO</span></span><span class="item-icon item-icon--normal" title="Morrowgear 軽量フレーム"><img src="assets/morrowgear_drone__lightweight_frame.png" alt="Morrowgear 軽量フレーム" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">LIG</span></span><span class="item-icon item-icon--normal" title="ピストン"><img src="assets/minecraft__piston.png" alt="ピストン" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">PIS</span></span><span class="item-icon item-icon--normal" title="レッドストーンブロック"><img src="assets/minecraft__redstone_block.png" alt="レッドストーンブロック" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">RED</span></span><span class="item-icon item-icon--normal" title="ピストン"><img src="assets/minecraft__piston.png" alt="ピストン" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">PIS</span></span><span class="item-icon item-icon--normal" title="Morrowgear 軽量フレーム"><img src="assets/morrowgear_drone__lightweight_frame.png" alt="Morrowgear 軽量フレーム" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">LIG</span></span><span class="item-icon item-icon--normal" title="鉄インゴット"><img src="assets/minecraft__iron_ingot.png" alt="鉄インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">IRO</span></span><span class="item-icon item-icon--normal" title="Morrowgear 軽量フレーム"><img src="assets/morrowgear_drone__lightweight_frame.png" alt="Morrowgear 軽量フレーム" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">LIG</span></span></div>
+          <span class="assembly-arrow" aria-hidden="true">›</span>
+          <div class="recipe-output">
+            <span class="item-icon item-icon--large" title="Morrowgear ドローンDock"><img src="assets/morrowgear_drone__dock_item.png" alt="Morrowgear ドローンDock" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">DOC</span></span>
+            <span>完成 × 1</span>
+          </div>
+        </div>
+        <div class="ingredient-list"><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="Morrowgear 軽量フレーム"><img src="assets/morrowgear_drone__lightweight_frame.png" alt="Morrowgear 軽量フレーム" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">LIG</span><span class="stack-count">4</span></span><span>Morrowgear 軽量フレーム</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="鉄インゴット"><img src="assets/minecraft__iron_ingot.png" alt="鉄インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">IRO</span><span class="stack-count">2</span></span><span>鉄インゴット</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="ピストン"><img src="assets/minecraft__piston.png" alt="ピストン" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">PIS</span><span class="stack-count">2</span></span><span>ピストン</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="レッドストーンブロック"><img src="assets/minecraft__redstone_block.png" alt="レッドストーンブロック" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">RED</span></span><span>レッドストーンブロック</span></span></div>
+        
+        <div class="usage-block">
+          <div class="usage-meta"><span>基地設備</span><strong>使う場所</strong><b>5×5の空き地へ設置</b></div>
+          <p>機体の就役、動的な帰還予約、充電、再武装、修理、モジュール交換、回収機の復旧、Cargo補給網の拠点になります。</p>
+        </div>
+    
+      </article>
+    
+      <article class="recipe-card" data-stage="NETHER" data-search="Morrowgear 浮遊サービス充電Dock">
+        <header class="recipe-card__head">
+          <div>
+            <span class="eyebrow">NETHER · ネザー到達後</span>
+            <h3>Morrowgear 浮遊サービス充電Dock</h3>
+          </div>
+          <span class="method">3 × 3</span>
+        </header>
+        <div class="recipe-assembly">
+          <div class="craft-grid"><span class="item-icon item-icon--normal" title="日照センサー"><img src="assets/minecraft__daylight_detector.png" alt="日照センサー" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">DAY</span></span><span class="item-icon item-icon--normal" title="Morrowgear 基礎制御基板"><img src="assets/morrowgear_drone__basic_control_board.png" alt="Morrowgear 基礎制御基板" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BAS</span></span><span class="item-icon item-icon--normal" title="日照センサー"><img src="assets/minecraft__daylight_detector.png" alt="日照センサー" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">DAY</span></span><span class="item-icon item-icon--normal" title="Morrowgear 強化飛行バッテリー"><img src="assets/morrowgear_drone__reinforced_battery_pack.png" alt="Morrowgear 強化飛行バッテリー" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">REI</span></span><span class="item-icon item-icon--normal" title="Morrowgear ドローンDock"><img src="assets/morrowgear_drone__dock_item.png" alt="Morrowgear ドローンDock" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">DOC</span></span><span class="item-icon item-icon--normal" title="Morrowgear 強化飛行バッテリー"><img src="assets/morrowgear_drone__reinforced_battery_pack.png" alt="Morrowgear 強化飛行バッテリー" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">REI</span></span><span class="item-icon item-icon--normal" title="Morrowgear 飛行アクチュエーター"><img src="assets/morrowgear_drone__flight_actuator.png" alt="Morrowgear 飛行アクチュエーター" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">FLI</span></span><span class="item-icon item-icon--normal" title="Morrowgear 推進パワーセル"><img src="assets/morrowgear_drone__power_cell.png" alt="Morrowgear 推進パワーセル" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">POW</span></span><span class="item-icon item-icon--normal" title="Morrowgear 飛行アクチュエーター"><img src="assets/morrowgear_drone__flight_actuator.png" alt="Morrowgear 飛行アクチュエーター" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">FLI</span></span></div>
+          <span class="assembly-arrow" aria-hidden="true">›</span>
+          <div class="recipe-output">
+            <span class="item-icon item-icon--large" title="Morrowgear 浮遊サービス充電Dock"><img src="assets/morrowgear_drone__solar_service_station.png" alt="Morrowgear 浮遊サービス充電Dock" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">SOL</span></span>
+            <span>完成 × 1</span>
+          </div>
+        </div>
+        <div class="ingredient-list"><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="日照センサー"><img src="assets/minecraft__daylight_detector.png" alt="日照センサー" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">DAY</span><span class="stack-count">2</span></span><span>日照センサー</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="Morrowgear 基礎制御基板"><img src="assets/morrowgear_drone__basic_control_board.png" alt="Morrowgear 基礎制御基板" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BAS</span></span><span>Morrowgear 基礎制御基板</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="Morrowgear 強化飛行バッテリー"><img src="assets/morrowgear_drone__reinforced_battery_pack.png" alt="Morrowgear 強化飛行バッテリー" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">REI</span><span class="stack-count">2</span></span><span>Morrowgear 強化飛行バッテリー</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="Morrowgear ドローンDock"><img src="assets/morrowgear_drone__dock_item.png" alt="Morrowgear ドローンDock" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">DOC</span></span><span>Morrowgear ドローンDock</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="Morrowgear 飛行アクチュエーター"><img src="assets/morrowgear_drone__flight_actuator.png" alt="Morrowgear 飛行アクチュエーター" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">FLI</span><span class="stack-count">2</span></span><span>Morrowgear 飛行アクチュエーター</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="Morrowgear 推進パワーセル"><img src="assets/morrowgear_drone__power_cell.png" alt="Morrowgear 推進パワーセル" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">POW</span></span><span>Morrowgear 推進パワーセル</span></span></div>
+        
+        <div class="usage-block">
+          <div class="usage-meta"><span>空中充電設備</span><strong>使う場所</strong><b>ブロックへ使用して上空に展開</b></div>
+          <p>最大3機へ充電子機を派遣し、周回中の機体へ飛行電力を供給します。弾薬・レーザー電力・修理材は補給しないため通常Dockと使い分けます。</p>
+        </div>
+    
+      </article>
+    
+      <article class="recipe-card" data-stage="ENDGAME" data-search="Morrowgear タクティカルバイザー">
+        <header class="recipe-card__head">
+          <div>
+            <span class="eyebrow">ENDGAME · 古代都市 / ネザー</span>
+            <h3>Morrowgear タクティカルバイザー</h3>
+          </div>
+          <span class="method">3 × 3</span>
+        </header>
+        <div class="recipe-assembly">
+          <div class="craft-grid"><span class="item-icon item-icon--normal" title="ネザライトの欠片"><img src="assets/minecraft__netherite_scrap.png" alt="ネザライトの欠片" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">NET</span></span><span class="item-icon item-icon--normal" title="残響の欠片"><img src="assets/minecraft__echo_shard.png" alt="残響の欠片" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">ECH</span></span><span class="item-icon item-icon--normal" title="ネザライトの欠片"><img src="assets/minecraft__netherite_scrap.png" alt="ネザライトの欠片" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">NET</span></span><span class="item-icon item-icon--normal" title="遮光ガラス"><img src="assets/minecraft__tinted_glass.png" alt="遮光ガラス" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">TIN</span></span><span class="item-icon item-icon--normal" title="Morrowgear 基礎制御基板"><img src="assets/morrowgear_drone__basic_control_board.png" alt="Morrowgear 基礎制御基板" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BAS</span></span><span class="item-icon item-icon--normal" title="遮光ガラス"><img src="assets/minecraft__tinted_glass.png" alt="遮光ガラス" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">TIN</span></span><span class="item-icon item-icon--normal" title="銅インゴット"><img src="assets/minecraft__copper_ingot.png" alt="銅インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COP</span></span><span class="item-icon item-icon--normal" title="レッドストーンブロック"><img src="assets/minecraft__redstone_block.png" alt="レッドストーンブロック" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">RED</span></span><span class="item-icon item-icon--normal" title="銅インゴット"><img src="assets/minecraft__copper_ingot.png" alt="銅インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COP</span></span></div>
+          <span class="assembly-arrow" aria-hidden="true">›</span>
+          <div class="recipe-output">
+            <span class="item-icon item-icon--large" title="Morrowgear タクティカルバイザー"><img src="assets/morrowgear_drone__tactical_visor.png" alt="Morrowgear タクティカルバイザー" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">TAC</span></span>
+            <span>完成 × 1</span>
+          </div>
+        </div>
+        <div class="ingredient-list"><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="ネザライトの欠片"><img src="assets/minecraft__netherite_scrap.png" alt="ネザライトの欠片" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">NET</span><span class="stack-count">2</span></span><span>ネザライトの欠片</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="残響の欠片"><img src="assets/minecraft__echo_shard.png" alt="残響の欠片" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">ECH</span></span><span>残響の欠片</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="遮光ガラス"><img src="assets/minecraft__tinted_glass.png" alt="遮光ガラス" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">TIN</span><span class="stack-count">2</span></span><span>遮光ガラス</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="Morrowgear 基礎制御基板"><img src="assets/morrowgear_drone__basic_control_board.png" alt="Morrowgear 基礎制御基板" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BAS</span></span><span>Morrowgear 基礎制御基板</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="銅インゴット"><img src="assets/minecraft__copper_ingot.png" alt="銅インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COP</span><span class="stack-count">2</span></span><span>銅インゴット</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="レッドストーンブロック"><img src="assets/minecraft__redstone_block.png" alt="レッドストーンブロック" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">RED</span></span><span>レッドストーンブロック</span></span></div>
+        
+        <div class="usage-block">
+          <div class="usage-meta"><span>装着装備</span><strong>使う場所</strong><b>頭スロットへ装備</b></div>
+          <p>周辺機・Wing・作戦・脅威・交戦相手を状況に応じてHUD表示します。電力喪失ビーコンは距離にかかわらず回収対象として表示します。</p>
+        </div>
+    
+      </article>
+    
+      <article class="recipe-card" data-stage="EXPAND" data-search="Morrowgear 機体回収ツール">
+        <header class="recipe-card__head">
+          <div>
+            <span class="eyebrow">EXPAND · 回収</span>
+            <h3>Morrowgear 機体回収ツール</h3>
+          </div>
+          <span class="method">3 × 3</span>
+        </header>
+        <div class="recipe-assembly">
+          <div class="craft-grid"><span class="item-icon item-icon--normal" title="トリップワイヤーフック"><img src="assets/minecraft__tripwire_hook.png" alt="トリップワイヤーフック" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">TRI</span></span><span class="item-icon item-icon--normal" title="モロウ合金"><img src="assets/morrowgear_drone__morrow_alloy.png" alt="モロウ合金" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">MOR</span></span><span class="item-icon item-icon--normal" title="トリップワイヤーフック"><img src="assets/minecraft__tripwire_hook.png" alt="トリップワイヤーフック" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">TRI</span></span><span class="item-icon item-icon--normal" title="銅インゴット"><img src="assets/minecraft__copper_ingot.png" alt="銅インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COP</span></span><span class="item-icon item-icon--normal" title="Morrowgear 基礎制御基板"><img src="assets/morrowgear_drone__basic_control_board.png" alt="Morrowgear 基礎制御基板" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BAS</span></span><span class="item-icon item-icon--normal" title="銅インゴット"><img src="assets/minecraft__copper_ingot.png" alt="銅インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COP</span></span><span class="grid-cell empty"></span><span class="item-icon item-icon--normal" title="鉄インゴット"><img src="assets/minecraft__iron_ingot.png" alt="鉄インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">IRO</span></span><span class="grid-cell empty"></span></div>
+          <span class="assembly-arrow" aria-hidden="true">›</span>
+          <div class="recipe-output">
+            <span class="item-icon item-icon--large" title="Morrowgear 機体回収ツール"><img src="assets/morrowgear_drone__recovery_tool.png" alt="Morrowgear 機体回収ツール" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">REC</span></span>
+            <span>完成 × 1</span>
+          </div>
+        </div>
+        <div class="ingredient-list"><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="トリップワイヤーフック"><img src="assets/minecraft__tripwire_hook.png" alt="トリップワイヤーフック" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">TRI</span><span class="stack-count">2</span></span><span>トリップワイヤーフック</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="モロウ合金"><img src="assets/morrowgear_drone__morrow_alloy.png" alt="モロウ合金" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">MOR</span></span><span>モロウ合金</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="銅インゴット"><img src="assets/minecraft__copper_ingot.png" alt="銅インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COP</span><span class="stack-count">2</span></span><span>銅インゴット</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="Morrowgear 基礎制御基板"><img src="assets/morrowgear_drone__basic_control_board.png" alt="Morrowgear 基礎制御基板" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BAS</span></span><span>Morrowgear 基礎制御基板</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="鉄インゴット"><img src="assets/minecraft__iron_ingot.png" alt="鉄インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">IRO</span></span><span>鉄インゴット</span></span></div>
+        
+        <div class="usage-block">
+          <div class="usage-meta"><span>回収工具</span><strong>使う場所</strong><b>所有する電力喪失機へ右クリック</b></div>
+          <p>墜落した機体を状態保持したアイテムへ変換します。耐久値は192で、回収後はDockへ投入して飛行可能になるまで整備します。</p>
+        </div>
+    
+      </article>
+    
+      <article class="recipe-card" data-stage="EXPAND" data-search="立体作業マーカー">
+        <header class="recipe-card__head">
+          <div>
+            <span class="eyebrow">EXPAND · 採掘・伐採</span>
+            <h3>立体作業マーカー</h3>
+          </div>
+          <span class="method">3 × 3</span>
+        </header>
+        <div class="recipe-assembly">
+          <div class="craft-grid"><span class="grid-cell empty"></span><span class="item-icon item-icon--normal" title="コンパス"><img src="assets/minecraft__compass.png" alt="コンパス" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COM</span></span><span class="grid-cell empty"></span><span class="item-icon item-icon--normal" title="レッドストーンダスト"><img src="assets/minecraft__redstone.png" alt="レッドストーンダスト" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">RED</span></span><span class="item-icon item-icon--normal" title="Morrowgear 基礎制御基板"><img src="assets/morrowgear_drone__basic_control_board.png" alt="Morrowgear 基礎制御基板" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BAS</span></span><span class="item-icon item-icon--normal" title="レッドストーンダスト"><img src="assets/minecraft__redstone.png" alt="レッドストーンダスト" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">RED</span></span><span class="grid-cell empty"></span><span class="item-icon item-icon--normal" title="鉄インゴット"><img src="assets/minecraft__iron_ingot.png" alt="鉄インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">IRO</span></span><span class="grid-cell empty"></span></div>
+          <span class="assembly-arrow" aria-hidden="true">›</span>
+          <div class="recipe-output">
+            <span class="item-icon item-icon--large" title="立体作業マーカー"><img src="assets/morrowgear_drone__operation_marker.png" alt="立体作業マーカー" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">OPE</span></span>
+            <span>完成 × 1</span>
+          </div>
+        </div>
+        <div class="ingredient-list"><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="コンパス"><img src="assets/minecraft__compass.png" alt="コンパス" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COM</span></span><span>コンパス</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="レッドストーンダスト"><img src="assets/minecraft__redstone.png" alt="レッドストーンダスト" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">RED</span><span class="stack-count">2</span></span><span>レッドストーンダスト</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="Morrowgear 基礎制御基板"><img src="assets/morrowgear_drone__basic_control_board.png" alt="Morrowgear 基礎制御基板" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BAS</span></span><span>Morrowgear 基礎制御基板</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="鉄インゴット"><img src="assets/minecraft__iron_ingot.png" alt="鉄インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">IRO</span></span><span>鉄インゴット</span></span></div>
+        
+        <div class="usage-block">
+          <div class="usage-meta"><span>作業範囲指定装備</span><strong>使う場所</strong><b>範囲の境界4点へ順番に使用</b></div>
+          <p>4点を含むX/Y/Z直方体を採掘範囲として登録します。Engineerが掘削し、ドロップは現地へ残り、Cargoが設定済み搬入先へ回収します。スニーク使用で入力途中の点を取り消せます。</p>
+        </div>
+    
+      </article>
+    </div>
+            </section>
+            
+            <section class="recipe-section" id="section-03">
+              <div class="section-heading"><span>03</span><div><h2>任務モジュール</h2><p>機体の役割を決める5系統。用途に応じて必要数を用意します。</p></div></div>
+              <div class="recipe-grid">
+      <article class="recipe-card" data-stage="EXPAND" data-search="Morrowgear Scoutモジュール">
+        <header class="recipe-card__head">
+          <div>
+            <span class="eyebrow">EXPAND · 索敵</span>
+            <h3>Morrowgear Scoutモジュール</h3>
+          </div>
+          <span class="method">3 × 3</span>
+        </header>
+        <div class="recipe-assembly">
+          <div class="craft-grid"><span class="item-icon item-icon--normal" title="アメジストの欠片"><img src="assets/minecraft__amethyst_shard.png" alt="アメジストの欠片" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">AME</span></span><span class="item-icon item-icon--normal" title="望遠鏡"><img src="assets/minecraft__spyglass.png" alt="望遠鏡" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">SPY</span></span><span class="item-icon item-icon--normal" title="アメジストの欠片"><img src="assets/minecraft__amethyst_shard.png" alt="アメジストの欠片" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">AME</span></span><span class="item-icon item-icon--normal" title="コンパス"><img src="assets/minecraft__compass.png" alt="コンパス" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COM</span></span><span class="item-icon item-icon--normal" title="Morrowgear 基礎制御基板"><img src="assets/morrowgear_drone__basic_control_board.png" alt="Morrowgear 基礎制御基板" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BAS</span></span><span class="item-icon item-icon--normal" title="コンパス"><img src="assets/minecraft__compass.png" alt="コンパス" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COM</span></span><span class="grid-cell empty"></span><span class="item-icon item-icon--normal" title="Morrowgear 軽量フレーム"><img src="assets/morrowgear_drone__lightweight_frame.png" alt="Morrowgear 軽量フレーム" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">LIG</span></span><span class="grid-cell empty"></span></div>
+          <span class="assembly-arrow" aria-hidden="true">›</span>
+          <div class="recipe-output">
+            <span class="item-icon item-icon--large" title="Morrowgear Scoutモジュール"><img src="assets/morrowgear_drone__scout_module.png" alt="Morrowgear Scoutモジュール" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">SCO</span></span>
+            <span>完成 × 1</span>
+          </div>
+        </div>
+        <div class="ingredient-list"><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="アメジストの欠片"><img src="assets/minecraft__amethyst_shard.png" alt="アメジストの欠片" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">AME</span><span class="stack-count">2</span></span><span>アメジストの欠片</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="望遠鏡"><img src="assets/minecraft__spyglass.png" alt="望遠鏡" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">SPY</span></span><span>望遠鏡</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="コンパス"><img src="assets/minecraft__compass.png" alt="コンパス" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COM</span><span class="stack-count">2</span></span><span>コンパス</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="Morrowgear 基礎制御基板"><img src="assets/morrowgear_drone__basic_control_board.png" alt="Morrowgear 基礎制御基板" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BAS</span></span><span>Morrowgear 基礎制御基板</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="Morrowgear 軽量フレーム"><img src="assets/morrowgear_drone__lightweight_frame.png" alt="Morrowgear 軽量フレーム" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">LIG</span></span><span>Morrowgear 軽量フレーム</span></span></div>
+        
+        <div class="usage-block">
+          <div class="usage-meta"><span>役割モジュール</span><strong>使う場所</strong><b>Dockの役割スロット / 着艦中の交換</b></div>
+          <p>SCOUT機へ変更します。周期的な全周スキャン、地形・Mob調査、脅威発見、Wingや全機へのデータリンク通報を担当します。</p>
+        </div>
+    
+      </article>
+    
+      <article class="recipe-card" data-stage="EXPAND" data-search="Morrowgear Cargoモジュール">
+        <header class="recipe-card__head">
+          <div>
+            <span class="eyebrow">EXPAND · 物流</span>
+            <h3>Morrowgear Cargoモジュール</h3>
+          </div>
+          <span class="method">3 × 3</span>
+        </header>
+        <div class="recipe-assembly">
+          <div class="craft-grid"><span class="item-icon item-icon--normal" title="Morrowgear 軽量フレーム"><img src="assets/morrowgear_drone__lightweight_frame.png" alt="Morrowgear 軽量フレーム" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">LIG</span></span><span class="item-icon item-icon--normal" title="チェスト"><img src="assets/minecraft__chest.png" alt="チェスト" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">CHE</span></span><span class="item-icon item-icon--normal" title="Morrowgear 軽量フレーム"><img src="assets/morrowgear_drone__lightweight_frame.png" alt="Morrowgear 軽量フレーム" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">LIG</span></span><span class="item-icon item-icon--normal" title="ホッパー"><img src="assets/minecraft__hopper.png" alt="ホッパー" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">HOP</span></span><span class="item-icon item-icon--normal" title="Morrowgear 基礎制御基板"><img src="assets/morrowgear_drone__basic_control_board.png" alt="Morrowgear 基礎制御基板" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BAS</span></span><span class="item-icon item-icon--normal" title="ホッパー"><img src="assets/minecraft__hopper.png" alt="ホッパー" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">HOP</span></span><span class="grid-cell empty"></span><span class="item-icon item-icon--normal" title="Morrowgear 軽量フレーム"><img src="assets/morrowgear_drone__lightweight_frame.png" alt="Morrowgear 軽量フレーム" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">LIG</span></span><span class="grid-cell empty"></span></div>
+          <span class="assembly-arrow" aria-hidden="true">›</span>
+          <div class="recipe-output">
+            <span class="item-icon item-icon--large" title="Morrowgear Cargoモジュール"><img src="assets/morrowgear_drone__cargo_module.png" alt="Morrowgear Cargoモジュール" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">CAR</span></span>
+            <span>完成 × 1</span>
+          </div>
+        </div>
+        <div class="ingredient-list"><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="Morrowgear 軽量フレーム"><img src="assets/morrowgear_drone__lightweight_frame.png" alt="Morrowgear 軽量フレーム" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">LIG</span><span class="stack-count">3</span></span><span>Morrowgear 軽量フレーム</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="チェスト"><img src="assets/minecraft__chest.png" alt="チェスト" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">CHE</span></span><span>チェスト</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="ホッパー"><img src="assets/minecraft__hopper.png" alt="ホッパー" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">HOP</span><span class="stack-count">2</span></span><span>ホッパー</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="Morrowgear 基礎制御基板"><img src="assets/morrowgear_drone__basic_control_board.png" alt="Morrowgear 基礎制御基板" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BAS</span></span><span>Morrowgear 基礎制御基板</span></span></div>
+        
+        <div class="usage-block">
+          <div class="usage-meta"><span>役割モジュール</span><strong>使う場所</strong><b>Dockの役割スロット / 着艦中の交換</b></div>
+          <p>CARGO機へ変更します。指定コンテナ間の輸送と、補給不足のDockへ物資を連続配送する物流網を担当します。</p>
+        </div>
+    
+      </article>
+    
+      <article class="recipe-card" data-stage="EXPAND" data-search="Morrowgear Engineerモジュール">
+        <header class="recipe-card__head">
+          <div>
+            <span class="eyebrow">EXPAND · 作業</span>
+            <h3>Morrowgear Engineerモジュール</h3>
+          </div>
+          <span class="method">3 × 3</span>
+        </header>
+        <div class="recipe-assembly">
+          <div class="craft-grid"><span class="item-icon item-icon--normal" title="Morrowgear 軽量フレーム"><img src="assets/morrowgear_drone__lightweight_frame.png" alt="Morrowgear 軽量フレーム" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">LIG</span></span><span class="item-icon item-icon--normal" title="鉄のツルハシ"><img src="assets/minecraft__iron_pickaxe.png" alt="鉄のツルハシ" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">IRO</span></span><span class="item-icon item-icon--normal" title="Morrowgear 軽量フレーム"><img src="assets/morrowgear_drone__lightweight_frame.png" alt="Morrowgear 軽量フレーム" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">LIG</span></span><span class="item-icon item-icon--normal" title="ピストン"><img src="assets/minecraft__piston.png" alt="ピストン" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">PIS</span></span><span class="item-icon item-icon--normal" title="Morrowgear 基礎制御基板"><img src="assets/morrowgear_drone__basic_control_board.png" alt="Morrowgear 基礎制御基板" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BAS</span></span><span class="item-icon item-icon--normal" title="ピストン"><img src="assets/minecraft__piston.png" alt="ピストン" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">PIS</span></span><span class="grid-cell empty"></span><span class="item-icon item-icon--normal" title="Morrowgear 軽量フレーム"><img src="assets/morrowgear_drone__lightweight_frame.png" alt="Morrowgear 軽量フレーム" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">LIG</span></span><span class="grid-cell empty"></span></div>
+          <span class="assembly-arrow" aria-hidden="true">›</span>
+          <div class="recipe-output">
+            <span class="item-icon item-icon--large" title="Morrowgear Engineerモジュール"><img src="assets/morrowgear_drone__engineer_module.png" alt="Morrowgear Engineerモジュール" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">ENG</span></span>
+            <span>完成 × 1</span>
+          </div>
+        </div>
+        <div class="ingredient-list"><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="Morrowgear 軽量フレーム"><img src="assets/morrowgear_drone__lightweight_frame.png" alt="Morrowgear 軽量フレーム" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">LIG</span><span class="stack-count">3</span></span><span>Morrowgear 軽量フレーム</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="鉄のツルハシ"><img src="assets/minecraft__iron_pickaxe.png" alt="鉄のツルハシ" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">IRO</span></span><span>鉄のツルハシ</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="ピストン"><img src="assets/minecraft__piston.png" alt="ピストン" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">PIS</span><span class="stack-count">2</span></span><span>ピストン</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="Morrowgear 基礎制御基板"><img src="assets/morrowgear_drone__basic_control_board.png" alt="Morrowgear 基礎制御基板" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BAS</span></span><span>Morrowgear 基礎制御基板</span></span></div>
+        
+        <div class="usage-block">
+          <div class="usage-meta"><span>役割モジュール</span><strong>使う場所</strong><b>Dockの役割スロット / 着艦中の交換</b></div>
+          <p>ENGINEER機へ変更します。採掘・作業・修復支援に加え、埋没した電力喪失機の上部を除去してSalvage経路を確保します。</p>
+        </div>
+    
+      </article>
+    
+      <article class="recipe-card" data-stage="NETHER" data-search="Morrowgear Securityモジュール">
+        <header class="recipe-card__head">
+          <div>
+            <span class="eyebrow">NETHER · ネザー到達後</span>
+            <h3>Morrowgear Securityモジュール</h3>
+          </div>
+          <span class="method">3 × 3</span>
+        </header>
+        <div class="recipe-assembly">
+          <div class="craft-grid"><span class="item-icon item-icon--normal" title="Morrowgear 軽量フレーム"><img src="assets/morrowgear_drone__lightweight_frame.png" alt="Morrowgear 軽量フレーム" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">LIG</span></span><span class="item-icon item-icon--normal" title="盾"><img src="assets/minecraft__shield.png" alt="盾" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">SHI</span></span><span class="item-icon item-icon--normal" title="Morrowgear 軽量フレーム"><img src="assets/morrowgear_drone__lightweight_frame.png" alt="Morrowgear 軽量フレーム" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">LIG</span></span><span class="item-icon item-icon--normal" title="クロスボウ"><img src="assets/minecraft__crossbow.png" alt="クロスボウ" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">CRO</span></span><span class="item-icon item-icon--normal" title="Morrowgear 基礎制御基板"><img src="assets/morrowgear_drone__basic_control_board.png" alt="Morrowgear 基礎制御基板" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BAS</span></span><span class="item-icon item-icon--normal" title="クロスボウ"><img src="assets/minecraft__crossbow.png" alt="クロスボウ" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">CRO</span></span><span class="item-icon item-icon--normal" title="Morrowgear 軽量フレーム"><img src="assets/morrowgear_drone__lightweight_frame.png" alt="Morrowgear 軽量フレーム" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">LIG</span></span><span class="item-icon item-icon--normal" title="ブレイズロッド"><img src="assets/minecraft__blaze_rod.png" alt="ブレイズロッド" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BLA</span></span><span class="item-icon item-icon--normal" title="Morrowgear 軽量フレーム"><img src="assets/morrowgear_drone__lightweight_frame.png" alt="Morrowgear 軽量フレーム" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">LIG</span></span></div>
+          <span class="assembly-arrow" aria-hidden="true">›</span>
+          <div class="recipe-output">
+            <span class="item-icon item-icon--large" title="Morrowgear Securityモジュール"><img src="assets/morrowgear_drone__security_module.png" alt="Morrowgear Securityモジュール" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">SEC</span></span>
+            <span>完成 × 1</span>
+          </div>
+        </div>
+        <div class="ingredient-list"><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="Morrowgear 軽量フレーム"><img src="assets/morrowgear_drone__lightweight_frame.png" alt="Morrowgear 軽量フレーム" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">LIG</span><span class="stack-count">4</span></span><span>Morrowgear 軽量フレーム</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="盾"><img src="assets/minecraft__shield.png" alt="盾" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">SHI</span></span><span>盾</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="クロスボウ"><img src="assets/minecraft__crossbow.png" alt="クロスボウ" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">CRO</span><span class="stack-count">2</span></span><span>クロスボウ</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="Morrowgear 基礎制御基板"><img src="assets/morrowgear_drone__basic_control_board.png" alt="Morrowgear 基礎制御基板" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BAS</span></span><span>Morrowgear 基礎制御基板</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="ブレイズロッド"><img src="assets/minecraft__blaze_rod.png" alt="ブレイズロッド" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BLA</span></span><span>ブレイズロッド</span></span></div>
+        
+        <div class="usage-block">
+          <div class="usage-meta"><span>役割モジュール</span><strong>使う場所</strong><b>Dockの役割スロット / 着艦中の交換</b></div>
+          <p>SECURITY機へ変更し、警戒・迎撃・護衛・脅威度に応じた戦力配分を有効にします。実戦には兵装モジュールも必要です。</p>
+        </div>
+    
+      </article>
+    
+      <article class="recipe-card" data-stage="EXPAND" data-search="Morrowgear Salvageモジュール">
+        <header class="recipe-card__head">
+          <div>
+            <span class="eyebrow">EXPAND · 回収</span>
+            <h3>Morrowgear Salvageモジュール</h3>
+          </div>
+          <span class="method">3 × 3</span>
+        </header>
+        <div class="recipe-assembly">
+          <div class="craft-grid"><span class="item-icon item-icon--normal" title="トリップワイヤーフック"><img src="assets/minecraft__tripwire_hook.png" alt="トリップワイヤーフック" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">TRI</span></span><span class="item-icon item-icon--normal" title="リード"><img src="assets/minecraft__lead.png" alt="リード" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">LEA</span></span><span class="item-icon item-icon--normal" title="トリップワイヤーフック"><img src="assets/minecraft__tripwire_hook.png" alt="トリップワイヤーフック" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">TRI</span></span><span class="item-icon item-icon--normal" title="ピストン"><img src="assets/minecraft__piston.png" alt="ピストン" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">PIS</span></span><span class="item-icon item-icon--normal" title="Morrowgear 基礎制御基板"><img src="assets/morrowgear_drone__basic_control_board.png" alt="Morrowgear 基礎制御基板" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BAS</span></span><span class="item-icon item-icon--normal" title="ピストン"><img src="assets/minecraft__piston.png" alt="ピストン" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">PIS</span></span><span class="item-icon item-icon--normal" title="Morrowgear 軽量フレーム"><img src="assets/morrowgear_drone__lightweight_frame.png" alt="Morrowgear 軽量フレーム" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">LIG</span></span><span class="item-icon item-icon--normal" title="Morrowgear 推進パワーセル"><img src="assets/morrowgear_drone__power_cell.png" alt="Morrowgear 推進パワーセル" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">POW</span></span><span class="item-icon item-icon--normal" title="Morrowgear 軽量フレーム"><img src="assets/morrowgear_drone__lightweight_frame.png" alt="Morrowgear 軽量フレーム" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">LIG</span></span></div>
+          <span class="assembly-arrow" aria-hidden="true">›</span>
+          <div class="recipe-output">
+            <span class="item-icon item-icon--large" title="Morrowgear Salvageモジュール"><img src="assets/morrowgear_drone__salvage_module.png" alt="Morrowgear Salvageモジュール" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">SAL</span></span>
+            <span>完成 × 1</span>
+          </div>
+        </div>
+        <div class="ingredient-list"><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="トリップワイヤーフック"><img src="assets/minecraft__tripwire_hook.png" alt="トリップワイヤーフック" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">TRI</span><span class="stack-count">2</span></span><span>トリップワイヤーフック</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="リード"><img src="assets/minecraft__lead.png" alt="リード" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">LEA</span></span><span>リード</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="ピストン"><img src="assets/minecraft__piston.png" alt="ピストン" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">PIS</span><span class="stack-count">2</span></span><span>ピストン</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="Morrowgear 基礎制御基板"><img src="assets/morrowgear_drone__basic_control_board.png" alt="Morrowgear 基礎制御基板" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BAS</span></span><span>Morrowgear 基礎制御基板</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="Morrowgear 軽量フレーム"><img src="assets/morrowgear_drone__lightweight_frame.png" alt="Morrowgear 軽量フレーム" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">LIG</span><span class="stack-count">2</span></span><span>Morrowgear 軽量フレーム</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="Morrowgear 推進パワーセル"><img src="assets/morrowgear_drone__power_cell.png" alt="Morrowgear 推進パワーセル" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">POW</span></span><span>Morrowgear 推進パワーセル</span></span></div>
+        
+        <div class="usage-block">
+          <div class="usage-meta"><span>役割モジュール</span><strong>使う場所</strong><b>Dockの役割スロット / 着艦中の交換</b></div>
+          <p>SALVAGE機へ変更します。電力喪失機を捜索・吊り上げ・牽引し、空きDockへ運んで復旧工程へ引き渡します。</p>
+        </div>
+    
+      </article>
+    </div>
+            </section>
+            
+            <section class="recipe-section" id="section-04">
+              <div class="section-heading"><span>04</span><div><h2>兵装・補給品</h2><p>兵装本体とDockへ投入する専用補給品。弾種ごとに在庫を分けて管理します。</p></div></div>
+              <div class="recipe-grid">
+      <article class="recipe-card" data-stage="NETHER" data-search="Morrowgear 機関砲モジュール">
+        <header class="recipe-card__head">
+          <div>
+            <span class="eyebrow">NETHER · ネザー到達後</span>
+            <h3>Morrowgear 機関砲モジュール</h3>
+          </div>
+          <span class="method">3 × 3</span>
+        </header>
+        <div class="recipe-assembly">
+          <div class="craft-grid"><span class="item-icon item-icon--normal" title="Morrowgear 軽量フレーム"><img src="assets/morrowgear_drone__lightweight_frame.png" alt="Morrowgear 軽量フレーム" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">LIG</span></span><span class="item-icon item-icon--normal" title="ディスペンサー"><img src="assets/minecraft__dispenser.png" alt="ディスペンサー" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">DIS</span></span><span class="item-icon item-icon--normal" title="Morrowgear 軽量フレーム"><img src="assets/morrowgear_drone__lightweight_frame.png" alt="Morrowgear 軽量フレーム" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">LIG</span></span><span class="item-icon item-icon--normal" title="クロスボウ"><img src="assets/minecraft__crossbow.png" alt="クロスボウ" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">CRO</span></span><span class="item-icon item-icon--normal" title="Morrowgear 基礎制御基板"><img src="assets/morrowgear_drone__basic_control_board.png" alt="Morrowgear 基礎制御基板" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BAS</span></span><span class="item-icon item-icon--normal" title="クロスボウ"><img src="assets/minecraft__crossbow.png" alt="クロスボウ" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">CRO</span></span><span class="item-icon item-icon--normal" title="Morrowgear 軽量フレーム"><img src="assets/morrowgear_drone__lightweight_frame.png" alt="Morrowgear 軽量フレーム" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">LIG</span></span><span class="item-icon item-icon--normal" title="ブレイズロッド"><img src="assets/minecraft__blaze_rod.png" alt="ブレイズロッド" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BLA</span></span><span class="item-icon item-icon--normal" title="Morrowgear 軽量フレーム"><img src="assets/morrowgear_drone__lightweight_frame.png" alt="Morrowgear 軽量フレーム" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">LIG</span></span></div>
+          <span class="assembly-arrow" aria-hidden="true">›</span>
+          <div class="recipe-output">
+            <span class="item-icon item-icon--large" title="Morrowgear 機関砲モジュール"><img src="assets/morrowgear_drone__autocannon_module.png" alt="Morrowgear 機関砲モジュール" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">AUT</span></span>
+            <span>完成 × 1</span>
+          </div>
+        </div>
+        <div class="ingredient-list"><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="Morrowgear 軽量フレーム"><img src="assets/morrowgear_drone__lightweight_frame.png" alt="Morrowgear 軽量フレーム" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">LIG</span><span class="stack-count">4</span></span><span>Morrowgear 軽量フレーム</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="ディスペンサー"><img src="assets/minecraft__dispenser.png" alt="ディスペンサー" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">DIS</span></span><span>ディスペンサー</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="クロスボウ"><img src="assets/minecraft__crossbow.png" alt="クロスボウ" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">CRO</span><span class="stack-count">2</span></span><span>クロスボウ</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="Morrowgear 基礎制御基板"><img src="assets/morrowgear_drone__basic_control_board.png" alt="Morrowgear 基礎制御基板" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BAS</span></span><span>Morrowgear 基礎制御基板</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="ブレイズロッド"><img src="assets/minecraft__blaze_rod.png" alt="ブレイズロッド" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BLA</span></span><span>ブレイズロッド</span></span></div>
+        
+        <div class="usage-block">
+          <div class="usage-meta"><span>兵装モジュール</span><strong>使う場所</strong><b>SECURITY機の兵装スロット / 着艦中の交換</b></div>
+          <p>機関砲によるCAS掃射を有効にします。射撃可能な進入路を選び、弾薬は機関砲弾倉からDockで補充します。</p>
+        </div>
+    
+      </article>
+    
+      <article class="recipe-card" data-stage="NETHER" data-search="Morrowgear 機関砲弾倉">
+        <header class="recipe-card__head">
+          <div>
+            <span class="eyebrow">NETHER · ネザー到達後</span>
+            <h3>Morrowgear 機関砲弾倉</h3>
+          </div>
+          <span class="method">3 × 3</span>
+        </header>
+        <div class="recipe-assembly">
+          <div class="craft-grid"><span class="item-icon item-icon--normal" title="鉄インゴット"><img src="assets/minecraft__iron_ingot.png" alt="鉄インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">IRO</span></span><span class="item-icon item-icon--normal" title="火薬"><img src="assets/minecraft__gunpowder.png" alt="火薬" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">GUN</span></span><span class="item-icon item-icon--normal" title="鉄インゴット"><img src="assets/minecraft__iron_ingot.png" alt="鉄インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">IRO</span></span><span class="item-icon item-icon--normal" title="鉄インゴット"><img src="assets/minecraft__iron_ingot.png" alt="鉄インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">IRO</span></span><span class="item-icon item-icon--normal" title="ブレイズパウダー"><img src="assets/minecraft__blaze_powder.png" alt="ブレイズパウダー" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BLA</span></span><span class="item-icon item-icon--normal" title="鉄インゴット"><img src="assets/minecraft__iron_ingot.png" alt="鉄インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">IRO</span></span><span class="grid-cell empty"></span><span class="item-icon item-icon--normal" title="銅インゴット"><img src="assets/minecraft__copper_ingot.png" alt="銅インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COP</span></span><span class="grid-cell empty"></span></div>
+          <span class="assembly-arrow" aria-hidden="true">›</span>
+          <div class="recipe-output">
+            <span class="item-icon item-icon--large" title="Morrowgear 機関砲弾倉"><img src="assets/morrowgear_drone__autocannon_magazine.png" alt="Morrowgear 機関砲弾倉" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">AUT</span></span>
+            <span>完成 × 1</span>
+          </div>
+        </div>
+        <div class="ingredient-list"><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="鉄インゴット"><img src="assets/minecraft__iron_ingot.png" alt="鉄インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">IRO</span><span class="stack-count">4</span></span><span>鉄インゴット</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="火薬"><img src="assets/minecraft__gunpowder.png" alt="火薬" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">GUN</span></span><span>火薬</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="ブレイズパウダー"><img src="assets/minecraft__blaze_powder.png" alt="ブレイズパウダー" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BLA</span></span><span>ブレイズパウダー</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="銅インゴット"><img src="assets/minecraft__copper_ingot.png" alt="銅インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COP</span></span><span>銅インゴット</span></span></div>
+        
+        <div class="usage-block">
+          <div class="usage-meta"><span>兵装補給品</span><strong>使う場所</strong><b>Dockの弾薬スロット / 自動補給バッファ</b></div>
+          <p>1個で機関砲弾120発を補給します。Dockに在庫があれば帰還したSecurity機へ必要分だけ移送されます。</p>
+        </div>
+    
+      </article>
+    
+      <article class="recipe-card" data-stage="ADVANCED" data-search="Morrowgear レーザーモジュール">
+        <header class="recipe-card__head">
+          <div>
+            <span class="eyebrow">ADVANCED · 試練の間</span>
+            <h3>Morrowgear レーザーモジュール</h3>
+          </div>
+          <span class="method">3 × 3</span>
+        </header>
+        <div class="recipe-assembly">
+          <div class="craft-grid"><span class="item-icon item-icon--normal" title="アメジストの欠片"><img src="assets/minecraft__amethyst_shard.png" alt="アメジストの欠片" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">AME</span></span><span class="item-icon item-icon--normal" title="ダイヤモンド"><img src="assets/minecraft__diamond.png" alt="ダイヤモンド" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">DIA</span></span><span class="item-icon item-icon--normal" title="アメジストの欠片"><img src="assets/minecraft__amethyst_shard.png" alt="アメジストの欠片" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">AME</span></span><span class="item-icon item-icon--normal" title="ネザークォーツ"><img src="assets/minecraft__quartz.png" alt="ネザークォーツ" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">QUA</span></span><span class="item-icon item-icon--normal" title="ブリーズロッド"><img src="assets/minecraft__breeze_rod.png" alt="ブリーズロッド" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BRE</span></span><span class="item-icon item-icon--normal" title="ネザークォーツ"><img src="assets/minecraft__quartz.png" alt="ネザークォーツ" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">QUA</span></span><span class="item-icon item-icon--normal" title="Morrowgear 基礎制御基板"><img src="assets/morrowgear_drone__basic_control_board.png" alt="Morrowgear 基礎制御基板" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BAS</span></span><span class="item-icon item-icon--normal" title="Morrowgear 強化飛行バッテリー"><img src="assets/morrowgear_drone__reinforced_battery_pack.png" alt="Morrowgear 強化飛行バッテリー" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">REI</span></span><span class="item-icon item-icon--normal" title="Morrowgear 基礎制御基板"><img src="assets/morrowgear_drone__basic_control_board.png" alt="Morrowgear 基礎制御基板" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BAS</span></span></div>
+          <span class="assembly-arrow" aria-hidden="true">›</span>
+          <div class="recipe-output">
+            <span class="item-icon item-icon--large" title="Morrowgear レーザーモジュール"><img src="assets/morrowgear_drone__laser_module.png" alt="Morrowgear レーザーモジュール" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">LAS</span></span>
+            <span>完成 × 1</span>
+          </div>
+        </div>
+        <div class="ingredient-list"><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="アメジストの欠片"><img src="assets/minecraft__amethyst_shard.png" alt="アメジストの欠片" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">AME</span><span class="stack-count">2</span></span><span>アメジストの欠片</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="ダイヤモンド"><img src="assets/minecraft__diamond.png" alt="ダイヤモンド" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">DIA</span></span><span>ダイヤモンド</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="ネザークォーツ"><img src="assets/minecraft__quartz.png" alt="ネザークォーツ" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">QUA</span><span class="stack-count">2</span></span><span>ネザークォーツ</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="ブリーズロッド"><img src="assets/minecraft__breeze_rod.png" alt="ブリーズロッド" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BRE</span></span><span>ブリーズロッド</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="Morrowgear 基礎制御基板"><img src="assets/morrowgear_drone__basic_control_board.png" alt="Morrowgear 基礎制御基板" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BAS</span><span class="stack-count">2</span></span><span>Morrowgear 基礎制御基板</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="Morrowgear 強化飛行バッテリー"><img src="assets/morrowgear_drone__reinforced_battery_pack.png" alt="Morrowgear 強化飛行バッテリー" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">REI</span></span><span>Morrowgear 強化飛行バッテリー</span></span></div>
+        
+        <div class="usage-block">
+          <div class="usage-meta"><span>兵装モジュール</span><strong>使う場所</strong><b>SECURITY機の兵装スロット / 着艦中の交換</b></div>
+          <p>高出力レーザーを有効にします。射線を確保して照射し、複数機では同一目標へ同期攻撃します。消費電力は兵装電力セルで補充します。</p>
+        </div>
+    
+      </article>
+    
+      <article class="recipe-card" data-stage="ADVANCED" data-search="Morrowgear 兵装電力セル">
+        <header class="recipe-card__head">
+          <div>
+            <span class="eyebrow">ADVANCED · 中盤以降</span>
+            <h3>Morrowgear 兵装電力セル</h3>
+          </div>
+          <span class="method">3 × 3</span>
+        </header>
+        <div class="recipe-assembly">
+          <div class="craft-grid"><span class="item-icon item-icon--normal" title="ネザークォーツ"><img src="assets/minecraft__quartz.png" alt="ネザークォーツ" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">QUA</span></span><span class="item-icon item-icon--normal" title="グロウストーンダスト"><img src="assets/minecraft__glowstone_dust.png" alt="グロウストーンダスト" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">GLO</span></span><span class="item-icon item-icon--normal" title="ネザークォーツ"><img src="assets/minecraft__quartz.png" alt="ネザークォーツ" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">QUA</span></span><span class="item-icon item-icon--normal" title="アメジストの欠片"><img src="assets/minecraft__amethyst_shard.png" alt="アメジストの欠片" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">AME</span></span><span class="item-icon item-icon--normal" title="レッドストーンダスト"><img src="assets/minecraft__redstone.png" alt="レッドストーンダスト" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">RED</span></span><span class="item-icon item-icon--normal" title="アメジストの欠片"><img src="assets/minecraft__amethyst_shard.png" alt="アメジストの欠片" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">AME</span></span><span class="grid-cell empty"></span><span class="item-icon item-icon--normal" title="銅インゴット"><img src="assets/minecraft__copper_ingot.png" alt="銅インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COP</span></span><span class="grid-cell empty"></span></div>
+          <span class="assembly-arrow" aria-hidden="true">›</span>
+          <div class="recipe-output">
+            <span class="item-icon item-icon--large" title="Morrowgear 兵装電力セル"><img src="assets/morrowgear_drone__laser_cell.png" alt="Morrowgear 兵装電力セル" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">LAS</span></span>
+            <span>完成 × 1</span>
+          </div>
+        </div>
+        <div class="ingredient-list"><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="ネザークォーツ"><img src="assets/minecraft__quartz.png" alt="ネザークォーツ" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">QUA</span><span class="stack-count">2</span></span><span>ネザークォーツ</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="グロウストーンダスト"><img src="assets/minecraft__glowstone_dust.png" alt="グロウストーンダスト" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">GLO</span></span><span>グロウストーンダスト</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="アメジストの欠片"><img src="assets/minecraft__amethyst_shard.png" alt="アメジストの欠片" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">AME</span><span class="stack-count">2</span></span><span>アメジストの欠片</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="レッドストーンダスト"><img src="assets/minecraft__redstone.png" alt="レッドストーンダスト" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">RED</span></span><span>レッドストーンダスト</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="銅インゴット"><img src="assets/minecraft__copper_ingot.png" alt="銅インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COP</span></span><span>銅インゴット</span></span></div>
+        
+        <div class="usage-block">
+          <div class="usage-meta"><span>兵装補給品</span><strong>使う場所</strong><b>Dockの弾薬スロット / 自動補給バッファ</b></div>
+          <p>1個でレーザー兵装電力1000を補給します。飛行電力とは別系統で、照射に使用した分だけDockから移送されます。</p>
+        </div>
+    
+      </article>
+    
+      <article class="recipe-card" data-stage="ADVANCED" data-search="Morrowgear ミサイルモジュール">
+        <header class="recipe-card__head">
+          <div>
+            <span class="eyebrow">ADVANCED · 中盤以降</span>
+            <h3>Morrowgear ミサイルモジュール</h3>
+          </div>
+          <span class="method">3 × 3</span>
+        </header>
+        <div class="recipe-assembly">
+          <div class="craft-grid"><span class="item-icon item-icon--normal" title="エンダーアイ"><img src="assets/minecraft__ender_eye.png" alt="エンダーアイ" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">END</span></span><span class="item-icon item-icon--normal" title="TNT"><img src="assets/minecraft__tnt.png" alt="TNT" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">TNT</span></span><span class="item-icon item-icon--normal" title="エンダーアイ"><img src="assets/minecraft__ender_eye.png" alt="エンダーアイ" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">END</span></span><span class="item-icon item-icon--normal" title="ロケット花火"><img src="assets/minecraft__firework_rocket.png" alt="ロケット花火" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">FIR</span></span><span class="item-icon item-icon--normal" title="オブザーバー"><img src="assets/minecraft__observer.png" alt="オブザーバー" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">OBS</span></span><span class="item-icon item-icon--normal" title="ロケット花火"><img src="assets/minecraft__firework_rocket.png" alt="ロケット花火" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">FIR</span></span><span class="item-icon item-icon--normal" title="Morrowgear 基礎制御基板"><img src="assets/morrowgear_drone__basic_control_board.png" alt="Morrowgear 基礎制御基板" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BAS</span></span><span class="item-icon item-icon--normal" title="ダイヤモンド"><img src="assets/minecraft__diamond.png" alt="ダイヤモンド" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">DIA</span></span><span class="item-icon item-icon--normal" title="Morrowgear 基礎制御基板"><img src="assets/morrowgear_drone__basic_control_board.png" alt="Morrowgear 基礎制御基板" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BAS</span></span></div>
+          <span class="assembly-arrow" aria-hidden="true">›</span>
+          <div class="recipe-output">
+            <span class="item-icon item-icon--large" title="Morrowgear ミサイルモジュール"><img src="assets/morrowgear_drone__missile_module.png" alt="Morrowgear ミサイルモジュール" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">MIS</span></span>
+            <span>完成 × 1</span>
+          </div>
+        </div>
+        <div class="ingredient-list"><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="エンダーアイ"><img src="assets/minecraft__ender_eye.png" alt="エンダーアイ" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">END</span><span class="stack-count">2</span></span><span>エンダーアイ</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="TNT"><img src="assets/minecraft__tnt.png" alt="TNT" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">TNT</span></span><span>TNT</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="ロケット花火"><img src="assets/minecraft__firework_rocket.png" alt="ロケット花火" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">FIR</span><span class="stack-count">2</span></span><span>ロケット花火</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="オブザーバー"><img src="assets/minecraft__observer.png" alt="オブザーバー" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">OBS</span></span><span>オブザーバー</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="Morrowgear 基礎制御基板"><img src="assets/morrowgear_drone__basic_control_board.png" alt="Morrowgear 基礎制御基板" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BAS</span><span class="stack-count">2</span></span><span>Morrowgear 基礎制御基板</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="ダイヤモンド"><img src="assets/minecraft__diamond.png" alt="ダイヤモンド" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">DIA</span></span><span>ダイヤモンド</span></span></div>
+        
+        <div class="usage-block">
+          <div class="usage-meta"><span>兵装モジュール</span><strong>使う場所</strong><b>SECURITY機の兵装スロット / 着艦中の交換</b></div>
+          <p>マイクロミサイルを有効にします。脅威度に応じて複数目標へ最大5発を割り当て、垂直射出から誘導・遅延起爆へ移行します。</p>
+        </div>
+    
+      </article>
+    
+      <article class="recipe-card" data-stage="ADVANCED" data-search="Morrowgear マイクロミサイル補給パック">
+        <header class="recipe-card__head">
+          <div>
+            <span class="eyebrow">ADVANCED · 中盤以降</span>
+            <h3>Morrowgear マイクロミサイル補給パック</h3>
+          </div>
+          <span class="method">3 × 3</span>
+        </header>
+        <div class="recipe-assembly">
+          <div class="craft-grid"><span class="item-icon item-icon--normal" title="鉄インゴット"><img src="assets/minecraft__iron_ingot.png" alt="鉄インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">IRO</span></span><span class="item-icon item-icon--normal" title="火薬"><img src="assets/minecraft__gunpowder.png" alt="火薬" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">GUN</span></span><span class="item-icon item-icon--normal" title="鉄インゴット"><img src="assets/minecraft__iron_ingot.png" alt="鉄インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">IRO</span></span><span class="item-icon item-icon--normal" title="火薬"><img src="assets/minecraft__gunpowder.png" alt="火薬" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">GUN</span></span><span class="item-icon item-icon--normal" title="エンダーアイ"><img src="assets/minecraft__ender_eye.png" alt="エンダーアイ" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">END</span></span><span class="item-icon item-icon--normal" title="火薬"><img src="assets/minecraft__gunpowder.png" alt="火薬" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">GUN</span></span><span class="item-icon item-icon--normal" title="銅インゴット"><img src="assets/minecraft__copper_ingot.png" alt="銅インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COP</span></span><span class="item-icon item-icon--normal" title="レッドストーンダスト"><img src="assets/minecraft__redstone.png" alt="レッドストーンダスト" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">RED</span></span><span class="item-icon item-icon--normal" title="銅インゴット"><img src="assets/minecraft__copper_ingot.png" alt="銅インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COP</span></span></div>
+          <span class="assembly-arrow" aria-hidden="true">›</span>
+          <div class="recipe-output">
+            <span class="item-icon item-icon--large" title="Morrowgear マイクロミサイル補給パック"><img src="assets/morrowgear_drone__micro_missile_pack.png" alt="Morrowgear マイクロミサイル補給パック" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">MIC</span></span>
+            <span>完成 × 1</span>
+          </div>
+        </div>
+        <div class="ingredient-list"><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="鉄インゴット"><img src="assets/minecraft__iron_ingot.png" alt="鉄インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">IRO</span><span class="stack-count">2</span></span><span>鉄インゴット</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="火薬"><img src="assets/minecraft__gunpowder.png" alt="火薬" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">GUN</span><span class="stack-count">3</span></span><span>火薬</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="エンダーアイ"><img src="assets/minecraft__ender_eye.png" alt="エンダーアイ" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">END</span></span><span>エンダーアイ</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="銅インゴット"><img src="assets/minecraft__copper_ingot.png" alt="銅インゴット" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COP</span><span class="stack-count">2</span></span><span>銅インゴット</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="レッドストーンダスト"><img src="assets/minecraft__redstone.png" alt="レッドストーンダスト" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">RED</span></span><span>レッドストーンダスト</span></span></div>
+        
+        <div class="usage-block">
+          <div class="usage-meta"><span>兵装補給品</span><strong>使う場所</strong><b>Dockの弾薬スロット / 自動補給バッファ</b></div>
+          <p>1個でマイクロミサイル5発を補給します。通常素材では代替できない専用補給品です。</p>
+        </div>
+    
+      </article>
+    </div>
+            </section>
+            
+            <section class="recipe-section" id="section-05">
+              <div class="section-heading"><span>05</span><div><h2>チャンクバスター母艦</h2><p>終盤の大型設備。展開装置と遠隔管制端末を別々に製造します。</p></div></div>
+              <div class="recipe-grid">
+      <article class="recipe-card" data-stage="ENDGAME" data-search="Morrowgear 母艦端末">
+        <header class="recipe-card__head">
+          <div>
+            <span class="eyebrow">ENDGAME · 母艦管制</span>
+            <h3>Morrowgear 母艦端末</h3>
+          </div>
+          <span class="method">不定形</span>
+        </header>
+        <div class="recipe-assembly">
+          <div class="craft-grid craft-grid--shapeless"><span class="item-icon item-icon--normal" title="Morrowgear 基礎制御基板"><img src="assets/morrowgear_drone__basic_control_board.png" alt="Morrowgear 基礎制御基板" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BAS</span></span><span class="item-icon item-icon--normal" title="コンパス"><img src="assets/minecraft__compass.png" alt="コンパス" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COM</span></span><span class="item-icon item-icon--normal" title="モロウ合金"><img src="assets/morrowgear_drone__morrow_alloy.png" alt="モロウ合金" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">MOR</span></span><span class="grid-cell empty"></span><span class="grid-cell empty"></span><span class="grid-cell empty"></span><span class="grid-cell empty"></span><span class="grid-cell empty"></span><span class="grid-cell empty"></span></div>
+          <span class="assembly-arrow" aria-hidden="true">›</span>
+          <div class="recipe-output">
+            <span class="item-icon item-icon--large" title="Morrowgear 母艦端末"><img src="assets/morrowgear_drone__carrier_console.png" alt="Morrowgear 母艦端末" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">CAR</span></span>
+            <span>完成 × 1</span>
+          </div>
+        </div>
+        <div class="ingredient-list"><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="Morrowgear 基礎制御基板"><img src="assets/morrowgear_drone__basic_control_board.png" alt="Morrowgear 基礎制御基板" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">BAS</span></span><span>Morrowgear 基礎制御基板</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="コンパス"><img src="assets/minecraft__compass.png" alt="コンパス" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">COM</span></span><span>コンパス</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="モロウ合金"><img src="assets/morrowgear_drone__morrow_alloy.png" alt="モロウ合金" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">MOR</span></span><span>モロウ合金</span></span></div>
+        
+        <div class="usage-block">
+          <div class="usage-meta"><span>母艦管制装備</span><strong>使う場所</strong><b>右クリック</b></div>
+          <p>船内、または権限を持つ128ブロック以内のチャンクバスターを開き、移動・採掘範囲・攻撃・格納庫・物資・船内機能を操作します。</p>
+        </div>
+    
+      </article>
+    
+      <article class="recipe-card" data-stage="ENDGAME" data-search="Morrowgear チャンクバスター展開装置">
+        <header class="recipe-card__head">
+          <div>
+            <span class="eyebrow">ENDGAME · ウィザー討伐後</span>
+            <h3>Morrowgear チャンクバスター展開装置</h3>
+          </div>
+          <span class="method">3 × 3</span>
+        </header>
+        <div class="recipe-assembly">
+          <div class="craft-grid"><span class="item-icon item-icon--normal" title="モロウ合金"><img src="assets/morrowgear_drone__morrow_alloy.png" alt="モロウ合金" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">MOR</span></span><span class="item-icon item-icon--normal" title="Morrowgear 高密度飛行バッテリー"><img src="assets/morrowgear_drone__high_density_battery_pack.png" alt="Morrowgear 高密度飛行バッテリー" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">HIG</span></span><span class="item-icon item-icon--normal" title="モロウ合金"><img src="assets/morrowgear_drone__morrow_alloy.png" alt="モロウ合金" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">MOR</span></span><span class="item-icon item-icon--normal" title="Morrowgear ドローンDock"><img src="assets/morrowgear_drone__dock_item.png" alt="Morrowgear ドローンDock" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">DOC</span></span><span class="item-icon item-icon--normal" title="ネザースター"><img src="assets/minecraft__nether_star.png" alt="ネザースター" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">NET</span></span><span class="item-icon item-icon--normal" title="Morrowgear ドローンDock"><img src="assets/morrowgear_drone__dock_item.png" alt="Morrowgear ドローンDock" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">DOC</span></span><span class="item-icon item-icon--normal" title="Morrowgear 飛行アクチュエーター"><img src="assets/morrowgear_drone__flight_actuator.png" alt="Morrowgear 飛行アクチュエーター" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">FLI</span></span><span class="item-icon item-icon--normal" title="Morrowgear レーザーモジュール"><img src="assets/morrowgear_drone__laser_module.png" alt="Morrowgear レーザーモジュール" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">LAS</span></span><span class="item-icon item-icon--normal" title="Morrowgear 飛行アクチュエーター"><img src="assets/morrowgear_drone__flight_actuator.png" alt="Morrowgear 飛行アクチュエーター" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">FLI</span></span></div>
+          <span class="assembly-arrow" aria-hidden="true">›</span>
+          <div class="recipe-output">
+            <span class="item-icon item-icon--large" title="Morrowgear チャンクバスター展開装置"><img src="assets/morrowgear_drone__carrier_unit.png" alt="Morrowgear チャンクバスター展開装置" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">CAR</span></span>
+            <span>完成 × 1</span>
+          </div>
+        </div>
+        <div class="ingredient-list"><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="モロウ合金"><img src="assets/morrowgear_drone__morrow_alloy.png" alt="モロウ合金" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">MOR</span><span class="stack-count">2</span></span><span>モロウ合金</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="Morrowgear 高密度飛行バッテリー"><img src="assets/morrowgear_drone__high_density_battery_pack.png" alt="Morrowgear 高密度飛行バッテリー" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">HIG</span></span><span>Morrowgear 高密度飛行バッテリー</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="Morrowgear ドローンDock"><img src="assets/morrowgear_drone__dock_item.png" alt="Morrowgear ドローンDock" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">DOC</span><span class="stack-count">2</span></span><span>Morrowgear ドローンDock</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="ネザースター"><img src="assets/minecraft__nether_star.png" alt="ネザースター" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">NET</span></span><span>ネザースター</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="Morrowgear 飛行アクチュエーター"><img src="assets/morrowgear_drone__flight_actuator.png" alt="Morrowgear 飛行アクチュエーター" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">FLI</span><span class="stack-count">2</span></span><span>Morrowgear 飛行アクチュエーター</span></span><span class="ingredient-chip"><span class="item-icon item-icon--tiny" title="Morrowgear レーザーモジュール"><img src="assets/morrowgear_drone__laser_module.png" alt="Morrowgear レーザーモジュール" onerror="this.parentElement.classList.add('missing');this.remove()"><span class="fallback">LAS</span></span><span>Morrowgear レーザーモジュール</span></span></div>
+        
+        <div class="usage-block">
+          <div class="usage-meta"><span>大型母艦</span><strong>使う場所</strong><b>地面へ使用して上空32ブロックに展開</b></div>
+          <p>チャンクバスターを展開します。広域移動、チャンク掘削、範囲攻撃、回収物保管、専用船内、小型ドローンの補給母艦として使用します。</p>
+        </div>
+    
+      </article>
+    </div>
+            </section>
+            
+    <footer><span>SOURCE: src/main/resources/data/morrowgear_drone/recipe</span><span>Generated from the shipped game data. No inferred substitutions.</span></footer>
+  </main>
+</body>
+</html>

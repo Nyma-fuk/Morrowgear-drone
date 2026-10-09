@@ -20,7 +20,7 @@ final class FleetThreatNetworkTest {
 		assertTrue(snapshot.active());
 		assertEquals(18, snapshot.score());
 		assertEquals("WING-B", snapshot.sourceWing());
-		assertFalse(FleetThreatNetwork.read("overworld", owner, 200).active());
+		assertFalse(FleetThreatNetwork.read("overworld", owner, 250).active());
 	}
 
 	@Test void playerDangerOutranksAHigherScoringScoutReport() {
@@ -48,5 +48,25 @@ final class FleetThreatNetworkTest {
 		assertEquals(2, contacts.size());
 		assertEquals(11, contacts.getFirst().entityId());
 		assertEquals(20, contacts.getFirst().score());
+	}
+
+	@Test void manySensorsCollapseToOneStoredContactPerEnemy() {
+		UUID owner = UUID.randomUUID();
+		for (int sensor = 0; sensor < 64; sensor++) for (int enemy = 0; enemy < 200; enemy++)
+			FleetThreatNetwork.publish("overworld", owner, "SCOUT-" + sensor,
+				new FleetThreatNetwork.Report(10 + sensor % 20, new Vec3(enemy, 64, 0), enemy,
+					"WING-" + sensor, "PATROL", 100));
+		assertEquals(200, FleetThreatNetwork.reportCountForTest("overworld", owner));
+		assertEquals(200, FleetThreatNetwork.readAll("overworld", owner, 100).size());
+	}
+
+	@Test void commandAuthorizationCanVerifyAnOwnerScopedFreshContact() {
+		UUID owner = UUID.randomUUID(), other = UUID.randomUUID();
+		FleetThreatNetwork.publish("overworld", owner, "SCOUT-1",
+			new FleetThreatNetwork.Report(30, Vec3.ZERO, 77, "WING-S", "PATROL", 100));
+		assertTrue(FleetThreatNetwork.knownContact("overworld", owner, 77, 120));
+		assertFalse(FleetThreatNetwork.knownContact("the_nether", owner, 77, 120));
+		assertFalse(FleetThreatNetwork.knownContact("overworld", other, 77, 120));
+		assertFalse(FleetThreatNetwork.knownContact("overworld", owner, 77, 221));
 	}
 }

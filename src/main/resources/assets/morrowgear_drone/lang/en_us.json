@@ -1,4 +1,6 @@
 {
+  "message.morrowgear_drone.carrier_console.no_recovery": "No destroyed carrier is available for recovery. Release Sneak to operate a nearby carrier.",
+  "message.morrowgear_drone.carrier_console.unavailable": "No accessible carrier within 128 blocks. Check distance and access permission.",
 	"container.morrowgear_drone.dock_service": "Morrowgear Dock Service",
   "item.morrowgear_drone.controller": "Morrowgear Field Controller",
   "item.morrowgear_drone.field_drone_unit": "Morrowgear Field Drone Unit",
@@ -9,7 +11,7 @@
 	"item.morrowgear_drone.security_module": "Morrowgear Security Module",
 	"item.morrowgear_drone.salvage_module": "Morrowgear Salvage Module",
 	"item.morrowgear_drone.recovery_tool": "Morrowgear Airframe Recovery Tool",
-	"item.morrowgear_drone.power_cell": "Morrowgear Power Cell",
+	"item.morrowgear_drone.power_cell": "Morrowgear Propulsion Power Cell",
 	"item.morrowgear_drone.autocannon_magazine": "Morrowgear Autocannon Magazine",
 	"item.morrowgear_drone.laser_cell": "Morrowgear Weapon Energy Cell",
 	"item.morrowgear_drone.micro_missile_pack": "Morrowgear Micro-missile Supply Pack",
@@ -31,9 +33,9 @@
 	"item.morrowgear_drone.lightweight_frame": "Morrowgear Lightweight Frame",
 	"item.morrowgear_drone.basic_control_board": "Morrowgear Basic Control Board",
 	"item.morrowgear_drone.flight_actuator": "Morrowgear Flight Actuator",
-	"item.morrowgear_drone.standard_battery_pack": "Morrowgear Standard Battery Pack",
-	"item.morrowgear_drone.reinforced_battery_pack": "Morrowgear Reinforced Battery Pack",
-	"item.morrowgear_drone.high_density_battery_pack": "Morrowgear High-density Battery Pack",
+	"item.morrowgear_drone.standard_battery_pack": "Morrowgear Standard Flight Battery",
+	"item.morrowgear_drone.reinforced_battery_pack": "Morrowgear Reinforced Flight Battery",
+	"item.morrowgear_drone.high_density_battery_pack": "Morrowgear High-density Flight Battery",
 	"item.morrowgear_drone.autocannon_module": "Morrowgear Autocannon Module",
 	"item.morrowgear_drone.laser_module": "Morrowgear Laser Module",
 	"item.morrowgear_drone.missile_module": "Morrowgear Missile Module",
@@ -43,6 +45,10 @@
 	"subtitles.morrowgear_drone.carrier_laser_fire": "Carrier high-output beam fires",
 	"subtitles.morrowgear_drone.carrier_laser_hit": "Carrier beam impacts",
 	"subtitles.morrowgear_drone.carrier_laser_cooldown": "Carrier beam assembly cools",
+	"subtitles.morrowgear_drone.carrier_mining_emitter": "Carrier convergence emitters sequence",
+	"subtitles.morrowgear_drone.carrier_mining_core": "Carrier mining core enters plasma state",
+	"subtitles.morrowgear_drone.carrier_mining_release": "Carrier releases mining core",
+	"subtitles.morrowgear_drone.carrier_mining_impact": "Mining core breaches the surface",
 	"subtitles.morrowgear_drone.flight_cruise": "Drone turbines cruise",
 	"subtitles.morrowgear_drone.autocannon_burst": "Autocannon fires",
 	"subtitles.morrowgear_drone.laser_charge": "Laser power compresses",
@@ -89,5 +95,6 @@
 	"communication.morrowgear_drone.return_started": "%s / %s units / Returning",
 	"communication.morrowgear_drone.docked": "%s / %s units / Docked",
 	"communication.morrowgear_drone.service_complete": "%s / %s units / Serviced and redeployed",
-	"communication.morrowgear_drone.operation_complete": "%s / %s units / Work completed"
+	"communication.morrowgear_drone.operation_complete": "%s / %s units / Work completed",
+	"item.morrowgear_drone.operation_marker": "Spatial Operation Marker"
 }

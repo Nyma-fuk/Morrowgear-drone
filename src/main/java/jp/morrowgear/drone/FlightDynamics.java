@@ -59,6 +59,18 @@ final class FlightDynamics {
 			Math.max(position.distanceTo(waypoint), remainingDistance));
 	}
 
+	static Vec3 steerCombatTransition(Vec3 current, Vec3 position, Vec3 target,
+		double speedLimit, double minimumSpeed) {
+		current = finite(current);
+		Vec3 error = finite(target.subtract(position));
+		double distance = error.length();
+		if (distance < 0.01) return brake(current);
+		double requestedSpeed = Math.min(safeLimit(speedLimit),
+			Math.max(Math.max(0.0, minimumSpeed), 0.06 + distance * 0.085));
+		Vec3 desired = error.scale(requestedSpeed / distance);
+		return matchVelocity(current, desired, speedLimit, 0.52);
+	}
+
 	static Vec3 steerPredictiveRoute(Vec3 current, Vec3 position, Vec3 target,
 		Vec3 separation, double speedLimit, double remainingDistance) {
 		current = finite(current);
@@ -116,13 +128,15 @@ final class FlightDynamics {
 		Vec3 error = slot.subtract(position);
 		double distance = error.length();
 		Vec3 correction = distance < 0.000001 ? Vec3.ZERO
-			: error.scale(Math.min(0.18, distance * 0.09) / distance);
+			: error.scale(Math.min(0.32, distance * 0.14) / distance);
 		Vec3 desired = slotVelocity.add(correction);
 		if (desired.length() > speedLimit) desired = desired.normalize().scale(speedLimit);
 		// The dedicated laser lane is also a hard safety envelope. Generic velocity
 		// matching may retain entry speed for several ticks while it decelerates.
+		// A moving target otherwise drags late members around a smaller arc and the
+		// element never converges to equal angular spacing.
 		return limit(matchVelocity(current, desired, speedLimit,
-			distance < 1.5 ? 0.18 : 0.28), safeLimit(speedLimit));
+			distance < 1.5 ? 0.26 : 0.42), safeLimit(speedLimit));
 	}
 
 	static Vec3 limitLaserVelocity(Vec3 velocity, double speedLimit) {
@@ -208,6 +222,13 @@ final class FlightDynamics {
 		if (finalApproach) {
 			Vec3 lateral = requested.multiply(1, 0, 1);
 			if (clear.test(lateral)) return lateral;
+		}
+		// Preserve as much of the already coordinated vector as the free corridor
+		// permits. Dropping directly to zero made CAS and rejoin look like a one-tick
+		// freeze whenever the large hull grazed a conservative collision sweep.
+		for (double scale = 0.85; scale >= 0.15; scale -= 0.10) {
+			Vec3 reduced = next.scale(scale);
+			if (clear.test(reduced)) return reduced;
 		}
 		return Vec3.ZERO;
 	}

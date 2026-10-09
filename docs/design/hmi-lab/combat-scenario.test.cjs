@@ -1,0 +1,7 @@
+const test=require('node:test');const assert=require('node:assert/strict');const {frame,steps}=require('./combat-scenario');
+test('four fronts keep stable identifiers and overflow count',()=>{const p=frame(4);assert.deepEqual(p.active.map(f=>f.id),['01','02','03','04']);assert.equal(p.visible.length,3);assert.equal(p.hidden,1);assert.equal(frame(4,{width:650}).hidden,3);});
+test('reinforcement changes allocation without replacing front',()=>{assert.equal(frame(4).active[2].units,0);assert.equal(frame(5).active[2].units,2);assert.equal(frame(5).active[2].id,'03');});
+test('aggregated kills do not end an ongoing battle',()=>{const p=frame(6);assert.equal(p.active.find(f=>f.id==='02').enemy,'ゾンビ群 ×7');assert.equal(p.history.filter(e=>e.type==='kill').length,1);assert.ok(!p.history.some(e=>e.type==='end'));});
+test('lost contact and withdrawal never imply victory',()=>{const p=frame(10);assert.equal(p.unresolved.length,2);assert.ok(!p.history.some(e=>['03','04'].includes(e.front)&&e.type==='end'));});
+test('resolved selected front is retained, not silently switched',()=>{assert.deepEqual(frame(8,{selected:'01'}).selected,{id:'01',closed:true});assert.equal(frame(8).active[0].id,'02');});
+test('feed capped, expires, history retained',()=>{for(let i=0;i<steps.length;i++)assert.ok(frame(i).logs.length<=3);assert.equal(frame(12).logs.length,0);assert.ok(frame(12).history.length>3);assert.equal(frame(12).unresolved.length,2);});

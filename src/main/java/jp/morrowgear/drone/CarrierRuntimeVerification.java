@@ -106,6 +106,28 @@ public final class CarrierRuntimeVerification {
         return WORLD_NAME.equals(name) && singleplayer && creative && players == 1;
     }
 
+    static boolean startAutomation(ServerPlayer player) {
+        Proof proof = Proof.get(player.level().getServer());
+        if (active == null && !proof.stage.equals("EMPTY") && !proof.stage.equals("CLEANED")) {
+            if (command(player.createCommandSourceStack(), "stop") != 1) return false;
+        }
+        for (ServerLevel level : player.level().getServer().getAllLevels()) {
+            for (Entity entity : level.getAllEntities()) {
+                if (entity instanceof DroneEntity drone) drone.discard();
+            }
+        }
+        return command(player.createCommandSourceStack(), "start") == 1;
+    }
+
+    static MorrowgearAutomation.Result automationStatus(MinecraftServer server) {
+        Proof proof = Proof.get(server);
+        if ("READY".equals(proof.stage) || "PASS".equals(proof.stage))
+            return MorrowgearAutomation.Result.pass(proof.stage + " / " + proof.message);
+        if ("FAILED".equals(proof.stage))
+            return MorrowgearAutomation.Result.fail(proof.stage + " / " + proof.message);
+        return MorrowgearAutomation.Result.running(proof.stage + " / " + proof.message);
+    }
+
     private static boolean allowed(ServerPlayer player) {
         MinecraftServer server = player.level().getServer();
         return allowedWorld(server.getWorldData().getLevelName(), server.isSingleplayer(), player.isCreative(),
@@ -166,7 +188,7 @@ public final class CarrierRuntimeVerification {
                 && ship.progress == null && ship.pending == null && ship.bay.snapshot().isEmpty(),
                 "existing carrier has work or a reservation; no mission takeover");
             require(ship.cargo.isEmpty() && ship.supplies.isEmpty(), "existing carrier cargo and supply slots must be empty; never overwrite items");
-            require(CarrierSupplies.canCharge(ship.energy) && CarrierSupplies.canCharge(ship.weaponEnergy), "existing tanks need room for one test cell each");
+            require(CarrierSupplies.canCharge(ship.energy, false) && CarrierSupplies.canCharge(ship.weaponEnergy, true), "existing tanks need room for one test cell each");
         }
         int x = existing == null ? Math.floorDiv(player.blockPosition().getX() + 32, 16) * 16 + 8
             : (existing.blockPosition().getX() >> 4) * 16 + 8;

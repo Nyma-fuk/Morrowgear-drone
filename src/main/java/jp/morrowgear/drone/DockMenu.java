@@ -30,7 +30,11 @@ public final class DockMenu extends AbstractContainerMenu {
 	public static final int DRONE_ID = 14, READINESS = 15, DRONE_FLIGHT_PERCENT = 16;
 	public static final int DRONE_WEAPON_PERCENT = 17, DRONE_GUN_ROUNDS = 18, DRONE_MISSILES = 19;
 	public static final int DRONE_WEAPON_CAPACITY = 20, DRONE_GUN_CAPACITY = 21, DRONE_MISSILE_CAPACITY = 22;
-	public static final int VALUE_COUNT = 23, DATA_COUNT = VALUE_COUNT * 2;
+	public static final int DRONE_LASER_HEAT = 23, DRONE_LOADOUT = 24;
+	public static final int DRONE_STRUCTURE_PERCENT = 25, DRONE_SYSTEM_PERCENT = 26;
+	public static final int DRONE_SECURITY = 27;
+	public static final int DOCK_X = 28, DOCK_Y = 29, DOCK_Z = 30;
+	public static final int VALUE_COUNT = 31, DATA_COUNT = VALUE_COUNT * 2;
 	public static final int EMPTY = 0, SERVICING = 1, READY = 2, BLOCKED = 3;
 	public static final int PLAYER_START = 27, HOTBAR_START = 54, PLAYER_END = 63;
 	private final Container container;
@@ -133,6 +137,7 @@ public final class DockMenu extends AbstractContainerMenu {
 	}
 
 	public int supplyCount(SupplyKind kind) { return value(STOCK_START + kind.index()); }
+	public net.minecraft.core.BlockPos dockPosition() { return new net.minecraft.core.BlockPos(value(DOCK_X), value(DOCK_Y), value(DOCK_Z)); }
 	public boolean available(SupplyKind kind) { return (value(AVAILABLE_MASK) & kind.mask()) != 0; }
 	public boolean shortage(SupplyKind kind) { return (value(SHORTAGE_MASK) & kind.mask()) != 0; }
 
@@ -172,6 +177,15 @@ public final class DockMenu extends AbstractContainerMenu {
 		setValue(DRONE_WEAPON_CAPACITY, drone == null ? PayloadCapacity.energy(0) : drone.weaponCapacity());
 		setValue(DRONE_GUN_CAPACITY, drone == null ? PayloadCapacity.gun(0) : drone.gunCapacity());
 		setValue(DRONE_MISSILE_CAPACITY, drone == null ? PayloadCapacity.missiles(0) : drone.missileCapacity());
+		setValue(DRONE_LASER_HEAT, drone == null ? 0 : drone.laserHeat());
+		setValue(DRONE_LOADOUT, drone == null ? SecurityLoadout.UNARMED.ordinal() : drone.securityLoadout().ordinal());
+		setValue(DRONE_STRUCTURE_PERCENT, drone == null ? 0 : Math.round(
+			drone.getHealth() * 100.0f / Math.max(1.0f, drone.getMaxHealth())));
+		setValue(DRONE_SYSTEM_PERCENT, drone == null ? 0 : drone.lowestSubsystemCondition() / 10);
+		setValue(DRONE_SECURITY, drone != null && drone.role() == DroneRole.SECURITY ? 1 : 0);
+		setValue(DOCK_X, dock.getBlockPos().getX());
+		setValue(DOCK_Y, dock.getBlockPos().getY());
+		setValue(DOCK_Z, dock.getBlockPos().getZ());
 		if (drone == null) {
 			setValue(READINESS, EMPTY);
 			setValue(SHORTAGE_MASK, 0);

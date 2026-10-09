@@ -8,17 +8,19 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
 final class FleetThreatNetwork {
-	static final long REPORT_TTL_TICKS = 60L;
-	private static final Map<Key, Map<String, Report>> REPORTS = new HashMap<>();
+	static final long REPORT_TTL_TICKS = ThreatSensorPolicy.REPORT_TTL_TICKS;
+	private static final Map<Key, Map<Integer, Report>> REPORTS = new HashMap<>();
+	private static final Map<Key, Long> LAST_PRUNE = new HashMap<>();
 
 	private FleetThreatNetwork() {}
 
 	static void publish(String dimension, UUID owner, String sourceId, Report report) {
 		if (sourceId == null || sourceId.isBlank()) return;
 		Key key = new Key(dimension, owner);
-		String contactKey = sourceId + '#' + report.entityId();
-		REPORTS.computeIfAbsent(key, ignored -> new HashMap<>()).put(contactKey, report.normalized());
-		prune(report.tick());
+		Report normalized = report.normalized();
+		REPORTS.computeIfAbsent(key, ignored -> new HashMap<>()).merge(normalized.entityId(), normalized,
+			(left, right) -> compareReports(left, right) >= 0 ? left : right);
+		prune(key, report.tick());
 	}
 
 	static Snapshot read(String dimension, UUID owner, long now) {
@@ -26,19 +28,21 @@ final class FleetThreatNetwork {
 	}
 
 	static List<Snapshot> readAll(String dimension, UUID owner, long now) {
-		Map<String, Report> reports = REPORTS.get(new Key(dimension, owner));
+		Key key = new Key(dimension, owner);
+		prune(key, now);
+		Map<Integer, Report> reports = REPORTS.get(key);
 		if (reports == null) return List.of();
-		Map<Integer, Report> strongestByEntity = new HashMap<>();
-		reports.values().stream()
+		return reports.values().stream()
 			.filter(report -> now - report.tick() <= REPORT_TTL_TICKS
 				&& report.score() > 0 && report.entityId() >= 0)
-			.forEach(report -> strongestByEntity.merge(report.entityId(), report,
-				(left, right) -> compareReports(left, right) >= 0 ? left : right));
-		return strongestByEntity.values().stream()
 			.sorted((a, b) -> -compareReports(a, b))
 			.map(report -> new Snapshot(report.score(), report.enemyThreat(), report.playerDanger(),
 				report.position(), report.entityId(), report.sourceWing(), report.sourceMission(), report.tick()))
 			.toList();
+	}
+
+	static boolean knownContact(String dimension, UUID owner, int entityId, long now) {
+		return readAll(dimension, owner, now).stream().anyMatch(report -> report.entityId() == entityId);
 	}
 
 	private static int compareReports(Report a, Report b) {
@@ -64,12 +68,25 @@ final class FleetThreatNetwork {
 
 	static void clear() {
 		REPORTS.clear();
+		LAST_PRUNE.clear();
 		CombatTheaterCoordinator.clear();
 	}
 
-	private static void prune(long now) {
-		REPORTS.values().forEach(values -> values.values().removeIf(report -> now - report.tick() > REPORT_TTL_TICKS));
-		REPORTS.entrySet().removeIf(entry -> entry.getValue().isEmpty());
+	private static void prune(Key key, long now) {
+		Long previous = LAST_PRUNE.get(key);
+		if (previous != null && now >= previous
+			&& now - previous < ThreatSensorPolicy.NETWORK_MAINTENANCE_INTERVAL_TICKS) return;
+		Map<Integer, Report> reports = REPORTS.get(key);
+		if (reports != null) {
+			reports.values().removeIf(report -> now - report.tick() > REPORT_TTL_TICKS);
+			if (reports.isEmpty()) REPORTS.remove(key);
+		}
+		LAST_PRUNE.put(key, now);
+	}
+
+	static int reportCountForTest(String dimension, UUID owner) {
+		Map<Integer, Report> reports = REPORTS.get(new Key(dimension, owner));
+		return reports == null ? 0 : reports.size();
 	}
 
 	record Report(int score, int enemyThreat, int playerDanger, Vec3 position, int entityId,

@@ -10,7 +10,8 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 public record CarrierCommandPayload(int menu, UUID ship, Action action, UUID generation, int x, int y, int z, UUID guest)
     implements CustomPacketPayload {
     public enum Action { PREVIEW_MINING, PREVIEW_COMBAT, ACTIVATE, RESUME_PREVIEW, STOP, BOARD, EXIT,
-        MOVE, REFUEL, ALLOW_GUEST, REVOKE_GUEST, RECOVER_CABIN, CHARGE_WEAPON, RESERVE_BAY, RELEASE_BAY, CARGO_PAGE }
+        MOVE, REFUEL, ALLOW_GUEST, REVOKE_GUEST, RECOVER_CABIN, CHARGE_WEAPON, RESERVE_BAY, RELEASE_BAY, CARGO_PAGE,
+        MOVE_MINING, MOVE_COMBAT }
     public static final UUID NONE = new UUID(0, 0);
     public static final Type<CarrierCommandPayload> TYPE = new Type<>(CarrierModule.id("carrier_command"));
     public static final StreamCodec<ByteBuf, CarrierCommandPayload> CODEC = StreamCodec.of((buf, p) -> {

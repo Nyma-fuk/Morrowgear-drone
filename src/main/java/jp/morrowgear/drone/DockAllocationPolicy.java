@@ -15,16 +15,26 @@ final class DockAllocationPolicy {
 	private DockAllocationPolicy() {
 	}
 
+	static boolean replacementRequired(boolean wasDocked, boolean serviceReturn,
+		boolean dockMode, boolean holding) {
+		return wasDocked || serviceReturn || dockMode || holding;
+	}
+
 	static int queuePosition(List<Request> requests, UUID aircraft) {
 		if (aircraft == null) return 0;
-		List<Request> ordered = requests.stream().sorted(Comparator
-			.comparingInt(Request::priority).reversed()
+		Request current = requests.stream().filter(request -> request.aircraft().equals(aircraft))
+			.findFirst().orElse(null);
+		if (current == null) return 0;
+		Comparator<Request> order = Comparator.comparingInt(Request::priority).reversed()
 			.thenComparingLong(Request::requestedTick)
-			.thenComparing(request -> request.aircraft().toString())).toList();
-		for (int index = 0; index < ordered.size(); index++) {
-			if (ordered.get(index).aircraft().equals(aircraft)) return index + 1;
-		}
-		return 0;
+			.thenComparing(request -> request.aircraft().toString());
+		int ahead = 0;
+		for (Request request : requests) if (order.compare(request, current) < 0) ahead++;
+		return ahead + 1;
+	}
+
+	static int queuePosition(List<Request> requests, UUID aircraft, java.util.Set<UUID> compatible) {
+		return queuePosition(requests.stream().filter(request -> compatible.contains(request.aircraft())).toList(), aircraft);
 	}
 
 	static boolean mayYield(boolean docked, boolean activeMission, boolean service,

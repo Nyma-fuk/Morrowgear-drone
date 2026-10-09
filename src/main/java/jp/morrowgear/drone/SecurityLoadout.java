@@ -22,6 +22,15 @@ public enum SecurityLoadout {
 	public String id() { return id; }
 	public String displayName() { return displayName; }
 	public CombatWeapon weapon() { return weapon; }
+	public boolean armed() { return this != UNARMED; }
+
+	/**
+	 * Legacy loadout values are retained as stable save/UI ids. They now express a
+	 * preferred doctrine; only UNARMED forbids fallback to another built-in weapon.
+	 */
+	public boolean prefers(CombatWeapon candidate) {
+		return weapon != null && weapon == candidate;
+	}
 
 	public static SecurityLoadout byId(String id) {
 		return Arrays.stream(values()).filter(loadout -> loadout.id.equalsIgnoreCase(id))

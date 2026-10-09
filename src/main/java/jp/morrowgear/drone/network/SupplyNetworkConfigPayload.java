@@ -25,7 +25,7 @@ public record SupplyNetworkConfigPayload(long source, long dock, boolean enabled
 			long source = buffer.readLong(), dock = buffer.readLong();
 			boolean enabled = buffer.readBoolean();
 			List<Rule> rules = new ArrayList<>();
-			for (SupplyKind kind : wireKinds()) rules.add(new Rule(kind, buffer.readInt(), buffer.readInt()));
+			for (SupplyKind kind : wireKinds()) rules.add(new Rule(kind, buffer.readInt(), buffer.readInt(), buffer.readInt()));
 			return new SupplyNetworkConfigPayload(source, dock, enabled, rules);
 		}
 
@@ -34,7 +34,7 @@ public record SupplyNetworkConfigPayload(long source, long dock, boolean enabled
 			buffer.writeLong(payload.source()).writeLong(payload.dock()).writeBoolean(payload.enabled());
 			for (SupplyKind kind : wireKinds()) {
 				Rule rule = payload.rules().stream().filter(r -> r.kind() == kind).findFirst().orElseThrow();
-				buffer.writeInt(rule.minimum()).writeInt(rule.priority());
+				buffer.writeInt(rule.minimum()).writeInt(rule.target()).writeInt(rule.priority());
 			}
 		}
 	};
@@ -52,10 +52,7 @@ public record SupplyNetworkConfigPayload(long source, long dock, boolean enabled
 	/** Parent receiver must call on the server thread, never on the network IO thread. */
 	public void apply(ServerPlayer player) {
 		try {
-			if (!enabled) {
-				if (!SupplyNetworkRuntime.disable(player, BlockPos.of(dock)))
-					throw new IllegalArgumentException("No owned supply route");
-			} else SupplyNetworkRuntime.configure(player, BlockPos.of(source), BlockPos.of(dock), rules, true);
+			SupplyNetworkRuntime.configureDock(player, BlockPos.of(dock), enabled);
 		} catch (IllegalArgumentException | IllegalStateException rejected) {
 			player.sendSystemMessage(Component.literal("[MORROWGEAR] SUPPLY / " + rejected.getMessage()));
 		}

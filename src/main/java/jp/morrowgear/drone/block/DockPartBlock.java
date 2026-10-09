@@ -38,7 +38,7 @@ public class DockPartBlock extends Block {
 	protected net.minecraft.world.InteractionResult useItemOn(net.minecraft.world.item.ItemStack stack,
 		BlockState state, Level level, BlockPos pos, Player player, net.minecraft.world.InteractionHand hand,
 		net.minecraft.world.phys.BlockHitResult hit) {
-		if (!DockBlockEntity.isSupply(stack)) return net.minecraft.world.InteractionResult.PASS;
+		if (!DockBlockEntity.isSupply(stack)) return net.minecraft.world.InteractionResult.TRY_WITH_EMPTY_HAND;
 		if (level.isClientSide()) return net.minecraft.world.InteractionResult.SUCCESS;
 		return player instanceof net.minecraft.server.level.ServerPlayer serverPlayer
 			&& level.getBlockEntity(pos.offset(-offsetX, 0, -offsetZ)) instanceof DockBlockEntity dock

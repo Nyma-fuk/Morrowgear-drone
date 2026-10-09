@@ -15,6 +15,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
 
 final class FieldOperationRegistry {
+	static final int MAX_SHARED_SCAN_SAMPLES_PER_TICK = 512;
 	private static final long TTL_TICKS = 20L * 60L * 30L;
 	private static final Map<Key, Operation> OPERATIONS = new HashMap<>();
 
@@ -23,14 +24,19 @@ final class FieldOperationRegistry {
 
 	static synchronized Operation acquire(String dimension, UUID owner, String id,
 		FieldOperationType type, BlockPos anchor, int radius, long now) {
+		return acquire(dimension, owner, id, type, anchor, radius, null, null, now);
+	}
+
+	static synchronized Operation acquire(String dimension, UUID owner, String id,
+		FieldOperationType type, BlockPos anchor, int radius, BlockPos markedMin, BlockPos markedMax, long now) {
 		prune(now);
 		Key key = new Key(dimension, owner, id);
 		Operation existing = OPERATIONS.get(key);
-		if (existing != null && existing.matches(type, anchor, radius)) {
+		if (existing != null && existing.matches(type, anchor, radius, markedMin, markedMax)) {
 			existing.touch(now);
 			return existing;
 		}
-		Operation replacement = new Operation(type, anchor, radius, now);
+		Operation replacement = new Operation(type, anchor, radius, markedMin, markedMax, now);
 		OPERATIONS.put(key, replacement);
 		return replacement;
 	}
@@ -78,24 +84,35 @@ final class FieldOperationRegistry {
 		private int surveyedFluid;
 		private boolean scanComplete;
 		private long lastAccessTick;
+		private long scanBudgetTick = Long.MIN_VALUE;
+		private int scanBudgetUsed;
 
-		Operation(FieldOperationType type, BlockPos anchor, int requestedRadius, long now) {
+		Operation(FieldOperationType type, BlockPos anchor, int requestedRadius, BlockPos markedMin, BlockPos markedMax, long now) {
 			this.type = type;
 			this.anchor = anchor.immutable();
 			this.radius = DroneStatePolicy.fieldRadius(type, requestedRadius);
-			minX = anchor.getX() - radius;
-			minZ = anchor.getZ() - radius;
-			sizeX = radius * 2 + 1;
-			sizeZ = radius * 2 + 1;
-			if (type == FieldOperationType.ORE) {
+			if (markedMin != null && markedMax != null) {
+				minX = Math.min(markedMin.getX(), markedMax.getX());
+				minY = Math.min(markedMin.getY(), markedMax.getY());
+				minZ = Math.min(markedMin.getZ(), markedMax.getZ());
+				sizeX = Math.max(1, Math.abs(markedMax.getX() - markedMin.getX()) + 1);
+				sizeY = Math.max(1, Math.abs(markedMax.getY() - markedMin.getY()) + 1);
+				sizeZ = Math.max(1, Math.abs(markedMax.getZ() - markedMin.getZ()) + 1);
+			} else if (type == FieldOperationType.ORE) {
+				minX = anchor.getX() - radius; minZ = anchor.getZ() - radius;
+				sizeX = radius * 2 + 1; sizeZ = radius * 2 + 1;
 				minY = anchor.getY() - 32;
 				sizeY = 65;
 			} else if (type == FieldOperationType.FORESTRY) {
+				minX = anchor.getX() - radius; minZ = anchor.getZ() - radius;
+				sizeX = radius * 2 + 1; sizeZ = radius * 2 + 1;
 				// The map anchor is terrain-derived. Scan both below and above it so
 				// tall jungle/spruce trunks and trees rooted below nearby slopes are included.
 				minY = anchor.getY() - 32;
 				sizeY = 65;
 			} else {
+				minX = anchor.getX() - radius; minZ = anchor.getZ() - radius;
+				sizeX = radius * 2 + 1; sizeZ = radius * 2 + 1;
 				minY = anchor.getY() - 5;
 				sizeY = 6;
 			}
@@ -103,10 +120,24 @@ final class FieldOperationRegistry {
 			lastAccessTick = now;
 		}
 
+		Operation(FieldOperationType type, BlockPos anchor, int requestedRadius, long now) {
+			this(type, anchor, requestedRadius, null, null, now);
+		}
+
 		synchronized void recordSurveySample(boolean air, boolean fluid, long now) {
 			touch(now);
 			if (air) surveyedAir++; else surveyedSolid++;
 			if (fluid) surveyedFluid++;
+		}
+
+		synchronized int claimScanBudget(long now, int requested, int limit) {
+			if (scanBudgetTick != now) {
+				scanBudgetTick = now;
+				scanBudgetUsed = 0;
+			}
+			int granted = Math.max(0, Math.min(Math.max(0, requested), Math.max(0, limit - scanBudgetUsed)));
+			scanBudgetUsed += granted;
+			return granted;
 		}
 
 		synchronized BlockPos nextScanPos(long now) {
@@ -258,9 +289,17 @@ final class FieldOperationRegistry {
 				surveyedAir, surveyedSolid, surveyedFluid);
 		}
 
-		private boolean matches(FieldOperationType requestedType, BlockPos requestedAnchor, int requestedRadius) {
+		private boolean matches(FieldOperationType requestedType, BlockPos requestedAnchor, int requestedRadius,
+			BlockPos markedMin, BlockPos markedMax) {
 			int normalizedRadius = DroneStatePolicy.fieldRadius(requestedType, requestedRadius);
-			return type == requestedType && anchor.equals(requestedAnchor) && radius == normalizedRadius;
+			if (type != requestedType || !anchor.equals(requestedAnchor) || radius != normalizedRadius) return false;
+			if (markedMin == null || markedMax == null) return sizeX == radius * 2 + 1 && sizeZ == radius * 2 + 1;
+			return minX == Math.min(markedMin.getX(), markedMax.getX())
+				&& minY == Math.min(markedMin.getY(), markedMax.getY())
+				&& minZ == Math.min(markedMin.getZ(), markedMax.getZ())
+				&& sizeX == Math.abs(markedMax.getX() - markedMin.getX()) + 1
+				&& sizeY == Math.abs(markedMax.getY() - markedMin.getY()) + 1
+				&& sizeZ == Math.abs(markedMax.getZ() - markedMin.getZ()) + 1;
 		}
 
 		private void touch(long now) { lastAccessTick = now; }

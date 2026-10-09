@@ -46,6 +46,7 @@ public final class CarrierEntity extends Entity {
     private static final EntityDataAccessor<Integer> CAPTURED = SynchedEntityData.defineId(CarrierEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<BlockPos> CAPTURE_POS = SynchedEntityData.defineId(CarrierEntity.class, EntityDataSerializers.BLOCK_POS);
     private static final EntityDataAccessor<Integer> BEAM_SEQUENCE = SynchedEntityData.defineId(CarrierEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> MINING_SURFACE_Y = SynchedEntityData.defineId(CarrierEntity.class, EntityDataSerializers.INT);
     private final CarrierBoardingPreview boardingPreview = new CarrierBoardingPreview();
     private final InterpolationHandler interpolation = new InterpolationHandler(this, 2);
     private float hull = 400;
@@ -101,7 +102,7 @@ public final class CarrierEntity extends Entity {
         CarrierShip ship = ship();
         if (ship == null) return false;
         var op = ship.mode == CarrierPolicy.Mode.MINING && ship.progress != null ? ship.progress.operation() : ship.preview;
-        return op == null || (pos.getX() >> 4) != op.chunkX() || (pos.getZ() >> 4) != op.chunkZ();
+        return op == null || !op.contains(pos.getX(), Math.clamp(pos.getY(), op.minY(), op.maxY()), pos.getZ());
     }
     @Override protected void defineSynchedData(SynchedEntityData.Builder builder) {
         builder.define(MODE, 0); builder.define(STATUS, 0); builder.define(CURSOR, 0); builder.define(TOTAL, 0);
@@ -117,6 +118,7 @@ public final class CarrierEntity extends Entity {
         for (var aim : AIMS) builder.define(aim, new org.joml.Vector3f());
         builder.define(MINED, 0); builder.define(CAPTURED, 0); builder.define(CAPTURE_POS, BlockPos.ZERO);
         builder.define(BEAM_SEQUENCE, 0);
+        builder.define(MINING_SURFACE_Y, 0);
     }
     public CarrierPolicy.Mode workMode() { return CarrierPolicy.Mode.values()[entityData.get(MODE)]; }
     public CarrierPolicy.Stop workStatus() { return CarrierPolicy.Stop.values()[entityData.get(STATUS)]; }
@@ -125,6 +127,7 @@ public final class CarrierEntity extends Entity {
     public BlockPos beamTarget() { return entityData.get(TARGET); }
     public BlockPos operationMin() { return entityData.get(AREA_MIN); }
     public BlockPos operationMax() { return entityData.get(AREA_MAX); }
+    public int miningSurfaceY() { return entityData.get(MINING_SURFACE_Y); }
     public String operationGeneration() { return entityData.get(GENERATION); }
     public boolean beamActive() { return entityData.get(BEAM); }
     public CarrierPolicy.WorkPhase workPhase() { return CarrierPolicy.WorkPhase.values()[entityData.get(PHASE)]; }
@@ -134,6 +137,7 @@ public final class CarrierEntity extends Entity {
         return switch (workPhase()) {
             case SCAN -> CarrierPolicy.SCAN_TICKS;
             case CHARGE -> CarrierPolicy.MINING_CHARGE_TICKS;
+            case FIRE -> CarrierMiningEffectPolicy.RELEASE_TICKS;
             default -> 0;
         };
     }
@@ -151,10 +155,15 @@ public final class CarrierEntity extends Entity {
         return lastCaptureDrops.stream().map(net.minecraft.world.item.ItemStack::copy).toList();
     }
     void recordCapture(BlockPos pos, java.util.List<net.minecraft.world.item.ItemStack> drops) {
-        lastCaptureDrops = drops.stream().map(net.minecraft.world.item.ItemStack::copy).toList();
         long items = drops.stream().mapToLong(net.minecraft.world.item.ItemStack::getCount).sum();
-        entityData.set(MINED, (int) Math.min(Integer.MAX_VALUE, (long) minedBlocks() + 1));
-        entityData.set(CAPTURED, (int) Math.min(Integer.MAX_VALUE, (long) capturedItems() + items));
+        recordCaptureBatch(pos, drops, 1, items);
+    }
+    void recordCaptureBatch(BlockPos pos, java.util.List<net.minecraft.world.item.ItemStack> drops,
+                            int blocks, long items) {
+        if (blocks <= 0) return;
+        lastCaptureDrops = drops.stream().map(net.minecraft.world.item.ItemStack::copy).toList();
+        entityData.set(MINED, (int) Math.min(Integer.MAX_VALUE, (long) minedBlocks() + blocks));
+        entityData.set(CAPTURED, (int) Math.min(Integer.MAX_VALUE, (long) capturedItems() + Math.max(0, items)));
         entityData.set(CAPTURE_POS, pos.immutable());
     }
     public java.util.List<Vec3> beamAims() {
@@ -254,8 +263,9 @@ public final class CarrierEntity extends Entity {
         entityData.set(CURSOR, cursor); entityData.set(TOTAL, op == null ? 0 : op.volume());
         entityData.set(GENERATION, op == null ? "" : op.generation().toString());
         if (op != null) {
-            entityData.set(AREA_MIN, new BlockPos(op.chunkX() * 16, op.minY(), op.chunkZ() * 16));
-            entityData.set(AREA_MAX, new BlockPos(op.chunkX() * 16 + 15, op.maxY(), op.chunkZ() * 16 + 15));
+            entityData.set(AREA_MIN, new BlockPos(op.minX(), op.minY(), op.minZ()));
+            entityData.set(AREA_MAX, new BlockPos(op.maxX(), op.maxY(), op.maxZ()));
+            entityData.set(MINING_SURFACE_Y, op.surfaceY());
             int current = Math.min(cursor, op.volume() - 1);
             if (beamTicks <= 0) entityData.set(TARGET, new BlockPos(op.x(current), op.y(current), op.z(current)));
         }
@@ -288,8 +298,6 @@ public final class CarrierEntity extends Entity {
         if (player.isSpectator()) return "OWNER_SPECTATING";
         if (getUUID().equals(CarrierInterior.currentShip(player))) return "READY";
         if (player.level() != level()) return "WRONG_DIMENSION";
-        double distanceSquared = player.distanceToSqr(this);
-        if (distanceSquared > 128 * 128) return "OUT_OF_RANGE_" + Math.round(Math.sqrt(distanceSquared));
         return "READY";
     }
     boolean hasOperationalOwner(ServerPlayer player) {
@@ -332,10 +340,28 @@ public final class CarrierEntity extends Entity {
             return;
         }
         CarrierSupplies.tick(ship, level.getGameTime());
+        if (ship.mode == CarrierPolicy.Mode.IDLE && ship.destination == null
+            && ship.arrivalOperation != CarrierPolicy.Mode.IDLE && ship.preview != null
+            && level.getServer().getTickCount() > ship.previewUntil) {
+            ship.arrivalOperation = CarrierPolicy.Mode.IDLE;
+            ship.preview = null;
+            ship.previewUntil = 0;
+            ship.stop = CarrierPolicy.Stop.EXPIRED;
+            ship.dirty.run();
+        }
         if (ship.destination != null && !ship.navigationPaused) {
             Vec3 destination = CarrierNavigation.destination(ship.destination);
             Vec3 delta = destination.subtract(position());
-            if (CarrierNavigation.arrived(position(), destination)) { ship.destination = null; ship.stop = CarrierPolicy.Stop.COMPLETE; ship.dirty.run(); }
+            if (CarrierNavigation.arrived(position(), destination)) {
+                CarrierPolicy.Mode arrivalOperation = ship.arrivalOperation;
+                ship.destination = null;
+                ship.stop = CarrierPolicy.Stop.COMPLETE;
+                if (arrivalOperation != CarrierPolicy.Mode.IDLE) {
+                    CarrierCommands.preparePreview(ship, level, this, arrivalOperation,
+                        blockPosition().getX(), blockPosition().getZ(), level.getServer().getTickCount());
+                }
+                ship.dirty.run();
+            }
             else {
                 double speedLimit = CarrierPowerPolicy.flightSpeed(ship.energy);
                 var motion = CarrierNavigation.advance(position(), destination, getYRot(), previousVelocity, speedLimit);
@@ -380,10 +406,15 @@ public final class CarrierEntity extends Entity {
         if (tickCount % 20 == 0) { ship.exterior = CarrierAnchor.at(this); ship.dirty.run(); }
     }
     public boolean setDestination(ServerPlayer player, BlockPos target) {
+        return setDestination(player, target, CarrierPolicy.Mode.IDLE);
+    }
+    public boolean setDestination(ServerPlayer player, BlockPos target, CarrierPolicy.Mode arrivalOperation) {
         CarrierShip ship = ship();
         if (!"READY".equals(destinationRefusalReason(player, target))) return false;
         ship.stop(CarrierPolicy.Stop.READY);
         ship.destination = new CarrierAnchor(level().dimension().identifier().toString(), target.getX(), target.getY(), target.getZ());
+        ship.arrivalOperation = arrivalOperation == CarrierPolicy.Mode.MINING || arrivalOperation == CarrierPolicy.Mode.COMBAT
+            ? arrivalOperation : CarrierPolicy.Mode.IDLE;
         ship.navigationPaused = false;
         bayClearWait = 0;
         ship.stop = CarrierPolicy.Stop.RUNNING;
@@ -434,7 +465,7 @@ public final class CarrierEntity extends Entity {
         for (int x = (int) Math.floor(box.minX); x <= (int) Math.floor(box.maxX); x++)
             for (int z = (int) Math.floor(box.minZ); z <= (int) Math.floor(box.maxZ); z++) {
                 heightQueries++;
-                if (Math.min(from.y, position.y) < level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z)
+                if (Math.min(from.y, position.y) < CarrierTerrainQueryCache.height(level, x, z)
                     + CarrierNavigation.GROUND_CLEARANCE) return false;
             }
         return level.noCollision(this, box);

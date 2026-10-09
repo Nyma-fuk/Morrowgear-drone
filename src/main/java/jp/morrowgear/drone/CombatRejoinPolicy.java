@@ -9,7 +9,10 @@ final class CombatRejoinPolicy {
 
 	static DroneMode resumeMode(int capturedMode, boolean hasWaypoint, boolean hasFollowMission,
 		boolean launchedFromDock, boolean hasDock) {
-		if (launchedFromDock && hasDock) return DroneMode.DOCK;
+		// A dynamically allocated berth may have been yielded while this aircraft was
+		// fighting. Keep the return intent so allocation can reserve another berth or
+		// place the aircraft in the bounded holding orbit instead of abandoning it.
+		if (launchedFromDock) return DroneMode.DOCK;
 		DroneMode captured = DroneMode.byId(capturedMode);
 		if (captured == DroneMode.WAYPOINT && !hasWaypoint) return DroneMode.STANDBY;
 		if (captured == DroneMode.FOLLOW && !hasFollowMission) return DroneMode.STANDBY;

@@ -21,6 +21,7 @@ public final class CarrierCommands {
         if (action == CarrierCommandPayload.Action.EXIT) { CarrierInterior.exit(player); return; }
         if (action == CarrierCommandPayload.Action.STOP) {
             if (owner) {
+                ship.arrivalOperation = CarrierPolicy.Mode.IDLE;
                 ship.stop(CarrierPolicy.Stop.EMERGENCY);
                 CarrierEntity exterior = CarrierModule.find(server, packet.ship());
                 if (exterior != null) {
@@ -53,19 +54,22 @@ public final class CarrierCommands {
             if (CarrierSupplies.charge(ship, weapon)) { menu.sync(player); return; }
             var cell = BuiltInRegistries.ITEM.getValue(CarrierModule.id(weapon ? "laser_cell" : "power_cell"));
             if (cell == net.minecraft.world.item.Items.AIR) return;
-            if (CarrierSupplies.canCharge(weapon ? ship.weaponEnergy : ship.energy)) {
+            if (CarrierSupplies.canCharge(weapon ? ship.weaponEnergy : ship.energy, weapon)) {
                 for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
                     var stack = player.getInventory().getItem(slot);
                     if (!stack.is(cell)) continue;
                     stack.shrink(1);
                     player.getInventory().setChanged();
-                    if (weapon) ship.weaponEnergy += 1000; else ship.energy += 1000;
+                    if (weapon) ship.weaponEnergy += CarrierSupplies.cellEnergy(true);
+                    else ship.energy += CarrierSupplies.cellEnergy(false);
                     break;
                 }
             }
         } else {
             CarrierEntity entity = CarrierModule.find(server, packet.ship());
             boolean handshake = action == CarrierCommandPayload.Action.MOVE
+                || action == CarrierCommandPayload.Action.MOVE_MINING
+                || action == CarrierCommandPayload.Action.MOVE_COMBAT
                 || action == CarrierCommandPayload.Action.PREVIEW_MINING
                 || action == CarrierCommandPayload.Action.PREVIEW_COMBAT
                 || action == CarrierCommandPayload.Action.RESUME_PREVIEW
@@ -80,13 +84,18 @@ public final class CarrierCommands {
             } else if (action == CarrierCommandPayload.Action.RELEASE_BAY) {
                 var port = CarrierModule.dronePorts().find(entity, packet.guest());
                 if (ship.bay.release(packet.guest()) && port != null) port.release(CarrierServiceBay.Release.CANCELLED);
-            } else if (action == CarrierCommandPayload.Action.MOVE) {
+            } else if (action == CarrierCommandPayload.Action.MOVE
+                || action == CarrierCommandPayload.Action.MOVE_MINING
+                || action == CarrierCommandPayload.Action.MOVE_COMBAT) {
                 if (Math.abs((long) packet.x()) > 29_999_000 || Math.abs((long) packet.z()) > 29_999_000
                     || packet.y() < level.getMinY() || packet.y() >= level.getMaxY()) {
                     reject(ship, menu, player, CarrierPolicy.Stop.INVALID_TARGET); return;
                 }
                 if (ship.mode != CarrierPolicy.Mode.IDLE) { reject(ship, menu, player, CarrierPolicy.Stop.BUSY); return; }
-                if (!entity.setDestination(player, new BlockPos(packet.x(), packet.y(), packet.z()))) {
+                CarrierPolicy.Mode arrival = action == CarrierCommandPayload.Action.MOVE_MINING
+                    ? CarrierPolicy.Mode.MINING : action == CarrierCommandPayload.Action.MOVE_COMBAT
+                    ? CarrierPolicy.Mode.COMBAT : CarrierPolicy.Mode.IDLE;
+                if (!entity.setDestination(player, new BlockPos(packet.x(), packet.y(), packet.z()), arrival)) {
                     reject(ship, menu, player, CarrierPolicy.Stop.INVALID_TARGET); return;
                 }
             } else if (action == CarrierCommandPayload.Action.PREVIEW_MINING || action == CarrierCommandPayload.Action.PREVIEW_COMBAT) {
@@ -94,16 +103,11 @@ public final class CarrierCommands {
                     || Math.floorDiv(packet.z(), 16) != entity.blockPosition().getZ() >> 4) {
                     reject(ship, menu, player, CarrierPolicy.Stop.INVALID_TARGET); return;
                 }
-                ship.stop(CarrierPolicy.Stop.PREVIEW);
-                int top = Math.min(level.getMaxY() - 1, CarrierPolicy.operationTop(entity.getY()));
-                if (top < level.getMinY()) { reject(ship, menu, player, CarrierPolicy.Stop.INVALID_TARGET); return; }
-                ship.previewMode = action == CarrierCommandPayload.Action.PREVIEW_MINING ? CarrierPolicy.Mode.MINING : CarrierPolicy.Mode.COMBAT;
-                ship.preview = ship.previewMode == CarrierPolicy.Mode.MINING
-                    ? CarrierPolicy.miningOperation(UUID.randomUUID(), level.dimension().identifier().toString(),
-                        packet.x(), packet.z(), entity.getY(), level.getMinY(), level.getMaxY())
-                    : CarrierPolicy.Operation.at(UUID.randomUUID(), level.dimension().identifier().toString(),
-                        packet.x(), packet.z(), level.getMinY(), top);
-                ship.previewUntil = (long) server.getTickCount() + CarrierPolicy.PREVIEW_TICKS;
+                CarrierPolicy.Mode previewMode = action == CarrierCommandPayload.Action.PREVIEW_MINING
+                    ? CarrierPolicy.Mode.MINING : CarrierPolicy.Mode.COMBAT;
+                if (!preparePreview(ship, level, entity, previewMode, packet.x(), packet.z(), server.getTickCount())) {
+                    reject(ship, menu, player, CarrierPolicy.Stop.INVALID_TARGET); return;
+                }
             } else if (action == CarrierCommandPayload.Action.RESUME_PREVIEW) {
                 if (ship.progress == null || ship.progress.complete()) {
                     reject(ship, menu, player, CarrierPolicy.Stop.INVALID_TARGET); return;
@@ -114,7 +118,7 @@ public final class CarrierCommands {
                 ship.previewUntil = (long) server.getTickCount() + CarrierPolicy.PREVIEW_TICKS;
             } else if (action == CarrierCommandPayload.Action.ACTIVATE) {
                 var op = ship.preview;
-                boolean loaded = op != null && level.getChunkSource().getChunkNow(op.chunkX(), op.chunkZ()) != null;
+                boolean loaded = footprintLoaded(level, op);
                 if (!CarrierPolicy.canActivate(packet.generation(), op, server.getTickCount(), ship.previewUntil,
                     owner, loaded, entity.controls(player))) {
                     reject(ship, menu, player, CarrierPolicy.Stop.EXPIRED); return;
@@ -130,6 +134,7 @@ public final class CarrierCommands {
                     }
                 } else { ship.activeCombat = op; ship.combatRemaining = CarrierPolicy.COMBAT_TICKS; ship.combatCursor = 0; }
                 ship.mode = ship.previewMode;
+                ship.arrivalOperation = CarrierPolicy.Mode.IDLE;
                 ship.stop = CarrierPolicy.Stop.RUNNING;
                 ship.preview = null;
                 ship.previewUntil = 0;
@@ -139,10 +144,44 @@ public final class CarrierCommands {
         ship.dirty.run();
         menu.sync(player);
     }
+
+    static boolean preparePreview(CarrierShip ship, ServerLevel level, CarrierEntity entity,
+                                  CarrierPolicy.Mode mode, int blockX, int blockZ, long tick) {
+        if (mode != CarrierPolicy.Mode.MINING && mode != CarrierPolicy.Mode.COMBAT) return false;
+        int top = Math.min(level.getMaxY() - 1, CarrierPolicy.operationTop(entity.getY()));
+        if (top < level.getMinY()) return false;
+        ship.stop(CarrierPolicy.Stop.PREVIEW);
+        ship.previewMode = mode;
+        if (mode == CarrierPolicy.Mode.MINING) {
+            var mining = CarrierPolicy.miningOperation(UUID.randomUUID(), level.dimension().identifier().toString(),
+                blockX, blockZ, entity.getY(), level.getMinY(), level.getMaxY());
+            int surface = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING,
+                mining.chunkX() * 16 + 8, mining.chunkZ() * 16 + 8);
+            ship.preview = mining.withSurfaceY(surface);
+        } else ship.preview = CarrierPolicy.Operation.at(UUID.randomUUID(), level.dimension().identifier().toString(),
+            blockX, blockZ, level.getMinY(), top);
+        ship.previewUntil = tick + CarrierPolicy.PREVIEW_TICKS;
+        ship.dirty.run();
+        return true;
+    }
     private static void reject(CarrierShip ship, CarrierMenu menu, ServerPlayer player, CarrierPolicy.Stop reason) {
         if (ship.mode == CarrierPolicy.Mode.IDLE) ship.stop = reason;
         ship.commandRevision = ship.commandRevision == Integer.MAX_VALUE ? 1 : ship.commandRevision + 1;
         ship.dirty.run();
         menu.sync(player);
+    }
+
+    private static boolean footprintLoaded(ServerLevel level, CarrierPolicy.Operation operation) {
+        if (operation == null) return false;
+        int minChunkX = Math.floorDiv(operation.minX(), 16);
+        int maxChunkX = Math.floorDiv(operation.maxX(), 16);
+        int minChunkZ = Math.floorDiv(operation.minZ(), 16);
+        int maxChunkZ = Math.floorDiv(operation.maxZ(), 16);
+        for (int chunkX = minChunkX; chunkX <= maxChunkX; chunkX++) {
+            for (int chunkZ = minChunkZ; chunkZ <= maxChunkZ; chunkZ++) {
+                if (level.getChunkSource().getChunkNow(chunkX, chunkZ) == null) return false;
+            }
+        }
+        return true;
     }
 }

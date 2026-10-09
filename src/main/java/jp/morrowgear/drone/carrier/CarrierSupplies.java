@@ -10,7 +10,10 @@ import net.minecraft.world.item.ItemStack;
 /** Dedicated supply inputs, separate from the paged cargo hold. */
 public final class CarrierSupplies extends SimpleContainer {
     public static final int FLIGHT = 0, WEAPON = 1, GUN = 2, MISSILES = 3, REPAIR = 4, SIZE = 5;
-    public static final int CELL_ENERGY = DockSupplyPolicy.LASER_CELL_ENERGY;
+    public static final int FLIGHT_CELL_ENERGY = DockSupplyPolicy.POWER_CELL_ENERGY;
+    public static final int WEAPON_CELL_ENERGY = DockSupplyPolicy.LASER_CELL_ENERGY;
+    /** Source compatibility for integrations that used the former shared cell size. */
+    @Deprecated public static final int CELL_ENERGY = WEAPON_CELL_ENERGY;
     private Runnable dirty;
 
     public CarrierSupplies(List<ItemStack> saved, Runnable dirty) {
@@ -49,16 +52,22 @@ public final class CarrierSupplies extends SimpleContainer {
 
     static boolean charge(CarrierShip ship, boolean weapon) {
         int energy = weapon ? ship.weaponEnergy : ship.energy;
-        if (!canCharge(energy)) return false;
+        int cellEnergy = cellEnergy(weapon);
+        if (!canCharge(energy, weapon)) return false;
         Source source = find(ship, weapon ? WEAPON : FLIGHT);
         if (source == null) return false;
         source.consume();
-        if (weapon) ship.weaponEnergy += CELL_ENERGY; else ship.energy += CELL_ENERGY;
+        if (weapon) ship.weaponEnergy += cellEnergy; else ship.energy += cellEnergy;
         ship.dirty.run();
         return true;
     }
 
-    public static boolean canCharge(int energy) { return energy >= 0 && energy <= CarrierPolicy.MAX_ENERGY - CELL_ENERGY; }
+    public static int cellEnergy(boolean weapon) { return weapon ? WEAPON_CELL_ENERGY : FLIGHT_CELL_ENERGY; }
+    public static boolean canCharge(int energy, boolean weapon) {
+        return energy >= 0 && energy <= CarrierPolicy.MAX_ENERGY - cellEnergy(weapon);
+    }
+    /** Legacy callers meant the 1000E weapon cell. */
+    public static boolean canCharge(int energy) { return canCharge(energy, true); }
 
     /** Called only by an attended exterior, at most one cell per tank per second. */
     static void tick(CarrierShip ship, long tick) {

@@ -36,11 +36,26 @@ final class DroneNavigatorStrategicEscapeTest {
 			DroneNavigator.strategicCacheGoal(false, destination, leaderAdvancedSlot));
 	}
 
+	@Test void fixedMissionDistanceRemainsStrategicWhenAFormationSlotStopsAtTheWall() {
+		Vec3 aircraft = new Vec3(0, 72, 0);
+		Vec3 destination = new Vec3(36, 72, 0);
+		Vec3 blockedSlot = new Vec3(5, 72, 0);
+		Vec3 planGoal = DroneNavigator.strategicCacheGoal(true, destination, blockedSlot);
+		assertTrue(aircraft.distanceTo(blockedSlot) < 10.0);
+		assertTrue(aircraft.distanceTo(planGoal) >= 10.0);
+	}
+
 	@Test void aClearDirectLineDoesNotCancelAnUnfinishedStrategicTurn() {
 		Vec3 waypoint = new Vec3(-2.5, 2.0, -72.0);
 		Vec3 direct = new Vec3(18.0, 2.0, 0.0);
 		assertEquals(waypoint, DroneNavigator.preferredClearTarget(waypoint, direct, true));
 		assertEquals(direct, DroneNavigator.preferredClearTarget(null, direct, true));
+	}
+
+	@Test void aReachedStrategicWaypointCannotResurrectAfterTheAircraftMovesPastIt() {
+		Vec3 waypoint = new Vec3(4.0, 72.0, 8.0);
+		assertTrue(DroneNavigator.strategicWaypointReached(waypoint.add(0.7, 0, 0), waypoint));
+		assertTrue(!DroneNavigator.strategicWaypointReached(waypoint.add(1.3, 0, 0), waypoint));
 	}
 
 	@Test void fourAircraftCompleteTheProductionStrategicTurnAroundTheGiantWall() {

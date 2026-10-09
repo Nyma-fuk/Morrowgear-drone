@@ -71,8 +71,8 @@ class CarrierDroneServiceAdapterTest {
         assertEquals(1000, demand(DroneRole.SECURITY, SecurityLoadout.UNARMED, 1));
         assertEquals(0, demand(DroneRole.SECURITY, SecurityLoadout.UNARMED, 2));
         assertEquals(0, demand(DroneRole.SECURITY, SecurityLoadout.UNARMED, 3));
-        assertEquals(DroneServicePolicy.Need.WEAPON_POWER,
-            CombatPolicy.weaponServiceNeed(SecurityLoadout.UNARMED, 0, 0, 0, 0));
+		assertEquals(DroneServicePolicy.Need.NONE,
+			CombatPolicy.weaponServiceNeed(SecurityLoadout.UNARMED, 0, 0, 0, 0));
     }
 
     @Test void chargingLargerThanCurrentCapacitiesCanContinueBeyondTwoMinutes() {

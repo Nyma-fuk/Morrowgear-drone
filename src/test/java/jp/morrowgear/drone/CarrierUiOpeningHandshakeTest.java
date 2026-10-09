@@ -55,6 +55,23 @@ final class CarrierUiOpeningHandshakeTest {
         assertFalse(policy.busy());
     }
 
+    @Test void moveCanCarryAPersistentArrivalOperationWithoutChangingPureMove() {
+        UUID ship = UUID.randomUUID(), generation = UUID.randomUUID();
+        var target = new CarrierUiPolicy.Destination("minecraft:overworld", 160, 120, 160);
+        CarrierUiPolicy policy = new CarrierUiPolicy(17, ship);
+        policy.accept(snapshot(17, ship, generation, true, 100), 1_000);
+
+        assertTrue(policy.queueMove(target, 1, 1_010));
+        policy.accept(snapshot(17, ship, generation, true, 106), 1_300);
+        assertEquals(1, policy.pollCommand(1_300).mode());
+
+        CarrierUiPolicy pureMove = new CarrierUiPolicy(18, ship);
+        pureMove.accept(snapshot(18, ship, generation, true, 100), 1_000);
+        assertTrue(pureMove.queueMove(target, 1_010));
+        pureMove.accept(snapshot(18, ship, generation, true, 106), 1_300);
+        assertEquals(0, pureMove.pollCommand(1_300).mode());
+    }
+
     @Test void timedOutMoveCannotBeRelabeledByALateMatchingSnapshot() {
         UUID ship = UUID.randomUUID(), generation = UUID.randomUUID();
         var target = new CarrierUiPolicy.Destination("minecraft:overworld", 160, 120, 160);

@@ -48,4 +48,9 @@ final class SalvageMissionRegistry {
 		RESERVATIONS.clear();
 		SUSPENDED.clear();
 	}
+
+	static synchronized void targetDestroyed(UUID target) {
+		RESERVATIONS.remove(target);
+		SUSPENDED.remove(target);
+	}
 }

@@ -19,9 +19,35 @@ final class DockSupplyPolicyTest {
 		assertEquals(SupplyKind.MISSILE, DockSupplyPolicy.kind("morrowgear_drone:micro_missile_pack"));
 		for (String id : new String[]{"minecraft:iron_nugget", "minecraft:firework_rocket", "other:laser_cell", "", null})
 			assertNull(DockSupplyPolicy.kind(id));
-		for (String id : new String[]{"minecraft:coal", "minecraft:charcoal", "morrowgear_drone:power_cell",
-			"morrowgear_drone:standard_battery_pack", "morrowgear_drone:reinforced_battery_pack", "morrowgear_drone:high_density_battery_pack"})
+		for (String id : new String[]{"minecraft:coal", "minecraft:charcoal", "morrowgear_drone:power_cell"})
 			assertEquals(SupplyKind.FUEL, DockSupplyPolicy.kind(id));
+		for (String id : new String[]{"morrowgear_drone:standard_battery_pack",
+			"morrowgear_drone:reinforced_battery_pack", "morrowgear_drone:high_density_battery_pack"}) {
+			assertTrue(DockSupplyPolicy.isBattery(id));
+			assertNull(DockSupplyPolicy.kind(id), "installed capacity hardware must not be consumed as fuel");
+		}
+	}
+
+	@Test void energyMaintenanceAndCargoPreferenceUseOneCanonicalContract() {
+		assertEquals(1200, DockSupplyPolicy.flightEnergy("morrowgear_drone:power_cell"));
+		assertEquals(1000, DockSupplyPolicy.flightEnergy("minecraft:coal"));
+		assertEquals(800, DockSupplyPolicy.flightEnergy("minecraft:charcoal"));
+		assertEquals(0, DockSupplyPolicy.flightEnergy("morrowgear_drone:high_density_battery_pack"));
+		assertEquals(20, DockSupplyPolicy.repairValue("morrowgear_drone:morrow_alloy"));
+		assertEquals(8, DockSupplyPolicy.repairValue("minecraft:iron_ingot"));
+		assertEquals(4, DockSupplyPolicy.repairValue("minecraft:copper_ingot"));
+		assertTrue(DockSupplyPolicy.deliveryPriority("morrowgear_drone:power_cell")
+			> DockSupplyPolicy.deliveryPriority("minecraft:coal"));
+		assertTrue(DockSupplyPolicy.deliveryPriority("morrowgear_drone:morrow_alloy")
+			> DockSupplyPolicy.deliveryPriority("minecraft:iron_ingot"));
+	}
+
+	@Test void automationCountsOpenedCreditsAndTankEnergyAsPackageEquivalents() {
+		assertEquals(5, DockSupplyPolicy.packageEquivalent(SupplyKind.FUEL, 2, 3600, 0, 0, 0));
+		assertEquals(3, DockSupplyPolicy.packageEquivalent(SupplyKind.LASER, 1, 0, 2999, 0, 0));
+		assertEquals(2, DockSupplyPolicy.packageEquivalent(SupplyKind.GUN, 1, 0, 0, 239, 0));
+		assertEquals(3, DockSupplyPolicy.packageEquivalent(SupplyKind.MISSILE, 1, 0, 0, 0, 10));
+		assertEquals(4, DockSupplyPolicy.packageEquivalent(SupplyKind.REPAIR, 4, 9999, 9999, 9999, 9999));
 	}
 
 	@Test void packCreditsConserveEveryUnitAcrossRandomPartialRequestsAndExhaustion() {

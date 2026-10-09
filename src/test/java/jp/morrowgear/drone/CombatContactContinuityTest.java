@@ -80,7 +80,8 @@ final class CombatContactContinuityTest {
 			}
 		}
 		// No refreshed observations after occlusion, loss, or return: normal TTL still applies.
-		assertTrue(FleetThreatNetwork.readAll("overworld", owner, 861).isEmpty());
+		assertTrue(FleetThreatNetwork.readAll("overworld", owner,
+			800 + ThreatSensorPolicy.REPORT_TTL_TICKS + 1).isEmpty());
 		assertTrue(CombatTheaterPolicy.allocate(List.of(), units).assignments().isEmpty());
 		assertTrue(FleetThreatNetwork.readAll("nether", owner, 800).isEmpty());
 		assertTrue(FleetThreatNetwork.readAll("overworld", UUID.randomUUID(), 800).isEmpty());

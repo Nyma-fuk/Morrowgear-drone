@@ -6,9 +6,9 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 
 final class HmiArt {
-	static final int BACKGROUND = 0xFF111416, PANEL = 0xFF1A1E21, RAISED = 0xFF23282B;
-	static final int LINE = 0xFF394347, TEXT = 0xFFEDF3F2, MUTED = 0xFFA6B5B8;
-	static final int CYAN = 0xFF62D8DF, AMBER = 0xFFFFBF69, RED = 0xFFFF7B75, GREEN = 0xFF8CDDB4;
+	static final int BACKGROUND = 0xFF121514, PANEL = 0xFF1A1E1C, RAISED = 0xFF29362F;
+	static final int LINE = 0xFF343C36, TEXT = 0xFFE1E7E0, MUTED = 0xFF99A59D;
+	static final int CYAN = 0xFF7CDEC8, AMBER = 0xFFE7BD79, RED = 0xFFF28D83, GREEN = 0xFFA5D391;
 	private HmiArt() {}
 	static String fitText(String text, int width, ToIntFunction<String> measure) {
 		if (width <= 0) return "";

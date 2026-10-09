@@ -92,9 +92,7 @@ public final class SolarServiceStationEntity extends PathfinderMob {
 		setYRot((tickCount * 0.18f) % 360.0f);
 		if (!(level() instanceof ServerLevel level)) return;
 		if (tickCount % SolarStationLightingPolicy.UPDATE_INTERVAL_TICKS == 0) updateServiceLights(level);
-		if (tickCount % 20 == 0) level.getChunkSource().addTicketWithRadius(
-			MorrowgearDrone.DRONE_OPERATION_TICKET, chunkPosition(),
-			RemoteOperationPolicy.ENTITY_TICKING_TICKET_RADIUS);
+		if (tickCount % 20 == 0) OperationChunkLeaseRuntime.refresh(level, chunkPosition());
 		if (level.getBrightness(LightLayer.SKY, blockPosition()) >= 12
 			&& level.canSeeSky(blockPosition()) && tickCount % 2 == 0) {
 			entityData.set(ENERGY, Math.min(ENERGY_CAPACITY, entityData.get(ENERGY) + 5));
@@ -102,7 +100,8 @@ public final class SolarServiceStationEntity extends PathfinderMob {
 		SolarServiceRegistry.heartbeat(getUUID(), ownerId(), level.dimension().toString(),
 			getX(), getY(), getZ(), energyPercent(), level.getGameTime());
 		entityData.set(WAITING_AIRCRAFT, SolarServiceRegistry.waitingCount(getUUID(), level.getGameTime()));
-		maintainRelays(level);
+		if (tickCount == 1 || Math.floorMod(tickCount, 20) == ManagedLightRuntime.phase(getUUID(), 20))
+			maintainRelays(level);
 	}
 
 	public Vec3 lightSatellitePosition(int slot) {
@@ -114,8 +113,7 @@ public final class SolarServiceStationEntity extends PathfinderMob {
 			BlockPos next = BlockPos.containing(lightSatellitePosition(slot));
 			if (next.equals(lightPositions[slot])) continue;
 			removeServiceLight(level, lightPositions[slot]);
-			if (level.getBlockState(next).isAir() || level.getBlockState(next).is(Blocks.LIGHT)) {
-				level.setBlockAndUpdate(next, Blocks.LIGHT.defaultBlockState());
+			if (ManagedLightRuntime.acquire(level, next)) {
 				lightPositions[slot] = next;
 			} else lightPositions[slot] = null;
 		}
@@ -135,12 +133,7 @@ public final class SolarServiceStationEntity extends PathfinderMob {
 	}
 
 	private void removeServiceLight(ServerLevel level, BlockPos pos) {
-		if (pos == null || !level.getBlockState(pos).is(Blocks.LIGHT)) return;
-		boolean sharedByStation = !level.getEntitiesOfClass(SolarServiceStationEntity.class,
-			new AABB(pos).inflate(8.0), station -> station != this && station.usesManagedLight(pos)).isEmpty();
-		boolean sharedByDrone = !level.getEntitiesOfClass(DroneEntity.class,
-			new AABB(pos).inflate(10.0), drone -> drone.usesManagedLight(pos)).isEmpty();
-		if (!sharedByStation && !sharedByDrone) level.removeBlock(pos, false);
+		ManagedLightRuntime.release(level, pos);
 	}
 
 	private void maintainRelays(ServerLevel level) {

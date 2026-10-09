@@ -1,0 +1,59 @@
+{
+  "passed": true,
+  "revision": "V31_INTEGRATED_MINING_RING_RUNTIME_01",
+  "canonicalSha256": "ca1ebb0aa0cf92c8ca5f7942aa852f3ed8af7733c1b68a064148897ae3f322ba",
+  "near": {
+    "passed": true,
+    "errors": [],
+    "format": "MGM4",
+    "vertices": 74166,
+    "triangles": 24722,
+    "bounds": [
+      -25.0,
+      0.20000000298023224,
+      -16.028892517089844,
+      25.0,
+      7.150000095367432,
+      14.854999542236328
+    ],
+    "sha256": "cb8be7d6fa409364b2c75a97cc505cfc5d4a8e1b8be490645821d2eaf83a72a7"
+  },
+  "far": {
+    "passed": true,
+    "errors": [],
+    "format": "MGM4",
+    "vertices": 41382,
+    "triangles": 13794,
+    "bounds": [
+      -25.0,
+      0.20000000298023224,
+      -16.028892517089844,
+      25.0,
+      7.150000095367432,
+      14.854999542236328
+    ],
+    "sha256": "6f1eaba8c012fce3373f0415be6da83bd1136586b4719bd10fb8f5acf737e505"
+  },
+  "assets": [
+    {
+      "path": "models/runtime/carrier.mgm",
+      "sha256": "cb8be7d6fa409364b2c75a97cc505cfc5d4a8e1b8be490645821d2eaf83a72a7"
+    },
+    {
+      "path": "models/runtime/carrier_lod.mgm",
+      "sha256": "6f1eaba8c012fce3373f0415be6da83bd1136586b4719bd10fb8f5acf737e505"
+    },
+    {
+      "path": "textures/runtime/carrier.png",
+      "sha256": "bc94cb173011c3c1aa2d12bae6ce0f54151d9cf4df27cf256e1212b4c8a70989"
+    },
+    {
+      "path": "textures/runtime/carrier_lod.png",
+      "sha256": "fbc50bada366c2e67860d6fa2f24f0f85047ca09a94080ac3386cf84599a01e3"
+    },
+    {
+      "path": "textures/item/carrier_unit.png",
+      "sha256": "89fc322cdfd7981478e5d6594651b90f35981b16dbc2b86a8a099948388a3e12"
+    }
+  ]
+}

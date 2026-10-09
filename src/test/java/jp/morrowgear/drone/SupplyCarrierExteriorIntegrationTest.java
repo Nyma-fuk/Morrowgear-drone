@@ -183,9 +183,12 @@ final class SupplyCarrierExteriorIntegrationTest {
     @Test void bothPhysicalBranchesRenewOnlyTheExistingBoundedOperationTicket() throws Exception {
         String ai = section(source("DroneEntity.java"), "protected void customServerAiStep(", "private Vec3 smoothFlightMotion(");
         assertTrue(ai.contains("CarrierDroneServiceAdapter.ownedCabinCarrier(level, owner) != null"));
-        assertTrue(ai.indexOf("addTicketWithRadius(") < ai.indexOf("tickCarrierService(level, owner)"));
+        assertTrue(ai.indexOf("OperationChunkLeaseRuntime.refresh(level, chunkPosition())")
+                < ai.indexOf("tickCarrierService(level, owner)"));
         assertTrue(ai.contains("RemoteOperationPolicy.keepsChunkActive(ownerSupportsExterior,"));
-        assertTrue(ai.contains("RemoteOperationPolicy.ENTITY_TICKING_TICKET_RADIUS"));
+        String leases = source("OperationChunkLeaseRuntime.java");
+        assertTrue(leases.contains("RemoteOperationPolicy.ENTITY_TICKING_TICKET_RADIUS"));
+        assertTrue(leases.contains("addTicketWithRadius("));
     }
 
     @Test void serviceExitIsBoundedAndRunsBeforeResumingTheSuspendedMission() throws Exception {

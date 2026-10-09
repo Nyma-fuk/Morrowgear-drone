@@ -66,6 +66,13 @@ final class DroneTaskStack {
 	int suspendedCount() { return suspended.size(); }
 	int pendingCount() { return pending.size(); }
 
+	static Task serviceFallback(DroneMode requestedMode, SalvageState salvageState,
+		UUID targetId, String missionId, boolean hasWaypoint) {
+		boolean activeRoute = hasWaypoint && missionId != null && !missionId.isBlank();
+		return new Task(activeRoute ? Kind.ROUTE : Kind.IDLE,
+			activeRoute ? DroneMode.WAYPOINT : requestedMode, salvageState, targetId, missionId);
+	}
+
 	enum Kind {
 		IDLE(0),
 		FOLLOW(20),

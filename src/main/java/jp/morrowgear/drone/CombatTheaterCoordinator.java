@@ -72,20 +72,23 @@ final class CombatTheaterCoordinator {
 			java.util.stream.Collectors.toMap(CombatTheaterPolicy.Unit::unitId, unit -> unit));
 		long engagedWings = plan.assignments().keySet().stream().map(byId::get)
 			.filter(java.util.Objects::nonNull).map(CombatTheaterPolicy.Unit::groupId).distinct().count();
+		long coveredTargets = plan.assignments().values().stream()
+			.map(CombatTheaterPolicy.Assignment::targetId).distinct().count();
 		String band = plan.clusters().stream().anyMatch(cluster -> cluster.contacts().stream()
 			.anyMatch(contact -> contact.playerDanger() >= 40)) ? "CRITICAL" : "ACTIVE";
 		return "OPERATION AEGIS / " + band + " / " + plan.clusters().size() + " FRONTS / "
-			+ plan.hostileCount() + " HOSTILES / " + engagedWings + "W "
+			+ plan.hostileCount() + " HOSTILES / COVER " + coveredTargets + "/" + plan.hostileCount() + " / " + engagedWings + "W "
 			+ plan.assignments().size() + "U ENGAGED / " + plan.reserveCount() + " RESERVE / "
 			+ units.size() + " SEC";
 	}
 
 	private static String fronts(CombatTheaterPolicy.Plan plan) {
 		String visible = plan.clusters().stream().limit(4).map(cluster -> {
-			long assigned = plan.assignments().values().stream()
-				.filter(assignment -> assignment.clusterId().equals(cluster.id())).count();
+			List<CombatTheaterPolicy.Assignment> assigned = plan.assignments().values().stream()
+				.filter(assignment -> assignment.clusterId().equals(cluster.id())).toList();
+			long covered = assigned.stream().map(CombatTheaterPolicy.Assignment::targetId).distinct().count();
 			int danger = cluster.contacts().stream().mapToInt(CombatTheaterPolicy.Contact::playerDanger).max().orElse(0);
-			return cluster.id() + " " + cluster.contacts().size() + "H/" + assigned + "U"
+			return cluster.id() + " " + cluster.contacts().size() + "H/" + covered + "T/" + assigned.size() + "U"
 				+ (danger >= 40 ? "!" : "");
 		}).reduce((left, right) -> left + "  |  " + right).orElse("");
 		int hidden = Math.max(0, plan.clusters().size() - 4);

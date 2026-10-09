@@ -77,7 +77,7 @@ test('small movement view exposes altitude and zoom without map input leaking th
   assert.match(screen, /if \(moveControls && small\(\)\)/);
   for (const label of ['高度 -8','高度 +8','地図に戻る','拡大','縮小']) assert.ok(screen.includes(`button("${label}"`));
   assert.match(screen, /if \(tab == Tab.MOVE\) button\("高度"/);
-  assert.match(screen, /diagnostics \|\| choosingTab \|\| moveControls \|\| tab == Tab.CARGO/);
+  assert.match(screen, /diagnostics \|\| choosingTab \|\| moveControls \|\| !mapTab\(\)/);
   assert.match(screen, /!choosingTab && !diagnostics && !moveControls/g);
   const controls = [{x:8,y:78,w:94,h:20},{x:108,y:78,w:94,h:20},{x:8,y:108,w:194,h:20},
     {x:6,y:156,w:70,h:20},{x:82,y:156,w:232,h:20}];
@@ -87,20 +87,17 @@ test('small movement view exposes altitude and zoom without map input leaking th
     assert.ok(a.x + a.w <= b.x || b.x + b.w <= a.x || a.y + a.h <= b.y || b.y + b.h <= a.y);
   }
 });
-test('supply route editor polls only while open and never infers the current Dock target', () => {
+test('Dock supply control polls only while open and delegates source choice to the owner network', () => {
   const dock = read('src/client/java/jp/morrowgear/drone/client/DockScreen.java');
   const source = read('src/client/java/jp/morrowgear/drone/client/SupplyNetworkPanel.java');
   assert.match(dock, /if \(network != null\) network.tick\(\)/);
   assert.match(dock, /return network == null && width >= 300 && height >= 166/);
-  assert.match(source, /private Long dock, source;/);
+  assert.match(source, /private final long dock;/);
+  assert.doesNotMatch(source, /private Long source/);
   assert.match(source, /SupplyNetworkClient.request\(\)/);
-  assert.match(source, /if \(!client.level.hasChunkAt\(pos\)\) continue/);
-  assert.match(source, /target.isOwnedBy\(client.player.getUUID\(\)\)/);
-  assert.match(source, /container.stillValid\(client.player\)/);
-  assert.match(source, /!container.isLocked\(\)/);
   assert.match(source, /ClientPlayNetworking.canSend\(SupplyNetworkConfigPayload.TYPE\)/);
-  assert.match(source, /new SupplyNetworkConfigPayload\(from, dock, enabled, savedRules\)/);
-  assert.match(source, /List<Rule> savedRules = enabled \? rules\(\) : current.rules\(\)/);
+  assert.match(source, /new SupplyNetworkConfigPayload\(Route.AUTO_SOURCE, dock, enabled, SupplyNetworkPolicy.defaults\(\)\)/);
+  assert.match(source, /補給元は所有者の物流網から在庫・距離・予約状況で自動選択/);
   assert.match(source, /value < 0 \? "未確認"/);
 });
 test('all literal button and map icons use existing approved HMI images', () => {

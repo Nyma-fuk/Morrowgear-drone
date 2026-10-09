@@ -2,6 +2,7 @@ package jp.morrowgear.drone.carrier;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.mojang.datafixers.util.Either;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -29,7 +30,8 @@ public final class CarrierShip {
         CarrierServiceBay.Lease.CODEC.listOf(0, CarrierPolicy.BAY_SLOTS).fieldOf("bay").forGetter(s -> s.bay.snapshot()),
         CarrierServiceBay.Stock.CODEC.optionalFieldOf("bay_stock", new CarrierServiceBay.Stock(0, 0)).forGetter(s -> s.bayStock),
         ItemStack.OPTIONAL_CODEC.listOf(0, CarrierSupplies.SIZE).optionalFieldOf("supplies", List.of()).forGetter(s -> s.supplies.snapshot()),
-        CarrierAnchor.CODEC.optionalFieldOf("navigation_intent").forGetter(s -> Optional.ofNullable(s.destination)),
+        TravelIntent.CODEC.optionalFieldOf("navigation_intent").forGetter(s -> s.destination == null
+            ? Optional.empty() : Optional.of(new TravelIntent(s.destination, s.arrivalOperation))),
         Codec.BOOL.optionalFieldOf("mining_startup_charged", false).forGetter(s -> s.miningStartupCharged)
     ).apply(i, CarrierShip::new));
 
@@ -54,6 +56,8 @@ public final class CarrierShip {
     public int combatRemaining;
     public CarrierPolicy.Operation activeCombat;
     public CarrierAnchor destination;
+    /** Operation requested together with travel. Kept server-side so closing the screen cannot lose it. */
+    public CarrierPolicy.Mode arrivalOperation = CarrierPolicy.Mode.IDLE;
     public boolean navigationPaused;
     public int navigationWaitTicks, combatCursor;
     public boolean miningStartupCharged;
@@ -81,7 +85,9 @@ public final class CarrierShip {
         if (progress == null || miningScanGeneration == null
             || !progress.operation().generation().equals(miningScanGeneration)) return 0;
         return workPhase() == CarrierPolicy.WorkPhase.SCAN ? miningScanTicks
-            : workPhase() == CarrierPolicy.WorkPhase.CHARGE ? miningScanTicks - CarrierPolicy.SCAN_TICKS : 0;
+            : workPhase() == CarrierPolicy.WorkPhase.CHARGE ? miningScanTicks - CarrierPolicy.SCAN_TICKS
+            : workPhase() == CarrierPolicy.WorkPhase.FIRE ? Math.min(CarrierMiningEffectPolicy.RELEASE_TICKS,
+                Math.max(0, miningScanTicks - CarrierPolicy.SCAN_TICKS - CarrierPolicy.MINING_CHARGE_TICKS)) : 0;
     }
     public int workPhaseDuration() {
         CarrierPolicy.WorkPhase phase = workPhase();
@@ -89,6 +95,7 @@ public final class CarrierShip {
         return switch (phase) {
             case SCAN -> CarrierPolicy.SCAN_TICKS;
             case CHARGE -> CarrierPolicy.MINING_CHARGE_TICKS;
+            case FIRE -> CarrierMiningEffectPolicy.RELEASE_TICKS;
             default -> 0;
         };
     }
@@ -103,7 +110,7 @@ public final class CarrierShip {
     private CarrierShip(UUID owner, int cabin, boolean ready, boolean destroyed, CarrierAnchor exterior,
                         List<UUID> guests, Optional<CarrierPolicy.Progress> progress, List<ItemStack> cargo,
                         int energy, int weaponEnergy, Optional<Pending> pending, List<CarrierServiceBay.Lease> leases,
-                        CarrierServiceBay.Stock stock, List<ItemStack> supplies, Optional<CarrierAnchor> navigationIntent,
+                        CarrierServiceBay.Stock stock, List<ItemStack> supplies, Optional<TravelIntent> navigationIntent,
                         boolean miningStartupCharged) {
         this.owner = owner;
         this.cabin = cabin;
@@ -115,8 +122,10 @@ public final class CarrierShip {
         this.energy = energy;
         this.weaponEnergy = weaponEnergy;
         this.bayStock = stock;
-        this.destination = navigationIntent.orElse(null);
+        TravelIntent travel = navigationIntent.orElse(null);
+        this.destination = travel == null ? null : travel.destination();
         this.navigationPaused = destination != null;
+        this.arrivalOperation = travel == null ? CarrierPolicy.Mode.IDLE : travel.arrivalOperation();
         this.miningStartupCharged = miningStartupCharged;
         this.pending = pending.orElse(null);
         this.cargo = new CarrierCargoStorage(cargo, () -> dirty.run());
@@ -156,5 +165,20 @@ public final class CarrierShip {
             ItemStack.CODEC.listOf(0, 256).fieldOf("drops").forGetter(Pending::drops)
         ).apply(i, Pending::new));
         public Pending { pos = pos.immutable(); drops = drops.stream().map(ItemStack::copy).toList(); }
+    }
+
+    public record TravelIntent(CarrierAnchor destination, CarrierPolicy.Mode arrivalOperation) {
+        private static final Codec<TravelIntent> CURRENT = RecordCodecBuilder.create(i -> i.group(
+            CarrierAnchor.CODEC.fieldOf("destination").forGetter(TravelIntent::destination),
+            Codec.intRange(0, CarrierPolicy.Mode.values().length - 1).optionalFieldOf("arrival_operation", 0)
+                .forGetter(value -> value.arrivalOperation.ordinal())
+        ).apply(i, (destination, mode) -> new TravelIntent(destination, CarrierPolicy.Mode.values()[mode])));
+        /** Reads legacy saves where navigation_intent contained only a CarrierAnchor. */
+        public static final Codec<TravelIntent> CODEC = Codec.either(CarrierAnchor.CODEC, CURRENT).xmap(
+            value -> value.map(anchor -> new TravelIntent(anchor, CarrierPolicy.Mode.IDLE), intent -> intent),
+            Either::right);
+        public TravelIntent {
+            if (arrivalOperation == null) arrivalOperation = CarrierPolicy.Mode.IDLE;
+        }
     }
 }

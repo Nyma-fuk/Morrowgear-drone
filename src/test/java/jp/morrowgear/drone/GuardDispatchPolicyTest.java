@@ -1,11 +1,20 @@
 package jp.morrowgear.drone;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
 final class GuardDispatchPolicyTest {
+	@Test
+	void confirmedReliefStrengthSurvivesPlanRefreshOnlyWhileReliefRemainsCommitted() {
+		assertTrue(GuardDispatchPolicy.confirmedReliefStrength(true, false, false));
+		assertTrue(GuardDispatchPolicy.confirmedReliefStrength(false, true, true));
+		assertFalse(GuardDispatchPolicy.confirmedReliefStrength(false, true, false));
+		assertFalse(GuardDispatchPolicy.confirmedReliefStrength(false, false, true));
+	}
+
 	@Test void sameWingAvailableGuardWinsAndResponseScalesWithThreat() {
 		var ranked = GuardDispatchPolicy.ranked(List.of(
 			new GuardDispatchPolicy.Candidate("A", false, true, false, false, false, false, 100, 100, 0, 9),
@@ -69,6 +78,8 @@ final class GuardDispatchPolicyTest {
 	@Test void rechargeCompletionInheritsOnlyAnObservedReliefMissionAndOtherwiseFallsBackSafely() {
 		assertEquals(GuardDispatchPolicy.RechargeCompletion.INHERIT_RELIEF_MISSION,
 			GuardDispatchPolicy.rechargeCompletion(true, true, true, true, true, true));
+		assertEquals(GuardDispatchPolicy.RechargeCompletion.INHERIT_RELIEF_MISSION,
+			GuardDispatchPolicy.rechargeCompletion(true, true, true, true, false, true));
 		assertEquals(GuardDispatchPolicy.RechargeCompletion.RESUME_ORIGINAL_MISSION,
 			GuardDispatchPolicy.rechargeCompletion(true, true, true, true, true, false));
 		assertEquals(GuardDispatchPolicy.RechargeCompletion.RECLAIM_COMBAT,

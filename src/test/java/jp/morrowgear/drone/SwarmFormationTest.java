@@ -131,11 +131,26 @@ class SwarmFormationTest {
 	}
 
 	@Test
-	void waitsForFullMusterThenDegradesGracefully() {
-		assertTrue(!SwarmFormation.canProceedWithAvailableUnits(true, 5, 4, 299));
-		assertTrue(SwarmFormation.canProceedWithAvailableUnits(true, 5, 4, 300));
-		assertTrue(SwarmFormation.canProceedWithAvailableUnits(false, 5, 4, 1));
-		assertTrue(SwarmFormation.canProceedWithAvailableUnits(true, 5, 5, 1));
+	void completeRosterLaunchesWithoutWaitingForMembersTemporarilyInService() {
+		assertTrue(SwarmFormation.canProceedWithAvailableUnits(true, 8, 8, 6, 1));
+		assertTrue(!SwarmFormation.canProceedWithAvailableUnits(true, 8, 8, 0, 300));
+		assertEquals(8, SwarmFormation.WING_SIZE);
+		assertEquals(8, SwarmFormation.wingSize(16, 0));
+	}
+
+	@Test
+	void genuinelyMissingAssignmentsStillReceiveTheMusterGracePeriod() {
+		assertTrue(!SwarmFormation.canProceedWithAvailableUnits(true, 8, 6, 6, 299));
+		assertTrue(SwarmFormation.canProceedWithAvailableUnits(true, 8, 6, 6, 300));
+		assertTrue(SwarmFormation.canProceedWithAvailableUnits(false, 8, 6, 6, 1));
+		assertTrue(SwarmFormation.canProceedWithAvailableUnits(true, 8, 8, 8, 1));
+	}
+
+	@Test
+	void returningReservedMemberLeavesLegacyMusterForMovingRejoin() {
+		assertTrue(SwarmFormation.lateMusterShouldJoinMovingCohort(1, 7));
+		assertTrue(!SwarmFormation.lateMusterShouldJoinMovingCohort(7, 7));
+		assertTrue(!SwarmFormation.lateMusterShouldJoinMovingCohort(0, 7));
 	}
 
 	@Test

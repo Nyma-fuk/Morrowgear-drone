@@ -40,6 +40,7 @@ public final class SupplyNetworkRuntime {
 		boolean acquireAccess(DroneEntity drone, BlockPos endpoint);
 		void releaseAccess(DroneEntity drone);
 		void stop(DroneEntity drone, Token token, boolean retainCargo, Status reason);
+		void idleAfterRoute(DroneEntity drone);
 	}
 
 	public enum ServiceResult { NOT_NETWORK, WAIT, TO_TARGET, COMPLETE, HOLD }
@@ -64,11 +65,44 @@ public final class SupplyNetworkRuntime {
 			|| !level.hasChunkAt(source) || !level.hasChunkAt(dock))
 			throw new IllegalArgumentException("Supply endpoints must be loaded and within 256 blocks");
 		Container warehouse = source(level, source);
-		if (warehouse == null || !warehouse.stillValid(owner)
+		// The tactical map may select any already-loaded source on the route.  The
+		// vanilla stillValid check is a player interaction range check (roughly
+		// eight blocks), not an automation ownership or route-safety check.
+		if (warehouse == null
 			|| !(level.getBlockEntity(dock) instanceof DockBlockEntity target) || !target.isOwnedBy(owner.getUUID()))
 			throw new IllegalArgumentException("Supply source must be accessible and Dock must be owned");
-		return SupplyNetworkSavedData.get(level).registry().configure(new Route(owner.getUUID(),
+		SupplyNetworkSavedData data = SupplyNetworkSavedData.get(level);
+		data.registerNode(owner.getUUID(), dimension(level), source.asLong());
+		return data.registry().configure(new Route(owner.getUUID(),
 			dimension(level), source.asLong(), dock.asLong()), rules, enabled);
+	}
+
+	/** Dock-local control: the Dock only joins or leaves its owner's shared logistics network. */
+	public static Configuration configureDock(ServerPlayer owner, BlockPos dock, boolean enabled) {
+		if (owner == null || dock == null || !(owner.level() instanceof ServerLevel level)
+			|| !level.hasChunkAt(dock) || !(level.getBlockEntity(dock) instanceof DockBlockEntity target)
+			|| !target.isOwnedBy(owner.getUUID()))
+			throw new IllegalArgumentException("Dock must be loaded and owned");
+		SupplyNetworkRegistry registry = SupplyNetworkSavedData.get(level).registry();
+		Configuration current = registry.configurations().stream().filter(c -> c.route().owner().equals(owner.getUUID())
+			&& c.route().dimension().equals(dimension(level)) && c.route().dock() == dock.asLong()).findFirst().orElse(null);
+		Route route = current == null
+			? new Route(owner.getUUID(), dimension(level), Route.AUTO_SOURCE, dock.asLong())
+			: current.route();
+		return registry.configure(route, current == null ? SupplyNetworkPolicy.defaults() : current.rules(), enabled);
+	}
+
+	public static boolean selectLogisticsNode(ServerPlayer owner, BlockPos pos) {
+		if (owner == null || pos == null || !(owner.level() instanceof ServerLevel level)) return false;
+		SupplyNetworkSavedData data = SupplyNetworkSavedData.get(level);
+		if (data.nodes(owner.getUUID(), dimension(level)).contains(pos.asLong())) return true;
+		BlockPos origin = owner.blockPosition();
+		long dx = pos.getX() - origin.getX(), dz = pos.getZ() - origin.getZ();
+		if (Math.abs(pos.getY() - origin.getY()) > SupplyNetworkPolicy.DISCOVERY_VERTICAL
+			|| dx * dx + dz * dz > (long)SupplyNetworkPolicy.DISCOVERY_RADIUS * SupplyNetworkPolicy.DISCOVERY_RADIUS
+			|| !level.hasChunkAt(pos) || source(level, pos) == null) return false;
+		data.registerNode(owner.getUUID(), dimension(level), pos.asLong());
+		return true;
 	}
 
 	/** Allows disabling an owned saved route even when one endpoint is unloaded or destroyed. */
@@ -97,29 +131,13 @@ public final class SupplyNetworkRuntime {
 		reconcile(level, registry, hooks);
 		List<DroneEntity> pool = candidates == null ? List.of()
 			: candidates.stream().limit(SupplyNetworkPolicy.MAX_CANDIDATES).filter(Objects::nonNull).toList();
-		List<Demand> demands = new ArrayList<>();
-		for (Configuration config : registry.configurations()) {
-			if (!config.enabled()) { registry.status(config.route(), Status.DISABLED); continue; }
-			Status endpoint = endpoints(level, config.route());
-			if (endpoint != Status.READY) { registry.status(config.route(), endpoint); continue; }
-			if (registry.dockReserved(config.route())) continue;
-			DockBlockEntity dock = dock(level, config.route());
-			boolean satisfied = true;
-			for (Rule rule : config.rules()) {
-				int missing = SupplyNetworkPolicy.demand(rule.minimum(), dock.supplyCount(rule.kind()),
-					registry.incoming(config.route(), rule.kind()));
-				if (missing > 0) { demands.add(new Demand(config, rule, missing)); satisfied = false; }
-			}
-			if (satisfied) registry.status(config.route(), Status.READY);
-		}
-		demands.sort(Comparator.comparingInt((Demand d) -> d.rule().priority()).reversed()
-			.thenComparingLong(d -> d.config().route().dock()).thenComparing(d -> d.rule().kind()));
+		List<Demand> demands = pendingDemands(level, registry);
 		java.util.Map<Route, Status> firstFailure = new java.util.LinkedHashMap<>();
 		for (Demand demand : demands) {
 			Route route = demand.config().route();
-			if (registry.dockReserved(route)) continue;
+			if (registry.kindReserved(route, demand.rule().kind())) continue;
 			dispatch(level, registry, demand, pool, hooks);
-			if (!registry.dockReserved(route)) firstFailure.putIfAbsent(route, registry.status(route));
+			if (!registry.kindReserved(route, demand.rule().kind())) firstFailure.putIfAbsent(route, registry.status(route));
 		}
 		firstFailure.forEach((route, reason) -> { if (!registry.dockReserved(route)) registry.status(route, reason); });
 		notifyChanges(level, data);
@@ -127,42 +145,70 @@ public final class SupplyNetworkRuntime {
 
 	private static void dispatch(ServerLevel level, SupplyNetworkRegistry registry, Demand demand,
 		List<DroneEntity> pool, CargoHooks hooks) {
-		Route route = demand.config().route();
-		Container source = source(level, BlockPos.of(route.source()));
-		DockBlockEntity target = dock(level, route);
-		if (source == null || target == null) return;
-		ItemStack available = ItemStack.EMPTY;
-		int count = 0;
-		boolean hasSupply = false;
-		for (int slot = 0; slot < source.getContainerSize(); slot++) {
-			ItemStack stack = source.getItem(slot);
-			if (DockSupplyPolicy.kind(stack) != demand.rule().kind() || !source.canTakeItem(source, slot, stack)) continue;
-			String item = DockSupplyPolicy.itemId(stack);
-			int stock = count(source, item);
-			int free = SupplyNetworkPolicy.available(stock, registry.reservedSource(route, item));
-			if (free <= 0) continue;
-			hasSupply = true;
-			int room = room(target, stack);
-			count = Math.min(Math.min(demand.missing(), free), Math.min(room, Math.min(stack.getCount(), stack.getMaxStackSize())));
-			if (count > 0) { available = stack; break; }
-		}
-		if (available.isEmpty()) {
-			registry.status(route, hasSupply ? Status.DOCK_FULL : Status.SOURCE_SHORTAGE);
-			return;
-		}
+		Route configRoute = demand.config().route();
+		DockBlockEntity target = dock(level, configRoute);
+		if (target == null) return;
+		SourceChoice choice = selectSource(level, registry, demand, target);
+		if (choice == null) return;
+		Route route = new Route(configRoute.owner(), configRoute.dimension(), choice.position().asLong(), configRoute.dock());
+		Container source = choice.container();
+		ItemStack available = choice.stack();
+		int count = choice.movable();
 		DroneEntity candidate = pool.stream().filter(d -> eligible(level, d, route, hooks)
 			&& registry.job(d.getUUID()).isEmpty() && hooks.token(d) == null)
 			.min(Comparator.comparingDouble((DroneEntity d) -> d.position().distanceToSqr(Vec3.atCenterOf(BlockPos.of(route.source()))))
 				.thenComparing(DroneEntity::getUUID)).orElse(null);
 		if (candidate == null) { registry.status(route, Status.NO_IDLE_CARGO); return; }
 		String item = DockSupplyPolicy.itemId(available);
-		Job job = registry.reserve(demand.config(), candidate.getUUID(), demand.rule().kind(), item,
+		Job job = registry.reserve(demand.config(), route, candidate.getUUID(), demand.rule().kind(), item,
 			count, count(source, item), room(target, available), level.getGameTime()).orElse(null);
 		if (job == null) { registry.status(route, Status.CAPACITY_LIMIT); return; }
 		if (!hooks.dispatch(candidate, job)) {
 			registry.release(job.token());
 			registry.status(route, Status.NO_IDLE_CARGO);
 		}
+	}
+
+	private static SourceChoice selectSource(ServerLevel level, SupplyNetworkRegistry registry, Demand demand,
+		DockBlockEntity target) {
+		Route route = demand.config().route();
+		SupplyNetworkSavedData data = SupplyNetworkSavedData.get(level);
+		java.util.LinkedHashSet<Long> positions = new java.util.LinkedHashSet<>(data.nodes(route.owner(), route.dimension()));
+		if (route.source() != Route.AUTO_SOURCE) positions.add(route.source());
+		if (positions.isEmpty()) { registry.status(route, Status.SOURCE_LOST); return null; }
+		SourceChoice best = null;
+		boolean loaded = false, valid = false, hasSupply = false;
+		BlockPos dockPos = BlockPos.of(route.dock());
+		for (long packed : positions) {
+			BlockPos position = BlockPos.of(packed);
+			if (position.distSqr(dockPos) > square(SupplyNetworkPolicy.MAX_ROUTE_DISTANCE)) continue;
+			if (!level.hasChunkAt(position)) continue;
+			loaded = true;
+			Container source = source(level, position);
+			if (source == null) continue;
+			valid = true;
+			Route delivery = new Route(route.owner(), route.dimension(), packed, route.dock());
+			for (int slot = 0; slot < source.getContainerSize(); slot++) {
+				ItemStack stack = source.getItem(slot);
+				if (DockSupplyPolicy.kind(stack) != demand.rule().kind() || !source.canTakeItem(source, slot, stack)) continue;
+				String item = DockSupplyPolicy.itemId(stack);
+				int stock = count(source, item);
+				int free = SupplyNetworkPolicy.available(stock, registry.reservedSource(delivery, item));
+				if (free <= 0) continue;
+				hasSupply = true;
+				int movable = Math.min(Math.min(demand.missing(), free), Math.min(room(target, stack), stack.getMaxStackSize()));
+				if (movable <= 0) continue;
+				SourceChoice next = new SourceChoice(position, source, stack, movable,
+					DockSupplyPolicy.deliveryPriority(item), position.distSqr(dockPos));
+				if (best == null || next.priority() > best.priority()
+					|| next.priority() == best.priority() && next.movable() > best.movable()
+					|| next.priority() == best.priority() && next.movable() == best.movable()
+						&& next.distance() < best.distance()) best = next;
+			}
+		}
+		if (best == null) registry.status(route, !loaded ? Status.WAIT_CHUNK
+			: !valid ? Status.SOURCE_LOST : hasSupply ? Status.DOCK_FULL : Status.SOURCE_SHORTAGE);
+		return best;
 	}
 
 	private static boolean eligible(ServerLevel level, DroneEntity drone, Route route, CargoHooks hooks) {
@@ -211,7 +257,7 @@ public final class SupplyNetworkRuntime {
 			if (drone.role() != DroneRole.CARGO || !drone.hasCargoSource() || !drone.hasCargoTarget()
 				|| drone.cargoSource().asLong() != job.route().source() || drone.cargoTarget().asLong() != job.deliveryTarget()
 				|| drone.cargoPaused() || drone.hasActiveFieldOperation() || drone.hasSecurityPatrol()
-				|| drone.hasPatrolRoute() || drone.hasTrackingTarget() || SupplyNetworkPolicy.protectedGroup(drone.groupId())
+				|| drone.hasPatrolRoute() || drone.hasTrackingTarget()
 				|| !drone.missionId().equals(drone.unitId() + "-cargo")) {
 				hold(registry, drone, job, hooks, Status.ASSIGNMENT_LOST);
 				continue;
@@ -290,21 +336,31 @@ public final class SupplyNetworkRuntime {
 	// Only serviceEndpoint calls this in production, after distance, dwell, loaded-chunk and lease checks.
 	static int loadReserved(SupplyNetworkRegistry registry, Job job, Container source, List<ItemStack> cargo,
 		java.util.function.ToIntFunction<ItemStack> targetRoom) {
-		if (!cargoMatches(job, cargo) || job.stage() != Stage.RESERVED
-			|| source.getContainerSize() > SupplyNetworkPolicy.MAX_SOURCE_SLOTS) return -1;
-		for (int slot = 0; slot < source.getContainerSize(); slot++) {
+		if (!cargoMatches(job, cargo) || source.getContainerSize() > SupplyNetworkPolicy.MAX_SOURCE_SLOTS) return -1;
+		if (!registry.current(job) || job.stage() != Stage.RESERVED) return 0;
+		int otherReservations = Math.max(0, registry.reservedSource(job.route(), job.item()) - job.requested());
+		int remaining = Math.min(job.requested(), SupplyNetworkPolicy.available(count(source, job.item()), otherReservations));
+		List<ItemStack> loaded = new ArrayList<>();
+		for (int slot = 0; slot < source.getContainerSize() && remaining > 0 && cargo.size() < 9; slot++) {
 			ItemStack stack = source.getItem(slot);
-			if (!source.canTakeItem(source, slot, stack)) continue;
-			int allowance = Math.min(beforeLoad(registry, job, source, stack), targetRoom.applyAsInt(stack));
+			if (!source.canTakeItem(source, slot, stack) || !allowed(job, stack)) continue;
+			int allowance = Math.min(remaining, Math.min(stack.getCount(), targetRoom.applyAsInt(stack)));
 			if (allowance <= 0) continue;
 			ItemStack removed = source.removeItem(slot, allowance);
 			if (removed.isEmpty()) continue;
 			cargo.add(removed);
+			loaded.add(removed);
+			remaining -= removed.getCount();
 			source.setChanged();
-			if (!allowed(job, removed) || removed.getCount() > allowance || !afterLoad(registry, job.token(), removed.getCount())) return -1;
-			return removed.getCount();
 		}
-		return 0;
+		int moved = loaded.stream().mapToInt(ItemStack::getCount).sum();
+		if (moved <= 0) return 0;
+		if (afterLoad(registry, job.token(), moved)) return moved;
+		for (ItemStack stack : loaded) {
+			cargo.remove(stack);
+			returnToContainer(source, stack);
+		}
+		return -1;
 	}
 
 	public static boolean beforeUnload(SupplyNetworkRegistry registry, Job job, ItemStack stack) {
@@ -340,9 +396,46 @@ public final class SupplyNetworkRuntime {
 		}
 		if (hooks.cargo(drone).isEmpty()) {
 			hooks.stop(drone, job.token(), false, Status.READY);
+			// Continue a logistics sortie without an avoidable one-second parked
+			// interval.  If another demand exists, the same aircraft receives it in
+			// this server tick; otherwise it remains available to the normal fleet
+			// dispatcher and does not return to its Dock merely because one trip ended.
+			if (!dispatchNext(level, registry, drone, hooks)) hooks.idleAfterRoute(drone);
 			return ServiceResult.COMPLETE;
 		}
 		return ServiceResult.WAIT;
+	}
+
+	private static List<Demand> pendingDemands(ServerLevel level, SupplyNetworkRegistry registry) {
+		List<Demand> demands = new ArrayList<>();
+		for (Configuration config : registry.configurations()) {
+			if (!config.enabled()) { registry.status(config.route(), Status.DISABLED); continue; }
+			Status endpoint = targetStatus(level, config.route());
+			if (endpoint != Status.READY) { registry.status(config.route(), endpoint); continue; }
+			DockBlockEntity target = dock(level, config.route());
+			boolean satisfied = true;
+			for (Rule rule : config.rules()) {
+				int actual = target.effectiveSupplyCount(rule.kind());
+				boolean refilling = registry.updateRefill(config.route(), rule.kind(), rule.minimum(), rule.target(), actual);
+				int missing = SupplyNetworkPolicy.demand(rule.minimum(), rule.target(), actual,
+					registry.incoming(config.route(), rule.kind()), refilling);
+				if (missing > 0) { demands.add(new Demand(config, rule, missing)); satisfied = false; }
+			}
+			if (satisfied) registry.status(config.route(), Status.READY);
+		}
+		demands.sort(Comparator.comparingInt((Demand d) -> d.rule().priority()).reversed()
+			.thenComparingLong(d -> d.config().route().dock()).thenComparing(d -> d.rule().kind()));
+		return demands;
+	}
+
+	private static boolean dispatchNext(ServerLevel level, SupplyNetworkRegistry registry,
+		DroneEntity drone, CargoHooks hooks) {
+		for (Demand demand : pendingDemands(level, registry)) {
+			if (!demand.config().route().owner().equals(drone.ownerId())) continue;
+			dispatch(level, registry, demand, List.of(drone), hooks);
+			if (hooks.token(drone) != null) return true;
+		}
+		return false;
 	}
 
 	public static void cancel(ServerLevel level, DroneEntity drone, CargoHooks hooks, Status reason) {
@@ -508,10 +601,11 @@ public final class SupplyNetworkRuntime {
 			&& c.route().dimension().equals(dimension(level))).map(c -> {
 			DockBlockEntity dock = dock(level, c.route());
 			List<StockSummary> stock = c.rules().stream().map(r -> {
-				int actual = dock == null ? -1 : dock.supplyCount(r.kind());
+				int actual = dock == null ? -1 : dock.effectiveSupplyCount(r.kind());
 				int incoming = registry.incoming(c.route(), r.kind());
-				return new StockSummary(r.kind(), r.minimum(), r.priority(), actual, incoming,
-					actual < 0 ? -1 : SupplyNetworkPolicy.demand(r.minimum(), actual, incoming));
+				return new StockSummary(r.kind(), r.minimum(), r.target(), r.priority(), actual, incoming,
+					actual < 0 ? -1 : SupplyNetworkPolicy.demand(r.minimum(), r.target(), actual, incoming,
+						registry.refilling(c.route(), r.kind())));
 			}).toList();
 			return new DockSummary(c, registry.status(c.route()), stock, registry.jobs().stream()
 				.filter(j -> j.route().owner().equals(owner) && j.route().dock() == c.route().dock()).toList());
@@ -545,6 +639,8 @@ public final class SupplyNetworkRuntime {
 	private static String dimension(ServerLevel level) { return level.dimension().identifier().toString(); }
 	private static double square(double value) { return value * value; }
 	private record Demand(Configuration config, Rule rule, int missing) {}
-	public record StockSummary(SupplyKind kind, int minimum, int priority, int stock, int incoming, int missing) {}
+	private record SourceChoice(BlockPos position, Container container, ItemStack stack, int movable,
+		int priority, double distance) {}
+	public record StockSummary(SupplyKind kind, int minimum, int target, int priority, int stock, int incoming, int missing) {}
 	public record DockSummary(Configuration configuration, Status status, List<StockSummary> stock, List<Job> jobs) {}
 }

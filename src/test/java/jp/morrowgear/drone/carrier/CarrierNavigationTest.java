@@ -39,7 +39,7 @@ class CarrierNavigationTest {
         assertTrue(CarrierNavigation.validTarget(new Vec3(1_000_000, 150, -1_000_000), -64, 320));
         assertFalse(CarrierNavigation.validTarget(new Vec3(Double.NaN, 150, 0), -64, 320));
         assertFalse(CarrierNavigation.validTarget(new Vec3(30_000_000, 150, 0), -64, 320));
-        assertFalse(CarrierNavigation.validTarget(new Vec3(0, 310, 0), -64, 320));
+		assertFalse(CarrierNavigation.validTarget(new Vec3(0, 312, 0), -64, 320));
         assertFalse(CarrierNavigation.validTarget(new Vec3(0, -50, 0), -64, 320));
     }
 
@@ -72,6 +72,17 @@ class CarrierNavigationTest {
         assertTrue(CarrierChunkLeases.wantsLease(id, ship, owner, id, true));
     }
 
+    @Test void activeWorkRetainsItsCentralLeaseWithoutAFlightDestination() {
+        UUID id = UUID.randomUUID(), owner = UUID.randomUUID();
+        var ship = new CarrierShip(owner, 0, new CarrierAnchor("minecraft:overworld", 8, 150, 8));
+        ship.mode = CarrierPolicy.Mode.MINING;
+        assertTrue(CarrierChunkLeases.wantsLease(id, ship, owner, null, true));
+        ship.mode = CarrierPolicy.Mode.COMBAT;
+        assertTrue(CarrierChunkLeases.wantsLease(id, ship, owner, null, true));
+        ship.mode = CarrierPolicy.Mode.IDLE;
+        assertFalse(CarrierChunkLeases.wantsLease(id, ship, owner, null, true));
+    }
+
     @Test void tinyResidualDistanceCompletesInsteadOfLeavingAnInvisibleActiveRoute() {
         Vec3 target = new Vec3(10, 120, -4);
         assertTrue(CarrierNavigation.arrived(target.add(1.0e-7, 0, 0), target));
@@ -98,5 +109,36 @@ class CarrierNavigationTest {
         assertEquals(CarrierPolicy.Mode.IDLE, loaded.mode);
         encoded.getAsJsonObject().remove("navigation_intent");
         assertNull(CarrierShip.CODEC.parse(JsonOps.INSTANCE, encoded).getOrThrow().destination);
+    }
+
+    @Test void travelOperationSurvivesSaveReloadAndKeepsABoundedLeaseUntilConfirmation() {
+        UUID id = UUID.randomUUID(), owner = UUID.randomUUID();
+        var ship = new CarrierShip(owner, 0, new CarrierAnchor("minecraft:overworld", 8, 150, 8));
+        ship.destination = new CarrierAnchor("minecraft:overworld", 1032, 150, 8);
+        ship.arrivalOperation = CarrierPolicy.Mode.MINING;
+        ship.navigationPaused = false;
+
+        var encoded = CarrierShip.CODEC.encodeStart(JsonOps.INSTANCE, ship).getOrThrow();
+        var loaded = CarrierShip.CODEC.parse(JsonOps.INSTANCE, encoded).getOrThrow();
+
+        assertEquals(ship.destination, loaded.destination);
+        assertEquals(CarrierPolicy.Mode.MINING, loaded.arrivalOperation);
+        assertTrue(CarrierChunkLeases.wantsLease(id, loaded, owner, null, true));
+        loaded.destination = null;
+        assertTrue(CarrierChunkLeases.wantsLease(id, loaded, owner, null, true),
+            "arrival confirmation must not unload before the owner can reopen the console");
+        loaded.arrivalOperation = CarrierPolicy.Mode.IDLE;
+        assertFalse(CarrierChunkLeases.wantsLease(id, loaded, owner, null, true));
+    }
+
+    @Test void legacyNavigationAnchorLoadsAsMoveOnlyIntent() {
+        var ship = new CarrierShip(UUID.randomUUID(), 0, new CarrierAnchor("minecraft:overworld", 8, 150, 8));
+        ship.destination = new CarrierAnchor("minecraft:overworld", 1032, 150, 8);
+        var encoded = CarrierShip.CODEC.encodeStart(JsonOps.INSTANCE, ship).getOrThrow().getAsJsonObject();
+        encoded.add("navigation_intent", CarrierAnchor.CODEC.encodeStart(JsonOps.INSTANCE, ship.destination).getOrThrow());
+
+        var loaded = CarrierShip.CODEC.parse(JsonOps.INSTANCE, encoded).getOrThrow();
+        assertEquals(ship.destination, loaded.destination);
+        assertEquals(CarrierPolicy.Mode.IDLE, loaded.arrivalOperation);
     }
 }

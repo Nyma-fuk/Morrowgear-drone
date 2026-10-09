@@ -92,7 +92,9 @@ public final class CarrierMenu extends AbstractContainerMenu {
         if (id.equals(CarrierInterior.currentShip(player))) return true;
         if (ship.destroyed) return ship.owner.equals(player.getUUID());
         var entity = CarrierModule.find(player.level().getServer(), id);
-        return entity != null && entity.level() == player.level() && entity.distanceToSqr(player) <= 128 * 128;
+        if (entity == null || entity.level() != player.level()) return false;
+        // The owner operates through the authenticated datalink. Guests still need physical proximity.
+        return ship.owner.equals(player.getUUID()) || entity.distanceToSqr(player) <= 128 * 128;
     }
     @Override public ItemStack quickMoveStack(Player player, int index) {
         if (!activeFor(player) || !owner() || !stillValid(player) || index < 0 || index >= slots.size()) return ItemStack.EMPTY;

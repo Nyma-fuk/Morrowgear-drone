@@ -42,7 +42,8 @@ class CarrierPresentationOperationsTest {
         assertTrue(work.contains(".getType() != HitResult.Type.MISS) return null"));
         assertTrue(renderer.contains("entity.beamPaths()"));
         assertTrue(renderer.contains("path.toRenderLocal(origin)"));
-        assertTrue(renderer.contains("MorrowgearRenderTypes.energyBeam()"));
+        assertTrue(renderer.contains("MorrowgearRenderTypes.condensedBeam()"));
+        assertTrue(renderer.contains("MorrowgearRenderTypes.condensedCore()"));
         assertTrue(renderer.contains("MorrowgearRenderTypes.visibleEnergyCore()"));
         assertFalse(renderer.contains("NO_DEPTH"));
     }
@@ -59,6 +60,27 @@ class CarrierPresentationOperationsTest {
         assertTrue(screen.contains("待機点へ接近"));
         assertTrue(screen.contains("収容位置へ移動"));
         assertTrue(screen.contains("補給中"));
+    }
+
+    @Test void miningMapKeepsItsTargetAndUsesAQuietThreeByThreeSurveyOverlay() throws Exception {
+        String screen = source("src/client/java/jp/morrowgear/drone/client/CarrierScreen.java");
+        assertTrue(screen.contains("CarrierMapUiPolicy.scanGrid"));
+        assertTrue(screen.contains("CarrierMapUiPolicy.scannedChunks"));
+        assertTrue(screen.contains("CarrierMapUiPolicy.persistentMiningFrame"));
+        assertTrue(screen.contains("new String[]{\"走査\", \"充填\", \"下降\", \"解放\"}"));
+        assertTrue(screen.contains("scanCorners"));
+        assertTrue(screen.contains("scanned.contains(chunk) ? HmiArt.CYAN : HmiArt.LINE"));
+    }
+
+    @Test void miningNeverStopsForPlayersAlliesOrPassiveEntitiesInTheFootprint() throws Exception {
+        String work = source("src/main/java/jp/morrowgear/drone/carrier/CarrierWork.java");
+        String screen = source("src/client/java/jp/morrowgear/drone/client/CarrierScreen.java");
+        assertFalse(work.contains("ship.stop(CarrierPolicy.Stop.FRIENDLY_IN_AREA)"));
+        assertTrue(work.contains("if (!hostile(target, owner)) continue;"));
+        assertTrue(work.contains("ship.stop == CarrierPolicy.Stop.UNLOADED || ship.stop == CarrierPolicy.Stop.FRIENDLY_IN_AREA"),
+            "legacy safety holds must clear without losing the accepted operation");
+        assertTrue(screen.contains("対象チャンクを読み込み中 / 完了後に自動再開"));
+        assertTrue(screen.contains("現任務: 対象チャンク読込待ち / 自動再開"));
     }
 
     @Test void navigationTrailRemainsBoundedVisibleAndWorldSpace() throws Exception {

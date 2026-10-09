@@ -31,6 +31,6 @@ public final class DroneStatePolicy {
 	}
 
 	public static int securityRadius(int value) {
-		return Math.max(6, Math.min(64, value));
+		return Math.max(6, Math.min(ThreatSensorPolicy.MAX_PATROL_RADIUS, value));
 	}
 }

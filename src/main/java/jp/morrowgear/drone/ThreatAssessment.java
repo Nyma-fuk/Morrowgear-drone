@@ -41,6 +41,9 @@ final class ThreatAssessment {
 	private ThreatAssessment() {
 	}
 
+	static void clear() { CACHE.clear(); }
+	static void clearOwner(UUID owner) { CACHE.remove(owner); }
+
 	static Snapshot assess(ServerLevel level, ServerPlayer owner) {
 		CachedSnapshot cached = CACHE.get(owner.getUUID());
 		long tick = level.getGameTime();

@@ -19,9 +19,12 @@ import net.minecraft.world.phys.AABB;
 final class BaseDefenseOperation {
 	private static final long ALERT_TICKS = 80L;
 	private static final long RECOVERY_TICKS = 140L;
+	private static final int SENSOR_INTERVAL_TICKS = 5;
 	private static final Map<UUID, Session> SESSIONS = new HashMap<>();
 
 	private BaseDefenseOperation() {}
+
+	static synchronized void clear() { SESSIONS.clear(); }
 
 	static synchronized void start(ServerPlayer player, BlockPos center) {
 		SESSIONS.put(player.getUUID(), new Session(player.getUUID(), player.level().dimension().toString(),
@@ -45,14 +48,17 @@ final class BaseDefenseOperation {
 		if (player == null || !player.level().dimension().toString().equals(current.dimension())) return current;
 		ServerLevel level = player.level();
 		long phaseTicks = level.getGameTime() - current.phaseStarted();
-		List<LivingEntity> hostiles = hostiles(level, current.center());
-		publishContacts(level, player, current, hostiles);
-		String fronts = frontSummary(current.center(), hostiles);
+		boolean sensorTick = current.phaseTicks() == 0L
+			|| Math.floorMod(level.getGameTime() + current.ownerId().hashCode(), SENSOR_INTERVAL_TICKS) == 0;
+		List<LivingEntity> hostiles = sensorTick ? hostiles(level, current.center()) : List.of();
+		if (sensorTick) publishContacts(level, player, current, hostiles);
+		int hostileCount = sensorTick ? hostiles.size() : current.hostiles();
+		String fronts = sensorTick ? frontSummary(current.center(), hostiles) : current.fronts();
 		if (current.phase() == Phase.ALERT && phaseTicks >= ALERT_TICKS) {
 			MorrowgearBaseGenerator.launchOperationWave(level, player, current.center(), 0);
-			return current.transition(Phase.CONTACT, level.getGameTime(), hostiles.size(), fronts);
+			return current.transition(Phase.CONTACT, level.getGameTime(), hostileCount, fronts);
 		}
-		if (shouldEnterRecovery(current.phase(), hostiles.size(), phaseTicks)) {
+		if (shouldEnterRecovery(current.phase(), hostileCount, phaseTicks)) {
 			player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
 				"[MORROWGEAR BASE] SERVICE WINDOW / FLEET RECOVERY"));
 			return current.transition(Phase.RECOVERY, level.getGameTime(), 0, fronts);
@@ -63,9 +69,9 @@ final class BaseDefenseOperation {
 				current.waveIndex() + 1);
 			else player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
 				"[MORROWGEAR BASE] SECTOR SECURE / DEFENSE OPERATION COMPLETE"));
-			return current.transition(next, level.getGameTime(), hostiles.size(), fronts);
+			return current.transition(next, level.getGameTime(), hostileCount, fronts);
 		}
-		return current.withStatus(phaseTicks, hostiles.size(), fronts);
+		return current.withStatus(phaseTicks, hostileCount, fronts);
 	}
 
 	static boolean shouldEnterRecovery(Phase phase, int hostiles, long phaseTicks) {

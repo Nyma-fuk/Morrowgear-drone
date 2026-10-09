@@ -20,6 +20,9 @@ final class DefenseAllocation {
 	private DefenseAllocation() {
 	}
 
+	static void clear() { STATES.clear(); }
+	static void clearOwner(UUID owner) { STATES.remove(owner); }
+
 	static Assignment assign(ServerLevel level, ServerPlayer owner, List<DroneEntity> drones,
 		ThreatAssessment.Snapshot threat, DroneEntity drone) {
 		long tick = level.getGameTime();

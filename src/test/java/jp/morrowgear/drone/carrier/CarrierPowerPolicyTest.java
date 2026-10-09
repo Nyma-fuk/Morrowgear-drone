@@ -94,21 +94,29 @@ class CarrierPowerPolicyTest {
         for (int broken = 0; broken < CarrierPolicy.BREAK_PER_TICK; broken++)
             assertEquals(broken < CarrierPowerPolicy.SUSTAINED_MINING_BLOCKS_PER_TICK,
                 CarrierPowerPolicy.sustainedMiningSlot(broken));
-        assertEquals(8, CarrierPowerPolicy.SUSTAINED_MINING_BLOCKS_PER_TICK);
+        assertEquals(2048, CarrierPowerPolicy.SUSTAINED_MINING_BLOCKS_PER_TICK);
         assertTrue(CarrierPowerPolicy.SUSTAINED_MINING_BLOCKS_PER_TICK < CarrierPolicy.BREAK_PER_TICK);
         assertTrue(CarrierPowerPolicy.MINING_BURST_ENERGY_PER_BLOCK > 0);
     }
 
-    @Test void fullDepthOverworldChunkFitsTheDocumentedElevenMinuteSolidBlockBudget() {
+    @Test void fullDepthOverworldChunkFitsTheDocumentedFastSolidBlockBudget() {
         var operation = CarrierPolicy.Operation.at(UUID.randomUUID(), "minecraft:overworld",
             8, 8, -64, 319);
         int ticks = CarrierPowerPolicy.miningTickBudget(operation);
         assertEquals(98_304, operation.volume());
         assertEquals(CarrierPolicy.SCAN_TICKS + CarrierPolicy.MINING_CHARGE_TICKS
             + operation.volume() / CarrierPowerPolicy.SUSTAINED_MINING_BLOCKS_PER_TICK, ticks);
-        assertTrue(ticks <= 11 * 60 * 20, "full-depth budget exceeded: " + ticks + " ticks");
+        assertTrue(ticks <= 15 * 20, "single-chunk full-depth budget exceeded: " + ticks + " ticks");
         assertTrue(ticks > operation.volume() / CarrierPolicy.BREAK_PER_TICK,
             "the upper bound must use sustained output, not assume permanent peak burst");
+    }
+
+    @Test void productionImpactReachesBedrockWithinThreeMinuteSolidBlockBudget() {
+        var operation = CarrierPolicy.miningOperation(UUID.randomUUID(), "minecraft:overworld",
+            8, 8, 320, -64, 320);
+        int ticks = CarrierPowerPolicy.miningTickBudget(operation);
+        assertEquals(CarrierPolicy.MINING_IMPACT_RADIUS, operation.footprintRadius());
+        assertTrue(ticks <= 30 * 20, "production excavation budget exceeded: " + ticks + " ticks");
     }
 
     private static CarrierShip ship() {

@@ -90,8 +90,19 @@ final class SwarmFormation {
 		return basePhase + Math.max(0, layerIndex) * Math.PI * (3.0 - Math.sqrt(5.0));
 	}
 
-	static boolean canProceedWithAvailableUnits(boolean mustering, int expected, int available, long elapsedTicks) {
-		return available >= expected || !mustering || elapsedTicks >= 300;
+	static boolean canProceedWithAvailableUnits(boolean mustering, int expected, int assigned,
+		int available, long elapsedTicks) {
+		if (!mustering) return true;
+		if (available <= 0) return false;
+		if (available >= expected) return true;
+		// The complete mission roster is known, so the difference is a reserved member
+		// temporarily detached for service or combat. The eligible cohort may depart.
+		if (assigned >= expected && assigned > available) return true;
+		return elapsedTicks >= 300;
+	}
+
+	static boolean lateMusterShouldJoinMovingCohort(int mustering, int available) {
+		return mustering > 0 && mustering < available;
 	}
 
 	static int leaderIndex(String missionId, int count) {

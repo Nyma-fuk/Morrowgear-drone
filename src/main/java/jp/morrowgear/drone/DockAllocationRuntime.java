@@ -4,6 +4,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.function.BiPredicate;
 import jp.morrowgear.drone.block.DockBlockEntity;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.server.level.ServerLevel;
@@ -18,6 +21,12 @@ final class DockAllocationRuntime {
 			return size() > CACHE_LIMIT;
 		}
 	};
+	private static final Map<Key, CompatibilitySnapshot> COMPATIBILITY = new LinkedHashMap<>(16, 0.75f, true) {
+		@Override
+		protected boolean removeEldestEntry(Map.Entry<Key, CompatibilitySnapshot> eldest) {
+			return size() > CACHE_LIMIT;
+		}
+	};
 	private static boolean registered;
 
 	private DockAllocationRuntime() {
@@ -26,7 +35,10 @@ final class DockAllocationRuntime {
 	static void register() {
 		if (registered) return;
 		registered = true;
-		ServerLifecycleEvents.SERVER_STOPPED.register(server -> CACHE.clear());
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
+			CACHE.clear();
+			COMPATIBILITY.clear();
+		});
 	}
 
 	static List<DockBlockEntity> docks(ServerLevel level, ServerPlayer owner) {
@@ -41,7 +53,27 @@ final class DockAllocationRuntime {
 	}
 
 	static void invalidate(ServerLevel level, UUID owner) {
-		if (level != null && owner != null) CACHE.remove(new Key(level, owner));
+		if (level != null && owner != null) {
+			Key key = new Key(level, owner);
+			CACHE.remove(key);
+			COMPATIBILITY.remove(key);
+		}
+	}
+
+	static Set<UUID> compatible(ServerLevel level, ServerPlayer owner, List<DroneEntity> fleet,
+		BiPredicate<DroneEntity, DockBlockEntity> predicate) {
+		Key key = new Key(level, owner.getUUID());
+		long tick = level.getGameTime();
+		CompatibilitySnapshot cached = COMPATIBILITY.get(key);
+		if (cached != null && cached.tick() == tick) return cached.aircraft();
+		List<DockBlockEntity> docks = docks(level, owner);
+		Set<UUID> aircraft = new HashSet<>();
+		for (DroneEntity drone : fleet) {
+			if (docks.stream().anyMatch(dock -> predicate.test(drone, dock))) aircraft.add(drone.getUUID());
+		}
+		Set<UUID> result = Set.copyOf(aircraft);
+		COMPATIBILITY.put(key, new CompatibilitySnapshot(tick, result));
+		return result;
 	}
 
 	static boolean fresh(long tick, long cachedTick) {
@@ -69,4 +101,5 @@ final class DockAllocationRuntime {
 		}
 	}
 	private record Snapshot(long tick, List<DockBlockEntity> docks) {}
+	private record CompatibilitySnapshot(long tick, Set<UUID> aircraft) {}
 }

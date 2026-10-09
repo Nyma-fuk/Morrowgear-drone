@@ -1,0 +1,80 @@
+{
+  "proposalOnly": true,
+  "revision": "V31_INTEGRATED_MINING_RING_01",
+  "coordinateSystem": {
+    "front": "-Y",
+    "up": "+Z",
+    "bilateralPlane": "X=0"
+  },
+  "recognitionFeatures": [
+    "50m low horizontal armored span",
+    "structurally integrated hollow central mining aperture",
+    "16 recessed mining emitters around the lower ring",
+    "four recessed fore/underside drone service bays",
+    "central lower-front propulsion intake and eight aft vector ducts"
+  ],
+  "components": [
+    {
+      "id": "flying_hull",
+      "state": "fixed",
+      "symmetry": "exact bilateral",
+      "connection": "continuous spanwise monocoque"
+    },
+    {
+      "id": "mining_ring",
+      "state": "fixed",
+      "symmetry": "exact bilateral",
+      "connection": "intersects hull pressure frame and eight mirrored load paths",
+      "innerDiameter": 9.1,
+      "outerDiameter": 12.7
+    },
+    {
+      "id": "mining_emitters",
+      "state": "dark/ready/active",
+      "count": 16,
+      "mount": "recessed lower annulus"
+    },
+    {
+      "id": "service_bays",
+      "state": "open/service",
+      "count": 4,
+      "centersX": [
+        -15,
+        -10,
+        10,
+        15
+      ],
+      "clearEnvelope": [
+        3.6,
+        4.4,
+        2.4
+      ]
+    },
+    {
+      "id": "lower_front_intake",
+      "state": "open",
+      "connection": "converging propulsion duct with flow straighteners"
+    },
+    {
+      "id": "aft_vector_ducts",
+      "state": "throttle/vector",
+      "count": 8
+    }
+  ],
+  "states": {
+    "transit": {
+      "emitterOptics": "dark",
+      "verticalBeam": "absent"
+    },
+    "miningReady": {
+      "emitterOptics": "energized",
+      "verticalBeam": "absent"
+    },
+    "miningActivePresentation": {
+      "emitterOptics": "energized",
+      "verticalBeam": "visible witness only",
+      "canonicalMeshContainsBeam": false
+    }
+  },
+  "runtimeStatus": "not installed; approval required"
+}

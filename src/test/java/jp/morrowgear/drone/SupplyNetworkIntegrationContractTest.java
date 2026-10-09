@@ -46,7 +46,7 @@ final class SupplyNetworkIntegrationContractTest {
 		assertTrue(waypoint.indexOf("preemptSupplyAssignment()") < waypoint.indexOf("assignMission("));
 		String mode = entity.substring(entity.indexOf("public void setMode("), entity.indexOf("public void assignFollowFormation("));
 		assertTrue(mode.indexOf("preemptSupplyAssignment()") < mode.indexOf("clearMissionAssignment()"));
-		assertTrue(entity.contains("if (!supplyOwnsMission() || SupplyNetworkPolicy.protectedGroup(groupId())"));
+		assertTrue(entity.contains("if (!supplyOwnsMission() || role() != DroneRole.CARGO"));
 	}
 
 	@Test void supplyNeverAssignsOrClearsWingMembershipAndPreservesServiceTasks() throws Exception {
@@ -58,6 +58,11 @@ final class SupplyNetworkIntegrationContractTest {
 		assertFalse(hooks.contains("serviceReturn = false"));
 		assertFalse(hooks.contains("clearSolarService("));
 		assertTrue(hooks.contains("task.kind() == DroneTaskStack.Kind.CARGO"));
+		assertTrue(hooks.contains("SUPPLY NETWORK READY / NEXT ROUTE SCAN"));
+		assertFalse(hooks.contains("drone.requestDockSlot()"));
+		assertFalse(hooks.contains("drone.entityData.set(MODE, DroneMode.DOCK.id())"));
+		assertTrue(hooks.contains("SupplyNetworkPolicy.protectedGroup(drone.groupId()) && !drone.isDocked()"));
+		assertFalse(hooks.contains("SupplyNetworkPolicy.protectedGroup(groupId()) || role()"));
 	}
 
 	@Test void schedulerCannotMoveItemsAndFallbackSearchRemainsBounded() throws Exception {
@@ -69,5 +74,42 @@ final class SupplyNetworkIntegrationContractTest {
 		assertFalse(runtime.contains("getChunk("));
 		assertTrue(runtime.contains("registry.configurations().stream().filter"));
 		assertTrue(runtime.contains("SupplyNetworkPolicy.MAX_ROUTE_DISTANCE"));
+	}
+
+	@Test void sourceDiscoveryIsServerBoundedAndDockUiDoesNotOwnWarehouseSelection() throws Exception {
+		String panel = Files.readString(Path.of("src/client/java/jp/morrowgear/drone/client/SupplyNetworkPanel.java"));
+		assertTrue(panel.contains("Dock 自動補給"));
+		assertTrue(panel.contains("Route.AUTO_SOURCE"));
+		assertFalse(panel.contains("buildSourceMap()"));
+		assertFalse(panel.contains("補給元を選ぶ"));
+		assertFalse(panel.contains("getBlockEntities()"));
+		String transport = source("SupplyNetworkTransport.java");
+		assertTrue(transport.contains("SupplyNetworkPolicy.DISCOVERY_RADIUS"));
+		assertTrue(transport.contains("SupplyNetworkPolicy.DISCOVERY_VERTICAL"));
+		assertTrue(transport.contains("registered.put"));
+		String runtime = source("SupplyNetworkRuntime.java");
+		assertTrue(runtime.contains("selectSource(level, registry, demand, target)"));
+		assertTrue(runtime.contains("data.nodes(route.owner(), route.dimension())"));
+	}
+
+	@Test void completedDeliveryCanRedispatchTheSameAircraftImmediately() throws Exception {
+		String runtime = source("SupplyNetworkRuntime.java");
+		String unload = runtime.substring(runtime.indexOf("private static ServiceResult unload("),
+			runtime.indexOf("private static List<Demand> pendingDemands("));
+		assertTrue(unload.indexOf("hooks.stop(drone, job.token(), false, Status.READY)")
+			< unload.indexOf("dispatchNext(level, registry, drone, hooks)"));
+		String next = runtime.substring(runtime.indexOf("private static boolean dispatchNext("),
+			runtime.indexOf("public static void cancel("));
+		assertTrue(next.contains("pendingDemands(level, registry)"));
+		assertTrue(next.contains("List.of(drone)"));
+		assertTrue(next.contains("route().owner().equals(drone.ownerId())"));
+		assertTrue(unload.contains("if (!dispatchNext(level, registry, drone, hooks)) hooks.idleAfterRoute(drone)"));
+		String hooks = source("DroneEntity.java");
+		assertTrue(hooks.contains("idleAfterRoute(DroneEntity drone) { drone.requestLogisticsDockReturn(); }"));
+		String returnPath = hooks.substring(hooks.indexOf("private void requestLogisticsDockReturn()"),
+			hooks.indexOf("public void setMode(", hooks.indexOf("private void requestLogisticsDockReturn()")));
+		assertTrue(returnPath.contains("supplyNetworkToken != null || !cargo.isEmpty()"));
+		assertTrue(returnPath.contains("entityData.set(MODE, DroneMode.DOCK.id())"));
+		assertTrue(returnPath.contains("requestDockSlot()"));
 	}
 }

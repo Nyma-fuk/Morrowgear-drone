@@ -77,19 +77,19 @@ final class CarrierTrailPolicyTest {
         return count;
     }
 
-    @Test void anchorsMatchTheUnchangedCanonicalRearExhaust() {
-        close(new Vec3(-7, 6.7, 24.9), CarrierTrailPolicy.LEFT);
-        close(new Vec3(7, 6.7, 24.9), CarrierTrailPolicy.RIGHT);
-        assertEquals(14, CarrierTrailPolicy.LEFT.distanceTo(CarrierTrailPolicy.RIGHT), EPSILON);
+	@Test void anchorsMatchTheV31CanonicalRearExhaust() {
+		close(new Vec3(-14.7, 4.2, 11.7), CarrierTrailPolicy.LEFT);
+		close(new Vec3(14.7, 4.2, 11.7), CarrierTrailPolicy.RIGHT);
+		assertEquals(29.4, CarrierTrailPolicy.LEFT.distanceTo(CarrierTrailPolicy.RIGHT), EPSILON);
         assertTrue(CarrierTrailPolicy.LEFT.z < CarrierPolicy.LENGTH / 2);
         assertTrue(CarrierTrailPolicy.LEFT.y < CarrierPolicy.HEIGHT);
     }
 
     @Test void positiveYawRotatesAftAnchorsInTheSameDirectionAsTheMesh() {
-        close(new Vec3(24.9, 6.7, 7), CarrierTrailPolicy.rotate(CarrierTrailPolicy.LEFT, 90));
-        close(new Vec3(24.9, 6.7, -7), CarrierTrailPolicy.rotate(CarrierTrailPolicy.RIGHT, 90));
-        close(new Vec3(7, 6.7, -24.9), CarrierTrailPolicy.rotate(CarrierTrailPolicy.LEFT, 180));
-        close(new Vec3(-24.9, 6.7, -7), CarrierTrailPolicy.rotate(CarrierTrailPolicy.LEFT, -90));
+		close(new Vec3(11.7, 4.2, 14.7), CarrierTrailPolicy.rotate(CarrierTrailPolicy.LEFT, 90));
+		close(new Vec3(11.7, 4.2, -14.7), CarrierTrailPolicy.rotate(CarrierTrailPolicy.RIGHT, 90));
+		close(new Vec3(14.7, 4.2, -11.7), CarrierTrailPolicy.rotate(CarrierTrailPolicy.LEFT, 180));
+		close(new Vec3(-11.7, 4.2, -14.7), CarrierTrailPolicy.rotate(CarrierTrailPolicy.LEFT, -90));
     }
 
     @Test void exhaustStaysBehindTheNavigationNoseAndUprightAtEveryHeading() {
@@ -98,9 +98,9 @@ final class CarrierTrailPolicyTest {
             Vec3 right = CarrierTrailPolicy.rotate(CarrierTrailPolicy.RIGHT, yaw);
             Vec3 nose = CarrierNavigation.rotate(new Vec3(0, 0, -1), yaw);
             close(CarrierNavigation.rotate(CarrierTrailPolicy.LEFT, yaw), left);
-            assertEquals(-24.9, left.add(right).scale(.5).dot(nose), EPSILON);
-            assertEquals(14, left.distanceTo(right), EPSILON);
-            assertEquals(6.7, left.y, EPSILON);
+			assertEquals(-11.7, left.add(right).scale(.5).dot(nose), EPSILON);
+			assertEquals(29.4, left.distanceTo(right), EPSILON);
+			assertEquals(4.2, left.y, EPSILON);
             close(CarrierTrailPolicy.LEFT, CarrierTrailPolicy.rotate(left, -yaw));
         }
     }
@@ -163,7 +163,7 @@ final class CarrierTrailPolicyTest {
         var fresh = samples.history.points().getLast();
         assertNotEquals(retiredStrip, fresh.strip());
         close(moved.add(CarrierTrailPolicy.rotate(CarrierTrailPolicy.LEFT, 10)), fresh.left());
-        assertEquals(14, fresh.left().distanceTo(fresh.right()), EPSILON);
+		assertEquals(29.4, fresh.left().distanceTo(fresh.right()), EPSILON);
     }
 
     @Test void packetGapsAndCorrectionsBreakStripsWithoutConnectingAcrossTheGap() {

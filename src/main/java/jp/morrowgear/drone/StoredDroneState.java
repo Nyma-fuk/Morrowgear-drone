@@ -8,16 +8,27 @@ import net.minecraft.world.item.component.CustomData;
 public record StoredDroneState(String unitId, DroneRole role, BatteryTier batteryTier,
 	int flightPower, int weaponPower, String groupId, SecurityLoadout securityLoadout,
 	int gunAmmo, int missiles, int laserHeat, float health, long dockPos,
-	int propulsionCondition, int sensorCondition, int payloadCondition, int capacityTier) {
+	int propulsionCondition, int sensorCondition, int payloadCondition, int capacityTier,
+	int auxiliaryPower) {
 	private static final String ROOT = "MorrowgearStoredDrone";
-	private static final int FORMAT = 3;
+	private static final int FORMAT = 4;
 
 	public StoredDroneState(String unitId, DroneRole role, BatteryTier batteryTier,
 		int flightPower, int weaponPower, String groupId, SecurityLoadout securityLoadout,
 		int gunAmmo, int missiles, int laserHeat, float health, long dockPos,
 		int propulsionCondition, int sensorCondition, int payloadCondition) {
 		this(unitId, role, batteryTier, flightPower, weaponPower, groupId, securityLoadout,
-			gunAmmo, missiles, laserHeat, health, dockPos, propulsionCondition, sensorCondition, payloadCondition, 0);
+			gunAmmo, missiles, laserHeat, health, dockPos, propulsionCondition, sensorCondition,
+			payloadCondition, 0, 1000);
+	}
+
+	public StoredDroneState(String unitId, DroneRole role, BatteryTier batteryTier,
+		int flightPower, int weaponPower, String groupId, SecurityLoadout securityLoadout,
+		int gunAmmo, int missiles, int laserHeat, float health, long dockPos,
+		int propulsionCondition, int sensorCondition, int payloadCondition, int capacityTier) {
+		this(unitId, role, batteryTier, flightPower, weaponPower, groupId, securityLoadout,
+			gunAmmo, missiles, laserHeat, health, dockPos, propulsionCondition, sensorCondition,
+			payloadCondition, capacityTier, 1000);
 	}
 
 	public static boolean isStoredDrone(ItemStack stack) {
@@ -45,6 +56,7 @@ public record StoredDroneState(String unitId, DroneRole role, BatteryTier batter
 			tag.putInt("PropulsionCondition", clampCondition(propulsionCondition));
 			tag.putInt("SensorCondition", clampCondition(sensorCondition));
 			tag.putInt("PayloadCondition", clampCondition(payloadCondition));
+			tag.putInt("AuxiliaryPower", Math.max(0, Math.min(1000, auxiliaryPower)));
 			root.put(ROOT, tag);
 		});
 	}
@@ -73,7 +85,8 @@ public record StoredDroneState(String unitId, DroneRole role, BatteryTier batter
 			clampCondition(tag.getIntOr("PropulsionCondition", DroneSubsystemPolicy.MAX)),
 			clampCondition(tag.getIntOr("SensorCondition", DroneSubsystemPolicy.MAX)),
 			clampCondition(tag.getIntOr("PayloadCondition", DroneSubsystemPolicy.MAX)),
-			PayloadCapacity.tier(tag.getIntOr("CapacityTier", 0)));
+			PayloadCapacity.tier(tag.getIntOr("CapacityTier", 0)),
+			Math.max(0, Math.min(1000, tag.getIntOr("AuxiliaryPower", 1000))));
 	}
 
 	private static int clampCondition(int condition) {

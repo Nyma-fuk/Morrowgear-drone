@@ -431,10 +431,27 @@ public final class CarrierAcceptanceVerification {
 			require(ship.preview.minY() == level.getMinY(), "mining preview does not start at dimension floor: " + ship.preview.minY());
 			require(ship.preview.maxY() == CarrierPolicy.operationTop(carrier.getY()),
 				"mining preview does not end directly below carrier: " + ship.preview.maxY());
+			if (resume) {
+				require(ship.preview.generation().equals(data.generation), "resume changed generation");
+				require(ship.preview.footprintRadius() == 8,
+					"bounded fixture resume changed its recorded footprint");
+			} else {
+				require(ship.preview.footprintRadius() == CarrierPolicy.MINING_IMPACT_RADIUS,
+					"normal product preview is not the circular three-chunk footprint");
+				require(ship.preview.volume() == (long) ship.preview.footprintSize()
+					* (ship.preview.maxY() - level.getMinY() + 1L),
+					"product preview volume does not match its footprint");
+				data.generation = ship.preview.generation(); data.setDirty();
+				// The deep conservation run intentionally uses a bounded 16x16 fixture.
+				// Product footprint geometry is asserted immediately above and by policy tests;
+				// mutating this verified preview prevents the acceptance run from touching
+				// unrecorded terrain outside its isolated fixture.
+				ship.preview = new CarrierPolicy.Operation(ship.preview.generation(), ship.preview.dimension(),
+					ship.preview.chunkX(), ship.preview.chunkZ(), ship.preview.minY(), ship.preview.maxY(),
+					ship.preview.surfaceY(), 8);
+			}
 			require(ship.preview.volume() == 256L * (ship.preview.maxY() - level.getMinY() + 1L),
-				"mining preview is not a full 16x16 vertical column: " + ship.preview.volume());
-			if (resume) require(ship.preview.generation().equals(data.generation), "resume changed generation");
-            else { data.generation = ship.preview.generation(); data.setDirty(); }
+				"bounded deep fixture is not a full 16x16 vertical column: " + ship.preview.volume());
         }
         void activate(ServerPlayer player, String phase) {
             if (elapsed() < 6) return;
@@ -679,8 +696,8 @@ public final class CarrierAcceptanceVerification {
             ServerPlayer player = player();
             require(stableRestartCheckpoint(data.stage), "restart checkpoint requires a stable stopped stage");
             require(ship.mode == CarrierPolicy.Mode.IDLE && (ship.destination == null || ship.navigationPaused), "stop normally before preparing restart");
-            require(ship.supplies.getItem(CarrierSupplies.FLIGHT).isEmpty() || !CarrierSupplies.canCharge(ship.energy), "flight supply is still charging; wait or remove normally");
-            require(ship.supplies.getItem(CarrierSupplies.WEAPON).isEmpty() || !CarrierSupplies.canCharge(ship.weaponEnergy), "laser supply is still charging; wait or remove normally");
+            require(ship.supplies.getItem(CarrierSupplies.FLIGHT).isEmpty() || !CarrierSupplies.canCharge(ship.energy, false), "flight supply is still charging; wait or remove normally");
+            require(ship.supplies.getItem(CarrierSupplies.WEAPON).isEmpty() || !CarrierSupplies.canCharge(ship.weaponEnergy, true), "laser supply is still charging; wait or remove normally");
             checkDrones(true); verifyConservation(player, data.passed.contains("M05-M06"));
             String checkpointResume = data.stage.equals("PAUSED") ? data.resume : data.stage;
             require(!checkpointResume.isBlank() && !checkpointResume.equals("PAUSED"), "paused checkpoint has no resumable prior stage");

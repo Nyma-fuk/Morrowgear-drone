@@ -9,6 +9,7 @@ public final class DockSupplyPolicy {
 	public static final int MAGAZINE_ROUNDS = 120;
 	public static final int LASER_CELL_ENERGY = 1000;
 	public static final int MISSILE_PACK_ROUNDS = 5;
+	public static final int POWER_CELL_ENERGY = 1200;
 	public static final int INVENTORY_SIZE = 27;
 	public static final int MAX_FLIGHT_CAPACITY = 18000;
 	public static final int MAX_FLIGHT_RESERVE = 118000;
@@ -35,14 +36,57 @@ public final class DockSupplyPolicy {
 	public static SupplyKind kind(String id) {
 		if (id == null) return null;
 		return switch (id) {
-			case "minecraft:coal", "minecraft:charcoal", "morrowgear_drone:power_cell",
-				"morrowgear_drone:standard_battery_pack", "morrowgear_drone:reinforced_battery_pack",
-				"morrowgear_drone:high_density_battery_pack" -> SupplyKind.FUEL;
+			case "minecraft:coal", "minecraft:charcoal", "morrowgear_drone:power_cell" -> SupplyKind.FUEL;
 			case "morrowgear_drone:autocannon_magazine" -> SupplyKind.GUN;
 			case "morrowgear_drone:laser_cell" -> SupplyKind.LASER;
 			case "morrowgear_drone:micro_missile_pack" -> SupplyKind.MISSILE;
 			case "minecraft:copper_ingot", "minecraft:iron_ingot", "morrowgear_drone:morrow_alloy" -> SupplyKind.REPAIR;
 			default -> null;
+		};
+	}
+
+	/** Installed battery packs define capacity. Only these consumables create flight energy. */
+	public static int flightEnergy(String id) {
+		return switch (id == null ? "" : id) {
+			case "morrowgear_drone:power_cell" -> POWER_CELL_ENERGY;
+			case "minecraft:coal" -> 1000;
+			case "minecraft:charcoal" -> 800;
+			default -> 0;
+		};
+	}
+
+	/** Structural hit points restored by one maintenance material. */
+	public static int repairValue(String id) {
+		return switch (id == null ? "" : id) {
+			case "morrowgear_drone:morrow_alloy" -> 20;
+			case "minecraft:iron_ingot" -> 8;
+			case "minecraft:copper_ingot" -> 4;
+			default -> 0;
+		};
+	}
+
+	/** Stable automatic-loading preference; higher-value supplies reduce Cargo trips. */
+	public static int deliveryPriority(String id) {
+		SupplyKind kind = kind(id);
+		if (kind == null) return Integer.MIN_VALUE;
+		return switch (kind) {
+			case FUEL -> flightEnergy(id);
+			case REPAIR -> repairValue(id);
+			case GUN -> MAGAZINE_ROUNDS;
+			case LASER -> LASER_CELL_ENERGY;
+			case MISSILE -> MISSILE_PACK_ROUNDS;
+		};
+	}
+
+	public static int packageEquivalent(SupplyKind kind, int physical, int flightEnergy,
+		int weaponEnergy, int gunRounds, int missiles) {
+		int packs = Math.max(0, physical);
+		return packs + switch (kind) {
+			case FUEL -> Math.max(0, flightEnergy) / POWER_CELL_ENERGY;
+			case LASER -> Math.max(0, weaponEnergy) / LASER_CELL_ENERGY;
+			case GUN -> Math.max(0, gunRounds) / MAGAZINE_ROUNDS;
+			case MISSILE -> Math.max(0, missiles) / MISSILE_PACK_ROUNDS;
+			case REPAIR -> 0;
 		};
 	}
 

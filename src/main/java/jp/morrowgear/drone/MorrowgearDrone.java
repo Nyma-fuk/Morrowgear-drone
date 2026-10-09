@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -16,8 +17,10 @@ import jp.morrowgear.drone.block.DockPartBlock;
 import jp.morrowgear.drone.item.DockKitItem;
 import jp.morrowgear.drone.item.DroneUnitItem;
 import jp.morrowgear.drone.item.RecoveryToolItem;
+import jp.morrowgear.drone.item.OperationMarkerItem;
 import jp.morrowgear.drone.item.SolarServiceStationItem;
 import jp.morrowgear.drone.network.DroneCommandPayload;
+import jp.morrowgear.drone.network.DroneCommandResultPayload;
 import jp.morrowgear.drone.network.FleetOperationPayload;
 import jp.morrowgear.drone.network.PowerLostBeaconPayload;
 import jp.morrowgear.drone.network.SupplyNetworkConfigPayload;
@@ -56,6 +59,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,7 +81,10 @@ public final class MorrowgearDrone implements ModInitializer {
 	public static final EntityType<DroneEntity> DRONE = registerEntity(
 		"field_drone",
 		EntityType.Builder.<DroneEntity>of(DroneEntity::new, MobCategory.MISC)
-			.sized(3.0f, 0.75f)
+			// The rendered rotor envelope remains 3x3. Keep the physical hull slightly
+			// inset so a centered aircraft can traverse a three-block service lane
+			// without numerical edge contact against both walls.
+			.sized(2.8f, 0.75f)
 			.clientTrackingRange(12)
 			.updateInterval(2)
 	);
@@ -107,6 +114,8 @@ public final class MorrowgearDrone implements ModInitializer {
 	public static final Item SALVAGE_MODULE = registerItem("salvage_module", Item::new, new Item.Properties().stacksTo(16));
 	public static final Item RECOVERY_TOOL = registerItem("recovery_tool", RecoveryToolItem::new,
 		new Item.Properties().stacksTo(1).durability(192));
+	public static final Item OPERATION_MARKER = registerItem("operation_marker", OperationMarkerItem::new,
+		new Item.Properties().stacksTo(1));
 	public static final Item POWER_CELL = registerItem("power_cell", Item::new, new Item.Properties().stacksTo(16));
 	public static final Item RAW_MORROW_COMPOSITE = registerItem("raw_morrow_composite", Item::new, new Item.Properties());
 	public static final Item MORROW_ALLOY = registerItem("morrow_alloy", Item::new, new Item.Properties());
@@ -140,6 +149,10 @@ public final class MorrowgearDrone implements ModInitializer {
 	public static final SoundEvent CARRIER_LASER_FIRE_SOUND = registerSound("carrier_laser_fire", 192.0f);
 	public static final SoundEvent CARRIER_LASER_HIT_SOUND = registerSound("carrier_laser_hit", 128.0f);
 	public static final SoundEvent CARRIER_LASER_COOLDOWN_SOUND = registerSound("carrier_laser_cooldown", 128.0f);
+	public static final SoundEvent CARRIER_MINING_EMITTER_SOUND = registerSound("carrier_mining_emitter", 160.0f);
+	public static final SoundEvent CARRIER_MINING_CORE_SOUND = registerSound("carrier_mining_core", 192.0f);
+	public static final SoundEvent CARRIER_MINING_RELEASE_SOUND = registerSound("carrier_mining_release", 192.0f);
+	public static final SoundEvent CARRIER_MINING_IMPACT_SOUND = registerSound("carrier_mining_impact", 224.0f);
 	public static final SoundEvent MISSILE_LAUNCH_SOUND = registerSound("missile_launch", 64.0f);
 	public static final SoundEvent MISSILE_IGNITION_SOUND = registerSound("missile_ignition", 64.0f);
 	public static final SoundEvent MISSILE_MOTOR_SOUND = registerSound("missile_motor", 64.0f);
@@ -189,6 +202,10 @@ public final class MorrowgearDrone implements ModInitializer {
 		SupplyItems.register();
 		DockMenu.register();
 		DockAllocationRuntime.register();
+		OperationChunkLeaseRuntime.register();
+		ManagedLightRuntime.register();
+		MissileDetonationRuntime.register();
+		RuntimeCacheLifecycle.register();
 		jp.morrowgear.drone.carrier.CarrierModule.register();
 		CarrierRuntimeVerification.register();
 		OperationCommunicationsServer.register();
@@ -207,6 +224,7 @@ public final class MorrowgearDrone implements ModInitializer {
 			entries.accept(SECURITY_MODULE);
 			entries.accept(SALVAGE_MODULE);
 			entries.accept(RECOVERY_TOOL);
+			entries.accept(OPERATION_MARKER);
 			entries.accept(POWER_CELL);
 			entries.accept(SupplyItems.AUTOCANNON_MAGAZINE);
 			entries.accept(SupplyItems.LASER_CELL);
@@ -227,8 +245,11 @@ public final class MorrowgearDrone implements ModInitializer {
 		});
 
 		PayloadTypeRegistry.serverboundPlay().register(DroneCommandPayload.TYPE, DroneCommandPayload.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(DroneCommandResultPayload.TYPE, DroneCommandResultPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(FleetOperationPayload.TYPE, FleetOperationPayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(PowerLostBeaconPayload.TYPE, PowerLostBeaconPayload.CODEC);
+		RecoverySnapshotNetwork.register();
+		TacticalContactNetwork.register();
 		PayloadTypeRegistry.serverboundPlay().register(SupplyNetworkConfigPayload.TYPE, SupplyNetworkConfigPayload.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(SupplyNetworkConfigPayload.TYPE, (payload, context) ->
 			context.server().execute(() -> payload.apply(context.player())));
@@ -241,54 +262,80 @@ public final class MorrowgearDrone implements ModInitializer {
 		});
 		ServerPlayNetworking.registerGlobalReceiver(FleetOperationPayload.TYPE, (payload, context) ->
 			dispatchFleetOperation(context.player(), payload));
+		OperatorCommandTransactions.register();
 		ServerPlayNetworking.registerGlobalReceiver(DroneCommandPayload.TYPE, (payload, context) -> {
 			ServerPlayer player = context.player();
-			if (!DroneCommandPolicy.acceptablePayload(payload.action())) return;
+			try (var transaction = OperatorCommandTransactions.begin(player, payload)) {
+			if (!DroneCommandPolicy.acceptablePayload(payload.action())) {
+				transaction.rejected("命令データが空、または長すぎます"); return;
+			}
+			boolean forced = payload.action().startsWith("force:");
+			String action = forced ? payload.action().substring("force:".length()) : payload.action();
+			if (!DroneCommandPolicy.acceptablePayload(action)) { transaction.rejected("強制命令の形式が不正です"); return; }
 			Entity entity = player.level().getEntity(payload.entityId());
-			if (!(entity instanceof DroneEntity drone) || !drone.isOwnedBy(player)) return;
-			if (payload.action().startsWith("capacity_upgrade:")) {
-				try { upgradeCapacity(player, drone, Integer.parseInt(payload.action().substring(17))); }
-				catch (NumberFormatException ignored) { }
+			if (!(entity instanceof DroneEntity drone)) { transaction.rejected("機体が受信範囲に存在しません"); return; }
+			transaction.identify(drone, action);
+			if (!drone.isOwnedBy(player)) { transaction.rejected("他ユーザーの機体は操作できません"); return; }
+			if (!allowOperatorCommand(player, drone)) { transaction.rejected(drone.operatorFlightCommandRejection()); return; }
+			if (action.startsWith("capacity_upgrade:")) {
+				if (forced) { transaction.rejected("容量変更は強制介入の対象外です"); return; }
+				try { upgradeCapacity(player, drone, Integer.parseInt(action.substring(17))); transaction.accepted(drone, action); }
+				catch (NumberFormatException ignored) { transaction.rejected("容量設定が不正です"); }
 				return;
 			}
-			if (payload.action().startsWith("weapon_module:")) {
-				String loadoutId = payload.action().substring("weapon_module:".length());
+			if (action.startsWith("weapon_module:")) {
+				if (forced) { transaction.rejected("兵装変更は強制介入の対象外です"); return; }
+				String loadoutId = action.substring("weapon_module:".length());
 				if (SecurityLoadout.isValidId(loadoutId)) {
 					changeSecurityLoadout(player, drone, SecurityLoadout.byId(loadoutId));
-				}
+					transaction.accepted(drone, action);
+				} else transaction.rejected("兵装IDが不正です");
 				return;
 			}
-			if (payload.action().startsWith("module:")) {
-				changeRoleModule(player, drone, DroneRole.byId(payload.action().substring("module:".length())));
+			if (action.startsWith("module:")) {
+				if (forced) { transaction.rejected("役割変更は強制介入の対象外です"); return; }
+				changeRoleModule(player, drone, DroneRole.byId(action.substring("module:".length())));
+				transaction.accepted(drone, action);
 				return;
 			}
-			if (payload.action().startsWith("wing_join:") || payload.action().startsWith("wing_create:")) {
-				String target = payload.action().substring(payload.action().indexOf(':') + 1);
+			if (action.startsWith("wing_join:") || action.startsWith("wing_create:")) {
+				if (forced) { transaction.rejected("Wing変更は強制介入の対象外です"); return; }
+				String target = action.substring(action.indexOf(':') + 1);
 				moveToWing(player, drone, target);
+				transaction.accepted(drone, action);
 				return;
 			}
-			if (payload.action().equals("wing_leave")) {
+			if (action.equals("wing_leave")) {
+				if (forced) { transaction.rejected("Wing変更は強制介入の対象外です"); return; }
 				leaveWing(player, drone);
+				transaction.accepted(drone, action);
 				return;
 			}
-			if (payload.action().startsWith("group:")) {
-				moveToWing(player, drone, payload.action().substring("group:".length()));
+			if (action.startsWith("group:")) {
+				if (forced) { transaction.rejected("Wing変更は強制介入の対象外です"); return; }
+				moveToWing(player, drone, action.substring("group:".length()));
+				transaction.accepted(drone, action);
 				return;
 			}
-			if (payload.action().startsWith("assign_dock:")) {
+			if (action.startsWith("assign_dock:")) {
+				if (forced) { transaction.rejected("Dock割当は強制介入の対象外です"); return; }
 				try {
-					assignDock(player, drone, BlockPos.of(Long.parseLong(payload.action().substring("assign_dock:".length()))));
+					assignDock(player, drone, BlockPos.of(Long.parseLong(action.substring("assign_dock:".length()))));
+					transaction.accepted(drone, action);
 				} catch (NumberFormatException ignored) {
+					transaction.rejected("Dock座標が不正です");
 					LOGGER.warn("Rejected malformed dock assignment from {}", player.getScoreboardName());
 				}
 				return;
 			}
-			if (payload.action().startsWith("cargo_source:") || payload.action().startsWith("cargo_target:")) {
-				assignCargoEndpoint(player, drone, payload.action());
+			if (action.startsWith("cargo_source:") || action.startsWith("cargo_target:")) {
+				if (forced) { transaction.rejected("補給経路変更は強制介入の対象外です"); return; }
+				if (assignCargoEndpoint(player, drone, action)) transaction.accepted(drone, action);
+				else transaction.rejected("物流ノードを設定できません");
 				return;
 			}
-			if (payload.action().startsWith("guard:")) {
-				String[] data = payload.action().split(":");
+			if (action.startsWith("guard:")) {
+				String[] data = action.split(":");
 				try {
 					if (data.length != 6) return;
 					BlockPos anchor = new BlockPos(Integer.parseInt(data[1]), Integer.parseInt(data[2]), Integer.parseInt(data[3]));
@@ -298,7 +345,9 @@ public final class MorrowgearDrone implements ModInitializer {
 						|| anchor.distSqr(player.blockPosition()) > 512 * 512
 						|| !DroneCommandPolicy.validSecurityRadius(radius)
 						|| !DroneCommandPolicy.validMission(orderId, 1, 0)) return;
+					if (forced && !applyForcedOperatorCommand(player, drone)) return;
 					drone.assignSecurityPatrol(anchor, radius, orderId);
+					transaction.accepted(drone, action);
 					player.sendSystemMessage(Component.literal("[MORROWGEAR] " + drone.unitId()
 						+ " / SECURITY PATROL / R" + radius + " / " + anchor.toShortString()));
 				} catch (NumberFormatException | ArrayIndexOutOfBoundsException ignored) {
@@ -306,8 +355,8 @@ public final class MorrowgearDrone implements ModInitializer {
 				}
 				return;
 			}
-			if (payload.action().startsWith("work:")) {
-				String[] data = payload.action().split(":");
+			if (action.startsWith("work:")) {
+				String[] data = action.split(":");
 				try {
 					if (data.length != 7) return;
 					FieldOperationType type = FieldOperationType.byId(data[1]);
@@ -328,9 +377,11 @@ public final class MorrowgearDrone implements ModInitializer {
 						default -> requestedAnchor.getY();
 					};
 					BlockPos anchor = new BlockPos(requestedAnchor.getX(), anchorY, requestedAnchor.getZ());
+					if (forced && !applyForcedOperatorCommand(player, drone)) return;
 					drone.clearSecurityPatrol();
-					if (MissionCommandPolicy.preemptsCargoRoute(payload.action())) drone.pauseCargoRoute();
+					if (MissionCommandPolicy.preemptsCargoRoute(action)) drone.pauseCargoRoute();
 					drone.assignFieldOperation(type, anchor, radius, orderId);
+					transaction.accepted(drone, action);
 					player.sendSystemMessage(Component.literal("[MORROWGEAR] " + drone.unitId() + " / "
 						+ type.label() + " / R" + radius + " / " + anchor.toShortString()));
 				} catch (NumberFormatException | ArrayIndexOutOfBoundsException ignored) {
@@ -338,8 +389,8 @@ public final class MorrowgearDrone implements ModInitializer {
 				}
 				return;
 			}
-			if (payload.action().startsWith("move:")) {
-				String[] coordinates = payload.action().substring("move:".length()).split(":");
+			if (action.startsWith("move:")) {
+				String[] coordinates = action.substring("move:".length()).split(":");
 				try {
 					int x = Integer.parseInt(coordinates[0]);
 					int z = Integer.parseInt(coordinates[1]);
@@ -350,37 +401,67 @@ public final class MorrowgearDrone implements ModInitializer {
 					int expected = coordinates.length > 3 ? Integer.parseInt(coordinates[3]) : 1;
 					int index = coordinates.length > 4 ? Integer.parseInt(coordinates[4]) : 0;
 					if (coordinates.length > 5 || !DroneCommandPolicy.validMission(missionId, expected, index)) return;
+					if (forced && !applyForcedOperatorCommand(player, drone)) return;
 					drone.clearSecurityPatrol();
-					if (MissionCommandPolicy.preemptsCargoRoute(payload.action())) drone.pauseCargoRoute();
+					if (MissionCommandPolicy.preemptsCargoRoute(action)) drone.pauseCargoRoute();
 					drone.assignWaypoint(new BlockPos(x, y, z), missionId, expected, index,
 						player.blockPosition().above(6), level.getGameTime());
+					transaction.accepted(drone, action);
 				} catch (NumberFormatException | ArrayIndexOutOfBoundsException ignored) {
 					LOGGER.warn("Rejected malformed waypoint from {}", player.getScoreboardName());
 				}
 				return;
 			}
-			if (payload.action().startsWith("track:")) {
-				String[] targetData = payload.action().substring("track:".length()).split(":");
+			if (action.startsWith("track:")) {
+				String[] targetData = action.substring("track:".length()).split(":");
 				try {
 					int targetId = Integer.parseInt(targetData[0]);
 					Entity target = player.level().getEntity(targetId);
+					boolean linked = FleetThreatNetwork.knownContact(player.level().dimension().toString(),
+						player.getUUID(), targetId, player.level().getGameTime());
 					if (!(target instanceof LivingEntity living) || !living.isAlive() || living == player
-						|| living.distanceTo(player) > 512.0) return;
+						|| living.distanceTo(player) > 512.0 && !linked) return;
 					String missionId = targetData.length > 1 ? targetData[1] : drone.getUUID().toString();
 					int expected = targetData.length > 2 ? Integer.parseInt(targetData[2]) : 1;
 					int index = targetData.length > 3 ? Integer.parseInt(targetData[3]) : 0;
 					if (targetData.length > 4 || !DroneCommandPolicy.validMission(missionId, expected, index)) return;
+					if (forced && !applyForcedOperatorCommand(player, drone)) return;
 					drone.clearSecurityPatrol();
-					if (MissionCommandPolicy.preemptsCargoRoute(payload.action())) drone.pauseCargoRoute();
+					if (MissionCommandPolicy.preemptsCargoRoute(action)) drone.pauseCargoRoute();
 					drone.assignTrackingTarget(living, missionId, expected, index,
 						player.blockPosition().above(6), player.level().getGameTime());
+					transaction.accepted(drone, action);
 				} catch (NumberFormatException | ArrayIndexOutOfBoundsException ignored) {
 					LOGGER.warn("Rejected malformed tracking assignment from {}", player.getScoreboardName());
 				}
 				return;
 			}
-			if (payload.action().startsWith("patrol:")) {
-				String[] data = payload.action().split(":", 8);
+			if (action.startsWith("attack:")) {
+				String[] targetData = action.substring("attack:".length()).split(":");
+				try {
+					int targetId = Integer.parseInt(targetData[0]);
+					Entity target = player.level().getEntity(targetId);
+					boolean linked = FleetThreatNetwork.knownContact(player.level().dimension().toString(),
+						player.getUUID(), targetId, player.level().getGameTime());
+					if (!(target instanceof LivingEntity living) || !living.isAlive() || living == player
+						|| living.distanceTo(player) > 512.0 && !linked || drone.role() != DroneRole.SECURITY) return;
+					String missionId = targetData.length > 1 ? targetData[1] : drone.getUUID().toString();
+					int expected = targetData.length > 2 ? Integer.parseInt(targetData[2]) : 1;
+					int index = targetData.length > 3 ? Integer.parseInt(targetData[3]) : 0;
+					if (targetData.length > 4 || !DroneCommandPolicy.validMission(missionId, expected, index)) return;
+					if (forced && !applyForcedOperatorCommand(player, drone)) return;
+					if (drone.assignOperatorAttack(player, living, missionId, expected, index)) {
+						transaction.accepted(drone, action);
+						player.sendSystemMessage(Component.literal("[MORROWGEAR] " + drone.unitId()
+							+ " / FORCED TARGET / " + living.getName().getString()));
+					} else transaction.rejected("指定目標を攻撃できません");
+				} catch (NumberFormatException | ArrayIndexOutOfBoundsException ignored) {
+					LOGGER.warn("Rejected malformed attack assignment from {}", player.getScoreboardName());
+				}
+				return;
+			}
+			if (action.startsWith("patrol:")) {
+				String[] data = action.split(":", 8);
 				try {
 					if (data.length != 5 && data.length != 8) return;
 					String missionId = data[1];
@@ -397,17 +478,19 @@ public final class MorrowgearDrone implements ModInitializer {
 						|| Math.abs(originZ - player.getBlockZ()) > 512
 						|| route.stream().anyMatch(point -> Math.abs(point.getX() - player.getBlockX()) > 512
 							|| Math.abs(point.getZ() - player.getBlockZ()) > 512)) return;
+					if (forced && !applyForcedOperatorCommand(player, drone)) return;
 					drone.clearSecurityPatrol();
-					if (MissionCommandPolicy.preemptsCargoRoute(payload.action())) drone.pauseCargoRoute();
+					if (MissionCommandPolicy.preemptsCargoRoute(action)) drone.pauseCargoRoute();
 					drone.assignPatrolRoute(route, missionId, expected, index,
 						new BlockPos(originX, player.getBlockY() + 6, originZ), player.level().getGameTime(), startIndex);
+					transaction.accepted(drone, action);
 				} catch (NumberFormatException ignored) {
 					LOGGER.warn("Rejected malformed patrol route from {}", player.getScoreboardName());
 				}
 				return;
 			}
-			if (payload.action().startsWith("follow:")) {
-				String[] formationData = payload.action().substring("follow:".length()).split(":");
+			if (action.startsWith("follow:")) {
+				String[] formationData = action.substring("follow:".length()).split(":");
 				try {
 					String missionId = formationData[0];
 					int expected = Integer.parseInt(formationData[1]);
@@ -415,43 +498,82 @@ public final class MorrowgearDrone implements ModInitializer {
 					if (formationData.length != 4 || !DroneCommandPolicy.validMission(missionId, expected, index)) return;
 					Entity leaderEntity = player.level().getEntity(Integer.parseInt(formationData[3]));
 					if (!(leaderEntity instanceof DroneEntity leader) || !leader.isOwnedBy(player)) return;
+					if (forced && !applyForcedOperatorCommand(player, drone)) return;
 					drone.clearSecurityPatrol();
-					if (MissionCommandPolicy.preemptsCargoRoute(payload.action())) drone.pauseCargoRoute();
+					if (MissionCommandPolicy.preemptsCargoRoute(action)) drone.pauseCargoRoute();
 					drone.assignFollowFormation(missionId, expected, index, leader.unitId(),
 						player.blockPosition().above(4), player.level().getGameTime());
+					transaction.accepted(drone, action);
 				} catch (NumberFormatException | ArrayIndexOutOfBoundsException ignored) {
 					LOGGER.warn("Rejected malformed follow formation from {}", player.getScoreboardName());
 				}
 				return;
 			}
-			if (payload.action().equals("decommission")) {
+			if (action.equals("decommission")) {
+				if (forced) return;
 				storeDrone(player, drone);
+				transaction.accepted(drone, action);
 				return;
 			}
-			if (!DroneCommandPolicy.isSimpleAction(payload.action())) return;
+			if (!DroneCommandPolicy.isSimpleAction(action)) return;
+			if (forced && !applyForcedOperatorCommand(player, drone)) return;
 			// Return is also a request for a free berth; an existing reservation is not required.
-			if (payload.action().equals("standby") || payload.action().equals("return")
-				|| payload.action().equals("dock") || payload.action().equals("orbit")) {
+			if (action.equals("standby") || action.equals("return")
+				|| action.equals("dock") || action.equals("orbit")) {
 				drone.clearFieldOperation();
 				drone.clearSecurityPatrol();
-				if (MissionCommandPolicy.preemptsCargoRoute(payload.action())) drone.pauseCargoRoute();
+				if (MissionCommandPolicy.preemptsCargoRoute(action)) drone.pauseCargoRoute();
 			}
-			if (payload.action().equals("dock")) drone.requestManualDockReturn();
-			else drone.setMode(DroneMode.fromAction(payload.action()));
+			if (action.equals("dock")) drone.requestManualDockReturn();
+			else drone.setMode(DroneMode.fromAction(action));
+			transaction.accepted(drone, action);
+			}
 		});
 		MorrowgearRuntimeVerifier.register();
 		DockMenuRuntimeVerification.register();
 		DesignVerificationSession.register();
 		MorrowgearBaseGenerator.register();
+		MorrowgearAutomation.register();
 
 		LOGGER.info("Morrowgear Drone Command initialized for Minecraft 26.2");
+	}
+
+	private static boolean allowOperatorCommand(ServerPlayer player, DroneEntity drone) {
+		return drone != null && drone.isOwnedBy(player) && allowOperatorCommands(player, List.of(drone));
+	}
+
+	private static boolean applyForcedOperatorCommand(ServerPlayer player, DroneEntity drone) {
+		if (drone.forceOperatorOverride()) return true;
+		player.sendSystemMessage(Component.literal("[MORROWGEAR] " + drone.unitId()
+			+ " / 強制介入を拒否 / " + drone.forcedOperatorCommandRejection()));
+		return false;
+	}
+
+	private static boolean allowOperatorCommands(ServerPlayer player, List<DroneEntity> drones) {
+		if (drones.stream().anyMatch(drone -> !drone.isOwnedBy(player))) return false;
+		var admission = OperatorCommandAdmission.select(drones, DroneEntity::acceptsOperatorFlightCommand);
+		notifyOperatorRejections(player, admission.rejected());
+		return admission.allAccepted();
+	}
+
+	private static void notifyOperatorRejections(ServerPlayer player, List<DroneEntity> rejected) {
+		if (rejected.isEmpty()) return;
+		String units = rejected.stream().limit(3).map(DroneEntity::unitId)
+			.collect(java.util.stream.Collectors.joining(", "));
+		if (rejected.size() > 3) units += " ほか" + (rejected.size() - 3) + "機";
+		player.sendSystemMessage(Component.literal("[MORROWGEAR] " + units + ": "
+			+ rejected.getFirst().operatorFlightCommandRejection()));
 	}
 
 	private static void dispatchFleetOperation(ServerPlayer player, FleetOperationPayload payload) {
 		FieldOperationType type = FieldOperationType.byId(payload.operationType());
 		if (type == FieldOperationType.NONE || !DroneCommandPolicy.validFieldRadius(type, payload.radius())
 			|| Math.abs(payload.x() - player.getBlockX()) > 512
-			|| Math.abs(payload.z() - player.getBlockZ()) > 512) return;
+			|| Math.abs(payload.z() - player.getBlockZ()) > 512) {
+			OperatorCommandTransactions.rejectGenerated(player, payload.commandId(), null,
+				"fleet:" + payload.operationType(), "作業種別、範囲、または地点が不正です");
+			return;
+		}
 		ServerLevel level = player.level();
 		int surfaceY = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, payload.x(), payload.z());
 		int anchorY = switch (type) {
@@ -460,11 +582,16 @@ public final class MorrowgearDrone implements ModInitializer {
 			case NONE -> surfaceY;
 		};
 		BlockPos anchor = new BlockPos(payload.x(), anchorY, payload.z());
-		List<DroneEntity> fleet = ownedDrones(level, player, 512);
+		var admission = OperatorCommandAdmission.select(ownedDrones(level, player, 512),
+			DroneEntity::acceptsOperatorFlightCommand);
+		notifyOperatorRejections(player, admission.rejected());
+		List<DroneEntity> fleet = admission.accepted();
 		List<AutonomousTaskForcePolicy.Candidate> candidates = fleet.stream()
 			.map(drone -> automaticCandidate(drone, anchor)).toList();
 		AutonomousTaskForcePolicy.Plan plan = AutonomousTaskForcePolicy.plan(type, payload.radius(), candidates);
 		if (!plan.executable()) {
+			OperatorCommandTransactions.rejectGenerated(player, payload.commandId(), null,
+				"fleet:" + payload.operationType(), plan.status());
 			player.sendSystemMessage(Component.literal("[MORROWGEAR] AUTO OPS BLOCKED / " + plan.status()));
 			return;
 		}
@@ -478,6 +605,9 @@ public final class MorrowgearDrone implements ModInitializer {
 			drone.clearSecurityPatrol();
 			if (drone.role() == DroneRole.CARGO) drone.pauseCargoRoute();
 			drone.assignFieldOperation(type, anchor, payload.radius(), orderId);
+			String action = "work:" + type.id() + ":" + anchor.getX() + ":" + anchor.getY() + ":"
+				+ anchor.getZ() + ":" + payload.radius() + ":" + orderId;
+			OperatorCommandTransactions.acceptGenerated(player, payload.commandId(), drone, action);
 		}
 		player.sendSystemMessage(Component.literal("[MORROWGEAR] AUTO OPS / " + type.label()
 			+ " / " + plan.selected().size() + " UNITS / " + plan.rosterLabel()));
@@ -497,6 +627,7 @@ public final class MorrowgearDrone implements ModInitializer {
 	}
 
 	private static void moveToWing(ServerPlayer player, DroneEntity drone, String targetGroup) {
+		if (!allowOperatorCommand(player, drone)) return;
 		ServerLevel level = player.level();
 		List<DroneEntity> fleet = ownedDrones(level, player, 512);
 		int targetSize = (int) fleet.stream().filter(member -> member.groupId().equals(targetGroup)).count();
@@ -509,6 +640,10 @@ public final class MorrowgearDrone implements ModInitializer {
 		}
 
 		String sourceGroup = drone.groupId();
+		List<DroneEntity> affected = fleet.stream().filter(member -> member == drone
+			|| member.groupId().equals(targetGroup)
+			|| sourceGroup.startsWith("WING-") && member.groupId().equals(sourceGroup)).toList();
+		if (!allowOperatorCommands(player, affected)) return;
 		drone.assignGroup(targetGroup);
 		List<DroneEntity> sourceMembers = fleet.stream()
 			.filter(member -> member != drone && member.groupId().equals(sourceGroup)).toList();
@@ -521,11 +656,13 @@ public final class MorrowgearDrone implements ModInitializer {
 	}
 
 	private static void leaveWing(ServerPlayer player, DroneEntity drone) {
+		if (!allowOperatorCommand(player, drone)) return;
 		if (!drone.groupId().startsWith("WING-")) return;
 		ServerLevel level = player.level();
 		String sourceGroup = drone.groupId();
 		List<DroneEntity> remaining = ownedDrones(level, player, 512).stream()
 			.filter(member -> member != drone && member.groupId().equals(sourceGroup)).toList();
+		if (!allowOperatorCommands(player, remaining)) return;
 		drone.assignGroup("ALPHA");
 		drone.clearFieldOperation();
 		drone.setMode(DroneMode.STANDBY);
@@ -536,6 +673,7 @@ public final class MorrowgearDrone implements ModInitializer {
 	private static void reslotWingMission(ServerLevel level, ServerPlayer player, List<DroneEntity> members,
 		DroneEntity joining) {
 		if (members.isEmpty()) return;
+		if (!allowOperatorCommands(player, members)) return;
 		List<DroneEntity> ordered = new ArrayList<>(members);
 		DroneEntity template = ordered.stream()
 			.filter(member -> member != joining && (member.hasActiveFieldOperation()
@@ -674,17 +812,20 @@ public final class MorrowgearDrone implements ModInitializer {
 	}
 
 	public static void assignDock(ServerPlayer player, DroneEntity drone, BlockPos pos) {
+		if (!allowOperatorCommand(player, drone)) return;
 		if (!(player.level() instanceof ServerLevel level)) return;
 		BlockEntity blockEntity = level.getBlockEntity(pos);
 		if (!(blockEntity instanceof DockBlockEntity dock) || !dock.isOwnedBy(player)) return;
-		for (DroneEntity other : ownedDrones(level, player, 512)) {
-			if (other != drone && other.hasDock() && other.dockPos().equals(pos)) other.clearDock();
-		}
+		List<DroneEntity> displaced = ownedDrones(level, player, 512).stream()
+			.filter(other -> other != drone && other.hasDock() && other.dockPos().equals(pos)).toList();
+		if (!allowOperatorCommands(player, displaced)) return;
+		for (DroneEntity other : displaced) other.clearDock();
 		drone.assignDock(pos);
 		player.sendSystemMessage(Component.literal("[MORROWGEAR] " + drone.unitId() + " に " + dock.dockId() + " を割り当てました。"));
 	}
 
 	public static void changeRoleModule(ServerPlayer player, DroneEntity drone, DroneRole requestedRole) {
+		if (!allowOperatorCommand(player, drone)) return;
 		boolean validDock = drone.isDocked() && drone.hasDock()
 			&& player.level().getBlockEntity(drone.dockPos()) instanceof DockBlockEntity dock
 			&& dock.isOwnedBy(player);
@@ -715,6 +856,7 @@ public final class MorrowgearDrone implements ModInitializer {
 
 	public static void changeSecurityLoadout(ServerPlayer player, DroneEntity drone,
 		SecurityLoadout requestedLoadout) {
+		if (!allowOperatorCommand(player, drone)) return;
 		boolean validDock = drone.isDocked() && drone.hasDock()
 			&& player.level().getBlockEntity(drone.dockPos()) instanceof DockBlockEntity dock
 			&& dock.isOwnedBy(player);
@@ -750,6 +892,7 @@ public final class MorrowgearDrone implements ModInitializer {
 	}
 
 	public static void upgradeCapacity(ServerPlayer player, DroneEntity drone, int expectedTier) {
+		if (!allowOperatorCommand(player, drone)) return;
 		if (!drone.isOwnedBy(player) || drone.role() != DroneRole.SECURITY || !drone.isDocked()
 			|| !drone.hasDock() || drone.capacityTier() != expectedTier || expectedTier >= PayloadCapacity.MAX_TIER
 			|| !(player.level().getBlockEntity(drone.dockPos()) instanceof DockBlockEntity dock)
@@ -792,6 +935,7 @@ public final class MorrowgearDrone implements ModInitializer {
 	}
 
 	static void storeDrone(ServerPlayer player, DroneEntity drone) {
+		if (!allowOperatorCommand(player, drone)) return;
 		ItemStack installedModule = moduleForRole(drone.role()) == null
 			? ItemStack.EMPTY : new ItemStack(moduleForRole(drone.role()));
 		List<ItemStack> returned = DroneStoragePolicy.returnedItems(drone.createStoredChassis(), installedModule,
@@ -815,6 +959,7 @@ public final class MorrowgearDrone implements ModInitializer {
 	public static boolean recoverPowerLost(ServerPlayer player, DroneEntity drone) {
 		if (player == null || drone == null || !PowerLossPolicy.manuallyRecoverable(
 			drone.isOwnedBy(player), drone.isPowerLost(), player.distanceTo(drone))) return false;
+		if (!allowOperatorCommand(player, drone)) return false;
 		ItemStack recovered = drone.createStoredUnit();
 		if (player.level() instanceof ServerLevel level) {
 			drone.transferLeadershipBeforeRemoval(level, player);
@@ -828,21 +973,23 @@ public final class MorrowgearDrone implements ModInitializer {
 		return true;
 	}
 
-	private static void assignCargoEndpoint(ServerPlayer player, DroneEntity drone, String action) {
+	private static boolean assignCargoEndpoint(ServerPlayer player, DroneEntity drone, String action) {
+		if (!allowOperatorCommand(player, drone)) return false;
 		if (!MissionAssignmentPolicy.allows(drone.role(), MissionAssignmentPolicy.MissionKind.CARGO_ROUTE)) {
 			player.sendSystemMessage(Component.literal("[MORROWGEAR] Cargo module is required."));
-			return;
+			return false;
 		}
 		try {
 			boolean source = action.startsWith("cargo_source:");
 			BlockPos pos = BlockPos.of(Long.parseLong(action.substring(action.indexOf(':') + 1)));
-			if (pos.distSqr(player.blockPosition()) > 32 * 32
-				|| !(player.level().getBlockEntity(pos) instanceof net.minecraft.world.Container)) return;
+			if (!SupplyNetworkRuntime.selectLogisticsNode(player, pos)) return false;
 			if (source) drone.assignCargoSource(pos); else drone.assignCargoTarget(pos);
 			player.sendSystemMessage(Component.literal("[MORROWGEAR] " + drone.unitId() + " / "
 				+ (source ? "CARGO SOURCE" : "CARGO TARGET") + " " + pos.toShortString()));
+			return true;
 		} catch (NumberFormatException ignored) {
 			LOGGER.warn("Rejected malformed cargo assignment from {}", player.getScoreboardName());
+			return false;
 		}
 	}
 
@@ -946,10 +1093,49 @@ public final class MorrowgearDrone implements ModInitializer {
 			CachedDroneRoster cached = DRONE_ROSTERS.get(player.getUUID());
 			if (cached != null && cached.level() == level && cached.tick() == tick) return cached.drones();
 			List<DroneEntity> drones = queryOwnedDrones(level, player, range);
-			DRONE_ROSTERS.put(player.getUUID(), new CachedDroneRoster(level, tick, drones));
+			DRONE_ROSTERS.put(player.getUUID(), CachedDroneRoster.create(level, tick, drones));
 			return drones;
 		}
 		return queryOwnedDrones(level, player, range);
+	}
+
+	static void clearDroneRosterCache() { DRONE_ROSTERS.clear(); }
+	static void clearDroneRosterCache(UUID owner) { DRONE_ROSTERS.remove(owner); }
+
+	static List<DroneEntity> ownedMissionDrones(ServerLevel level, ServerPlayer player,
+		String missionId, String groupId) {
+		ownedDrones(level, player, 512);
+		CachedDroneRoster cached = DRONE_ROSTERS.get(player.getUUID());
+		if (cached == null || cached.level() != level || cached.tick() != level.getGameTime()) return List.of();
+		return cached.missions().getOrDefault(new MissionWingKey(missionId,
+			MissionWingPolicy.normalizedGroup(groupId)), List.of());
+	}
+
+	static List<DroneEntity> ownedSecurityPatrolDrones(ServerLevel level, ServerPlayer player,
+		String securityOrder) {
+		ownedDrones(level, player, 512);
+		CachedDroneRoster cached = DRONE_ROSTERS.get(player.getUUID());
+		if (cached == null || cached.level() != level || cached.tick() != level.getGameTime()) return List.of();
+		return cached.securityPatrols().getOrDefault(securityOrder == null ? "" : securityOrder, List.of());
+	}
+
+	static List<DroneEntity> ownedNearbyDrones(ServerLevel level, UUID ownerId, AABB area) {
+		ServerPlayer owner = level.getServer().getPlayerList().getPlayer(ownerId);
+		if (owner == null || owner.level() != level) {
+			return level.getEntitiesOfClass(DroneEntity.class, area, drone -> drone.isOwnedBy(ownerId));
+		}
+		ownedDrones(level, owner, 512.0);
+		CachedDroneRoster cached = DRONE_ROSTERS.get(ownerId);
+		if (cached == null || cached.level() != level || cached.tick() != level.getGameTime()) return List.of();
+		Set<DroneEntity> candidates = new LinkedHashSet<>();
+		for (int x = SpatialCell.coordinate(area.minX); x <= SpatialCell.coordinate(area.maxX); x++) {
+			for (int y = SpatialCell.coordinate(area.minY); y <= SpatialCell.coordinate(area.maxY); y++) {
+				for (int z = SpatialCell.coordinate(area.minZ); z <= SpatialCell.coordinate(area.maxZ); z++) {
+					candidates.addAll(cached.spatial().getOrDefault(new SpatialCell(x, y, z), List.of()));
+				}
+			}
+		}
+		return candidates.stream().filter(drone -> area.intersects(drone.getBoundingBox())).toList();
 	}
 
 	private static List<DroneEntity> queryOwnedDrones(ServerLevel level, ServerPlayer player, double range) {
@@ -983,11 +1169,49 @@ public final class MorrowgearDrone implements ModInitializer {
 		}
 	}
 
-	private record CachedDroneRoster(ServerLevel level, long tick, List<DroneEntity> drones) {
+	private record MissionWingKey(String missionId, String groupId) {
+	}
+
+	private record SpatialCell(int x, int y, int z) {
+		private static final int SIZE = 8;
+		static int coordinate(double value) { return (int)Math.floor(value / SIZE); }
+	}
+
+	private record CachedDroneRoster(ServerLevel level, long tick, List<DroneEntity> drones,
+		Map<MissionWingKey, List<DroneEntity>> missions, Map<String, List<DroneEntity>> securityPatrols,
+		Map<SpatialCell, List<DroneEntity>> spatial) {
+		static CachedDroneRoster create(ServerLevel level, long tick, List<DroneEntity> drones) {
+			Map<MissionWingKey, List<DroneEntity>> missions = new HashMap<>();
+			Map<String, List<DroneEntity>> patrols = new HashMap<>();
+			Map<SpatialCell, List<DroneEntity>> spatial = new HashMap<>();
+			for (DroneEntity drone : drones) {
+				if (drone.hasWaypoint() && !drone.missionId().isBlank())
+					missions.computeIfAbsent(new MissionWingKey(drone.missionId(),
+						MissionWingPolicy.normalizedGroup(drone.groupId())), ignored -> new ArrayList<>()).add(drone);
+				if (drone.hasSecurityPatrol()) patrols.computeIfAbsent(drone.securityOrderKey(),
+					ignored -> new ArrayList<>()).add(drone);
+				AABB bounds = drone.getBoundingBox();
+				for (int x = SpatialCell.coordinate(bounds.minX); x <= SpatialCell.coordinate(bounds.maxX); x++)
+					for (int y = SpatialCell.coordinate(bounds.minY); y <= SpatialCell.coordinate(bounds.maxY); y++)
+						for (int z = SpatialCell.coordinate(bounds.minZ); z <= SpatialCell.coordinate(bounds.maxZ); z++)
+							spatial.computeIfAbsent(new SpatialCell(x, y, z), ignored -> new ArrayList<>()).add(drone);
+			}
+			missions.replaceAll((key, members) -> members.stream().sorted(
+				Comparator.comparingInt(DroneEntity::missionIndex).thenComparing(DroneEntity::unitId)).toList());
+			patrols.replaceAll((key, members) -> members.stream().sorted(
+				Comparator.comparing(DroneEntity::unitId)).toList());
+			spatial.replaceAll((key, members) -> List.copyOf(members));
+			return new CachedDroneRoster(level, tick, drones, Map.copyOf(missions), Map.copyOf(patrols),
+				Map.copyOf(spatial));
+		}
 	}
 
 	public static List<DockBlockEntity> findDocks(ServerLevel level, ServerPlayer player, int range) {
 		return findDocks(level, player, player.blockPosition(), range);
+	}
+
+	public static void dockTopologyChanged(ServerLevel level, UUID owner) {
+		DockAllocationRuntime.invalidate(level, owner);
 	}
 
 	public static List<DockBlockEntity> findDocks(ServerLevel level, ServerPlayer player,
@@ -1014,7 +1238,7 @@ public final class MorrowgearDrone implements ModInitializer {
 		Block[] parts = wide ? WIDE_DOCK_PARTS : DOCK_PARTS;
 		int side = wide ? 5 : 3;
 		if (level.getBlockEntity(center) instanceof DockBlockEntity dock) {
-			DockAllocationRuntime.invalidate(level, dock.ownerId());
+			dockTopologyChanged(level, dock.ownerId());
 			for (int slot = 0; slot < dock.getContainerSize(); slot++) {
 				ItemStack stack = dock.removeItemNoUpdate(slot);
 				if (!stack.isEmpty()) Block.popResource(level, center.above(), stack);

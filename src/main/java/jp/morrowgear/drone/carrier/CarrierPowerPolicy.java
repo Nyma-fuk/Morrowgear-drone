@@ -7,7 +7,8 @@ public final class CarrierPowerPolicy {
     public static final int FLIGHT_GENERATION_PER_TICK = 12;
     public static final int WORK_GENERATION_PER_TICK = 10;
     public static final int MINING_STARTUP_ENERGY = 200;
-    public static final int SUSTAINED_MINING_BLOCKS_PER_TICK = CarrierPolicy.BREAK_PER_TICK / 4;
+    /** Reactor-funded continuous excavation rate; additional shock-front throughput consumes the work capacitor. */
+    public static final int SUSTAINED_MINING_BLOCKS_PER_TICK = 2048;
     public static final int MINING_BURST_ENERGY_PER_BLOCK = 10;
     public static final int BOOST_ENABLE_RESERVE = 500;
     public static final int FLIGHT_SERVICE_RESERVE = 2_000;

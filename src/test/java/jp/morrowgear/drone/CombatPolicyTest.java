@@ -44,7 +44,7 @@ final class CombatPolicyTest {
 	}
 
 	@Test
-	void installedSecurityLoadoutOverridesAutomaticAllocation() {
+	void securityDoctrinePrefersItsWeaponButFallsBackWhenUnavailable() {
 		assertEquals(CombatWeapon.NONE, CombatPolicy.weaponFor(SecurityLoadout.UNARMED,
 			0, 4, 1, 20, 240, 4, 0));
 		assertEquals(CombatWeapon.AUTOCANNON, CombatPolicy.weaponFor(SecurityLoadout.AUTOCANNON,
@@ -53,8 +53,12 @@ final class CombatPolicyTest {
 			0, 4, 1, 20, 240, 4, 0));
 		assertEquals(CombatWeapon.MISSILE, CombatPolicy.weaponFor(SecurityLoadout.MISSILE,
 			0, 4, 1, 20, 240, 4, 0));
-		assertEquals(CombatWeapon.NONE, CombatPolicy.weaponFor(SecurityLoadout.AUTOCANNON,
+		assertEquals(CombatWeapon.LASER, CombatPolicy.weaponFor(SecurityLoadout.AUTOCANNON,
 			0, 4, 1, 20, 0, 4, 0));
+		assertEquals(CombatWeapon.AUTOCANNON, CombatPolicy.weaponFor(SecurityLoadout.LASER,
+			0, 4, 1, 20, 20, 0, CombatPolicy.LASER_SWITCH_HEAT));
+		assertEquals(CombatWeapon.LASER, CombatPolicy.weaponFor(SecurityLoadout.MISSILE,
+			0, 4, 1, 20, 0, 0, 0));
 	}
 
 	@Test void unarmedSecurityAircraftCannotSortieBeforeAModuleIsInstalled() {
@@ -83,33 +87,37 @@ final class CombatPolicyTest {
 
 	@Test
 	void weaponServiceDecisionIsIndependentFromFlightSafety() {
-		assertTrue(CombatPolicy.needsWeaponService(SecurityLoadout.AUTO,
+		assertFalse(CombatPolicy.needsWeaponService(SecurityLoadout.AUTO,
 			14, 240, 4, 0));
-		assertTrue(CombatPolicy.needsWeaponService(SecurityLoadout.AUTO,
+		assertFalse(CombatPolicy.needsWeaponService(SecurityLoadout.AUTO,
 			100, 0, 0, 1000));
+		assertTrue(CombatPolicy.needsWeaponService(SecurityLoadout.AUTO,
+			0, 0, 0, 1000));
 		assertFalse(CombatPolicy.needsWeaponService(SecurityLoadout.AUTO,
 			100, 240, 4, 0));
 	}
 
 	@Test
 	void eachInstalledWeaponReportsItsExactDockServiceReason() {
-		assertEquals(DroneServicePolicy.Need.WEAPON_POWER, CombatPolicy.weaponServiceNeed(
+		assertEquals(DroneServicePolicy.Need.NONE, CombatPolicy.weaponServiceNeed(
 			SecurityLoadout.AUTO, 14, 240, 4, 0));
-		assertEquals(DroneServicePolicy.Need.AUTOCANNON_AMMO, CombatPolicy.weaponServiceNeed(
+		assertEquals(DroneServicePolicy.Need.NONE, CombatPolicy.weaponServiceNeed(
 			SecurityLoadout.AUTOCANNON, 100, 0, 4, 0));
-		assertEquals(DroneServicePolicy.Need.MISSILE_AMMO, CombatPolicy.weaponServiceNeed(
+		assertEquals(DroneServicePolicy.Need.NONE, CombatPolicy.weaponServiceNeed(
 			SecurityLoadout.MISSILE, 100, 240, 0, 0));
 		assertEquals(DroneServicePolicy.Need.NONE, CombatPolicy.weaponServiceNeed(
 			SecurityLoadout.LASER, 100, 240, 4, CombatPolicy.LASER_SWITCH_HEAT));
 		assertEquals(DroneServicePolicy.Need.NONE, CombatPolicy.weaponServiceNeed(
 			SecurityLoadout.AUTO, 100, 1, 0, 1000));
-		assertEquals(DroneServicePolicy.Need.WEAPON_REARM, CombatPolicy.weaponServiceNeed(
+		assertEquals(DroneServicePolicy.Need.NONE, CombatPolicy.weaponServiceNeed(
 			SecurityLoadout.AUTO, 100, 0, 0, 1000));
+		assertEquals(DroneServicePolicy.Need.WEAPON_POWER, CombatPolicy.weaponServiceNeed(
+			SecurityLoadout.AUTO, 0, 0, 0, 1000));
 	}
 
 	@Test
 	void overheatedLaserCoolsInTheFieldInsteadOfRequestingDockService() {
-		assertFalse(CombatPolicy.hasUsableWeapon(SecurityLoadout.LASER,
+		assertTrue(CombatPolicy.hasUsableWeapon(SecurityLoadout.LASER,
 			CombatPolicy.GUN_CAPACITY, CombatPolicy.MISSILE_CAPACITY, CombatPolicy.LASER_SWITCH_HEAT));
 		assertEquals(DroneServicePolicy.Need.NONE, CombatPolicy.weaponServiceNeed(
 			SecurityLoadout.LASER, 100, CombatPolicy.GUN_CAPACITY,
@@ -128,13 +136,13 @@ final class CombatPolicyTest {
 
 	@Test
 	void normalAndUrgentSortiesUseDifferentReadinessThresholds() {
-		assertFalse(CombatPolicy.sortieReady(SecurityLoadout.AUTO, 1.0f,
+		assertTrue(CombatPolicy.sortieReady(SecurityLoadout.AUTO, 1.0f,
 			90, 90, 143, 2, 0, false));
 		assertTrue(CombatPolicy.sortieReady(SecurityLoadout.AUTO, 1.0f,
 			90, 90, 144, 2, 200, false));
 		assertTrue(CombatPolicy.sortieReady(SecurityLoadout.AUTO, 1.0f,
 			90, 90, 240, 2, 1000, false));
-		assertFalse(CombatPolicy.sortieReady(SecurityLoadout.LASER, 1.0f,
+		assertTrue(CombatPolicy.sortieReady(SecurityLoadout.LASER, 1.0f,
 			90, 90, 240, 2, CombatPolicy.LASER_SWITCH_HEAT, false));
 		assertTrue(CombatPolicy.sortieReady(SecurityLoadout.AUTO, 1.0f,
 			65, 65, 1, 0, 1000, true));
@@ -142,23 +150,33 @@ final class CombatPolicyTest {
 			64, 100, 240, 4, 0, true));
 		assertFalse(CombatPolicy.sortieReady(SecurityLoadout.AUTO, 0.29f,
 			100, 100, 240, 4, 0, true));
+		assertFalse(CombatPolicy.sortieReady(SecurityLoadout.LASER, 1.0f,
+			100, 64, 0, 0, 0, false));
+		assertTrue(CombatPolicy.sortieReady(SecurityLoadout.LASER, 1.0f,
+			100, 65, 0, 0, 0, false));
+		assertTrue(CombatPolicy.sortieReady(SecurityLoadout.LASER, 1.0f,
+			65, 35, 0, 0, 0, true));
 	}
 
 	@Test
 	void exhaustedDockCanReleaseAMinimallyReadyAircraftIntoAnActiveBattle() {
 		assertTrue(CombatPolicy.resourceLimitedSortieReady(SecurityLoadout.AUTOCANNON,
-			0.75f, 65, 65, 1, 0, 0, true, true));
+			0.75f, 35, 35, 1, 0, 0, true, true));
 		assertFalse(CombatPolicy.resourceLimitedSortieReady(SecurityLoadout.AUTOCANNON,
 			0.75f, 65, 65, 1, 0, 0, false, true));
 		assertFalse(CombatPolicy.resourceLimitedSortieReady(SecurityLoadout.AUTOCANNON,
-			0.75f, 64, 65, 1, 0, 0, true, true));
-		assertFalse(CombatPolicy.resourceLimitedSortieReady(SecurityLoadout.AUTOCANNON,
+			0.75f, 34, 65, 1, 0, 0, true, true));
+		assertTrue(CombatPolicy.resourceLimitedSortieReady(SecurityLoadout.AUTOCANNON,
 			0.75f, 65, 65, 0, 0, 0, true, true));
+		assertTrue(CombatPolicy.resourceLimitedSortieReady(SecurityLoadout.LASER,
+			1.0f, 93, 43, 0, 0, 0, true, true));
+		assertFalse(CombatPolicy.resourceLimitedSortieReady(SecurityLoadout.LASER,
+			1.0f, 93, 34, 0, 0, 0, true, true));
 	}
 
 	@Test
 	void autoCanUseItsRemainingGunWhenMissileResupplyIsExhausted() {
-		assertFalse(CombatPolicy.normalPayloadReady(SecurityLoadout.AUTO, 144, 0, 0));
+		assertTrue(CombatPolicy.normalPayloadReady(SecurityLoadout.AUTO, 144, 0, 0));
 		assertTrue(CombatPolicy.resourceLimitedSortieReady(SecurityLoadout.AUTO,
 			1.0f, 70, 70, 12, 0, 0, true, true));
 	}
@@ -274,7 +292,7 @@ final class CombatPolicyTest {
 	void laserOrbitPublishesAStableTangentVelocity() {
 		Vec3 center = new Vec3(4, 70, -3);
 		Vec3 velocity = CombatPolicy.laserOrbitVelocity(center, 1, 4, 200, 1000);
-		assertTrue(velocity.length() > 0.20 && velocity.length() < 0.35);
+		assertTrue(velocity.length() > 0.32 && velocity.length() < 0.45);
 		assertTrue(Math.abs(velocity.y) < 0.0001);
 	}
 
@@ -312,24 +330,36 @@ final class CombatPolicyTest {
 	}
 
 	@Test
-	void laserReleasePrefersFullFormationButCannotDeadlockOnOneStuckAircraft() {
+	void everyReadyLaserMayFireWhileLaterAircraftBuildTheSynchronizedPeak() {
 		assertTrue(CombatPolicy.laserReleaseReady(8, 8, false, 0));
-		assertTrue(!CombatPolicy.laserReleaseReady(8, 6, false, 23));
+		assertTrue(CombatPolicy.laserReleaseReady(8, 1, false, 0));
 		assertTrue(CombatPolicy.laserReleaseReady(8, 6, false, 24));
-		assertTrue(!CombatPolicy.laserReleaseReady(8, 5, false, 59));
 		assertTrue(CombatPolicy.laserReleaseReady(8, 1, false, 60));
 		assertTrue(CombatPolicy.laserReleaseReady(8, 1, true, 0));
 		assertTrue(!CombatPolicy.laserReleaseReady(8, 0, true, 80));
 	}
 
+	@Test void chargeOrbitAltitudeDoesNotRetriggerIngress() {
+		Vec3 center = new Vec3(0, 64, 0);
+		Vec3 chargeOrbit = CombatPolicy.laserOrbit(center, 0, 4, 0, 0);
+		assertFalse(CombatPolicy.laserIngressRequired(chargeOrbit, center,
+			CombatPolicy.AirspaceSlot.single()));
+		assertTrue(CombatPolicy.laserIngressRequired(chargeOrbit.add(0, -1.1, 0), center,
+			CombatPolicy.AirspaceSlot.single()));
+	}
+
 	@Test
-	void chargedLaserTimeoutReleasesOnlyAircraftThatReachedItsSlot() {
+	void chargedLaserTimeoutPrefersFormationThenPreventsPermanentHolding() {
 		assertTrue(!CombatPolicy.laserFallbackReleaseReady(59, 12.0, 5.0, true, true));
 		assertTrue(!CombatPolicy.laserFallbackReleaseReady(60, 12.0, 5.0, true, false));
 		assertTrue(CombatPolicy.laserFallbackReleaseReady(60, 12.0, 5.0, true, true));
 		assertTrue(CombatPolicy.laserFallbackReleaseReady(60, 36.0, 1.65, true, false));
-		assertTrue(!CombatPolicy.laserFallbackReleaseReady(60, 48.01, 5.0, true, true));
+		assertTrue(CombatPolicy.laserFallbackReleaseReady(120, 12.0, 19.0, true, false));
+		assertTrue(CombatPolicy.laserFallbackReleaseReady(120, 49.8, 15.0, true, false));
+		assertTrue(!CombatPolicy.laserFallbackReleaseReady(60, 64.01, 5.0, true, true));
+		assertTrue(!CombatPolicy.laserFallbackReleaseReady(120, 64.01, 5.0, true, true));
 		assertTrue(!CombatPolicy.laserFallbackReleaseReady(60, 12.0, 5.0, false, true));
+		assertTrue(!CombatPolicy.laserFallbackReleaseReady(120, 12.0, 5.0, false, true));
 	}
 
 	@Test
@@ -342,6 +372,8 @@ final class CombatPolicyTest {
 			new Vec3(33, 64, 0), target));
 		assertTrue(!CombatPolicy.autocannonImpactAcceptable(intended,
 			new Vec3(0, 64, 0), target));
+		assertTrue(!CombatPolicy.autocannonImpactAcceptable(intended,
+			new Vec3(6.5, 76, 0.5), target), "a cave roof must not be accepted as the strike line");
 	}
 
 	@Test
@@ -462,6 +494,26 @@ final class CombatPolicyTest {
 		assertFalse(CombatPolicy.forwardFiringSolution(muzzle, forward, new Vec3(5, 0, 8)));
 		assertFalse(CombatPolicy.forwardFiringSolution(muzzle, forward, new Vec3(-4, -2, 0)));
 		assertFalse(CombatPolicy.forwardFiringSolution(muzzle, Vec3.ZERO, new Vec3(4, 0, 0)));
+	}
+
+	@Test
+	void coordinatedGunLineAllowsTurnLagButNeverRearwardMotion() {
+		Vec3 muzzle = Vec3.ZERO;
+		Vec3 aim = new Vec3(12, -3, 1);
+		Vec3 planned = new Vec3(0.8, -0.05, 0.0);
+		assertTrue(CombatPolicy.coordinatedForwardFiringSolution(muzzle, planned,
+			new Vec3(0.15, 0.0, 0.65), aim));
+		assertFalse(CombatPolicy.coordinatedForwardFiringSolution(muzzle, planned,
+			new Vec3(-0.8, 0.0, 0.0), aim));
+		assertFalse(CombatPolicy.coordinatedForwardFiringSolution(muzzle,
+			new Vec3(-0.8, 0.0, 0.0), new Vec3(0.8, 0.0, 0.0), aim));
+	}
+
+	@Test
+	void casTrackingRetainsClosureMarginAfterIngress() {
+		assertTrue(CombatPolicy.gunFlightSpeed(4.0, false) > CombatPolicy.CAS_PATH_SPEED + 0.15);
+		assertTrue(CombatPolicy.gunFlightSpeed(12.0, false)
+			> CombatPolicy.gunFlightSpeed(4.0, false));
 	}
 
 	@Test

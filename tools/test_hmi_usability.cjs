@@ -9,6 +9,7 @@ const client = resolve(root, 'src/client/java/jp/morrowgear/drone/client');
 const dashboard = readFileSync(resolve(client, 'TacticalDashboard.java'), 'utf8');
 const hud = readFileSync(resolve(client, 'VisorHudOverlay.java'), 'utf8');
 const art = readFileSync(resolve(client, 'HmiArt.java'), 'utf8');
+const displayText = readFileSync(resolve(client, 'ControllerDisplayText.java'), 'utf8');
 const wingPolicy = readFileSync(resolve(root, 'src/main/java/jp/morrowgear/drone/WingMembershipPolicy.java'), 'utf8')
   .replace(/^package [^;]+;/, '');
 
@@ -44,7 +45,9 @@ class HmiCommandHarness {
   long confirmStoreUntil;
   ${dashboard.match(/private static final String\[\] ACTIONS = \{[^}]+\};/)[0]}
   void notifyAction(String message) {}
+  void notifyCommandResult() {}
   void issueFollowFormation() {}
+  void sendDroneCommand(UUID commandId, int id, String action) { ClientPlayNetworking.send(new DroneCommandPayload(id, action)); }
   List<DroneEntity> drones() { return List.of(); }
   String actionLabel(int index, List<DroneEntity> drones) { return ACTIONS[index]; }
   ${method(dashboard, 'execute')}
@@ -127,13 +130,13 @@ try { checkSyntax(); checkHmi(); System.out.println("HMI_LOGIC_PASS"); } catch (
   assert.doesNotMatch(result.stdout, /Error:/);
 });
 
-test('wire command IDs stay stable while return and dock labels distinguish destinations', () => {
+test('wire command IDs stay stable while localized return and dock labels distinguish destinations', () => {
   const actions = dashboard.match(/String\[\] ACTIONS = \{([^}]+)\}/)[1];
   assert.deepEqual([...actions.matchAll(/"([^"]+)"/g)].map(match => match[1]),
     ['follow', 'standby', 'return', 'dock', 'orbit', 'decommission']);
-  assert.match(method(dashboard, 'actionLabel'), /case "return" -> "RETURN TO ME"/);
-  assert.match(method(dashboard, 'actionLabel'), /case "dock" -> "TO DOCK"/);
-  assert.match(method(dashboard, 'execute'), /new DroneCommandPayload\(id, ACTIONS\[index\]\)/);
+  assert.match(method(dashboard, 'actionLabel'), /ControllerDisplayText\.action\(ACTIONS\[index\]\)/);
+  assert.match(displayText, /case "follow" -> "追従"; case "return" -> "集合"; case "dock" -> "Dock帰還"/);
+  assert.match(method(dashboard, 'execute'), /sendDroneCommand\(commandId, id, ACTIONS\[index\]\)/);
 });
 
 test('storage confirmation snapshots recipients and expires on changed selection or another command', () => {
@@ -147,19 +150,19 @@ test('storage confirmation snapshots recipients and expires on changed selection
 
 test('route editing cannot also send a waypoint, work or guard command', () => {
   const click = method(dashboard, 'onClick');
-  assert.match(click, /page == 0 && !armedRoute && doubleClick/);
-  assert.match(click, /armedWork = armedWork == WORK_TYPES\[i\][^;]+;\s*armedRoute = false;\s*routeDraft\.clear\(\)/);
-  assert.match(click, /armedGuard = !armedGuard;\s*armedRoute = false;\s*routeDraft\.clear\(\)/);
+  assert.match(click, /page == 0 && !armedRoute && !armedWaypoint[\s\S]*?\(doubleClick \|\| armedGuard \|\| armedWork != FieldOperationType\.NONE\)/);
+  assert.match(click, /armedWork = armedWork == WORK_TYPES\[i\][^;]+;[\s\S]*?armedRoute = false;[\s\S]*?routeDraft\.clear\(\)/);
+  assert.match(click, /armedGuard = !armedGuard;[\s\S]*?armedRoute = false;[\s\S]*?routeDraft\.clear\(\)/);
 });
 
-test('selection summaries use complete memberships and disclose hidden recipients', () => {
+test('selection summaries use complete memberships and disclose unavailable recipients', () => {
   const summary = method(dashboard, 'selectionWingSummary');
   assert.match(summary, /drones\.stream\(\)\.filter\(d -> d\.groupId\(\)\.equals\(id\)\)/);
   assert.match(summary, /allMatch\(d -> selected\.contains\(d\.getId\(\)\)\)/);
   const panel = method(dashboard, 'drawCommandPanel');
-  assert.match(panel, /HIDDEN BY FILTER/);
-  assert.match(panel, /NO DOCK/);
-  assert.match(panel, /FLEET TASK FORCE/);
+  assert.match(panel, /selected\.unavailableCount\(\)/);
+  assert.match(panel, /未受信の選択/);
+  assert.match(panel, /複数対象の共通操作/);
 });
 
 test('existing Wing capacity, drag dispatch and additive selection contracts remain present', () => {
@@ -172,15 +175,15 @@ test('existing Wing capacity, drag dispatch and additive selection contracts rem
   assert.match(click, /event\.hasControlDown\(\)/);
   assert.match(click, /event\.hasShiftDown\(\)/);
   assert.match(click, /selectionToggleRect/);
-  assert.equal((dashboard.match(/String\[\] PAGES = \{([^}]+)\}/)[1].match(/"[^"]+"/g) || []).length, 8);
+  assert.equal((dashboard.match(/String\[\] PAGES = \{([^}]+)\}/)[1].match(/"[^"]+"/g) || []).length, 11);
 });
 
-test('HUD prioritizes focus and does not force the operation panel between overlapping side panels', () => {
-  assert.match(method(hud, 'extractRenderState'), /!inspecting \|\| HmiArt\.hudSidesFit\(width\)/);
-  assert.match(method(hud, 'drawOperationOverview'), /if \(panelWidth < 320\) return/);
-  assert.match(method(hud, 'drawCommandContext'), /contextGroup\.isBlank\(\) \? List\.of\(pinned\)/);
+test('HUD prioritizes adaptive combat and keeps inspection responsive without overlapping labels', () => {
+  assert.match(method(hud, 'extractRenderState'), /drawAdaptiveCombat\(g, client, width, height\)/);
+  assert.match(method(hud, 'drawAdaptiveCombat'), /combatLedger\.page\(selectedFrontTarget, 3\)/);
+  assert.match(method(hud, 'drawAdaptiveCombat'), /occupiedLabels\.add\(summary\)/);
   assert.match(method(hud, 'drawInspectionContext'), /if \(compact\)/);
-  assert.doesNotMatch(method(hud, 'drawCommandContext'), /"LINK " \+ link/);
+  assert.match(method(hud, 'drawInspectionContext'), /occupiedLabels\.add/);
 });
 
 test('warning text wraps, beacon-only alerts remain visible and marker budgets include urgent units', () => {
@@ -189,7 +192,7 @@ test('warning text wraps, beacon-only alerts remain visible and marker budgets i
   assert.match(rail, /stacked \? 48 : 32/);
   assert.match(rail, /lineY \+ \(stacked \? 22 : 0\)/);
   assert.doesNotMatch(rail, /RTB ASSIGNED/);
-  assert.match(method(hud, 'drawProximity'), /if \(drawn >= budget\) continue;\s*drawn\+\+/);
+  assert.match(method(hud, 'drawProximity'), /if \(drawn >= budget\) continue;[\s\S]*?drawn\+\+/);
   assert.doesNotMatch(method(hud, 'drawCluster'), /groupId\(\)/);
   assert.match(method(dashboard, 'fitText'), /HmiArt\.fitText/);
   assert.match(method(hud, 'fit'), /HmiArt\.fitText/);

@@ -9,6 +9,7 @@ import java.util.UUID;
 import jp.morrowgear.drone.CarrierAudioPolicy;
 import jp.morrowgear.drone.MorrowgearDrone;
 import jp.morrowgear.drone.carrier.CarrierEntity;
+import jp.morrowgear.drone.carrier.CarrierMiningEffectPolicy;
 import jp.morrowgear.drone.carrier.CarrierPolicy;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
@@ -78,13 +79,16 @@ public final class CarrierAudioController {
         private final Loop idle;
         private final Loop cruise;
         private final Loop fire;
+        private final Loop miningCore;
         private CarrierPolicy.WorkPhase previous = CarrierPolicy.WorkPhase.IDLE;
+        private int previousPhaseTick = -1;
         private int sequence = -1;
 
         private Track(CarrierEntity carrier) {
             idle = new Loop(carrier, MorrowgearDrone.CARRIER_FLIGHT_IDLE_SOUND);
             cruise = new Loop(carrier, MorrowgearDrone.CARRIER_FLIGHT_CRUISE_SOUND);
             fire = new Loop(carrier, MorrowgearDrone.CARRIER_LASER_FIRE_SOUND);
+            miningCore = new Loop(carrier, MorrowgearDrone.CARRIER_MINING_CORE_SOUND);
         }
 
         private void update(Minecraft client, CarrierEntity carrier, long now) {
@@ -92,18 +96,41 @@ public final class CarrierAudioController {
             idle.update(client, mix.idle(), mix.pitch(), now);
             cruise.update(client, mix.cruise(), mix.pitch(), now);
             CarrierPolicy.WorkPhase phase = carrier.workPhase();
-            if (CarrierAudioPolicy.chargeStarted(previous, phase))
+            boolean mining = carrier.workMode() == CarrierPolicy.Mode.MINING;
+            if (!mining && CarrierAudioPolicy.chargeStarted(previous, phase))
                 play(client, carrier.position(), MorrowgearDrone.CARRIER_LASER_CHARGE_SOUND, .52f, .92f, 70);
-            if (CarrierAudioPolicy.fireActive(phase, carrier.beamActive())) fire.update(client, .58f, .94f, now);
+            if (mining && phase == CarrierPolicy.WorkPhase.CHARGE) {
+                int active = CarrierMiningEffectPolicy.visual(phase, carrier.phaseTick(), carrier.phaseDuration()).activeEmitters();
+                int previousActive = previous == phase && previousPhaseTick >= 0
+                    ? CarrierMiningEffectPolicy.visual(phase, previousPhaseTick, carrier.phaseDuration()).activeEmitters() : 0;
+                if (active > previousActive)
+                    play(client, carrier.position(), MorrowgearDrone.CARRIER_MINING_EMITTER_SOUND,
+                        .34f, .84f + active * .009f, 18);
+                float coreVolume = (float)(.12 + .38 * Math.clamp(
+                    (carrier.phaseTick() + 1.0) / CarrierPolicy.MINING_CHARGE_TICKS, 0, 1));
+                miningCore.update(client, coreVolume, .86f + .08f * coreVolume, now);
+            } else if (mining && phase == CarrierPolicy.WorkPhase.FIRE
+                && carrier.phaseTick() < CarrierMiningEffectPolicy.RELEASE_TICKS) {
+                miningCore.update(client, .48f, .96f, now);
+            } else miningCore.stop(client);
+            if (mining && phase == CarrierPolicy.WorkPhase.FIRE && previous != phase)
+                play(client, carrier.beamPath().origin(), MorrowgearDrone.CARRIER_MINING_RELEASE_SOUND, .58f, .94f,
+                    CarrierMiningEffectPolicy.RELEASE_TICKS + 8);
+            if (mining && phase == CarrierPolicy.WorkPhase.FIRE
+                && previousPhaseTick < CarrierMiningEffectPolicy.RELEASE_TICKS
+                && carrier.phaseTick() >= CarrierMiningEffectPolicy.RELEASE_TICKS)
+                play(client, carrier.beamPath().target(), MorrowgearDrone.CARRIER_MINING_IMPACT_SOUND, .68f, .9f, 100);
+            if (!mining && CarrierAudioPolicy.fireActive(phase, carrier.beamActive())) fire.update(client, .58f, .94f, now);
             else fire.stop(client);
-            if (CarrierAudioPolicy.fireActive(phase, carrier.beamActive())
+            if (!mining && CarrierAudioPolicy.fireActive(phase, carrier.beamActive())
                 && CarrierAudioPolicy.hitStarted(sequence, carrier.beamSequence())) {
                 Vec3 impact = carrier.beamPath().target();
                 play(client, impact, MorrowgearDrone.CARRIER_LASER_HIT_SOUND, .56f, .9f, 18);
             }
-            if (CarrierAudioPolicy.cooldownStarted(previous, phase))
+            if (!mining && CarrierAudioPolicy.cooldownStarted(previous, phase))
                 play(client, carrier.beamPath().origin(), MorrowgearDrone.CARRIER_LASER_COOLDOWN_SOUND, .48f, .9f, 58);
             previous = phase;
+            previousPhaseTick = carrier.phaseTick();
             sequence = carrier.beamSequence();
         }
 
@@ -111,6 +138,7 @@ public final class CarrierAudioController {
             idle.stop(client);
             cruise.stop(client);
             fire.stop(client);
+            miningCore.stop(client);
         }
     }
 

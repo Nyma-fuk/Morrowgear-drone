@@ -34,28 +34,29 @@ final class CarrierWork {
         if (!CarrierPolicy.aligned(op, level.dimension().identifier().toString(), carrier.getX(), carrier.getY(), carrier.getZ())) {
             ship.stop(CarrierPolicy.Stop.OBSTRUCTED); return;
         }
-        if (level.getChunkSource().getChunkNow(op.chunkX(), op.chunkZ()) == null) {
-            ship.stop(CarrierPolicy.Stop.UNLOADED); return;
+        if (!footprintLoaded(level, op)) {
+            waitForChunks(carrier, ship); return;
+        }
+        if (ship.stop == CarrierPolicy.Stop.UNLOADED || ship.stop == CarrierPolicy.Stop.FRIENDLY_IN_AREA) {
+            ship.stop = CarrierPolicy.Stop.RUNNING;
+            ship.dirty.run();
         }
         if (mode == CarrierPolicy.Mode.COMBAT) { tickCombat(carrier, ship, level, owner, op); return; }
-        AABB area = new AABB(op.chunkX() * 16, op.minY(), op.chunkZ() * 16,
-            op.chunkX() * 16 + 16, carrier.getY(), op.chunkZ() * 16 + 16);
+        AABB area = new AABB(op.minX(), op.minY(), op.minZ(),
+            op.maxX() + 1, carrier.getY(), op.maxZ() + 1);
         List<LivingEntity> entities = new java.util.ArrayList<>();
         level.getEntities(net.minecraft.world.level.entity.EntityTypeTest.forClass(LivingEntity.class), area,
             LivingEntity::isAlive, entities, 129);
-        if (entities.size() > 128 || entities.stream().anyMatch(e -> !hostile(e, owner))) {
-            ship.stop(CarrierPolicy.Stop.FRIENDLY_IN_AREA); return;
-        }
         if (!carrier.hasOperationalOwner(owner)) { ship.stop(CarrierPolicy.Stop.OWNER_ABSENT); return; }
         if (!op.generation().equals(ship.miningScanGeneration)) {
             ship.miningScanGeneration = op.generation();
             ship.miningScanTicks = 0;
         }
-        // The renderer projects this centre endpoint into the selected 16x16 footprint,
+        // The renderer projects this centre endpoint into the selected circular impact footprint,
         // with each ray starting directly above its own column, never at the aperture.
         if (ship.workPhase() != CarrierPolicy.WorkPhase.FIRE) {
             var samples = new java.util.ArrayList<Vec3>();
-            for (int column : CarrierPolicy.miningScanColumns(ship.miningScanTicks)) {
+            for (int column : CarrierPolicy.miningScanColumns(ship.miningScanTicks, op.footprintRadius())) {
                 int x = op.x(column), z = op.z(column);
                 double y = Math.max(op.minY(), Math.min(op.maxY() + 1,
                     level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, x, z)));
@@ -66,8 +67,8 @@ final class CarrierWork {
             }
             carrier.recordBeams(samples);
         } else {
-            carrier.recordBeams(List.of(new Vec3(op.chunkX() * 16 + 8,
-                op.y(Math.min(ship.progress.cursor(), op.volume() - 1)) + 1, op.chunkZ() * 16 + 8)));
+            carrier.recordBeams(List.of(new Vec3(op.centerX(),
+                op.y(Math.min(ship.progress.cursor(), op.volume() - 1)) + 1, op.centerZ())));
         }
         if (ship.miningScanTicks < CarrierPolicy.SCAN_TICKS) {
             ship.miningScanTicks++;
@@ -83,13 +84,17 @@ final class CarrierWork {
             ship.miningScanTicks++;
             return;
         }
+        if (!CarrierMiningEffectPolicy.releaseComplete(ship.miningScanTicks)) {
+            ship.miningScanTicks++;
+            return;
+        }
         if (carrier.tickCount % 10 == 0) {
             int hits = 0;
             for (LivingEntity target : entities) {
                 if (!continues(ship, op, mode)) return;
                 if (!carrier.hasOperationalOwner(owner)) { ship.stop(CarrierPolicy.Stop.OWNER_ABSENT); return; }
                 if (!target.isAlive()) continue;
-                if (!hostile(target, owner)) { ship.stop(CarrierPolicy.Stop.FRIENDLY_IN_AREA); return; }
+                if (!hostile(target, owner)) continue;
                 if (hits >= 8 || !CarrierPowerPolicy.workAvailable(ship, 10)) break;
                 Vec3 aim = target.getEyePosition();
                 Vec3 from = new Vec3(aim.x, carrier.beamOrigin().y, aim.z);
@@ -104,6 +109,9 @@ final class CarrierWork {
         if (!continues(ship, op, mode)) return;
         long deadline = System.nanoTime() + CarrierPolicy.WORK_NANOS;
         int broken = 0;
+        ItemStack tool = new ItemStack(Items.NETHERITE_PICKAXE);
+        var capture = new CaptureBatch();
+        try {
         for (int scanned = 0; scanned < CarrierPolicy.SCAN_PER_TICK && broken < CarrierPolicy.BREAK_PER_TICK
             && System.nanoTime() < deadline; scanned++) {
             if (!continues(ship, op, CarrierPolicy.Mode.MINING)) return;
@@ -114,21 +122,19 @@ final class CarrierWork {
             var state = level.getBlockState(pos);
             if (progress.sealed() || state.isAir()) { ship.progress = progress.advance(); ship.dirty.run(); continue; }
             if (state.is(Blocks.BEDROCK)) { ship.progress = progress.seal(); ship.dirty.run(); continue; }
-            Vec3 from = miningOrigin(progress, carrier.beamOrigin().y);
-            var hit = level.clip(new ClipContext(from, Vec3.atCenterOf(pos), ClipContext.Block.COLLIDER,
-                ClipContext.Fluid.ANY, carrier));
-            pos = miningTarget(progress, hit);
-            if (pos == null) {
+            // The cursor is strictly top-down. A higher motion-blocking block means something was
+            // inserted after that column was scanned; stop instead of tunnelling underneath it.
+            int visibleTop = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING,
+                pos.getX(), pos.getZ()) - 1;
+            if (visibleTop > pos.getY()) {
                 ship.stop(CarrierPolicy.Stop.OBSTRUCTED); return;
             }
-            state = level.getBlockState(pos);
             boolean drainingFluid = CarrierProtection.drainableFluid(state);
             boolean permitted = CarrierProtection.permitted(owner, level, pos, state);
             if (!miningSnapshot(ship, progress)) return;
             if (!permitted) { ship.stop(CarrierPolicy.Stop.PROTECTED); return; }
             if (!carrier.hasOperationalOwner(owner)) { ship.stop(CarrierPolicy.Stop.OWNER_ABSENT); return; }
             if (!sameUnclaimedBlock(owner, level, pos, state)) { ship.stop(CarrierPolicy.Stop.PROTECTED); return; }
-            ItemStack tool = new ItemStack(Items.NETHERITE_PICKAXE);
             if (ship.pending == null || !ship.pending.pos().equals(pos) || !ship.pending.state().equals(state)) {
                 List<ItemStack> drops = Block.getDrops(state, level, pos, null, owner, tool);
                 if (!miningSnapshot(ship, progress)) return;
@@ -150,7 +156,7 @@ final class CarrierWork {
                 ship.stop(CarrierPolicy.Stop.OBSTRUCTED); return;
             }
             ship.cargo.commit(plan.get());
-            if (!drainingFluid) carrier.recordCapture(pos, pending.drops());
+            if (!drainingFluid) capture.add(pos, pending.drops());
             if (!sustained) CarrierPowerPolicy.consumeWork(ship, CarrierPowerPolicy.MINING_BURST_ENERGY_PER_BLOCK);
             if (ship.pending == pending) ship.pending = null;
             if (miningSnapshot(ship, progress)) ship.progress = afterRemoval(progress, pos);
@@ -158,6 +164,26 @@ final class CarrierWork {
             broken++;
             if (!drainingFluid) state.spawnAfterBreak(level, pos, tool, true);
             PlayerBlockBreakEvents.AFTER.invoker().afterBlockBreak(level, owner, pos, state, null);
+        }
+        } finally {
+            capture.flush(carrier);
+        }
+    }
+
+    /** Coalesces mining telemetry and visual capture sync to one entity update per server tick. */
+    private static final class CaptureBatch {
+        private int blocks;
+        private long items;
+        private BlockPos lastPos;
+        private List<ItemStack> lastDrops = List.of();
+        void add(BlockPos pos, List<ItemStack> drops) {
+            blocks++;
+            items += drops.stream().mapToLong(ItemStack::getCount).sum();
+            lastPos = pos.immutable();
+            lastDrops = drops;
+        }
+        void flush(CarrierEntity carrier) {
+            if (blocks > 0) carrier.recordCaptureBatch(lastPos, lastDrops, blocks, items);
         }
     }
 
@@ -323,6 +349,21 @@ final class CarrierWork {
             for (int z = ((int) Math.floor(Math.min(from.z, to.z))) >> 4; z <= ((int) Math.floor(Math.max(from.z, to.z))) >> 4; z++)
                 if (level.getChunkSource().getChunkNow(x, z) == null) return false;
         return true;
+    }
+
+    private static boolean footprintLoaded(ServerLevel level, CarrierPolicy.Operation op) {
+        for (int x = op.minX() >> 4; x <= op.maxX() >> 4; x++)
+            for (int z = op.minZ() >> 4; z <= op.maxZ() >> 4; z++)
+                if (level.getChunkSource().getChunkNow(x, z) == null) return false;
+        return true;
+    }
+
+    private static void waitForChunks(CarrierEntity carrier, CarrierShip ship) {
+        carrier.clearBeams();
+        if (ship.stop != CarrierPolicy.Stop.UNLOADED) {
+            ship.stop = CarrierPolicy.Stop.UNLOADED;
+            ship.dirty.run();
+        }
     }
 
     private static boolean workPower(CarrierEntity carrier, CarrierShip ship, int cost) {

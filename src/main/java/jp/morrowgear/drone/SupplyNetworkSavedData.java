@@ -37,8 +37,10 @@ public final class SupplyNetworkSavedData extends SavedData {
 	private static final Codec<Rule> RULE = RecordCodecBuilder.create(i -> i.group(
 		KIND.fieldOf("kind").forGetter(Rule::kind),
 		Codec.intRange(0, SupplyNetworkPolicy.MAX_STOCK).fieldOf("minimum").forGetter(Rule::minimum),
+		Codec.intRange(0, SupplyNetworkPolicy.MAX_STOCK).optionalFieldOf("target", -1).forGetter(Rule::target),
 		Codec.intRange(0, 100).fieldOf("priority").forGetter(Rule::priority)
-	).apply(i, Rule::new));
+	).apply(i, (kind, minimum, target, priority) -> new Rule(kind, minimum,
+		target < minimum ? minimum : target, priority)));
 	private static final Codec<Configuration> CONFIG = RecordCodecBuilder.create(i -> i.group(
 		ROUTE.fieldOf("route").forGetter(Configuration::route),
 		RULE.listOf().fieldOf("rules").forGetter(Configuration::rules),
@@ -61,16 +63,23 @@ public final class SupplyNetworkSavedData extends SavedData {
 		Codec.LONG.fieldOf("seen_tick").forGetter(Job::seenTick),
 		Codec.LONG.optionalFieldOf("fallback", Long.MIN_VALUE).forGetter(Job::fallback)
 	).apply(i, Job::new));
+	private static final Codec<LogisticsNode> NODE = RecordCodecBuilder.create(i -> i.group(
+		UUIDUtil.STRING_CODEC.fieldOf("owner").forGetter(LogisticsNode::owner),
+		Codec.STRING.fieldOf("dimension").forGetter(LogisticsNode::dimension),
+		Codec.LONG.fieldOf("position").forGetter(LogisticsNode::position)
+	).apply(i, LogisticsNode::new));
 	public static final Codec<SupplyNetworkSavedData> CODEC = RecordCodecBuilder.create(i -> i.group(
 		Codec.LONG.optionalFieldOf("generation", 0L).forGetter(d -> d.registry.generation()),
 		CONFIG.listOf().optionalFieldOf("routes", List.of()).forGetter(d -> d.registry.configurations()),
-		JOB.listOf().optionalFieldOf("jobs", List.of()).forGetter(d -> d.registry.jobs())
+		JOB.listOf().optionalFieldOf("jobs", List.of()).forGetter(d -> d.registry.jobs()),
+		NODE.listOf().optionalFieldOf("logistics_nodes", List.of()).forGetter(d -> List.copyOf(d.nodes))
 	).apply(i, SupplyNetworkSavedData::new));
 	public static final SavedDataType<SupplyNetworkSavedData> TYPE = new SavedDataType<>(
 		Identifier.fromNamespaceAndPath("morrowgear_drone", "supply_network"),
 		SupplyNetworkSavedData::new, CODEC, null);
 
 	private final SupplyNetworkRegistry registry = new SupplyNetworkRegistry(this::setDirty);
+	private final java.util.LinkedHashSet<LogisticsNode> nodes = new java.util.LinkedHashSet<>();
 	final java.util.Map<Route, Notice> notices = new java.util.HashMap<>();
 	final java.util.Map<java.util.UUID, Long> ownerNoticeTicks = new java.util.HashMap<>();
 	final java.util.LinkedHashMap<java.util.UUID, java.lang.ref.WeakReference<DroneEntity>> candidates = new java.util.LinkedHashMap<>();
@@ -78,11 +87,31 @@ public final class SupplyNetworkSavedData extends SavedData {
 
 	public SupplyNetworkSavedData() {}
 
-	private SupplyNetworkSavedData(long generation, List<Configuration> configurations, List<Job> jobs) {
+	private SupplyNetworkSavedData(long generation, List<Configuration> configurations, List<Job> jobs,
+		List<LogisticsNode> nodes) {
 		registry.restore(generation, configurations, jobs);
+		this.nodes.addAll(nodes);
+		// Existing worlds used the per-Dock route source as their logistics-node registry.
+		// Preserve those warehouses when upgrading to source-agnostic Dock settings.
+		for (Configuration config : configurations) if (config.route().source() != Route.AUTO_SOURCE)
+			this.nodes.add(new LogisticsNode(config.route().owner(), config.route().dimension(), config.route().source()));
 	}
 
 	public SupplyNetworkRegistry registry() { return registry; }
+	public void registerNode(java.util.UUID owner, String dimension, long position) {
+		LogisticsNode node = new LogisticsNode(owner, dimension, position);
+		if (nodes.contains(node)) return;
+		long count = nodes.stream().filter(existing -> existing.owner().equals(owner)
+			&& existing.dimension().equals(dimension)).count();
+		if (count >= SupplyNetworkPolicy.MAX_DISCOVERED_NODES)
+			throw new IllegalStateException("Logistics node limit reached");
+		nodes.add(node);
+		setDirty();
+	}
+	public List<Long> nodes(java.util.UUID owner, String dimension) {
+		return nodes.stream().filter(node -> node.owner().equals(owner) && node.dimension().equals(dimension))
+			.map(LogisticsNode::position).toList();
+	}
 	public static SupplyNetworkSavedData get(ServerLevel level) {
 		return level.getDataStorage().computeIfAbsent(TYPE);
 	}
@@ -95,4 +124,10 @@ public final class SupplyNetworkSavedData extends SavedData {
 	}
 
 	record Notice(Status status, long tick) {}
+	public record LogisticsNode(java.util.UUID owner, String dimension, long position) {
+		public LogisticsNode {
+			if (owner == null || dimension == null || dimension.isBlank())
+				throw new IllegalArgumentException("Invalid logistics node");
+		}
+	}
 }

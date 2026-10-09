@@ -16,8 +16,6 @@ final class CombatTheaterPolicy {
 	static final double CLUSTER_HORIZONTAL_DISTANCE = 12.0;
 	static final double CLUSTER_VERTICAL_DISTANCE = 6.0;
 	static final int MAX_UNITS_PER_TARGET = 8;
-	private static final double RESERVE_RATIO = 0.20;
-
 	private CombatTheaterPolicy() {}
 
 	static boolean awaitingInitialPlan(CombatState state, long stateTick, long planTick, long now) {
@@ -30,44 +28,50 @@ final class CombatTheaterPolicy {
 		List<Contact> contacts = deduplicate(rawContacts);
 		if (contacts.isEmpty()) return Plan.empty(units.size());
 		List<Cluster> clusters = clusters(contacts);
+		Map<Integer, String> clusterIds = clusterIds(clusters);
 		Map<String, Assignment> assignments = new LinkedHashMap<>();
+		Map<Integer, Integer> assignmentCounts = new HashMap<>();
 		Set<String> used = new HashSet<>();
 
 		// An active attack pass owns its aircraft until the pass completes.
 		for (Unit unit : units.stream().filter(Unit::committed)
 			.sorted(Comparator.comparing(Unit::unitId)).toList()) {
 			Contact contact = contacts.stream().filter(c -> c.entityId() == unit.currentTarget()).findFirst().orElse(null);
-			if (contact == null || countFor(assignments, contact.entityId()) >= MAX_UNITS_PER_TARGET) continue;
+			if (contact == null || assignmentCounts.getOrDefault(contact.entityId(), 0) >= MAX_UNITS_PER_TARGET) continue;
 			assignments.put(unit.unitId(), new Assignment(unit.unitId(), contact.entityId(),
-				Math.max(0, unit.currentSlot()), 1, clusterId(clusters, contact.entityId()), contact));
+				Math.max(0, unit.currentSlot()), 1, clusterIds.getOrDefault(contact.entityId(), "FRONT-01"), contact));
+			assignmentCounts.merge(contact.entityId(), 1, Integer::sum);
 			used.add(unit.unitId());
 		}
 
 		boolean operationalEmergency = contacts.stream().anyMatch(CombatTheaterPolicy::operationalEmergency);
 		int eligible = (int)units.stream().filter(unit -> eligible(unit, operationalEmergency)).count();
-		int reserve = contacts.size() <= 1 ? 0 : Math.max(1, (int)Math.ceil(eligible * RESERVE_RATIO));
-		if (operationalEmergency) reserve = 0;
-		int deploymentLimit = Math.max(assignments.size(), Math.max(0, eligible - reserve));
+		Map<Integer, Integer> demands = new HashMap<>();
+		contacts.forEach(contact -> demands.put(contact.entityId(), targetDemand(contact, contacts)));
+		int totalDemand = contacts.stream().mapToInt(contact -> demands.get(contact.entityId())).sum();
+		int deploymentLimit = Math.max(assignments.size(), Math.min(eligible, totalDemand));
+
+		// Cover every live hostile before reinforcing a high-value target. This keeps a large
+		// base visibly responsive while the existing threat/durability model still decides
+		// how the remaining aircraft reinforce each contact.
+		for (Contact contact : contacts.stream().sorted(CONTACT_PRIORITY).toList()) {
+			if (assignments.size() >= deploymentLimit) break;
+			if (assignmentCounts.getOrDefault(contact.entityId(), 0) > 0) continue;
+			assignNext(assignments, assignmentCounts, used, units, contact, clusterIds, operationalEmergency(contact));
+		}
 
 		List<Contact> queue = new ArrayList<>();
 		for (Cluster cluster : clusters) {
 			int demand = Math.max(clusterDemand(cluster), cluster.contacts().stream()
-				.mapToInt(contact -> targetDemand(contact, contacts)).sum());
+				.mapToInt(contact -> demands.get(contact.entityId())).sum());
 			List<Contact> ordered = cluster.contacts().stream().sorted(CONTACT_PRIORITY).toList();
 			for (int index = 0; index < demand; index++) queue.add(ordered.get(index % ordered.size()));
 		}
 		queue.sort(CONTACT_PRIORITY);
 		for (Contact contact : queue) {
 			if (assignments.size() >= deploymentLimit) break;
-			if (countFor(assignments, contact.entityId()) >= targetDemand(contact, contacts)) continue;
-			Unit selected = units.stream().filter(unit -> !used.contains(unit.unitId()))
-				.filter(unit -> eligible(unit, operationalEmergency(contact)))
-				.min(unitComparator(contact)).orElse(null);
-			if (selected == null) continue;
-			used.add(selected.unitId());
-			int slot = countFor(assignments, contact.entityId());
-			assignments.put(selected.unitId(), new Assignment(selected.unitId(), contact.entityId(), slot,
-				1, clusterId(clusters, contact.entityId()), contact));
+			if (assignmentCounts.getOrDefault(contact.entityId(), 0) >= demands.get(contact.entityId())) continue;
+			assignNext(assignments, assignmentCounts, used, units, contact, clusterIds, operationalEmergency(contact));
 		}
 
 		Map<Integer, Integer> targetCounts = new HashMap<>();
@@ -78,6 +82,19 @@ final class CombatTheaterPolicy {
 				targetCounts.getOrDefault(a.targetId(), 1), a.clusterId(), a.contact())));
 		int actualReserve = Math.max(0, eligible - normalized.size());
 		return new Plan(Map.copyOf(normalized), List.copyOf(clusters), contacts.size(), actualReserve);
+	}
+
+	private static boolean assignNext(Map<String, Assignment> assignments, Map<Integer, Integer> assignmentCounts,
+		Set<String> used, List<Unit> units, Contact contact, Map<Integer, String> clusterIds, boolean emergency) {
+		Unit selected = units.stream().filter(unit -> !used.contains(unit.unitId()))
+			.filter(unit -> eligible(unit, emergency)).min(unitComparator(contact)).orElse(null);
+		if (selected == null) return false;
+		used.add(selected.unitId());
+		int slot = assignmentCounts.getOrDefault(contact.entityId(), 0);
+		assignments.put(selected.unitId(), new Assignment(selected.unitId(), contact.entityId(), slot,
+			1, clusterIds.getOrDefault(contact.entityId(), "FRONT-01"), contact));
+		assignmentCounts.put(contact.entityId(), slot + 1);
+		return true;
 	}
 
 	private static List<Contact> deduplicate(List<Contact> contacts) {
@@ -185,13 +202,12 @@ final class CombatTheaterPolicy {
 		return 2;
 	}
 
-	private static int countFor(Map<String, Assignment> assignments, int targetId) {
-		return (int)assignments.values().stream().filter(a -> a.targetId() == targetId).count();
-	}
-
-	private static String clusterId(List<Cluster> clusters, int targetId) {
-		return clusters.stream().filter(cluster -> cluster.contacts().stream()
-			.anyMatch(contact -> contact.entityId() == targetId)).map(Cluster::id).findFirst().orElse("FRONT-01");
+	private static Map<Integer, String> clusterIds(List<Cluster> clusters) {
+		Map<Integer, String> result = new HashMap<>();
+		for (Cluster cluster : clusters) {
+			for (Contact contact : cluster.contacts()) result.put(contact.entityId(), cluster.id());
+		}
+		return result;
 	}
 
 	private static final Comparator<Contact> CONTACT_PRIORITY = Comparator

@@ -57,7 +57,7 @@ public final class DockCenterBlock extends BaseEntityBlock {
 	@Override
 	protected InteractionResult useItemOn(net.minecraft.world.item.ItemStack stack, BlockState state,
 		Level level, BlockPos pos, Player player, net.minecraft.world.InteractionHand hand, BlockHitResult hit) {
-		if (!DockBlockEntity.isSupply(stack)) return InteractionResult.PASS;
+		if (!DockBlockEntity.isSupply(stack)) return InteractionResult.TRY_WITH_EMPTY_HAND;
 		if (level.isClientSide()) return InteractionResult.SUCCESS;
 		return player instanceof net.minecraft.server.level.ServerPlayer serverPlayer
 			&& level.getBlockEntity(pos) instanceof DockBlockEntity dock && dock.insertSupply(serverPlayer, stack)

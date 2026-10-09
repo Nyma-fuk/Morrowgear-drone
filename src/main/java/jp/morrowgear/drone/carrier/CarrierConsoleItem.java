@@ -1,6 +1,7 @@
 package jp.morrowgear.drone.carrier;
 
 import java.util.Comparator;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -19,10 +20,23 @@ public final class CarrierConsoleItem extends Item {
                 entity -> CarrierMenu.accessible(serverPlayer, entity.getUUID()));
             var entity = nearby.stream().min(Comparator.comparingDouble(player::distanceToSqr)).orElse(null);
             if (entity != null && !player.isShiftKeyDown()) CarrierMenu.open(serverPlayer, entity.getUUID());
+            else if (!player.isShiftKeyDown()) CarrierSavedData.get(serverPlayer.level().getServer()).ships().entrySet().stream()
+                .filter(entry -> !entry.getValue().destroyed && entry.getValue().owner.equals(player.getUUID()))
+                .filter(entry -> {
+                    CarrierEntity exterior = CarrierModule.find(serverPlayer.level().getServer(), entry.getKey());
+                    return exterior != null && exterior.level() == serverPlayer.level();
+                })
+                .min(Comparator.comparingDouble(entry -> player.distanceToSqr(
+                    CarrierModule.find(serverPlayer.level().getServer(), entry.getKey()))))
+                .ifPresentOrElse(entry -> CarrierMenu.open(serverPlayer, entry.getKey()),
+                    () -> serverPlayer.sendSystemMessage(Component.translatable("message.morrowgear_drone.carrier_console.unavailable")));
             else CarrierSavedData.get(serverPlayer.level().getServer()).ships().entrySet().stream()
                 .filter(entry -> entry.getValue().destroyed && entry.getValue().owner.equals(player.getUUID()))
                 .sorted(Comparator.comparingInt(entry -> entry.getValue().cabin)).findFirst()
-                .ifPresent(entry -> CarrierMenu.open(serverPlayer, entry.getKey()));
+                .ifPresentOrElse(entry -> CarrierMenu.open(serverPlayer, entry.getKey()),
+                    () -> serverPlayer.sendSystemMessage(Component.translatable(player.isShiftKeyDown()
+                        ? "message.morrowgear_drone.carrier_console.no_recovery"
+                        : "message.morrowgear_drone.carrier_console.unavailable")));
         }
         return InteractionResult.SUCCESS;
     }

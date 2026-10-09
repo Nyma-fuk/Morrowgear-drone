@@ -65,6 +65,7 @@ class CarrierSavedDataTest {
         data.markPlayerBuilt("minecraft:overworld", new BlockPos(1, 2, 3).asLong());
         ship.guests.add(guest);
         var op = CarrierPolicy.Operation.at(UUID.randomUUID(), "minecraft:overworld", -17, 32, -64, 154);
+        op = op.withSurfaceY(71);
         ship.progress = new CarrierPolicy.Progress(op, 257, List.of(0));
         // A full hold may pause on a visible foreground block ahead of the unchanged raster cursor.
         ship.pending = new CarrierShip.Pending(new BlockPos(op.x(257) + 2, op.y(257), op.z(257) + 2),
@@ -84,6 +85,7 @@ class CarrierSavedDataTest {
         assertEquals(new CarrierServiceBay.Stock(119, 4), restored.bayStock);
         assertTrue(decoded.playerBuilt("minecraft:overworld", new BlockPos(1, 2, 3).asLong()));
         assertEquals(ship.progress, restored.progress);
+        assertEquals(71, restored.progress.operation().surfaceY());
         assertEquals(ship.pending.pos(), restored.pending.pos());
         assertNotEquals(new BlockPos(op.x(257), op.y(257), op.z(257)), restored.pending.pos());
         assertEquals(ship.pending.state(), restored.pending.state());
@@ -107,6 +109,12 @@ class CarrierSavedDataTest {
         var encoded = CarrierShip.CODEC.encodeStart(ops, ship).getOrThrow().getAsJsonObject();
         encoded.remove("mining_startup_charged");
         assertFalse(CarrierShip.CODEC.parse(ops, encoded).getOrThrow().miningStartupCharged);
+    }
+    @Test void legacyOperationWithoutSurfaceFallsBackToItsPersistentUpperPlane() {
+        var op = CarrierPolicy.Operation.at(UUID.randomUUID(), "minecraft:overworld", 0, 0, -64, 114);
+        var encoded = CarrierPolicy.Operation.CODEC.encodeStart(JsonOps.INSTANCE, op).getOrThrow().getAsJsonObject();
+        encoded.remove("surface_y");
+        assertEquals(115, CarrierPolicy.Operation.CODEC.parse(JsonOps.INSTANCE, encoded).getOrThrow().surfaceY());
     }
     @Test void cabinDimensionDecodesWithCachedMinecraftCodec() throws Exception {
         var json = com.google.gson.JsonParser.parseString(java.nio.file.Files.readString(java.nio.file.Path.of(

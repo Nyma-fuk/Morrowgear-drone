@@ -18,7 +18,8 @@ final class SupplyNetworkStatusPayloadTest {
     @Test void roundTripIncludesActualStockReservedCargoAndShortageReason() {
         var job = new SupplyNetworkStatusPayload.Delivery(UUID.randomUUID(), Status.IN_TRANSIT, SupplyKind.LASER, 2);
         var dock = new SupplyNetworkStatusPayload.DockStatus(-23, 45, true, Status.SOURCE_SHORTAGE, stocks(), List.of(job));
-        var packet = new SupplyNetworkStatusPayload(5, UUID.randomUUID(), "minecraft:overworld", List.of(dock));
+        var node = new SupplyNetworkStatusPayload.LogisticsNode(99, "樽", "石炭 x24", 12, -2, true);
+        var packet = new SupplyNetworkStatusPayload(5, UUID.randomUUID(), "minecraft:overworld", List.of(dock), List.of(node));
         var buffer = Unpooled.buffer();
         try {
             SupplyNetworkStatusPayload.CODEC.encode(buffer, packet);

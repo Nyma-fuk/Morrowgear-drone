@@ -24,14 +24,17 @@ before(() => {
 });
 for (const name of ['work_column','aperture','chunk_clip','negative_chunk','invalid_rays','winding','budget','phase_progress','baseline','continuous_capture','reset_and_empty','stale_and_budget','map_clip'])
   test(`carrier effects: ${name}`, () => run('java',['-cp',dir,'jp.morrowgear.drone.client.CarrierEffectChecks',name]));
-test('renderer consumes authoritative phase and all successful aims from the unchanged central origin', () => {
+test('renderer consumes authoritative phase and fans mining scan rays from both wing undersides', () => {
   for(const getter of ['beamOrigin','beamPaths','workPhase','phaseTick','phaseDuration','sampleTick','captureSequence','capturedItems','lastCapturePosition'])
     assert.ok(renderer.includes(`entity.${getter}()`), getter);
   assert.match(renderer,/state.phase == CarrierPolicy.WorkPhase.FIRE && entity.beamActive\(\)/);
   assert.match(renderer,/entity.beamPaths\(\).stream\(\).limit\(1\)/);
   assert.match(renderer,/state.column = state.combat \? null/);
   assert.match(renderer,/CarrierEffectGeometry.validRay/);
-  assert.match(renderer,/MorrowgearRenderTypes.energyBeam\(\)/);
+  assert.match(renderer,/wingScanOrigin\(state\.beamOrigin, state\.heading, i\)/);
+  assert.match(renderer,/\(index & 1\) == 0 \? -8\.6 : 8\.6/);
+  assert.match(renderer,/MorrowgearRenderTypes.condensedBeam\(\)/);
+  assert.match(renderer,/MorrowgearRenderTypes.condensedCore\(\)/);
   assert.match(renderer,/MorrowgearRenderTypes.visibleEnergyCore\(\)/);
   assert.doesNotMatch(renderer,/NO_DEPTH|SeeThrough|disableDepth|DepthStencilState/);
   assert.match(renderer,/eye.distanceToSqr\(state.boardingPad\) < 96 \* 96/);
@@ -59,7 +62,8 @@ test('saved navigation can be explicitly resumed and stopped while paused', () =
   assert.match(screen,/保存した目的地への移動を再開/);
   assert.match(screen,/confirmation.queueMove\(destination\(destination\), now\(\)\)/);
   assert.match(screen,/new CarrierUiPolicy.Destination\(anchor.dimension\(\), anchor.x\(\), anchor.y\(\), anchor.z\(\)\)/);
-  assert.match(screen,/case MOVE -> Action.MOVE/);
+  assert.match(screen,/case MOVE -> command\.mode\(\) == CarrierPolicy\.Mode\.MINING\.ordinal\(\) \? Action\.MOVE_MINING/);
+  assert.match(screen,/command\.mode\(\) == CarrierPolicy\.Mode\.COMBAT\.ordinal\(\) \? Action\.MOVE_COMBAT : Action\.MOVE/);
   assert.match(screen,/command.kind\(\) == CarrierUiPolicy.CommandKind.START \? command.generation\(\) : CarrierCommandPayload.NONE/);
   assert.match(screen,/destination == null \? command.chunkX\(\) \* 16 \+ 8 : destination.x\(\), destination == null \? 0 : destination.y\(\)/);
   assert.match(screen,/destination == null \? command.chunkZ\(\) \* 16 \+ 8 : destination.z\(\), CarrierCommandPayload.NONE\)/);

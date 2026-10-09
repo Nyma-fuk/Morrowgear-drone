@@ -19,6 +19,9 @@ class CombatRejoinPolicyTest {
 	void dockLaunchedInterceptorReturnsToItsDock() {
 		assertEquals(DroneMode.DOCK, CombatRejoinPolicy.resumeMode(
 			DroneMode.STANDBY.id(), false, false, true, true));
+		assertEquals(DroneMode.DOCK, CombatRejoinPolicy.resumeMode(
+			DroneMode.STANDBY.id(), false, false, true, false),
+			"a yielded reservation must trigger dynamic reallocation, not standby");
 	}
 
 	@Test

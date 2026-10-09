@@ -22,6 +22,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FaceAttachedHorizontalDirectionalBlock;
+import net.minecraft.world.level.block.entity.BarrelBlockEntity;
 import net.minecraft.world.level.block.entity.CommandBlockEntity;
 import net.minecraft.world.level.block.state.properties.AttachFace;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -33,13 +34,19 @@ final class MorrowgearBaseGenerator {
 	private static final String[] WINGS = { "ALPHA", "BRAVO", "CHARLIE", "DELTA" };
 	private static final DroneRole[] WING_ROLES = {
 		DroneRole.SCOUT, DroneRole.SECURITY, DroneRole.SECURITY, DroneRole.ENGINEER,
-		DroneRole.CARGO, DroneRole.SECURITY, DroneRole.FIELD, DroneRole.SCOUT
+		DroneRole.SCOUT, DroneRole.SECURITY, DroneRole.SECURITY, DroneRole.CARGO,
+		DroneRole.SCOUT, DroneRole.SECURITY, DroneRole.SECURITY, DroneRole.FIELD,
+		DroneRole.SCOUT, DroneRole.SECURITY, DroneRole.SECURITY, DroneRole.SALVAGE
 	};
 	private static final SecurityLoadout[] SECURITY_LOADOUTS = {
 		SecurityLoadout.UNARMED, SecurityLoadout.AUTOCANNON, SecurityLoadout.LASER,
-		SecurityLoadout.UNARMED, SecurityLoadout.UNARMED, SecurityLoadout.MISSILE,
-		SecurityLoadout.UNARMED, SecurityLoadout.UNARMED
+		SecurityLoadout.UNARMED, SecurityLoadout.UNARMED, SecurityLoadout.AUTOCANNON,
+		SecurityLoadout.MISSILE, SecurityLoadout.UNARMED, SecurityLoadout.UNARMED,
+		SecurityLoadout.LASER, SecurityLoadout.MISSILE, SecurityLoadout.UNARMED,
+		SecurityLoadout.UNARMED, SecurityLoadout.AUTOCANNON, SecurityLoadout.LASER,
+		SecurityLoadout.UNARMED
 	};
+	private static final BlockPos SUPPLY_DEPOT_OFFSET = new BlockPos(-7, 1, 0);
 
 	private MorrowgearBaseGenerator() {}
 
@@ -73,8 +80,13 @@ final class MorrowgearBaseGenerator {
 		buildFloorAndWalls(level, center);
 		buildDockBays(level, player, center);
 		buildCommandConsole(level, center);
+		BlockPos supplyDepot = buildSupplyDepot(level, center);
 		spawnDockedFleet(level, player, center);
-		player.sendSystemMessage(Component.literal("[MORROWGEAR BASE] ONLINE / 80x80 / 32 DOCKS / 4 WINGS"));
+		int routes = configureSupplyNetwork(player, center, supplyDepot);
+		MorrowgearDrone.dockTopologyChanged(level, player.getUUID());
+		player.sendSystemMessage(Component.literal("[MORROWGEAR BASE] ONLINE / 80x80 / 16 WALL DOCKS / 4 WINGS"));
+		player.sendSystemMessage(Component.literal("[MORROWGEAR BASE] SUPPLY DEPOT / AUTO LOGISTICS "
+			+ routes + "/16 ROUTES"));
 		player.sendSystemMessage(Component.literal("[MORROWGEAR BASE] 中央コンソール: DEFENSE / CONTACT / ASSAULT / SIEGE"));
 	}
 
@@ -121,28 +133,91 @@ final class MorrowgearBaseGenerator {
 	private static void buildDockBays(ServerLevel level, ServerPlayer player, BlockPos center) {
 		for (DockStation station : MorrowgearBaseLayout.dockStations()) {
 			BlockPos dock = center.offset(station.x(), station.y() + 1, station.z());
-			if (station.y() > 0) buildUpperSupport(level, dock);
-			placeDock(level, player, dock);
+			buildWallHangar(level, dock, station.facing());
+			placeDock(level, player, dock, station.facing());
 		}
 	}
 
-	private static void buildUpperSupport(ServerLevel level, BlockPos dock) {
-		for (int x : new int[] { -2, 2 }) for (int z : new int[] { -2, 2 }) {
-			for (int y = -7; y <= -1; y++) level.setBlock(dock.offset(x, y, z),
-				Blocks.REINFORCED_DEEPSLATE.defaultBlockState(), 2);
+	private static void buildWallHangar(ServerLevel level, BlockPos dock, Direction facing) {
+		Direction rear = facing.getOpposite();
+		Direction right = facing.getClockWise();
+		for (int lateral = -3; lateral <= 3; lateral++) for (int height = 1; height <= 4; height++) {
+			BlockPos back = dock.relative(rear, 4)
+				.offset(right.getStepX() * lateral, height, right.getStepZ() * lateral);
+			level.setBlock(back, height == 3 ? Blocks.IRON_BLOCK.defaultBlockState()
+				: Blocks.REINFORCED_DEEPSLATE.defaultBlockState(), 2);
 		}
-		for (int x = -2; x <= 2; x++) for (int z = -2; z <= 2; z++) {
-			if (Math.abs(x) == 2 || Math.abs(z) == 2) level.setBlock(dock.offset(x, -1, z),
-				Blocks.IRON_BLOCK.defaultBlockState(), 2);
+		for (int lateral : new int[] { -3, 3 }) for (int depth = -3; depth <= 2; depth++) {
+			for (int height = 1; height <= 3; height++) {
+				BlockPos side = dock.relative(facing, depth)
+					.offset(right.getStepX() * lateral, height, right.getStepZ() * lateral);
+				boolean marker = height == 2 && depth == 1;
+				level.setBlock(side, marker ? Blocks.SEA_LANTERN.defaultBlockState()
+					: Blocks.REINFORCED_DEEPSLATE.defaultBlockState(), 2);
+			}
+		}
+		for (int lateral = -3; lateral <= 3; lateral++) {
+			BlockPos header = dock.relative(rear, 3)
+				.offset(right.getStepX() * lateral, 4, right.getStepZ() * lateral);
+			level.setBlock(header, Blocks.IRON_BLOCK.defaultBlockState(), 2);
 		}
 	}
 
-	private static void placeDock(ServerLevel level, ServerPlayer player, BlockPos center) {
+	private static void placeDock(ServerLevel level, ServerPlayer player, BlockPos center, Direction facing) {
 		for (int index = 0; index < MorrowgearDrone.WIDE_DOCK_PARTS.length; index++) {
 			BlockPos part = center.offset(index % 5 - 2, 0, index / 5 - 2);
 			level.setBlockAndUpdate(part, MorrowgearDrone.WIDE_DOCK_PARTS[index].defaultBlockState());
 		}
-		if (level.getBlockEntity(center) instanceof DockBlockEntity dock) dock.initialize(player);
+		if (level.getBlockEntity(center) instanceof DockBlockEntity dock) dock.initialize(player, facing);
+	}
+
+	private static BlockPos buildSupplyDepot(ServerLevel level, BlockPos center) {
+		BlockPos source = center.offset(SUPPLY_DEPOT_OFFSET);
+		for (int x = -2; x <= 2; x++) for (int z = -2; z <= 2; z++)
+			level.setBlock(source.offset(x, -1, z), Blocks.IRON_BLOCK.defaultBlockState(), 2);
+		level.setBlockAndUpdate(source, Blocks.BARREL.defaultBlockState());
+		if (level.getBlockEntity(source) instanceof BarrelBlockEntity barrel) {
+			barrel.setItem(0, new ItemStack(MorrowgearDrone.POWER_CELL, 64));
+			barrel.setItem(1, new ItemStack(Items.IRON_INGOT, 64));
+			barrel.setItem(2, new ItemStack(SupplyItems.AUTOCANNON_MAGAZINE, 64));
+			barrel.setItem(3, new ItemStack(SupplyItems.LASER_CELL, 64));
+			barrel.setItem(4, new ItemStack(SupplyItems.MICRO_MISSILE_PACK, 64));
+			barrel.setChanged();
+		}
+		for (int x : new int[] { -2, 2 }) for (int z : new int[] { -2, 2 })
+			level.setBlock(source.offset(x, 0, z), Blocks.SEA_LANTERN.defaultBlockState(), 2);
+		return source;
+	}
+
+	private static int configureSupplyNetwork(ServerPlayer player, BlockPos center, BlockPos source) {
+		List<DockStation> stations = MorrowgearBaseLayout.dockStations();
+		int configured = 0;
+		for (int index = 0; index < stations.size(); index++) {
+			DockStation station = stations.get(index);
+			BlockPos dock = center.offset(station.x(), station.y() + 1, station.z());
+			try {
+				SupplyNetworkRuntime.configure(player, source, dock, supplyRules(SECURITY_LOADOUTS[index]), true);
+				configured++;
+			} catch (IllegalArgumentException | IllegalStateException ignored) {
+				// The generated base remains usable even when a world already owns the route limit.
+			}
+		}
+		return configured;
+	}
+
+	static List<DroneRole> fleetRoles() { return List.of(WING_ROLES); }
+	static List<SecurityLoadout> fleetLoadouts() { return List.of(SECURITY_LOADOUTS); }
+
+	static List<SupplyNetworkPolicy.Rule> supplyRules(SecurityLoadout loadout) {
+		return List.of(
+			new SupplyNetworkPolicy.Rule(DockSupplyPolicy.SupplyKind.FUEL, 16, 100),
+			new SupplyNetworkPolicy.Rule(DockSupplyPolicy.SupplyKind.REPAIR, 8, 90),
+			new SupplyNetworkPolicy.Rule(DockSupplyPolicy.SupplyKind.GUN,
+				loadout == SecurityLoadout.AUTOCANNON ? 8 : 0, 80),
+			new SupplyNetworkPolicy.Rule(DockSupplyPolicy.SupplyKind.LASER,
+				loadout == SecurityLoadout.LASER ? 8 : 0, 70),
+			new SupplyNetworkPolicy.Rule(DockSupplyPolicy.SupplyKind.MISSILE,
+				loadout == SecurityLoadout.MISSILE ? 4 : 0, 60));
 	}
 
 	private static void buildCommandConsole(ServerLevel level, BlockPos center) {
@@ -179,13 +254,12 @@ final class MorrowgearBaseGenerator {
 			BlockPos dock = center.offset(station.x(), station.y() + 1, station.z());
 			DroneEntity drone = MorrowgearDrone.DRONE.create(level, EntitySpawnReason.TRIGGERED);
 			if (drone == null) continue;
-			int wing = index / 8;
-			int slot = index % 8;
+			int wing = index / 4;
 			drone.setPos(dock.getX() + 0.5, dock.getY() + 0.316, dock.getZ() + 0.5);
 			drone.initializeOwner(player);
 			drone.assignGroup(BASE_GROUP_PREFIX + WINGS[wing]);
-			drone.assignRole(WING_ROLES[slot]);
-			drone.assignSecurityLoadout(SECURITY_LOADOUTS[slot]);
+			drone.assignRole(WING_ROLES[index]);
+			drone.assignSecurityLoadout(SECURITY_LOADOUTS[index]);
 			drone.assignDock(dock);
 			drone.setMode(DroneMode.STANDBY);
 			drone.setDockedForVerification(true);
@@ -193,10 +267,11 @@ final class MorrowgearBaseGenerator {
 			if (level.getBlockEntity(dock) instanceof DockBlockEntity serviceDock) {
 				serviceDock.setItem(DockBlockEntity.SLOT_POWER_INPUT, new ItemStack(MorrowgearDrone.POWER_CELL, 16));
 				serviceDock.setItem(DockBlockEntity.SLOT_REPAIR, new ItemStack(Items.IRON_INGOT, 32));
-				serviceDock.setItem(DockBlockEntity.SUPPLY_BUFFER_START, new ItemStack(SupplyItems.LASER_CELL, 16));
-				if (SECURITY_LOADOUTS[slot] == SecurityLoadout.AUTOCANNON)
+				if (SECURITY_LOADOUTS[index] == SecurityLoadout.AUTOCANNON)
 					serviceDock.setItem(DockBlockEntity.SLOT_AMMUNITION, new ItemStack(SupplyItems.AUTOCANNON_MAGAZINE, 16));
-				else if (SECURITY_LOADOUTS[slot] == SecurityLoadout.MISSILE)
+				else if (SECURITY_LOADOUTS[index] == SecurityLoadout.LASER)
+					serviceDock.setItem(DockBlockEntity.SUPPLY_BUFFER_START, new ItemStack(SupplyItems.LASER_CELL, 16));
+				else if (SECURITY_LOADOUTS[index] == SecurityLoadout.MISSILE)
 					serviceDock.setItem(DockBlockEntity.SLOT_AMMUNITION, new ItemStack(SupplyItems.MICRO_MISSILE_PACK, 16));
 			}
 		}

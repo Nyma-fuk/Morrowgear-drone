@@ -9,9 +9,11 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import jp.morrowgear.drone.DroneEntity;
 import jp.morrowgear.drone.DroneMode;
+import jp.morrowgear.drone.DroneResourceUiPolicy;
 import jp.morrowgear.drone.DroneRole;
 import jp.morrowgear.drone.DockAllocationUiPolicy;
 import jp.morrowgear.drone.DockAllocationUiPolicy.AircraftView;
@@ -28,11 +30,13 @@ import jp.morrowgear.drone.WingMembershipPolicy;
 import jp.morrowgear.drone.block.DockBlockEntity;
 import jp.morrowgear.drone.network.DroneCommandPayload;
 import jp.morrowgear.drone.network.FleetOperationPayload;
+import jp.morrowgear.drone.network.TacticalContactPayload;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.DynamicTexture;
@@ -43,52 +47,62 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.decoration.ArmorStand;
-import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 public final class TacticalDashboard extends AbstractWidget {
+	private static final int NAV_RAIL_WIDTH = ControllerLayoutPolicy.NAV_WIDTH;
 	private static final Identifier TERRAIN_TEXTURE_ID = Identifier.fromNamespaceAndPath("morrowgear_drone", "c2_terrain");
-	private static final int BG = HmiArt.BACKGROUND;
-	private static final int PANEL = HmiArt.PANEL;
-	private static final int PANEL_ALT = HmiArt.RAISED;
-	private static final int PANEL_RAISED = 0xFF303A3F;
-	private static final int BORDER = HmiArt.LINE;
-	private static final int GRID = 0xFF1D3139;
-	private static final int TEXT = HmiArt.TEXT;
-	private static final int MUTED = HmiArt.MUTED;
-	private static final int CYAN = HmiArt.CYAN;
+	private static final int BG = 0xFF121514;
+	private static final int PANEL = 0xFF1A1E1C;
+	private static final int PANEL_ALT = 0xFF242A27;
+	private static final int PANEL_RAISED = 0xFF303A32;
+	private static final int BORDER = 0xFF343C36;
+	private static final int GRID = 0xFF29332C;
+	private static final int TEXT = 0xFFE1E7E0;
+	private static final int MUTED = 0xFF99A59D;
+	private static final int CYAN = 0xFF7CDEC8;
 	private static final int BLUE = 0xFF5594FF;
-	private static final int GREEN = HmiArt.GREEN;
-	private static final int AMBER = HmiArt.AMBER;
-	private static final int RED = HmiArt.RED;
-	private static final String[] PAGES = {"作戦地図", "Wing", "任務", "Dock・補給", "回収", "バイザー", "機器", "設定"};
-	private static final String[] PAGE_ICONS = {"map", "layers", "list-checks", "battery-charging", "wrench", "radar", "boxes", "sliders-horizontal"};
-	private static final String[] ITEM_IDS = {"controller", "tactical_visor", "recovery_tool", "field_drone_unit", "dock_item", "solar_service_station",
+	private static final int GREEN = 0xFFA5D391;
+	private static final int AMBER = 0xFFE7BD79;
+	private static final int RED = 0xFFF28D83;
+	private static final String[] PAGES = {"作戦地図", "Wing編成", "任務", "Dock・補給", "機体回収", "バイザー", "機器", "設定", "補給網", "母艦", "報告履歴"};
+	private static final String[] PAGE_ICONS = {"map", "layers", "list-checks", "battery-charging", "wrench", "radar", "boxes", "sliders-horizontal", "boxes", "container", "clock"};
+	private static final int[] NAV_ORDER = {0, 1, 2, 3, 8, 4, 9, 5, 6, 10, 7};
+	private final int[] pageOffsets = new int[PAGES.length];
+	private static final String[] ITEM_IDS = {"controller", "tactical_visor", "recovery_tool", "operation_marker", "field_drone_unit", "dock_item", "solar_service_station",
 		"scout_module", "cargo_module", "engineer_module", "security_module", "salvage_module", "power_cell", "standard_battery_pack",
 		"reinforced_battery_pack", "high_density_battery_pack", "raw_morrow_composite", "morrow_alloy", "lightweight_frame",
-		"basic_control_board", "flight_actuator", "autocannon_module", "laser_module", "missile_module"};
+		"basic_control_board", "flight_actuator", "autocannon_module", "laser_module", "missile_module",
+		"autocannon_magazine", "laser_cell", "micro_missile_pack"};
+	private final ControllerPreferences preferences = ControllerPreferences.current();
 	private int page;
 	private int pageScroll;
 	private int roleFilter = -1;
 	private int sortMode;
+	private int inspectedEquipment = -1;
+	private int hoverX, hoverY;
 	private final VisorClientConfig visorConfig = VisorClientConfig.current();
 	private static final String[] ACTIONS = { "follow", "standby", "return", "dock", "orbit", "decommission" };
 	private static final DroneRole[] MODULE_ROLES = { DroneRole.FIELD, DroneRole.SCOUT, DroneRole.CARGO, DroneRole.ENGINEER, DroneRole.SECURITY, DroneRole.SALVAGE };
 	private static final SecurityLoadout[] WEAPON_LOADOUTS = {
 		SecurityLoadout.AUTOCANNON, SecurityLoadout.LASER, SecurityLoadout.MISSILE
 	};
-	private static final String[] WEAPON_LABELS = { "GUN", "LZR", "MSL" };
+	private static final String[] WEAPON_LABELS = { "機関砲", "レーザー", "ミサイル" };
 	private static final FieldOperationType[] WORK_TYPES = {
 		FieldOperationType.ORE, FieldOperationType.EXCAVATE, FieldOperationType.FORESTRY
 	};
-	private static final String[] WORK_LABELS = { "ORE OPS", "EXCAVATE", "FORESTRY" };
+	private static final String[] WORK_LABELS = { "鉱脈採掘", "範囲掘削", "伐採" };
 
 	private final Minecraft client = Minecraft.getInstance();
-	private final Set<Integer> selected = new LinkedHashSet<>();
-	private int selectionAnchorId = -1;
+	private final net.minecraft.client.gui.components.EditBox search = new net.minecraft.client.gui.components.EditBox(client.font, 0, 0, 100, 20, Component.literal("機体名・識別番号・Wingを検索"));
+	private int inspectorScroll;
+	private double mapCenterX = Double.NaN, mapCenterZ = Double.NaN;
+	private boolean panning;
+	private int transmitted, suppressed;
+	private String transmitProblem = "";
+	private final ControllerSelection selected = new ControllerSelection();
+	private java.util.UUID selectionAnchor;
 	private SelectionMode selectionMode = SelectionMode.UNIT;
 	private boolean wingMapMode;
 	private int unitScroll;
@@ -100,6 +114,23 @@ public final class TacticalDashboard extends AbstractWidget {
 	private boolean autoOperations;
 	private boolean armedGuard;
 	private boolean armedRoute;
+	private boolean armedWaypoint;
+	private boolean armedAttack;
+	private boolean forceOverride;
+	private int routePointIndex = -1;
+	private int routeStartIndex = -1;
+	private final int[] workRadii = {32, 8, 20};
+	private int guardRadius = 24;
+	private boolean relocateRoutePoint;
+	private long inspectedSupplyDock = Long.MIN_VALUE;
+	private BlockPos pendingWorldPoint;
+	private BlockPos pendingTaskPoint;
+	private Set<java.util.UUID> draftTargets = Set.of();
+	private Map<java.util.UUID, String> draftMissions = Map.of();
+	private final ControllerCommandWatch commandWatch = new ControllerCommandWatch();
+	private long menuRequestAt;
+	private double pendingMapX = Double.NaN;
+	private double pendingMapY = Double.NaN;
 	private final List<BlockPos> routeDraft = new ArrayList<>();
 	private int draggedEntity = -1;
 	private int dragSourceX;
@@ -118,12 +149,13 @@ public final class TacticalDashboard extends AbstractWidget {
 	private DynamicTexture terrainTexture;
 	private int terrainTextureWidth;
 	private int terrainTextureHeight;
-	private Object entityCacheLevel;
-	private long entityRefreshAt;
-	private List<LivingEntity> cachedMapEntities = List.of();
 	private Object dockCacheLevel;
 	private long dockRefreshAt;
 	private List<DockInfo> cachedDocks = List.of();
+	private Object foreignCacheLevel;
+	private long foreignRefreshAt;
+	private List<DroneEntity> cachedForeignDrones = List.of();
+	private List<ForeignDock> cachedForeignDocks = List.of();
 	private Object containerCacheLevel;
 	private long containerRefreshAt;
 	private List<ContainerInfo> cachedContainers = List.of();
@@ -134,6 +166,58 @@ public final class TacticalDashboard extends AbstractWidget {
 
 	public TacticalDashboard(int x, int y, int width, int height) {
 		super(x, y, width, height, Component.literal("Morrowgear integrated tactical command dashboard"));
+		search.setHint(Component.literal("機体名・識別番号・Wing"));
+		search.setMaxLength(80);
+		search.setResponder(value -> unitScroll = 0);
+	}
+
+	boolean focusReport(java.util.UUID identity, String dimension) {
+		if (client.level == null || !client.level.dimension().identifier().toString().equals(ControllerDisplayText.dimensionId(dimension))) return false;
+		DroneEntity drone = drones().stream().filter(d -> d.getUUID().equals(identity)).findFirst().orElse(null);
+		if (drone == null) return false;
+		selected.clear();
+		selected.add(drone.getId());
+		selectionMode = SelectionMode.UNIT;
+		mapCenterX = drone.getX(); mapCenterZ = drone.getZ();
+		wingMapMode = false;
+		page = 0;
+		return true;
+	}
+
+	String runAutomationSmoke() {
+		int original = page;
+		var originalScreen = client.gui.screen();
+		try {
+			for (int candidate = 0; candidate < ControllerLayoutPolicy.NAV_COUNT; candidate++) {
+				String failure = selectAutomationPage(candidate);
+				if (!failure.isEmpty()) return failure;
+				if (candidate == 10) client.setScreenAndShow(originalScreen);
+			}
+			return "";
+		} catch (RuntimeException failure) {
+			return "controller page initialization failed: " + failure;
+		} finally {
+			page = original;
+			if (client.gui.screen() != originalScreen) client.setScreenAndShow(originalScreen);
+		}
+	}
+
+	String selectAutomationPage(int candidate) {
+		if (candidate < 0 || candidate >= ControllerLayoutPolicy.NAV_COUNT) return "invalid page " + candidate;
+		Rect requested = pageTab(candidate);
+		boolean handled = handlePageClick(layout(), drones(), docks(drones()),
+			requested.x + requested.w / 2.0, requested.y + requested.h / 2.0, false);
+		if (!handled) return "navigation action was not handled on page " + candidate;
+		if (candidate == 10) return client.gui.screen() instanceof OperationHistoryScreen
+			? "" : "history screen did not open through its normal navigation action";
+		if (page != candidate) return "navigation action selected the wrong page " + candidate;
+		Layout current = layout();
+		Rect tab = pageTab(candidate);
+		if (tab.w <= 0 || tab.h <= 0 || current.bottomTop <= current.header)
+			return "invalid controller layout on page " + candidate;
+		if (candidate < 5 && (current.map.w <= 0 || current.leftWidth <= NAV_RAIL_WIDTH || current.right.w <= 0))
+			return "operational workspace collapsed on page " + candidate;
+		return "";
 	}
 
 	@Override
@@ -141,25 +225,23 @@ public final class TacticalDashboard extends AbstractWidget {
 		float scale = dashboardScale();
 		int virtualMouseX = (int) (mouseX / scale);
 		int virtualMouseY = (int) (mouseY / scale);
+		hoverX = virtualMouseX; hoverY = virtualMouseY;
 		g.pose().pushMatrix();
 		g.pose().scale(scale, scale);
 		List<DroneEntity> drones = drones();
-		List<LivingEntity> mapEntities = mapEntities();
+		if (client.player != null && Double.isNaN(mapCenterX)) recenterMap(false);
+		List<TacticalContactPayload.Row> mapEntities = mapEntities();
 		List<DockInfo> docks = docks(drones);
-		if (selectionMode == SelectionMode.ALL) {
-			selected.clear();
-			drones.forEach(drone -> selected.add(drone.getId()));
-		} else {
-			selected.removeIf(id -> drones.stream().noneMatch(drone -> drone.getId() == id));
-		}
 		if (!selected.equals(confirmStoreSelection)) confirmStoreUntil = 0;
 		Layout l = layout();
 		TacticalUiPolicy.CommandAvailability availability = availability(drones);
 
 		g.fill(0, 0, virtualWidth(), virtualHeight(), BG);
 		drawHeader(g, l, drones, mapEntities, availability);
+		drawNavigationRail(g, l);
 		if (page >= 5) {
 			drawUtilityPage(g, l, drones);
+			drawBottomPanel(g, l, drones);
 			drawInteractionStatus(g, l, availability);
 			g.pose().popMatrix();
 			return;
@@ -185,34 +267,36 @@ public final class TacticalDashboard extends AbstractWidget {
 	}
 
 	private void drawHeader(GuiGraphicsExtractor g, Layout l, List<DroneEntity> drones,
-		List<LivingEntity> mapEntities, TacticalUiPolicy.CommandAvailability availability) {
+		List<TacticalContactPayload.Row> mapEntities, TacticalUiPolicy.CommandAvailability availability) {
 		g.fill(0, 0, virtualWidth(), l.header, PANEL);
-		g.fill(0, 0, 5, l.header, CYAN);
 		g.horizontalLine(0, virtualWidth(), l.header - 1, BORDER);
-		g.text(client.font, "MORROWGEAR", 15, 10, TEXT, true);
-		g.text(client.font, "COMMAND NETWORK", 15, 24, MUTED);
-		g.text(client.font, "C2", 109, 10, CYAN, true);
-		g.verticalLine(137, 8, 35, BORDER);
-		drawHeaderMetric(g, 150, "ONLINE", Integer.toString(drones.size()), GREEN);
-		drawHeaderMetric(g, 228, "SELECTED", Integer.toString(availability.selected()), CYAN);
-		int threatScore = drones.stream().mapToInt(DroneEntity::threatScore).max().orElse(0);
-		long hostileCount = mapEntities.stream().filter(entity -> entity instanceof Enemy).count();
-		int threatColor = threatScore >= 28 ? RED : threatScore >= 14 ? AMBER : threatScore >= 6 ? 0xFFFFD866 : GREEN;
-		drawHeaderMetric(g, 318, "THREAT", threatLabel(threatScore) + " " + threatScore, threatColor);
-		drawHeaderMetric(g, 430, "HOSTILES", Long.toString(hostileCount), hostileCount > 0 ? AMBER : MUTED);
-		String context = armedGuard ? "警戒地点を地図でダブルクリック"
-			: armedWork != FieldOperationType.NONE ? WORK_LABELS[workIndex(armedWork)] + " の中心を地図でダブルクリック"
-			: "OVERWORLD-01 / 指揮リンク正常";
-		g.text(client.font, fitText(context, Math.max(100, virtualWidth() - 650)), 530, 17,
-			armedGuard || armedWork != FieldOperationType.NONE ? AMBER : MUTED);
-		String clock = LocalTime.now().withNano(0).toString();
-		g.text(client.font, clock, virtualWidth() - client.font.width(clock) - 14, 17, TEXT, true);
+		g.fill(10, 10, 13, 29, CYAN);
+		g.text(client.font, "MORROWGEAR", 21, 14, TEXT);
+		g.text(client.font, "受信 " + drones.size() + "機   選択 " + selected.size() + "機   敵性 "
+			+ mapEntities.size(), NAV_RAIL_WIDTH + 14, 14, CYAN);
+		String dimension = client.level == null ? "未接続" : client.level.dimension().identifier().toString();
+		g.text(client.font, fitText(ControllerDisplayText.dimensionName(dimension) + " / 周辺256m", 230), virtualWidth() - 240, 14, MUTED);
+		Map<java.util.UUID, ControllerCommandWatch.Observation> received = new LinkedHashMap<>();
+		drones.forEach(d -> received.put(d.getUUID(), commandObservation(d)));
+		var counts = commandWatch.observe(received, System.currentTimeMillis());
+		String status = menuRequestAt > 0 ? System.currentTimeMillis() - menuRequestAt < 5000
+			? "操作要求: サーバー応答待ち" : "操作要求: 結果未確認 / 自動再送なし"
+			: ControllerCommandResults.summary() + " / 応答待ち " + counts.waiting();
+		g.text(client.font, fitText(status, virtualWidth() - NAV_RAIL_WIDTH - 24), NAV_RAIL_WIDTH + 14, 28, MUTED);
+	}
+
+	private void drawNavigationRail(GuiGraphicsExtractor g, Layout l) {
+		g.fill(0, l.header, NAV_RAIL_WIDTH, virtualHeight(), PANEL);
+		g.verticalLine(NAV_RAIL_WIDTH - 1, l.header, virtualHeight(), BORDER);
 		for (int index = 0; index < PAGES.length; index++) {
 			Rect tab = pageTab(index);
-			if (page == index) { g.fill(tab.x, tab.y, tab.right(), tab.bottom(), PANEL_ALT);
-				g.fill(tab.x, tab.bottom() - 2, tab.right(), tab.bottom(), CYAN); }
-			HmiArt.icon(g, PAGE_ICONS[index], tab.x + 8, tab.y + 4, 15);
-			g.text(client.font, PAGES[index], tab.x + 29, tab.y + 8, page == index ? CYAN : MUTED);
+			boolean active = page == index;
+			g.fill(tab.x, tab.y, tab.right(), tab.bottom(), active ? PANEL_RAISED : PANEL);
+			if (active) g.fill(tab.x, tab.y, tab.x + 3, tab.bottom(), CYAN);
+			g.outline(tab.x, tab.y, tab.w, tab.h, active ? CYAN : BORDER);
+			HmiArt.icon(g, PAGE_ICONS[index], tab.x + 7, tab.y + 7, 15);
+			g.text(client.font, fitText(PAGES[index], tab.w - 29),
+				tab.x + 26, tab.y + 10, active ? TEXT : MUTED);
 		}
 	}
 
@@ -223,20 +307,22 @@ public final class TacticalDashboard extends AbstractWidget {
 
 	private void drawLeftPanel(GuiGraphicsExtractor g, Layout l, List<DroneEntity> drones, List<DockInfo> docks, int mouseX, int mouseY) {
 		drones = visibleRoster(drones);
-		g.fill(0, l.header, l.leftWidth, l.bottomTop, PANEL);
+		g.fill(NAV_RAIL_WIDTH, l.header, l.leftWidth, l.bottomTop, PANEL);
 		g.verticalLine(l.leftWidth - 1, l.header, l.bottomTop, BORDER);
-		g.text(client.font, "FLEET", 10, l.header + 9, TEXT, true);
+		g.text(client.font, "機体一覧", NAV_RAIL_WIDTH + 10, l.header + 9, TEXT, true);
 		for (int i = 0; i < 2; i++) {
 			Rect filter = rosterFilterRect(l, i);
 			g.fill(filter.x, filter.y, filter.right(), filter.bottom(), PANEL_ALT);
-			g.text(client.font, i == 0 ? roleFilter < 0 ? "全ロール" : DroneRole.values()[roleFilter].displayName()
-				: new String[] {"ID順", "ロール順", "電力順", "任務順"}[sortMode], filter.x + 6, filter.y + 5, MUTED);
+			g.text(client.font, i == 0 ? roleFilter < 0 ? "全役割" : roleLabel(DroneRole.values()[roleFilter])
+				: new String[] {"ID順", "役割順", "電力順", "任務順"}[sortMode], filter.x + 6, filter.y + 5, MUTED);
 		}
-		g.text(client.font, "戦力・編成", 52, l.header + 9, MUTED);
-		String roster = drones.size() + " UNITS";
+		String roster = drones.size() + "機";
 		g.text(client.font, roster, l.leftWidth - client.font.width(roster) - 10, l.header + 9, CYAN);
+		Rect searchBounds = searchRect(l);
+		search.setX(searchBounds.x); search.setY(searchBounds.y); search.setWidth(searchBounds.w); search.setHeight(searchBounds.h);
+		search.extractRenderState(g, mouseX, mouseY, 0);
 
-		String[] tabs = { "UNIT", "WING", "ALL" };
+		String[] tabs = { "個体", "Wing", "表示", "全受信", "解除" };
 		for (int i = 0; i < tabs.length; i++) {
 			Rect tab = tabRect(l, i);
 			boolean active = selectionMode.ordinal() == i;
@@ -255,13 +341,13 @@ public final class TacticalDashboard extends AbstractWidget {
 				OperationalWing wing = wings.get(unitScroll + visible);
 				boolean active = wing.members.stream().allMatch(drone -> selected.contains(drone.getId()));
 				boolean hover = row.contains(mouseX, mouseY);
-				g.fill(row.x, row.y, row.right(), row.bottom(), active ? 0xFF123A40 : hover ? PANEL_ALT : PANEL);
+				g.fill(row.x, row.y, row.right(), row.bottom(), active ? PANEL_RAISED : hover ? PANEL_ALT : PANEL);
 				g.outline(row.x, row.y, row.w, row.h, active ? CYAN : BORDER);
 				int stateColor = wing.averageBattery < 35 ? AMBER : GREEN;
 				drawSelectionToggle(g, row, active, stateColor);
 				g.text(client.font, wing.label, row.x + 18, row.y + 6, TEXT, true);
-				String detail = wing.members.size() + "機 / L " + shortId(wing.leader.unitId())
-					+ " / REC " + wing.recoveryCount;
+				String coordinate = (int)Math.round(wing.leader.getX()) + "," + (int)Math.round(wing.leader.getZ());
+				String detail = wing.members.size() + "機 / " + wing.missionLabel + " / " + coordinate;
 				g.text(client.font, fitText(detail, row.w - 86), row.x + 18, row.y + 18, MUTED);
 				String battery = wing.averageBattery + "%";
 				g.text(client.font, battery, row.right() - client.font.width(battery) - 7, row.y + 10, stateColor, true);
@@ -275,167 +361,172 @@ public final class TacticalDashboard extends AbstractWidget {
 			int stateColor = drone.batteryPercent() < 35 ? AMBER : GREEN;
 			drawSelectionToggle(g, row, active, stateColor);
 			HmiArt.role(g, drone.role(), row.x + 16, row.y + 3, 26);
-			g.text(client.font, shortId(drone.unitId()), row.x + 44, row.y + 6, TEXT, true);
-			String assignment = selectionMode == SelectionMode.GROUP
-				? (drone.groupId().startsWith("WING-") ? drone.groupId() : "UNIT POOL")
-				: "W" + (drone.wingIndex() + 1) + " / " + aircraftDockLabel(drone);
-			g.text(client.font, fitText(drone.role().displayName() + " / " + assignment, row.w - 112), row.x + 44, row.y + 18, MUTED);
+			g.text(client.font, fitText(ControllerDisplayText.unitName(drone.getName().getString(), drone.unitId()), row.w - 52), row.x + 44, row.y + 3, TEXT, true);
+			g.text(client.font, roleLabel(drone.role()), row.x + 44, row.y + 14, MUTED);
+			g.text(client.font, fitText(rosterStatusLabel(drone), row.w - 52), row.x + 44, row.y + 25, CYAN);
 			String battery = drone.batteryPercent() + "%";
-			g.text(client.font, battery, row.right() - client.font.width(battery) - 7, row.y + 10, stateColor, true);
+			g.text(client.font, battery, row.right() - client.font.width(battery) - 7, row.y + 14, stateColor, true);
 		}
 		drawScrollCounter(g, l.leftWidth - 145, l.dockHeaderY - 10, unitScroll, rowCount, unitCapacity);
 		if (rowCount > unitCapacity) drawPageButtons(g, unitFirstRect(l), unitUpRect(l), unitDownRect(l), unitLastRect(l));
 
-		g.horizontalLine(7, l.leftWidth - 7, l.dockHeaderY - 5, BORDER);
-		g.text(client.font, "DOCK NETWORK", 9, l.dockHeaderY, TEXT, true);
-		String dockCount = docks.size() + " ONLINE";
-		g.text(client.font, dockCount, l.leftWidth - client.font.width(dockCount) - 9, l.dockHeaderY, GREEN);
-		int dockCapacity = dockCapacity(l);
-		dockScroll = clampScroll(dockScroll, docks.size(), dockCapacity);
-		for (int visible = 0; visible < dockCapacity && dockScroll + visible < docks.size(); visible++) {
-			DockInfo dock = docks.get(dockScroll + visible);
-			Rect row = dockRect(l, visible);
-			boolean hover = row.contains(mouseX, mouseY);
-			g.fill(row.x, row.y, row.right(), row.bottom(), hover ? 0xFF1B343A : PANEL_ALT);
-			g.outline(row.x, row.y, row.w, row.h, hover ? CYAN : BORDER);
-			g.text(client.font, dock.id, row.x + 7, row.y + 7, TEXT);
-			String state = DockAllocationUiPolicy.dockStateLabel(dock.allocation) + "  "
-				+ DockAllocationUiPolicy.queueLabel(dock.allocation) + "  "
-				+ DockAllocationUiPolicy.holdingLabel(dock.allocation);
-			int stateColor = allocationColor(dock.allocation.state());
-			g.text(client.font, fitText(state, row.w - client.font.width(dock.id) - 22),
-				row.right() - client.font.width(fitText(state, row.w - client.font.width(dock.id) - 22)) - 7,
-				row.y + 7, stateColor);
-		}
-		drawScrollCounter(g, l.leftWidth - 145, l.bottomTop - 11, dockScroll, docks.size(), dockCapacity);
-		if (docks.size() > dockCapacity) drawPageButtons(g, dockFirstRect(l), dockUpRect(l), dockDownRect(l), dockLastRect(l));
 	}
 
-	private void drawMap(GuiGraphicsExtractor g, Layout l, List<DroneEntity> drones, List<LivingEntity> mapEntities, int mouseX, int mouseY) {
+	private void drawMap(GuiGraphicsExtractor g, Layout l, List<DroneEntity> drones,
+		List<TacticalContactPayload.Row> entities, int mouseX, int mouseY) {
 		Rect map = l.map;
-		g.fill(map.x, map.y, map.right(), map.bottom(), 0xFF091317);
+		g.enableScissor(map.x, map.y, map.right(), map.bottom());
+		g.fill(map.x, map.y, map.right(), map.bottom(), BG);
 		drawTerrain(g, map);
 		drawSecurityZones(g, map, drones);
-		for (int x = map.x; x <= map.right(); x += 16) g.verticalLine(x, map.y, map.bottom(), GRID);
-		for (int y = map.y; y <= map.bottom(); y += 16) g.horizontalLine(map.x, map.right(), y, GRID);
-		g.fill(map.x, map.y, map.right(), map.y + 28, 0xE6111920);
-		g.horizontalLine(map.x, map.right(), map.y + 28, BORDER);
-		g.text(client.font, "TACTICAL MAP", map.x + 10, map.y + 9, TEXT, true);
-		g.text(client.font, "OVERWORLD-01", map.x + 92, map.y + 9, MUTED);
-		String zoom = String.format("ZOOM %.1fx", mapZoom / 5.0);
-		g.text(client.font, zoom, map.right() - client.font.width(zoom) - 10, map.y + 9, CYAN);
 		drawPatrolRoutes(g, map, drones);
+		for (ForeignDock dock : foreignDocks()) {
+			BlockPos pos = BlockPos.of(dock.pos());
+			MapPoint point = mapPoint(map, pos.getX(), pos.getZ());
+			if (point == null) continue;
+			g.outline(point.x - 3, point.y - 3, 7, 7, MUTED);
+			g.text(client.font, fitText(dock.owner() + " / DOCK", 92),
+				Math.min(point.x + 7, map.right() - 94), point.y - 4, MUTED);
+		}
+		for (TacticalContactPayload.Row entity : entities) {
+			MapPoint point = mapPoint(map, entity.x(), entity.z());
+			if (point != null) drawMobMarker(g, point.x, point.y, RED, true);
+		}
+		for (DroneEntity drone : drones) {
+			MapPoint point = mapPoint(map, drone.getX(), drone.getZ());
+			if (point == null) continue;
+			boolean active = selected.contains(drone.getId());
+			drawDiamond(g, point.x, point.y, active ? CYAN : GREEN);
+			if (active) {
+				int radius = preferences.markerRadius() + 3;
+				g.outline(point.x - radius, point.y - radius, radius * 2 + 1, radius * 2 + 1, CYAN);
+				g.text(client.font, fitText(drone.getName().getString(), 105), Math.min(point.x + 10, map.right() - 112), point.y - 5, TEXT);
+				if (drone.hasWaypoint()) {
+					MapPoint target = mapPoint(map, drone.waypointPos().getX(), drone.waypointPos().getZ());
+					if (target != null) drawLine(g, point.x, point.y, target.x, target.y, CYAN);
+				}
+			}
+		}
+		for (DroneEntity drone : foreignDrones()) {
+			MapPoint point = mapPoint(map, drone.getX(), drone.getZ());
+			if (point == null) continue;
+			g.outline(point.x - 3, point.y - 3, 7, 7, MUTED);
+			String owner = drone.ownerName().isBlank() ? "他ユーザー" : drone.ownerName();
+			g.text(client.font, fitText(owner + " / " + roleLabel(drone.role()), 108),
+				Math.min(point.x + 7, map.right() - 110), point.y - 4, MUTED);
+		}
+		if (selectionMode == SelectionMode.GROUP) drawOperationalWingMarkers(g, map, drones);
+		if (client.player != null) {
+			MapPoint player = mapPoint(map, client.player.getX(), client.player.getZ());
+			if (player != null) { int radius = preferences.markerRadius() + 1; g.outline(player.x - radius, player.y - radius, radius * 2 + 1, radius * 2 + 1, TEXT); }
+		}
+		g.fill(map.x, map.y, map.right(), map.y + 29, PANEL);
+		g.text(client.font, "作戦地図", map.x + 10, map.y + 10, TEXT);
+		String[] names = {"自分", "選択", "-", "+"};
+		for (int i = 0; i < 4; i++) drawCargoButton(g, mapToolRect(map, i), names[i], false, CYAN, i != 1 || !selected.isEmpty());
 		drawRouteControls(g, map, mouseX, mouseY);
-		int cx = map.x + map.w / 2;
-		int cy = map.y + map.h / 2;
-		g.outline(cx - 70, cy - 70, 140, 140, 0xFF45636B);
-		g.text(client.font, "OPERATOR ORIGIN", cx - 70, cy - 82, MUTED);
-		g.fill(cx - 4, cy - 4, cx + 4, cy + 4, PANEL_ALT);
-		g.outline(cx - 4, cy - 4, 8, 8, MUTED);
+		drawPendingWaypoint(g, map);
+		drawPendingTask(g, map);
+		g.disableScissor();
+	}
 
+	private Rect mapToolRect(Rect map, int index) { return new Rect(map.right() - 130 + index * 31, map.y + 4, 28, 21); }
+
+	private void recenterMap(boolean selection) {
 		if (client.player == null) return;
-		Set<String> fieldMarkers = new LinkedHashSet<>();
+		var units = selection ? drones().stream().filter(d -> selected.contains(d.getId())).toList() : List.<DroneEntity>of();
+		mapCenterX = units.isEmpty() ? client.player.getX() : units.stream().mapToDouble(DroneEntity::getX).average().orElseThrow();
+		mapCenterZ = units.isEmpty() ? client.player.getZ() : units.stream().mapToDouble(DroneEntity::getZ).average().orElseThrow();
+	}
+
+	private boolean selectUnitAt(Rect map, List<DroneEntity> drones, double x, double y, boolean additive) {
+		DroneEntity nearest = null;
+		double distance = preferences.markerHitRadius();
 		for (DroneEntity drone : drones) {
-			boolean visibleOperation = selected.contains(drone.getId())
-				|| drone.fieldOrderId().startsWith("AUTO-");
-			if (!drone.hasFieldOperation() || !visibleOperation
-				|| !fieldMarkers.add(drone.fieldOrderId())) continue;
-			MapPoint point = mapPoint(map, drone.fieldAnchor().getX() + 0.5, drone.fieldAnchor().getZ() + 0.5);
+			MapPoint point = mapPoint(map, drone.getX(), drone.getZ());
 			if (point == null) continue;
-			int radius = Math.max(4, (int)Math.round(drone.fieldRadius() * mapZoom));
-			drawOrbitRing(g, map, point.x, point.y, radius, GREEN);
-			if (selected.size() <= 8) {
-				String label = drone.fieldOperationType().label() + " / " + TacticalUiPolicy.radiusLabel(drone.fieldRadius()) + " / "
-					+ drone.fieldProgress() + "% F" + drone.fieldFound();
-				int labelWidth = client.font.width(label) + 10;
-				int labelX = Math.max(map.x + 4, Math.min(point.x + 7, map.right() - labelWidth - 4));
-				int labelY = Math.max(map.y + 33, point.y - 23);
-				g.fill(labelX, labelY, labelX + labelWidth, labelY + 14, 0xE6081014);
-				g.text(client.font, label, labelX + 5, labelY + 3, GREEN);
-			}
+			double candidate = Math.hypot(point.x - x, point.y - y);
+			if (candidate < distance) { distance = candidate; nearest = drone; }
 		}
-		Set<String> highlightedWings = new LinkedHashSet<>();
-		for (DroneEntity drone : drones) {
-			if (!selected.contains(drone.getId()) || drone.mode() != DroneMode.WAYPOINT || !drone.hasWaypoint()) continue;
-			String wingKey = drone.missionId() + "#" + drone.wingIndex();
-			if (!highlightedWings.add(wingKey)) continue;
-			MapPoint center = mapPoint(map, drone.waypointPos().getX() + 0.5, drone.waypointPos().getZ() + 0.5);
-			if (center == null) continue;
-			int radius = Math.max(3, (int) Math.round(drone.orbitLayerRadius() * mapZoom));
-			drawOrbitRing(g, map, center.x, center.y, radius, CYAN);
-			if (selected.size() <= 8) {
-				String layer = "W" + (drone.wingIndex() + 1) + " ALT +" + (int) Math.round(drone.orbitLayerHeight());
-				g.fill(center.x + radius + 4, center.y - 7, center.x + radius + 10 + client.font.width(layer), center.y + 7, 0xD9081014);
-				g.text(client.font, layer, center.x + radius + 7, center.y - 4, CYAN);
-			}
-		}
-		for (LivingEntity entity : mapEntities) {
-			MapPoint point = mapPoint(map, entity.getX(), entity.getZ());
+		if (nearest == null) return false;
+		if (!additive) selected.clear();
+		if (additive && selected.contains(nearest.getId())) selected.remove(nearest.getId()); else selected.add(nearest.getId());
+		selectionMode = SelectionMode.UNIT;
+		wingMapMode = false;
+		return true;
+	}
+
+	private void drawOperationalWingMarkers(GuiGraphicsExtractor g, Rect map, List<DroneEntity> drones) {
+		for (OperationalWing wing : operationalWings(drones)) {
+			MapPoint point = mapPoint(map, wing.leader.getX(), wing.leader.getZ());
 			if (point == null) continue;
-			int color = entity instanceof Enemy ? RED : entity instanceof Animal ? GREEN : AMBER;
-			drawMobMarker(g, point.x, point.y, color, entity instanceof Enemy);
-			if (Math.abs(mouseX - point.x) <= 7 && Math.abs(mouseY - point.y) <= 7) {
-				String label = entity.getName().getString();
-				g.fill(point.x + 8, point.y - 7, point.x + 14 + client.font.width(label), point.y + 7, 0xE6081014);
-				g.text(client.font, label, point.x + 11, point.y - 4, TEXT);
-			}
+			boolean active = wing.members.stream().allMatch(member -> selected.contains(member.getId()));
+			int color = active ? AMBER : CYAN;
+			String title = fitText(wing.label + " / " + wing.members.size() + "U", 94);
+			String mission = fitText(wing.missionLabel, 94);
+			int width = Math.max(82, Math.max(client.font.width(title), client.font.width(mission)) + 22);
+			int x = Math.max(map.x + 4, Math.min(point.x + 8, map.right() - width - 4));
+			int y = Math.max(map.y + 62, Math.min(point.y - 13, map.bottom() - 31));
+			if (!active) continue;
+			// Selected Wing labels remain unframed so dense formations do not cover the terrain.
+			drawDiamond(g, x + 10, y + 10, color);
+			g.text(client.font, title, x + 20, y + 5, TEXT, true);
+			g.text(client.font, mission, x + 20, y + 17, MUTED);
 		}
-		boolean detailedRoutes = selected.size() <= 8;
-		for (DroneEntity drone : drones) {
-			int dx = (int) Math.max(-map.w / 2 + 18, Math.min(map.w / 2 - 92, (drone.getX() - client.player.getX()) * mapZoom));
-			int dz = (int) Math.max(-map.h / 2 + 18, Math.min(map.h / 2 - 18, (drone.getZ() - client.player.getZ()) * mapZoom));
-			int px = cx + dx;
-			int py = cy + dz;
-			boolean wingLeader = !drone.cohortLeaderId().isBlank()
-				&& drone.unitId().equals(drone.cohortLeaderId());
-			boolean routeVisible = wingLeader || detailedRoutes && selected.contains(drone.getId());
-			if (routeVisible) drawLine(g, cx, cy, px, py, drone.batteryPercent() < 35 ? AMBER : CYAN);
-			if (drone.missionStage() == DroneEntity.MISSION_CONVERGING && drone.hasRendezvous()) {
-				MapPoint join = mapPoint(map, drone.rendezvousPos().getX(), drone.rendezvousPos().getZ());
-				if (join != null) {
-					drawLine(g, px, py, join.x, join.y, AMBER);
-					g.outline(join.x - 3, join.y - 3, 6, 6, AMBER);
-				}
-			}
-			if (routeVisible && drone.mode() == DroneMode.WAYPOINT && drone.hasWaypoint()) {
-				LivingEntity tracked = drone.hasTrackingTarget()
-					? mapEntities.stream().filter(entity -> entity.getUUID().equals(drone.trackingTargetId())).findFirst().orElse(null)
-					: null;
-				double targetX = tracked == null ? drone.waypointPos().getX() : tracked.getX();
-				double targetZ = tracked == null ? drone.waypointPos().getZ() : tracked.getZ();
-				int wx = cx + (int) ((targetX - client.player.getX()) * mapZoom);
-				int wz = cy + (int) ((targetZ - client.player.getZ()) * mapZoom);
-				if (map.contains(wx, wz)) {
-					drawLine(g, px, py, wx, wz, GREEN);
-					if (tracked == null) g.outline(wx - 5, wz - 5, 10, 10, GREEN);
-					else g.outline(wx - 6, wz - 6, 12, 12, AMBER);
-				}
-			}
-			drawDiamond(g, px, py, selected.contains(drone.getId()) ? TEXT : CYAN);
-			if (wingLeader) {
-				g.text(client.font, "L", px - 3, py - 15, AMBER, true);
-			}
-			if (selectionMode == SelectionMode.UNIT && selected.contains(drone.getId())) {
-				g.fill(px + 9, py - 7, px + 83, py + 7, 0xD9081014);
-				g.text(client.font, shortId(drone.unitId()) + " / " + cohortLabel(drone), px + 13, py - 4, TEXT);
-			}
+	}
+
+	private void drawPendingWaypoint(GuiGraphicsExtractor g, Rect map) {
+		if (!armedWaypoint) return;
+		g.outline(map.x, map.y, map.w, map.h, AMBER);
+		if (Double.isNaN(pendingMapX) || Double.isNaN(pendingMapY)) return;
+		MapPoint point = pendingWorldPoint == null ? null : mapPoint(map, pendingWorldPoint.getX(), pendingWorldPoint.getZ());
+		int x = point == null ? map.x + 12 : point.x;
+		int y = point == null ? map.y + 70 : point.y;
+		List<DroneEntity> formation = selectedMissionFormation();
+		if (point != null && !formation.isEmpty()) {
+			MapPoint origin = mapPoint(map, formation.getFirst().getX(), formation.getFirst().getZ());
+			if (origin != null) drawLine(g, origin.x, origin.y, x, y, AMBER);
 		}
-		String contacts = "LIFE " + mapEntities.size() + " / HOSTILE " + mapEntities.stream().filter(entity -> entity instanceof Enemy).count();
-		g.text(client.font, contacts, map.right() - client.font.width(contacts) - 10, map.bottom() - 14, MUTED);
+		if (point != null) g.outline(x - 6, y - 6, 12, 12, AMBER);
+		g.text(client.font, point == null ? "移動先は表示範囲外" : "移動先", Math.min(x + 10, map.right() - 112), y - 4, AMBER, true);
+		Rect apply = waypointApplyRect(map);
+		Rect cancel = waypointCancelRect(map);
+		g.fill(apply.x, apply.y, apply.right(), apply.bottom(), 0xFF3B3015);
+		g.outline(apply.x, apply.y, apply.w, apply.h, AMBER);
+		g.centeredText(client.font, "移動を指示", apply.x + apply.w / 2, apply.y + 6, TEXT);
+		g.fill(cancel.x, cancel.y, cancel.right(), cancel.bottom(), PANEL_ALT);
+		g.outline(cancel.x, cancel.y, cancel.w, cancel.h, BORDER);
+		g.centeredText(client.font, "取消", cancel.x + cancel.w / 2, cancel.y + 6, TEXT);
+	}
+
+	private void drawPendingTask(GuiGraphicsExtractor g, Rect map) {
+		if (pendingTaskPoint == null || (!armedGuard && armedWork == FieldOperationType.NONE)) return;
+		int radius = armedGuard ? guardRadius : workRadii[workIndex(armedWork)];
+		MapPoint point = mapPoint(map, pendingTaskPoint.getX(), pendingTaskPoint.getZ());
+		if (point != null) drawOrbitRing(g, map, point.x, point.y, (int)(radius * mapZoom), AMBER);
+		int y = map.bottom() - 94;
+		g.fill(map.x + 8, y, map.right() - 8, map.bottom() - 30, PANEL);
+		String label = (armedGuard ? "警戒" : WORK_LABELS[workIndex(armedWork)])
+			+ " / " + (autoOperations && !armedGuard ? "自動編成" : selected.size() + "機") + " / 半径 " + radius + "m";
+		g.text(client.font, fitText(label, map.w - 28), map.x + 14, y + 7, AMBER);
+		g.text(client.font, fitText(pendingTaskPoint.getX() + ", " + pendingTaskPoint.getZ()
+			+ (armedGuard ? " / 警戒範囲" : " / 地形変更あり"), map.w - 28), map.x + 14, y + 21, MUTED);
+		drawCargoButton(g, waypointApplyRect(map), "指示を送信", false, AMBER, true);
+		drawCargoButton(g, waypointCancelRect(map), "取消", false, CYAN, true);
 	}
 
 	private void drawWingBoard(GuiGraphicsExtractor g, Layout l, List<DroneEntity> drones, int mouseX, int mouseY) {
 		Rect board = l.map;
-		g.fill(board.x, board.y, board.right(), board.bottom(), 0xFF091317);
+		g.fill(board.x, board.y, board.right(), board.bottom(), BG);
 		for (int x = board.x; x <= board.right(); x += 16) g.verticalLine(x, board.y, board.bottom(), GRID);
 		for (int y = board.y; y <= board.bottom(); y += 16) g.horizontalLine(board.x, board.right(), y, GRID);
-		g.text(client.font, "WING MANAGEMENT", board.x + 12, board.y + 11, TEXT, true);
-		g.text(client.font, "HARD LIMIT 8 UNITS", board.right() - 116, board.y + 11, CYAN);
+		g.text(client.font, "Wing編成", board.x + 12, board.y + 11, TEXT, true);
+		g.text(client.font, "1 Wing 最大8機", board.right() - 116, board.y + 11, CYAN);
 		Rect create = newWingRect(board);
 		boolean createHover = create.contains(mouseX, mouseY);
 		g.fill(create.x, create.y, create.right(), create.bottom(), createHover ? 0xFF174139 : PANEL_ALT);
 		g.outline(create.x, create.y, create.w, create.h, createHover ? GREEN : CYAN);
-		g.centeredText(client.font, "+  NEW WING", create.x + create.w / 2, create.y + 6, TEXT);
+		g.centeredText(client.font, "+ Wingを新規編成", create.x + create.w / 2, create.y + 6, TEXT);
 
 		List<WingCard> cards = wingCards(drones);
 		int columns = wingCardColumns(board);
@@ -448,18 +539,19 @@ public final class TacticalDashboard extends AbstractWidget {
 			int cardIndex = firstCard + visible;
 			Rect card = wingCardRect(board, visible);
 			boolean hover = card.contains(mouseX, mouseY);
-			g.fill(card.x, card.y, card.right(), card.bottom(), hover ? 0xFF162D33 : PANEL);
+			g.fill(card.x, card.y, card.right(), card.bottom(), hover ? PANEL_ALT : PANEL);
 			g.outline(card.x, card.y, card.w, card.h, hover ? CYAN : BORDER);
 
 			WingCard wing = cards.get(cardIndex);
 			int stateColor = wing.averageBattery < 35 ? AMBER : GREEN;
 			g.fill(card.x, card.y, card.right(), card.y + 29, PANEL_ALT);
 			String count = wing.members.size() + " / " + WingMembershipPolicy.MAX_MEMBERS;
-			g.text(client.font, fitText(wing.groupId, card.w - client.font.width(count) - 24),
+			g.text(client.font, fitText(wing.groupId, card.w - client.font.width(count) - 92),
 				card.x + 8, card.y + 8, TEXT, true);
-			g.text(client.font, count, card.right() - client.font.width(count) - 8, card.y + 8,
+			g.text(client.font, count, card.right() - client.font.width(count) - 76, card.y + 8,
 				wing.members.size() >= WingMembershipPolicy.MAX_MEMBERS ? AMBER : CYAN, true);
-			String condition = "BAT " + wing.averageBattery + "%  REC " + wing.recoveryCount;
+			drawCargoButton(g, wingTransferRect(card), "移籍", false, CYAN, selected.size() == 1);
+			String condition = "電力 " + wing.averageBattery + "%  回収 " + wing.recoveryCount;
 			int conditionX = card.right() - client.font.width(condition) - 8;
 			g.text(client.font, fitText("L " + shortId(wing.leader.unitId()) + "  " + wing.missionLabel,
 				conditionX - card.x - 16), card.x + 8, card.y + 32, MUTED);
@@ -468,7 +560,7 @@ public final class TacticalDashboard extends AbstractWidget {
 			for (int slot = 0; slot < WingMembershipPolicy.MAX_MEMBERS; slot++) {
 				Rect slotRect = wingSlotRect(card, slot);
 				boolean slotHover = slotRect.contains(mouseX, mouseY);
-				g.fill(slotRect.x, slotRect.y, slotRect.right(), slotRect.bottom(), slotHover ? 0xFF1C3A40 : 0xFF0D171B);
+				g.fill(slotRect.x, slotRect.y, slotRect.right(), slotRect.bottom(), slotHover ? 0xFF1C3A40 : BG);
 				g.outline(slotRect.x, slotRect.y, slotRect.w, slotRect.h, slotHover ? CYAN : GRID);
 				if (slot >= wing.members.size()) {
 					g.centeredText(client.font, String.format("%02d", slot + 1), slotRect.x + slotRect.w / 2,
@@ -506,7 +598,7 @@ public final class TacticalDashboard extends AbstractWidget {
 				previous = point;
 			}
 			MapPoint center = mapPoint(map, anchor.getX() + 0.5, anchor.getZ() + 0.5);
-			if (center != null && selected.size() <= 8) g.text(client.font, "SEC / " + TacticalUiPolicy.radiusLabel(drone.securityRadius()),
+			if (center != null && selected.size() <= 8) g.text(client.font, "警戒 / 半径 " + drone.securityRadius() + "m",
 				center.x + 6, center.y - 5, color, true);
 		}
 	}
@@ -516,35 +608,37 @@ public final class TacticalDashboard extends AbstractWidget {
 		boolean hover = toggle.contains(mouseX, mouseY);
 		g.fill(toggle.x, toggle.y, toggle.right(), toggle.bottom(), hover ? 0xFF174139 : PANEL_ALT);
 		g.outline(toggle.x, toggle.y, toggle.w, toggle.h, hover ? GREEN : CYAN);
-		g.centeredText(client.font, wingMapMode ? "OPEN WING BOARD" : "OPEN TACTICAL MAP",
+		g.centeredText(client.font, wingMapMode ? "Wing編成へ" : "作戦地図へ",
 			toggle.x + toggle.w / 2, toggle.y + 6, TEXT);
 	}
 
 	private MapPoint mapPoint(Rect map, double worldX, double worldZ) {
 		if (client.player == null) return null;
-		int x = map.x + map.w / 2 + (int) ((worldX - client.player.getX()) * mapZoom);
-		int y = map.y + map.h / 2 + (int) ((worldZ - client.player.getZ()) * mapZoom);
+		int x = map.x + map.w / 2 + (int) ((worldX - mapCenterX) * mapZoom);
+		int y = map.y + map.h / 2 + (int) ((worldZ - mapCenterZ) * mapZoom);
 		return map.contains(x, y) ? new MapPoint(x, y) : null;
 	}
 
-	private static void drawMobMarker(GuiGraphicsExtractor g, int x, int y, int color, boolean hostile) {
+	private void drawMobMarker(GuiGraphicsExtractor g, int x, int y, int color, boolean hostile) {
+		int radius = preferences.markerRadius() + 1;
 		if (hostile) {
-			g.horizontalLine(x - 4, x + 4, y, color);
-			g.verticalLine(x, y - 4, y + 4, color);
+			g.horizontalLine(x - radius, x + radius, y, color);
+			g.verticalLine(x, y - radius, y + radius, color);
 			g.fill(x - 1, y - 1, x + 2, y + 2, BG);
 		} else {
-			g.fill(x - 2, y - 2, x + 3, y + 3, color);
+			int half = Math.max(1, radius - 2);
+			g.fill(x - half, y - half, x + half + 1, y + half + 1, color);
 			g.fill(x - 1, y - 1, x + 2, y + 2, BG);
 		}
 	}
 
 	private void drawTerrain(GuiGraphicsExtractor g, Rect map) {
 		if (client.level == null || client.player == null) return;
-		int centerWorldX = (int) Math.floor(client.player.getX());
-		int centerWorldZ = (int) Math.floor(client.player.getZ());
+		int centerWorldX = (int) Math.floor(mapCenterX);
+		int centerWorldZ = (int) Math.floor(mapCenterZ);
 		int zoomKey = (int) Math.round(mapZoom * 100.0);
 		long gameTime = client.level.getGameTime();
-		boolean stale = terrainCacheLevel != client.level
+		boolean stale = terrainTexture == null || terrainCacheLevel != client.level
 			|| terrainCacheCenterX != centerWorldX || terrainCacheCenterZ != centerWorldZ
 			|| terrainCacheZoom != zoomKey || !map.equals(terrainCacheMap)
 			|| gameTime >= terrainRefreshAt;
@@ -580,8 +674,8 @@ public final class TacticalDashboard extends AbstractWidget {
 			int screenY = map.y + row * sample;
 			for (int columnIndex = 0; columnIndex < columns; columnIndex++) {
 				int screenX = map.x + columnIndex * sample;
-				int worldX = (int) Math.floor(client.player.getX() + (screenX + sample / 2.0 - centerX) / mapZoom);
-				int worldZ = (int) Math.floor(client.player.getZ() + (screenY + sample / 2.0 - centerY) / mapZoom);
+				int worldX = (int) Math.floor(mapCenterX + (screenX + sample / 2.0 - centerX) / mapZoom);
+				int worldZ = (int) Math.floor(mapCenterZ + (screenY + sample / 2.0 - centerY) / mapZoom);
 				int index = row * columns + columnIndex;
 				BlockPos column = new BlockPos(worldX, 0, worldZ);
 				if (!client.level.hasChunkAt(column)) {
@@ -603,13 +697,13 @@ public final class TacticalDashboard extends AbstractWidget {
 				int index = row * columns + columnIndex;
 				int height = heights[index];
 				if (height == Integer.MIN_VALUE) {
-					pixels.setPixel(columnIndex, row, 0xFF091317);
+					pixels.setPixel(columnIndex, row, (columnIndex + row) % 6 < 2 ? BORDER : BG);
 					continue;
 				}
 				int west = columnIndex > 0 && heights[index - 1] != Integer.MIN_VALUE ? heights[index - 1] : height;
 				int north = row > 0 && heights[index - columns] != Integer.MIN_VALUE ? heights[index - columns] : height;
 				int slope = height - (west + north) / 2;
-				pixels.setPixel(columnIndex, row, terrainColor(colors[index], height, slope, water[index]));
+				pixels.setPixel(columnIndex, row, ControllerTerrainTone.darken(terrainColor(colors[index], height, slope, water[index])));
 			}
 		}
 		terrainTexture.upload();
@@ -625,6 +719,9 @@ public final class TacticalDashboard extends AbstractWidget {
 	}
 
 	void close() {
+		panning = false;
+		draggedEntity = -1;
+		search.setFocused(false);
 		if (terrainTexture == null) return;
 		client.getTextureManager().release(TERRAIN_TEXTURE_ID);
 		terrainTexture = null;
@@ -655,266 +752,144 @@ public final class TacticalDashboard extends AbstractWidget {
 
 	private void drawCommandPanel(GuiGraphicsExtractor g, Layout l, List<DroneEntity> drones, int mouseX, int mouseY) {
 		Rect right = l.right;
-		TacticalUiPolicy.CommandAvailability availability = availability(drones);
 		g.fill(right.x, right.y, right.right(), right.bottom(), PANEL);
 		g.verticalLine(right.x, right.y, right.bottom(), BORDER);
-		g.text(client.font, "COMMAND", right.x + 10, right.y + 9, TEXT, true);
-		String count = selected.size() + " SELECTED";
-		g.text(client.font, count, right.right() - client.font.width(count) - 9, right.y + 9, CYAN);
-		List<DroneEntity> selection = drones.stream().filter(d -> selected.contains(d.getId())).toList();
-		boolean multiple = selection.size() > 1;
-		DroneEntity active = selection.size() == 1 ? selection.getFirst() : null;
-		int infoY = right.y + 34;
-		g.horizontalLine(right.x, right.right(), infoY - 7, BORDER);
-		String identity = multiple ? selection.size() + " UNITS / " + selection.stream().map(d -> d.role().name()).distinct().collect(java.util.stream.Collectors.joining(" + "))
-			: active == null ? "NO UNIT SELECTED" : active.unitId();
-		g.text(client.font, fitText(identity, right.w - 20), right.x + 10, infoY, TEXT, true);
-		g.text(client.font, multiple ? "稼働 " + selection.stream().filter(this::hasActiveMission).count()
-			+ " / 着艦 " + selection.stream().filter(DroneEntity::isDocked).count()
-			: active == null ? "左の一覧から対象を選択" : fitText(statusLabel(active), right.w - 20),
-			right.x + 10, infoY + 17, active == null ? MUTED : CYAN);
-		String batteryRange = selection.isEmpty() ? "--" : selection.stream().mapToInt(DroneEntity::batteryPercent).min().orElse(0)
-			+ (multiple ? "-" + selection.stream().mapToInt(DroneEntity::batteryPercent).max().orElse(0) : "") + "%";
-		g.text(client.font, batteryRange, right.x + 10, infoY + 39, selection.stream().anyMatch(d -> d.batteryPercent() < 35) ? AMBER : GREEN, true);
-		g.text(client.font, "BATTERY", right.x + 10, infoY + 51, MUTED);
-		g.text(client.font, "LINK", right.x + 96, infoY + 51, MUTED);
-		g.text(client.font, fitText(multiple ? "MULTIPLE" : active == null ? "--" : active.dataLinkStatus(), right.w - 106), right.x + 96, infoY + 39,
-			multiple ? MUTED : active == null ? RED : active.dataLinkStatus().contains("HAZARDOUS") ? AMBER : GREEN, true);
-		int joined = active == null ? 0 : (int) drones.stream()
-			.filter(drone -> (drone.missionStage() == DroneEntity.MISSION_MOVING
-				|| drone.missionStage() == DroneEntity.MISSION_ORBIT_ENTRY
-				|| drone.missionStage() == DroneEntity.MISSION_ORBIT)
-				&& drone.cohortId().equals(active.cohortId())).count();
-		int cohortSize = active == null ? 0 : (int) drones.stream()
-			.filter(drone -> !active.cohortId().isBlank() && drone.cohortId().equals(active.cohortId())).count();
-		int wingRecovery = active == null ? 0 : (int) drones.stream()
-			.filter(drone -> drone.missionId().equals(active.missionId()) && drone.wingIndex() == active.wingIndex()
-				&& drone.recoveryLevel() > 0).count();
-		String wing = active == null ? "--" : (active.wingIndex() + 1) + "/" + active.wingCount();
-		if (multiple) {
-			String roles = selection.stream().map(DroneEntity::role).distinct().sorted()
-				.map(role -> TacticalUiPolicy.moduleLabel(role) + " " + selection.stream().filter(d -> d.role() == role).count())
-				.collect(java.util.stream.Collectors.joining(" / "));
-			List<DroneEntity> visible = visibleRoster(drones);
-			long hidden = selection.stream().filter(d -> !visible.contains(d)).count();
-			g.text(client.font, fitText(roles, right.w - 20), right.x + 10, infoY + 66, MUTED);
-			g.text(client.font, fitText(selectionWingSummary(drones, selection), right.w - 20), right.x + 10, infoY + 78, TEXT);
-			String scope = hidden > 0 ? "HIDDEN BY FILTER " + hidden : "SELECTED " + selection.size();
-			g.text(client.font, fitText(scope + " / NO DOCK " + selection.stream().filter(d -> !d.hasDock()).count(), right.w - 20),
-				right.x + 10, infoY + 90, hidden > 0 ? AMBER : MUTED);
+		inspectorScroll = Math.clamp(inspectorScroll, 0, Math.max(0, inspectorHeight() - right.h));
+		g.enableScissor(right.x, right.y, right.right(), right.bottom());
+		int x = right.x + 10, y = right.y + 10 - inspectorScroll, w = right.w - 20;
+		List<DroneEntity> units = drones.stream().filter(d -> selected.contains(d.getId())).toList();
+		DroneEntity unit = units.size() == 1 ? units.getFirst() : null;
+		g.text(client.font, units.isEmpty() ? "選択詳細" : units.size() + "機を選択", x, y, CYAN);
+		if (unit != null) {
+			HmiArt.role(g, unit.role(), right.x + (right.w - 104) / 2, y + 17, 104);
+			g.text(client.font, fitText(unit.getName().getString(), w), x, y + 124, TEXT);
+			g.text(client.font, fitText("役割: " + roleLabel(unit.role()), w), x, y + 138, MUTED);
+			g.text(client.font, fitText("所属 " + (unit.groupId().isBlank() ? "未所属" : unit.groupId()), w), x, y + 153, TEXT);
+			g.text(client.font, fitText("現在 " + statusLabel(unit), w), x, y + 168, CYAN);
+			var resources = resourceSnapshot(unit);
+			g.text(client.font, fitText(resources.readiness(), w), x, y + 187, resourceColor(resources.tone()));
+			int ry = y + 204;
+			for (var metric : resources.metrics()) {
+				g.text(client.font, fitText(metric.label(), w / 2), x, ry, MUTED);
+				g.text(client.font, fitText(metric.value(), w / 2), x + w / 2, ry, resourceColor(metric.tone()));
+				ry += 14;
+			}
 		} else {
-			g.text(client.font, fitText("ROLE    " + (active == null ? "--" : active.role().displayName())
-				+ "  WING " + wing, right.w - 20), right.x + 10, infoY + 66, MUTED);
-			g.text(client.font, "LEADER  " + (active == null || active.cohortLeaderId().isBlank()
-				? "--" : shortId(active.cohortLeaderId())), right.x + 10, infoY + 78, active != null && active.unitId().equals(active.cohortLeaderId()) ? AMBER : TEXT);
-			String slot = active == null ? "--" : active.missionStage() == DroneEntity.MISSION_CONVERGING
-				? "JOIN -> " + rendezvousLabel(active) : (active.cohortRank() + 1) + " / " + Math.max(joined, cohortSize);
-			g.text(client.font, fitText("SLOT    " + slot + "  REC " + wingRecovery, right.w - 20), right.x + 10, infoY + 90,
-				active != null && active.missionStage() == DroneEntity.MISSION_CONVERGING ? AMBER : TEXT);
+			g.text(client.font, units.isEmpty() ? "対象を選択してください" : "複数対象の共通操作", x, y + 35, TEXT);
+			int ry = y + 60;
+			for (DroneRole role : MODULE_ROLES) {
+				long count = units.stream().filter(d -> d.role() == role).count();
+				if (count == 0) continue;
+				HmiArt.role(g, role, x, ry, 24);
+				g.text(client.font, roleLabel(role) + " " + count + "機", x + 30, ry + 8, TEXT);
+				ry += 30;
+			}
+			g.text(client.font, "未受信の選択 " + selected.unavailableCount() + "機", x, y + 260, MUTED);
 		}
-		g.text(client.font, "FLIGHT CONTROL", right.x + 9, infoY + 108, MUTED);
+		g.text(client.font, "移動・任務", x, right.y + 323 - inspectorScroll, MUTED);
 		for (int i = 0; i < ACTIONS.length; i++) {
 			Rect button = commandRect(l, i);
-			boolean hover = button.contains(mouseX, mouseY);
-			boolean enabled = availability.hasSelection();
-			int color = ACTIONS[i].equals("decommission") ? RED : ACTIONS[i].equals("dock") ? AMBER : CYAN;
-			boolean confirming = ACTIONS[i].equals("decommission") && client.level != null
-				&& client.level.getGameTime() < confirmStoreUntil;
-			g.fill(button.x, button.y, button.right(), button.bottom(), confirming ? 0xFF492129
-				: enabled && hover ? PANEL_RAISED : PANEL_ALT);
-			g.outline(button.x, button.y, button.w, button.h, enabled ? color : BORDER);
-			g.centeredText(client.font, fitText(confirming ? "CONFIRM STORE" : actionLabel(i, drones), button.w - 8),
-				button.x + button.w / 2, button.y + 8,
-				enabled ? TEXT : MUTED);
+			boolean confirming = i == 5 && client.level != null && client.level.getGameTime() < confirmStoreUntil;
+			drawCargoButton(g, button, fitText(confirming ? "格納を確定" : actionLabel(i, drones), button.w - 8), false, i == 5 ? RED : CYAN, !units.isEmpty());
 		}
-		for (int i = 0; i < WORK_TYPES.length; i++) {
-			Rect button = workRect(l, i);
-			boolean armed = armedWork == WORK_TYPES[i];
-			boolean hover = button.contains(mouseX, mouseY);
-			boolean enabled = autoOperations ? !drones.isEmpty() : availability.workEnabled(WORK_TYPES[i]);
-			g.fill(button.x, button.y, button.right(), button.bottom(), armed ? 0xFF174139 : enabled && hover ? PANEL_RAISED : PANEL_ALT);
-			g.outline(button.x, button.y, button.w, button.h, enabled ? armed ? GREEN : BLUE : BORDER);
-			g.centeredText(client.font, fitText(WORK_LABELS[i], button.w - 6), button.x + button.w / 2, button.y + 8,
-				enabled ? armed ? GREEN : TEXT : MUTED);
+		g.text(client.font, "作業地点を指定", x, right.y + 422 - inspectorScroll, MUTED);
+		var available = availability(drones);
+		for (int i = 0; i < 4; i++) {
+			boolean enabled = i == 3 ? available.securityEnabled() : autoOperations ? !drones.isEmpty() : available.workEnabled(WORK_TYPES[i]);
+			drawCargoButton(g, workRect(l, i), i == 3 ? "警戒" : WORK_LABELS[i], false, CYAN, enabled);
 		}
-		Rect guard = workRect(l, WORK_TYPES.length);
-		boolean guardHover = guard.contains(mouseX, mouseY);
-		boolean guardEnabled = availability.securityEnabled();
-		g.fill(guard.x, guard.y, guard.right(), guard.bottom(), armedGuard ? 0xFF4A2025 : guardEnabled && guardHover ? PANEL_RAISED : PANEL_ALT);
-		g.outline(guard.x, guard.y, guard.w, guard.h, guardEnabled ? armedGuard ? RED : AMBER : BORDER);
-		g.centeredText(client.font, "GUARD", guard.x + guard.w / 2, guard.y + 8,
-			guardEnabled ? armedGuard ? RED : TEXT : MUTED);
-		Rect auto = autoOperationsRect(l);
-		g.text(client.font, autoOperations ? "FLEET TASK FORCE" : "SELECTED " + availability.selected(),
-			right.x + 9, auto.y + 4, autoOperations ? GREEN : MUTED);
-		g.fill(auto.x, auto.y, auto.right(), auto.bottom(), autoOperations ? 0xFF174139
-			: auto.contains(mouseX, mouseY) ? PANEL_RAISED : PANEL_ALT);
-		g.outline(auto.x, auto.y, auto.w, auto.h, autoOperations ? GREEN : BORDER);
-		g.centeredText(client.font, autoOperations ? "AUTO OPS ON" : "AUTO OPS",
-			auto.x + auto.w / 2, auto.y + 4, autoOperations ? GREEN : TEXT);
+		drawCargoButton(g, autoOperationsRect(l), autoOperations ? "自動編成 ON" : "自動編成 OFF", autoOperations, GREEN, true);
+		drawCargoButton(g, forceOverrideRect(l), forceOverride ? "強制介入 ON" : "強制介入 OFF",
+			forceOverride, forceOverride ? RED : AMBER, !units.isEmpty());
+		if (page != 3) drawCargoButton(g, attackTargetRect(l), armedAttack
+			? "攻撃対象を地図で選択" : "特定モブを攻撃", armedAttack, RED,
+			!units.isEmpty() && units.stream().anyMatch(d -> d.role() == DroneRole.SECURITY));
+		if (page != 3) drawCargoButton(g, cargoEditorRect(l), "輸送経路を設定", false, CYAN,
+			!units.isEmpty() && units.stream().allMatch(d -> d.role() == DroneRole.CARGO));
+		if (page != 3) drawCargoButton(g, radiusEditorRect(l), "作業・警戒の範囲", false, CYAN,
+			armedGuard || armedWork != FieldOperationType.NONE);
+		if (page == 3) {
+			g.text(client.font, "着艦中の役割装備", x, right.y + 520 - inspectorScroll, MUTED);
+			for (int i = 0; i < MODULE_ROLES.length; i++)
+				drawCargoButton(g, moduleRect(l, i), roleLabel(MODULE_ROLES[i]), false, CYAN, !units.isEmpty() && units.stream().allMatch(DroneEntity::isDocked));
+			g.text(client.font, "兵装", x, right.y + 608 - inspectorScroll, MUTED);
+			for (int i = 0; i < WEAPON_LOADOUTS.length; i++)
+				drawCargoButton(g, weaponModuleRect(l, i), WEAPON_LABELS[i], false, AMBER, !units.isEmpty() && units.stream().allMatch(d -> d.role() == DroneRole.SECURITY));
+			drawCargoButton(g, capacityUpgradeRect(l), "搭載容量を強化", false, CYAN, unit != null && unit.isDocked() && unit.role() == DroneRole.SECURITY && unit.capacityTier() < jp.morrowgear.drone.PayloadCapacity.MAX_TIER);
+		}
+		g.disableScissor();
+		if (inspectorHeight() > right.h) {
+			int track = right.h - 8, thumb = Math.max(20, track * right.h / inspectorHeight());
+			int top = right.y + 4 + (track - thumb) * inspectorScroll / Math.max(1, inspectorHeight() - right.h);
+			g.fill(right.right() - 3, top, right.right() - 1, top + thumb, MUTED);
+		}
+	}
 
-		int missionY = infoY + 214;
-		if (page != 3) {
-		g.text(client.font, "MISSION STATUS", right.x + 9, missionY, MUTED);
-		drawAssignment(g, right.x + 9, missionY + 14, right.w - 18, "任務: " + (multiple ? "複数選択 / 任務タブで確認" : active == null ? "未選択" : statusLabel(active)), "");
-		drawAssignment(g, right.x + 9, missionY + 38, right.w - 18,
-			"DOCK: " + (multiple ? allocationSummary(selection) : active == null ? "未選択" : aircraftDockLabel(active)),
-			active != null && active.isDocked() ? "着艦" : "--");
-		}
-		if (modulePanelVisible(l)) {
-			boolean securitySelection = availability.hasSelection() && drones.stream()
-				.filter(drone -> selected.contains(drone.getId()))
-				.allMatch(drone -> drone.role() == DroneRole.SECURITY);
-			boolean dualPanel = dualModulePanelVisible(l);
-			boolean showRolePanel = dualPanel || !securitySelection;
-			int moduleY = right.bottom() - (dualPanel ? 78 : 43);
-			g.fill(right.x, moduleY - 4, right.right(), right.bottom(), PANEL);
-			String bayState = selection.isEmpty() ? "NO UNIT" : selection.stream().allMatch(DroneEntity::isDocked) ? "BAY ONLINE" : "DOCK REQUIRED";
-			if (showRolePanel) {
-				g.text(client.font, "ROLE MODULE", right.x + 9, moduleY, MUTED);
-				g.text(client.font, bayState, right.right() - client.font.width(bayState) - 9, moduleY,
-					!selection.isEmpty() && selection.stream().allMatch(DroneEntity::isDocked) ? GREEN : AMBER);
-				for (int i = 0; i < MODULE_ROLES.length; i++) {
-					Rect button = moduleRect(l, i);
-					DroneRole moduleRole = MODULE_ROLES[i];
-					boolean installed = !selection.isEmpty() && selection.stream().allMatch(d -> d.role() == moduleRole);
-					boolean hover = button.contains(mouseX, mouseY);
-					boolean enabled = availability.hasSelection() && drones.stream()
-						.filter(drone -> selected.contains(drone.getId())).allMatch(DroneEntity::isDocked);
-					int color = moduleColor(MODULE_ROLES[i]);
-					g.fill(button.x, button.y, button.right(), button.bottom(), installed ? 0xFF163B40 : enabled && hover ? PANEL_RAISED : PANEL_ALT);
-					g.outline(button.x, button.y, button.w, button.h, installed ? color : enabled ? BORDER : 0xFF273840);
-					g.centeredText(client.font, TacticalUiPolicy.moduleLabel(MODULE_ROLES[i]), button.x + button.w / 2, button.y + 7,
-						enabled ? installed ? color : TEXT : MUTED);
-				}
-			}
-			if (dualPanel || securitySelection) {
-				int weaponY = right.bottom() - 37;
-				g.text(client.font, "SECURITY LOADOUT", right.x + 9, weaponY, MUTED);
-				Rect capacity = capacityUpgradeRect(l);
-				boolean canUpgrade = securitySelection && selection.size() == 1 && active != null
-					&& active.isDocked() && active.capacityTier() < jp.morrowgear.drone.PayloadCapacity.MAX_TIER;
-				g.text(client.font, active == null ? "CAP --" : "CAP " + active.capacityTier() + " +",
-					capacity.x, capacity.y + 2, canUpgrade ? CYAN : MUTED);
-				if (capacity.contains(mouseX, mouseY) && active != null) {
-					String detail = "GUN " + active.gunAmmo() + "/" + active.gunCapacity() + " MSL "
-						+ active.missiles() + "/" + active.missileCapacity() + " ENERGY " + active.weaponCapacity();
-					g.fill(right.x, weaponY - 32, right.right(), weaponY - 2, PANEL);
-					g.text(client.font, fitText(detail, right.w - 18), right.x + 9, weaponY - 30, TEXT);
-					String cost = active.capacityTier() == 0 ? "合金8 / ダイヤ1 / RSブロック2"
-						: active.capacityTier() == 1 ? "合金16 / ダイヤ4 / RSブロック4 / 欠片2" : "MAX CAPACITY";
-					g.text(client.font, fitText(cost, right.w - 18), right.x + 9, weaponY - 17, AMBER);
-				}
-				for (int i = 0; i < WEAPON_LOADOUTS.length; i++) {
-					Rect button = weaponModuleRect(l, i);
-					SecurityLoadout loadout = WEAPON_LOADOUTS[i];
-					boolean installed = securitySelection && selection.stream().allMatch(d -> d.securityLoadout() == loadout);
-					boolean hover = button.contains(mouseX, mouseY);
-					g.fill(button.x, button.y, button.right(), button.bottom(),
-						installed ? 0xFF4A2025 : securitySelection && hover ? PANEL_RAISED : PANEL_ALT);
-					g.outline(button.x, button.y, button.w, button.h,
-						installed ? RED : securitySelection ? BORDER : 0xFF273840);
-					g.centeredText(client.font, WEAPON_LABELS[i], button.x + button.w / 2, button.y + 7,
-						securitySelection ? installed ? RED : TEXT : MUTED);
-				}
-			}
-		}
+	private int inspectorHeight() { return page == 3 ? 715 : 632; }
+
+	private static String resourceName(String code) {
+		return switch (code) {
+			case "FLT" -> "飛行電力"; case "LZR" -> "レーザー電力"; case "GUN" -> "機関砲弾";
+			case "MSL" -> "ミサイル"; case "HEAT" -> "熱"; case "STR" -> "機体"; case "SYS" -> "システム";
+			default -> code;
+		};
 	}
 
 	private void drawBottomPanel(GuiGraphicsExtractor g, Layout l, List<DroneEntity> drones) {
-		g.fill(0, l.bottomTop, virtualWidth(), virtualHeight(), 0xFF0D171B);
-		g.horizontalLine(0, virtualWidth(), l.bottomTop, BORDER);
-		int split = (int) (virtualWidth() * 0.60);
-		g.verticalLine(split, l.bottomTop, virtualHeight(), BORDER);
-		g.fill(0, l.bottomTop, split, l.bottomTop + 29, PANEL);
-		g.fill(split, l.bottomTop, virtualWidth(), l.bottomTop + 29, PANEL);
-		g.text(client.font, "MISSION QUEUE", 10, l.bottomTop + 9, TEXT, true);
-		long activeCount = drones.stream().filter(this::hasActiveMission).count();
-		long queuedCount = drones.stream().filter(drone -> drone.role() == DroneRole.CARGO
-			&& drone.cargoState().queued()).count();
-		String activity = activeCount + " ACTIVE / " + queuedCount + " QUEUED";
-		g.text(client.font, activity, split - client.font.width(activity) - 56, l.bottomTop + 9, CYAN);
-		List<ContainerInfo> containers = containers();
-		g.text(client.font, "LOGISTICS", split + 10, l.bottomTop + 9, TEXT, true);
-		g.text(client.font, "コンテナ走査 / " + TacticalUiPolicy.radiusLabel(32), split + 80, l.bottomTop + 9, MUTED);
-		String found = containers.size() + " FOUND";
-		g.text(client.font, found, cargoUpRect(l).x - client.font.width(found) - 12, l.bottomTop + 9, CYAN);
-		g.horizontalLine(0, virtualWidth(), l.bottomTop + 28, BORDER);
-		g.text(client.font, "UNIT", 10, l.bottomTop + 37, MUTED);
-		g.text(client.font, "MISSION / PROGRESS", 90, l.bottomTop + 37, MUTED);
-		g.text(client.font, "STATE", split - 70, l.bottomTop + 37, MUTED);
-		int capacity = Math.max(1, (virtualHeight() - (l.bottomTop + 55)) / 25);
-		missionScroll = clampScroll(missionScroll, drones.size(), capacity);
-		drawScrollCounter(g, split - 305, l.bottomTop + 9, missionScroll, drones.size(), capacity);
-		if (drones.size() > capacity) drawPageButtons(g, missionFirstRect(l), missionUpRect(l), missionDownRect(l), missionLastRect(l));
-		for (int visible = 0; visible < capacity && missionScroll + visible < drones.size(); visible++) {
-			DroneEntity drone = drones.get(missionScroll + visible);
-			int y = l.bottomTop + 55 + visible * 25;
-			boolean activeRow = selected.contains(drone.getId());
-			if (activeRow) g.fill(5, y - 3, split - 5, y + 18, 0xFF142B32);
-			g.text(client.font, shortId(drone.unitId()), 9, y, activeRow ? CYAN : TEXT, true);
-			g.text(client.font, fitText(statusLabel(drone), Math.max(70, split - 172)), 90, y, TEXT);
-			g.fill(90, y + 12, split - 120, y + 15, 0xFF304249);
-			g.fill(90, y + 12, 90 + (split - 210) * drone.batteryPercent() / 100, y + 15, CYAN);
-			boolean activeMission = hasActiveMission(drone);
-			g.text(client.font, activeMission ? "ACTIVE" : "STANDBY", split - 70, y,
-				activeMission ? GREEN : MUTED);
-		}
-
-		DroneEntity cargoDrone = drones.stream().filter(drone -> selected.contains(drone.getId())
-			&& drone.role() == DroneRole.CARGO).findFirst().orElse(null);
-		int cargoCapacity = cargoCapacity(l);
-		cargoScroll = clampScroll(cargoScroll, containers.size(), cargoCapacity);
-		drawScrollCounter(g, cargoUpRect(l).x - 122, l.bottomTop + 9, cargoScroll, containers.size(), cargoCapacity);
-		if (containers.size() > cargoCapacity) drawPageButtons(g, cargoFirstRect(l), cargoUpRect(l), cargoDownRect(l), cargoLastRect(l));
-		if (containers.isEmpty()) {
-			g.text(client.font, "NO COMPATIBLE CONTAINERS", split + 16, l.bottomTop + 48, MUTED);
-		} else for (int visible = 0; visible < cargoCapacity && cargoScroll + visible < containers.size(); visible++) {
-			ContainerInfo container = containers.get(cargoScroll + visible);
-			Rect row = cargoRowRect(l, visible);
-			boolean source = cargoDrone != null && cargoDrone.hasCargoSource() && cargoDrone.cargoSource().asLong() == container.pos;
-			boolean target = cargoDrone != null && cargoDrone.hasCargoTarget() && cargoDrone.cargoTarget().asLong() == container.pos;
-			g.fill(row.x, row.y, row.right(), row.bottom(), PANEL_ALT);
-			g.outline(row.x, row.y, row.w, row.h, source ? CYAN : target ? AMBER : BORDER);
-			g.text(client.font, container.label, row.x + 6, row.y + 5, TEXT, true);
-			g.text(client.font, container.distance + "m  " + container.coordinate, row.x + 98, row.y + 5, MUTED);
-			drawCargoButton(g, cargoSourceRect(l, visible), "OUT", source, CYAN, cargoDrone != null);
-			drawCargoButton(g, cargoTargetRect(l, visible), "IN", target, AMBER, cargoDrone != null);
-		}
-		if (cargoDrone != null) {
-			String state = cargoDrone.cargoStatusLabel() + " / LOAD " + cargoDrone.cargoItemCount();
-			g.text(client.font, state, split + 9, l.bottomTop + 24, cargoDrone.cargoItemCount() > 0 ? AMBER : MUTED);
-		}
+		g.fill(NAV_RAIL_WIDTH, l.bottomTop, virtualWidth(), virtualHeight(), PANEL);
+		g.horizontalLine(NAV_RAIL_WIDTH, virtualWidth(), l.bottomTop, BORDER);
+		g.text(client.font, "選択 " + selected.size() + "機", NAV_RAIL_WIDTH + 10, l.bottomTop + 10, CYAN);
+		String[] labels = {"移動先", "任務変更", "巡回経路", "Wing編成", "Dock帰還", "集合", "追従"};
+		for (int i = 0; i < labels.length; i++)
+			drawCargoButton(g, quickCommandRect(l, i), labels[i], false, i == 4 ? AMBER : CYAN, !selected.isEmpty());
+		String status = client.level != null && client.level.getGameTime() < transientNoticeUntil ? transientNotice
+			: selected.unavailableCount() > 0 ? "未受信の選択 " + selected.unavailableCount() + "機"
+			: "対象 " + selected.size() + "機 / " + ControllerCommandResults.latestReason();
+		g.text(client.font, fitText(status, virtualWidth() - NAV_RAIL_WIDTH - 20), NAV_RAIL_WIDTH + 10, virtualHeight() - 15, MUTED);
 	}
 
 	private void drawCargoButton(GuiGraphicsExtractor g, Rect rect, String label, boolean active, int color, boolean enabled) {
-		g.fill(rect.x, rect.y, rect.right(), rect.bottom(), active ? 0xFF173A3D : PANEL);
+		g.fill(rect.x, rect.y, rect.right(), rect.bottom(), active || enabled && rect.contains(hoverX, hoverY) ? PANEL_RAISED : PANEL);
 		g.outline(rect.x, rect.y, rect.w, rect.h, enabled ? color : BORDER);
-		g.centeredText(client.font, label, rect.x + rect.w / 2, rect.y + 5, enabled ? (active ? color : TEXT) : MUTED);
+		g.centeredText(client.font, fitText(label, rect.w - 8), rect.x + rect.w / 2, rect.y + 5, enabled ? (active ? color : TEXT) : MUTED);
+	}
+
+	private void drawIconButton(GuiGraphicsExtractor g, Rect rect, String icon, String label, boolean enabled) {
+		g.fill(rect.x, rect.y, rect.right(), rect.bottom(), enabled && rect.contains(hoverX, hoverY) ? PANEL_RAISED : PANEL);
+		g.outline(rect.x, rect.y, rect.w, rect.h, enabled ? CYAN : BORDER);
+		int size = Math.min(16, rect.h - 4);
+		HmiArt.icon(g, icon, rect.x + 5, rect.y + (rect.h - size) / 2, size);
+		g.text(client.font, fitText(label, rect.w - size - 16), rect.x + size + 10,
+			rect.y + (rect.h - 9) / 2, enabled ? TEXT : MUTED);
 	}
 
 	private void drawInteractionStatus(GuiGraphicsExtractor g, Layout l,
 		TacticalUiPolicy.CommandAvailability availability) {
-		if (page != 0 && (client.level == null || client.level.getGameTime() >= transientNoticeUntil)) return;
+		if (page != 0 || !(armedWaypoint || armedGuard || armedWork != FieldOperationType.NONE)) return;
 		String message;
 		int color;
-		if (armedGuard) {
-			message = "GUARD配置: 地図上の警戒中心をダブルクリック / " + TacticalUiPolicy.radiusLabel(24);
+		if (armedWaypoint) {
+			message = Double.isNaN(pendingMapX)
+				? "目的地変更: 地図をクリック / 取消で下書きを破棄"
+				: "新経路を確認 / 移動を指示 または 取消";
+			color = AMBER;
+		} else if (armedGuard) {
+			message = "警戒配置: 地図上の警戒中心をクリック / " + TacticalUiPolicy.radiusLabel(guardRadius);
 			color = RED;
 		} else if (armedWork != FieldOperationType.NONE) {
-			int radius = armedWork == FieldOperationType.ORE ? 32 : armedWork == FieldOperationType.EXCAVATE ? 8 : 20;
-			String assignment = autoOperations ? "AUTO OPS" : "選択ユニット";
-			message = assignment + " / " + WORK_LABELS[workIndex(armedWork)] + ": 地図上の作業中心をダブルクリック / "
+			int radius = workRadii[workIndex(armedWork)];
+			String assignment = autoOperations ? "自動編成" : "選択ユニット";
+			message = assignment + " / " + WORK_LABELS[workIndex(armedWork)] + ": 地図上の作業中心をクリック / "
 				+ TacticalUiPolicy.radiusLabel(radius);
 			color = GREEN;
 		} else if (client.level != null && client.level.getGameTime() < transientNoticeUntil) {
 			message = transientNotice;
 			color = CYAN;
 		} else if (!availability.hasSelection()) {
-			message = "操作対象がありません。左のUNITまたはWINGを選択してください";
+			message = "操作対象がありません。左の個体またはWingを選択してください";
 			color = AMBER;
 		} else {
-			message = availability.selected() + "機を選択中 / 地図をダブルクリック: 移動または追跡 / ホイール: ズーム";
+			message = availability.selected() + "機を選択中 / 移動先で目的地変更 / 地図上のWingも選択可能";
 			color = MUTED;
 		}
 		int width = Math.min(l.map.w - 24, client.font.width(message) + 18);
@@ -925,49 +900,114 @@ public final class TacticalDashboard extends AbstractWidget {
 		g.centeredText(client.font, fitText(message, width - 12), x + width / 2, y + 6, color);
 	}
 
-	@SuppressWarnings("unused")
-	private void drawLegacyBottomPanel(GuiGraphicsExtractor g, Layout l, List<DroneEntity> drones) {
-		g.fill(0, l.bottomTop, virtualWidth(), virtualHeight(), 0xFF0D171B);
-		g.horizontalLine(0, virtualWidth(), l.bottomTop, BORDER);
-		int split = (int) (virtualWidth() * 0.60);
-		g.verticalLine(split, l.bottomTop, virtualHeight(), BORDER);
-		g.text(client.font, "進行中の任務", 9, l.bottomTop + 9, TEXT, true);
-		g.text(client.font, drones.size() + " ACTIVE / 0 QUEUED", split - 116, l.bottomTop + 9, CYAN);
-		g.text(client.font, "周辺コンテナ / 32ブロック", split + 9, l.bottomTop + 9, TEXT, true);
-		g.text(client.font, "0 FOUND", virtualWidth() - 56, l.bottomTop + 9, CYAN);
-		g.horizontalLine(0, virtualWidth(), l.bottomTop + 28, BORDER);
-		g.text(client.font, "UNIT", 9, l.bottomTop + 37, MUTED);
-		g.text(client.font, "MISSION / PROGRESS", 90, l.bottomTop + 37, MUTED);
-		g.text(client.font, "STATE", split - 70, l.bottomTop + 37, MUTED);
-		int capacity = Math.max(1, (virtualHeight() - (l.bottomTop + 55)) / 25);
-		missionScroll = clampScroll(missionScroll, drones.size(), capacity);
-		drawScrollCounter(g, split - 205, l.bottomTop + 9, missionScroll, drones.size(), capacity);
-		if (drones.size() > capacity) drawPageButtons(g, missionFirstRect(l), missionUpRect(l), missionDownRect(l), missionLastRect(l));
-		for (int visible = 0; visible < capacity && missionScroll + visible < drones.size(); visible++) {
-			DroneEntity drone = drones.get(missionScroll + visible);
-			int y = l.bottomTop + 55 + visible * 25;
-			g.text(client.font, shortId(drone.unitId()), 9, y, TEXT, true);
-			g.text(client.font, statusLabel(drone), 90, y, TEXT);
-			g.fill(90, y + 12, split - 120, y + 15, 0xFF304249);
-			g.fill(90, y + 12, 90 + (split - 210) * drone.batteryPercent() / 100, y + 15, CYAN);
-			g.text(client.font, drone.mode() == DroneMode.STANDBY ? "STANDBY" : "ACTIVE", split - 70, y, drone.mode() == DroneMode.STANDBY ? MUTED : GREEN);
-		}
-		int cardX = split + 9;
-		g.fill(cardX, l.bottomTop + 38, cardX + 145, l.bottomTop + 88, PANEL_ALT);
-		g.outline(cardX, l.bottomTop + 38, 145, 50, BORDER);
-		g.text(client.font, "CHEST SCAN", cardX + 7, l.bottomTop + 47, TEXT, true);
-		g.text(client.font, "No compatible containers", cardX + 7, l.bottomTop + 64, MUTED);
-	}
 
 	@Override
 	public void onClick(MouseButtonEvent event, boolean doubleClick) {
+		transmitted = suppressed = 0; transmitProblem = "";
 		double mouseX = event.x() / dashboardScale();
 		double mouseY = event.y() / dashboardScale();
 		List<DroneEntity> drones = drones();
 		List<DockInfo> docks = docks(drones);
 		TacticalUiPolicy.CommandAvailability availability = availability(drones);
 		Layout l = layout();
-		if (handlePageClick(l, drones, docks, mouseX, mouseY, event.hasControlDown())) return;
+		if (event.button() != 0) {
+			draggedEntity = -1;
+			panning = page == 0 && l.map.contains(mouseX, mouseY);
+			return;
+		}
+		if (mouseY < l.bottomTop && handlePageClick(l, drones, docks, mouseX, mouseY, event.hasControlDown())) {
+			search.setFocused(false); return;
+		}
+		search.setFocused(page < 5 && searchRect(l).contains(mouseX, mouseY));
+		if (search.isFocused()) { search.mouseClicked(new MouseButtonEvent(mouseX, mouseY, event.buttonInfo()), doubleClick); return; }
+		if (page == 0) for (int i = 0; i < 4; i++) if (mapToolRect(l.map, i).contains(mouseX, mouseY)) {
+			if (i < 2) recenterMap(i == 1);
+			else mapZoom = Math.clamp(mapZoom + (i == 2 ? -0.75 : 0.75), 1.5, 14.0);
+			return;
+		}
+		for (int i = 0; i < 7; i++) if (quickCommandRect(l, i).contains(mouseX, mouseY)) {
+			if (selected.isEmpty()) { notifyAction("対象を選択してください"); return; }
+			if (i == 0) {
+				armedWaypoint = !armedWaypoint;
+				captureDraftTargets();
+				pendingMapX = pendingMapY = Double.NaN;
+				armedRoute = false;
+				armedAttack = false;
+				armedWork = FieldOperationType.NONE;
+				armedGuard = false;
+				page = 0;
+			} else if (i == 1) {
+				page = 0;
+				inspectorScroll = Math.min(323, Math.max(0, inspectorHeight() - l.right.h));
+			} else if (i == 2) {
+				armedRoute = !armedRoute;
+				seedRouteDraft(drones);
+				armedGuard = false;
+				armedWork = FieldOperationType.NONE;
+				armedWaypoint = false;
+				armedAttack = false;
+				pendingMapX = pendingMapY = Double.NaN;
+				page = 0;
+			} else if (i == 3) {
+				page = 1;
+				selectionMode = SelectionMode.GROUP;
+				wingMapMode = false;
+			} else if (i == 4 && availability.hasSelection()) execute(3);
+			else if (i == 5 && availability.hasSelection()) execute(2);
+			else if (i == 6 && availability.hasSelection()) execute(0);
+			return;
+		}
+		if (page >= 5 || mouseY >= l.bottomTop) return;
+		if (page == 0 && pendingTaskPoint != null && (armedGuard || armedWork != FieldOperationType.NONE)) {
+			if (waypointCancelRect(l.map).contains(mouseX, mouseY)) {
+				pendingTaskPoint = null; armedGuard = false; armedWork = FieldOperationType.NONE;
+				notifyAction("作業・警戒の下書きを取り消しました"); return;
+			}
+			if (waypointApplyRect(l.map).contains(mouseX, mouseY)) {
+				double targetX = l.map.x + l.map.w / 2 + (pendingTaskPoint.getX() - mapCenterX) * mapZoom;
+				double targetY = l.map.y + l.map.h / 2 + (pendingTaskPoint.getZ() - mapCenterZ) * mapZoom;
+				if (armedGuard) issueSecurityPatrol(l, targetX, targetY);
+				else issueFieldOperation(l, targetX, targetY);
+				if (transmitted > 0 || (armedWork == FieldOperationType.NONE && !armedGuard)) pendingTaskPoint = null;
+				return;
+			}
+		}
+		if (page == 0 && armedWaypoint && waypointApplyRect(l.map).contains(mouseX, mouseY)
+			&& !Double.isNaN(pendingMapX)) {
+			if (!confirmDraftTargets()) return;
+			if (pendingWorldPoint != null) issueWaypointAt(pendingWorldPoint.getX(), pendingWorldPoint.getZ());
+			armedWaypoint = false;
+			pendingMapX = pendingMapY = Double.NaN;
+			return;
+		}
+		if (page == 0 && armedWaypoint && waypointCancelRect(l.map).contains(mouseX, mouseY)) {
+			armedWaypoint = false;
+			pendingMapX = pendingMapY = Double.NaN;
+			notifyAction("目的地変更を取り消しました");
+			return;
+		}
+		if (page == 0 && armedAttack && l.map.contains(mouseX, mouseY) && mouseY > l.map.y + 29) {
+			TacticalContactPayload.Row target = mapEntityAt(l.map, mouseX, mouseY, mapEntities());
+			if (target == null) {
+				notifyAction("敵対モブのマーカーを選択してください");
+				return;
+			}
+			issueAttack(target.entityId());
+			armedAttack = false;
+			return;
+		}
+		if (page == 0 && armedWaypoint && !doubleClick && l.map.contains(mouseX, mouseY)
+			&& mouseY > l.map.y + 60) {
+			pendingMapX = mouseX;
+			pendingMapY = mouseY;
+			pendingWorldPoint = worldPoint(l.map, mouseX, mouseY);
+			return;
+		}
+		if (page == 0 && !armedWaypoint && !armedRoute && !armedGuard && !armedAttack
+			&& armedWork == FieldOperationType.NONE && !doubleClick && l.map.contains(mouseX, mouseY)
+			&& (selectionMode == SelectionMode.UNIT
+				? selectUnitAt(l.map, drones, mouseX, mouseY, event.hasControlDown() || event.hasShiftDown())
+				: selectOperationalWingAt(l.map, drones, mouseX, mouseY, event.hasControlDown() || event.hasShiftDown()))) return;
 		for (int i = 0; i < 2; i++) if (rosterFilterRect(l, i).contains(mouseX, mouseY)) {
 			if (i == 0) roleFilter = (roleFilter + 2) % 7 - 1;
 			else sortMode = (sortMode + 1) % 4;
@@ -975,7 +1015,9 @@ public final class TacticalDashboard extends AbstractWidget {
 		}
 		if (page == 0 && routeToggleRect(l.map).contains(mouseX, mouseY)) {
 			armedRoute = !armedRoute;
-			routeDraft.clear();
+			seedRouteDraft(drones);
+			armedWaypoint = false;
+			pendingMapX = pendingMapY = Double.NaN;
 			armedWork = FieldOperationType.NONE;
 			armedGuard = false;
 			return;
@@ -986,61 +1028,67 @@ public final class TacticalDashboard extends AbstractWidget {
 		}
 		if (page == 0 && armedRoute && routeCancelRect(l.map).contains(mouseX, mouseY)) {
 			armedRoute = false;
-			routeDraft.clear();
+			routeDraft.clear(); routeStartIndex = -1;
 			notifyAction("巡回ルート編集を取り消しました");
 			return;
 		}
-		if (page == 0 && armedRoute && !doubleClick && l.map.contains(mouseX, mouseY) && mouseY > l.map.y + 28) {
+		if (page == 0 && armedRoute && handleRouteEditor(l.map, mouseX, mouseY)) return;
+		if (page == 0 && armedRoute && !doubleClick && l.map.contains(mouseX, mouseY) && mouseY > l.map.y + 60) {
+			if ((relocateRoutePoint || event.hasShiftDown()) && routePointIndex >= 0 && routePointIndex < routeDraft.size()) {
+				routeDraft.set(routePointIndex, worldPoint(l.map, mouseX, mouseY));
+				relocateRoutePoint = false;
+				return;
+			}
 			addPatrolPoint(l, mouseX, mouseY);
 			return;
 		}
-		if (page == 0 && !armedRoute && doubleClick && l.map.contains(mouseX, mouseY)) {
+		if (page == 0 && !armedRoute && !armedWaypoint
+			&& (doubleClick || armedGuard || armedWork != FieldOperationType.NONE)
+			&& l.map.contains(mouseX, mouseY)) {
 			if (armedGuard) {
-				issueSecurityPatrol(l, mouseX, mouseY);
+				pendingTaskPoint = worldPoint(l.map, mouseX, mouseY);
 				return;
 			}
 			if (armedWork != FieldOperationType.NONE) {
-				issueFieldOperation(l, mouseX, mouseY);
+				pendingTaskPoint = worldPoint(l.map, mouseX, mouseY);
 				return;
 			}
-			LivingEntity target = mapEntityAt(l.map, mouseX, mouseY, mapEntities());
-			if (target == null) issueWaypoint(l, mouseX, mouseY);
-			else issueTracking(target);
+			TacticalContactPayload.Row target = mapEntityAt(l.map, mouseX, mouseY, mapEntities());
+			if (target == null) {
+				armedWaypoint = true;
+				captureDraftTargets();
+				pendingMapX = mouseX;
+				pendingMapY = mouseY;
+				pendingWorldPoint = worldPoint(l.map, mouseX, mouseY);
+			}
+			else issueTracking(target.entityId());
 			return;
 		}
 		if (unitFirstRect(l).contains(mouseX, mouseY)) { unitScroll = 0; return; }
 		if (unitUpRect(l).contains(mouseX, mouseY)) { unitScroll -= unitCapacity(l); return; }
 		if (unitDownRect(l).contains(mouseX, mouseY)) { unitScroll += unitCapacity(l); return; }
 		if (unitLastRect(l).contains(mouseX, mouseY)) { unitScroll = Integer.MAX_VALUE; return; }
-		if (dockFirstRect(l).contains(mouseX, mouseY)) { dockScroll = 0; return; }
-		if (dockUpRect(l).contains(mouseX, mouseY)) { dockScroll -= dockCapacity(l); return; }
-		if (dockDownRect(l).contains(mouseX, mouseY)) { dockScroll += dockCapacity(l); return; }
-		if (dockLastRect(l).contains(mouseX, mouseY)) { dockScroll = Integer.MAX_VALUE; return; }
-		if (missionFirstRect(l).contains(mouseX, mouseY)) { missionScroll = 0; return; }
-		if (missionUpRect(l).contains(mouseX, mouseY)) { missionScroll -= missionCapacity(l); return; }
-		if (missionDownRect(l).contains(mouseX, mouseY)) { missionScroll += missionCapacity(l); return; }
-		if (missionLastRect(l).contains(mouseX, mouseY)) { missionScroll = Integer.MAX_VALUE; return; }
-		if (cargoFirstRect(l).contains(mouseX, mouseY)) { cargoScroll = 0; return; }
-		if (cargoUpRect(l).contains(mouseX, mouseY)) { cargoScroll -= cargoCapacity(l); return; }
-		if (cargoDownRect(l).contains(mouseX, mouseY)) { cargoScroll += cargoCapacity(l); return; }
-		if (cargoLastRect(l).contains(mouseX, mouseY)) { cargoScroll = Integer.MAX_VALUE; return; }
-		for (int i = 0; i < 3; i++) {
+		for (int i = 0; i < 5; i++) {
 			if (!tabRect(l, i).contains(mouseX, mouseY)) continue;
+			if (i == 4) { selected.clear(); return; }
+			if (i == 3) { selectAllReceived(drones); return; }
+			if (i == 2) {
+				List<DroneEntity> visible = visibleRoster(drones);
+				if (selectionMode == SelectionMode.GROUP && wingMapMode)
+					visible = operationalWings(visible).stream().flatMap(wing -> wing.members.stream()).toList();
+				visible.forEach(drone -> selected.add(drone.getId()));
+				return;
+			}
 			selectionMode = SelectionMode.values()[i];
 			unitScroll = 0;
 			wingBoardScroll = 0;
 			wingMapMode = selectionMode == SelectionMode.GROUP && page != 1;
-			Set<Integer> normalized = TacticalUiPolicy.normalizeSelection(
-				TacticalUiPolicy.SelectionScope.values()[selectionMode.ordinal()], selected,
-				drones.stream().map(DroneEntity::getId).toList());
-			selected.clear();
-			selected.addAll(normalized);
 			return;
 		}
 		if (page == 1
 			&& beginWingCardInteraction(l, drones, mouseX, mouseY)) return;
 		List<DroneEntity> displayed = visibleRoster(drones);
-		List<OperationalWing> wings = operationalWings(drones);
+		List<OperationalWing> wings = operationalWings(displayed);
 		int rowCount = selectionMode == SelectionMode.GROUP && wingMapMode ? wings.size() : displayed.size();
 		for (int visible = 0; visible < unitCapacity(l) && unitScroll + visible < rowCount; visible++) {
 			if (!unitRect(l, visible).contains(mouseX, mouseY)) continue;
@@ -1056,11 +1104,13 @@ public final class TacticalDashboard extends AbstractWidget {
 			}
 			int clickedIndex = unitScroll + visible;
 			DroneEntity drone = displayed.get(clickedIndex);
-			if (selectionMode != SelectionMode.ALL) {
+			{
 				boolean toggle = event.hasControlDown()
 					|| selectionToggleRect(unitRect(l, visible)).contains(mouseX, mouseY);
-				if (event.hasShiftDown() && selectionAnchorId >= 0) {
-					int anchorIndex = indexOfEntity(displayed, selectionAnchorId);
+				if (event.hasShiftDown() && selectionAnchor != null) {
+					int anchorIndex = -1;
+					for (int index = 0; index < displayed.size(); index++)
+						if (displayed.get(index).getUUID().equals(selectionAnchor)) { anchorIndex = index; break; }
 					if (!event.hasControlDown()) selected.clear();
 					if (anchorIndex < 0) selected.add(drone.getId());
 					else for (int index = Math.min(anchorIndex, clickedIndex);
@@ -1069,7 +1119,7 @@ public final class TacticalDashboard extends AbstractWidget {
 					if (!toggle) selected.clear();
 					if (toggle && selected.contains(drone.getId())) selected.remove(drone.getId());
 					else selected.add(drone.getId());
-					selectionAnchorId = drone.getId();
+					selectionAnchor = drone.getUUID();
 				}
 			}
 			draggedEntity = drone.getId();
@@ -1081,58 +1131,88 @@ public final class TacticalDashboard extends AbstractWidget {
 			dragY = mouseY;
 			return;
 		}
-		for (int visible = 0; visible < dockCapacity(l) && dockScroll + visible < docks.size(); visible++) {
-			if (!dockRect(l, visible).contains(mouseX, mouseY)) continue;
-			DockInfo dock = docks.get(dockScroll + visible);
-			notifyAction(dock.id + " / " + DockAllocationUiPolicy.dockStateLabel(dock.allocation)
-				+ " / " + DockAllocationUiPolicy.queueLabel(dock.allocation)
-				+ " / " + DockAllocationUiPolicy.holdingLabel(dock.allocation));
+		if (!l.right.contains(mouseX, mouseY)) return;
+		if (page != 3 && radiusEditorRect(l).contains(mouseX, mouseY)) {
+			if (armedGuard || armedWork != FieldOperationType.NONE) openRadiusEditor();
 			return;
 		}
-		for (int i = 0; i < ACTIONS.length; i++) {
+		if (page != 3 && cargoEditorRect(l).contains(mouseX, mouseY)) {
+			openCargoEditor(drones);
+			return;
+		}
+		for (int i = 0; page < 5 && i < ACTIONS.length; i++) {
 			if (commandRect(l, i).contains(mouseX, mouseY)) {
 				if (availability.hasSelection()) execute(i);
 				return;
 			}
 		}
-		for (int i = 0; i < WORK_TYPES.length; i++) {
+		for (int i = 0; page < 5 && i < WORK_TYPES.length; i++) {
 			if (!workRect(l, i).contains(mouseX, mouseY)) continue;
 			if (!autoOperations && !availability.workEnabled(WORK_TYPES[i])) {
 				notifyAction(availability.workBlockReason(WORK_TYPES[i]));
 				return;
 			}
 			armedWork = armedWork == WORK_TYPES[i] ? FieldOperationType.NONE : WORK_TYPES[i];
+			pendingTaskPoint = null;
+			captureDraftTargets();
 			armedRoute = false;
-			routeDraft.clear();
+			armedWaypoint = false;
+			armedAttack = false;
+			pendingMapX = pendingMapY = Double.NaN;
+			routeDraft.clear(); routeStartIndex = -1;
 			page = 0;
 			armedGuard = false;
 			return;
 		}
-		if (autoOperationsRect(l).contains(mouseX, mouseY)) {
+		if (page < 5 && autoOperationsRect(l).contains(mouseX, mouseY)) {
 			autoOperations = !autoOperations;
 			notifyAction(autoOperations
-				? "AUTO OPS: 待機中の適格機から一時Task Forceを自動編成します"
-				: "AUTO OPSを解除しました。選択中ユニットへ任務を割り当てます");
+				? "自動編成: 待機中の適格機から任務部隊を編成します"
+				: "自動編成を解除しました。選択機を対象にします");
 			return;
 		}
-		if (workRect(l, WORK_TYPES.length).contains(mouseX, mouseY)) {
+		if (page < 5 && forceOverrideRect(l).contains(mouseX, mouseY)) {
+			if (selected.isEmpty()) { notifyAction("強制介入する機体を選択してください"); return; }
+			forceOverride = !forceOverride;
+			notifyAction(forceOverride
+				? "強制介入 ON / 次の命令は現在任務・充填・照射を中断します"
+				: "強制介入 OFF / 通常の任務優先度を使用します");
+			return;
+		}
+		if (page != 3 && attackTargetRect(l).contains(mouseX, mouseY)) {
+			boolean securitySelected = drones.stream().anyMatch(d -> selected.contains(d.getId())
+				&& d.role() == DroneRole.SECURITY);
+			if (!securitySelected) { notifyAction("攻撃には警備機を選択してください"); return; }
+			armedAttack = !armedAttack;
+			armedWaypoint = armedRoute = armedGuard = false;
+			armedWork = FieldOperationType.NONE;
+			page = 0;
+			notifyAction(armedAttack ? "地図上の敵対モブを選択してください" : "攻撃対象指定を解除しました");
+			return;
+		}
+		if (page < 5 && workRect(l, WORK_TYPES.length).contains(mouseX, mouseY)) {
 			if (!availability.securityEnabled()) {
-				notifyAction("GUARDにはSecurityユニットが必要です");
+				notifyAction("警戒には警備機が必要です");
 				return;
 			}
 			armedGuard = !armedGuard;
+			pendingTaskPoint = null;
+			captureDraftTargets();
 			armedRoute = false;
-			routeDraft.clear();
+			armedWaypoint = false;
+			armedAttack = false;
+			pendingMapX = pendingMapY = Double.NaN;
+			routeDraft.clear(); routeStartIndex = -1;
 			page = 0;
 			armedWork = FieldOperationType.NONE;
 			return;
 		}
-		if (modulePanelVisible(l)) {
+		if (page < 5 && modulePanelVisible(l)) {
 			if (capacityUpgradeRect(l).contains(mouseX, mouseY) && selected.size() == 1) {
 				DroneEntity unit = drones.stream().filter(d -> selected.contains(d.getId())).findFirst().orElse(null);
 				if (unit != null && unit.role() == DroneRole.SECURITY && unit.isDocked()
 					&& unit.capacityTier() < jp.morrowgear.drone.PayloadCapacity.MAX_TIER) {
-					ClientPlayNetworking.send(new DroneCommandPayload(unit.getId(), "capacity_upgrade:" + unit.capacityTier()));
+					sendDroneCommand(new DroneCommandPayload(unit.getId(), "capacity_upgrade:" + unit.capacityTier()));
 				}
 				return;
 			}
@@ -1144,12 +1224,13 @@ public final class TacticalDashboard extends AbstractWidget {
 				List<DroneEntity> selection = drones.stream()
 					.filter(drone -> selected.contains(drone.getId())).toList();
 				if (selection.isEmpty() || selection.stream().anyMatch(drone -> drone.role() != DroneRole.SECURITY)) {
-					notifyAction("武装指定にはSecurityユニットを選択してください");
+					notifyAction("武装指定には警備機を選択してください");
 					return;
 				}
-				for (int id : selected) ClientPlayNetworking.send(new DroneCommandPayload(id,
-					"weapon_module:" + WEAPON_LOADOUTS[i].id()));
-				notifyAction(WEAPON_LABELS[i] + " 武装変更を要求しました");
+				UUID commandId = UUID.randomUUID();
+				for (int id : selected) sendDroneCommand(commandId, id,
+					"weapon_module:" + WEAPON_LOADOUTS[i].id());
+				notifyCommandResult();
 				return;
 			}
 			if (dualModulePanelVisible(l) || !securitySelection) for (int i = 0; i < MODULE_ROLES.length; i++) {
@@ -1161,29 +1242,17 @@ public final class TacticalDashboard extends AbstractWidget {
 					notifyAction("モジュール換装には選択機すべてのDock着艦が必要です");
 					return;
 				}
-				for (int id : selected) ClientPlayNetworking.send(new DroneCommandPayload(id, "module:" + MODULE_ROLES[i].id()));
-					notifyAction(TacticalUiPolicy.moduleLabel(MODULE_ROLES[i]) + " モジュール換装を要求しました");
+				UUID commandId = UUID.randomUUID();
+				for (int id : selected) sendDroneCommand(commandId, id, "module:" + MODULE_ROLES[i].id());
+					notifyCommandResult();
 				return;
 			}
-		}
-		List<ContainerInfo> containers = containers();
-		for (int visible = 0; visible < cargoCapacity(l) && cargoScroll + visible < containers.size(); visible++) {
-			ContainerInfo container = containers.get(cargoScroll + visible);
-			String action = cargoSourceRect(l, visible).contains(mouseX, mouseY) ? "cargo_source:"
-				: cargoTargetRect(l, visible).contains(mouseX, mouseY) ? "cargo_target:" : null;
-			if (action == null) continue;
-			for (DroneEntity drone : drones) {
-				if (selected.contains(drone.getId()) && drone.role() == DroneRole.CARGO) {
-					ClientPlayNetworking.send(new DroneCommandPayload(drone.getId(), action + container.pos));
-				}
-			}
-			notifyAction((action.startsWith("cargo_source") ? "搬出元" : "搬入先") + "を " + container.label + " に変更要求しました");
-			return;
 		}
 	}
 
 	@Override
 	protected void onDrag(MouseButtonEvent event, double deltaX, double deltaY) {
+		if (panning) { mapCenterX -= deltaX / dashboardScale() / mapZoom; mapCenterZ -= deltaY / dashboardScale() / mapZoom; return; }
 		if (draggedEntity < 0) return;
 		dragX = event.x() / dashboardScale();
 		dragY = event.y() / dashboardScale();
@@ -1191,6 +1260,8 @@ public final class TacticalDashboard extends AbstractWidget {
 
 	@Override
 	public void onRelease(MouseButtonEvent event) {
+		transmitted = suppressed = 0; transmitProblem = "";
+		if (panning) { panning = false; return; }
 		if (Math.hypot(event.x() / dashboardScale() - dragStartX, event.y() / dashboardScale() - dragStartY) < 7) {
 			draggedEntity = -1; return;
 		}
@@ -1205,11 +1276,17 @@ public final class TacticalDashboard extends AbstractWidget {
 				draggedEntity = -1;
 				return;
 			}
-			for (int i = 0; i < ACTIONS.length; i++) if (commandRect(l, i).contains(mouseX, mouseY)) execute(i);
+			if (page < 5 && l.right.contains(mouseX, mouseY))
+				for (int i = 0; i < ACTIONS.length; i++) if (commandRect(l, i).contains(mouseX, mouseY)) execute(i);
 			if (page == 0 && l.map.contains(mouseX, mouseY)) {
-				LivingEntity target = mapEntityAt(l.map, mouseX, mouseY, mapEntities());
-				if (target == null) issueWaypoint(l, mouseX, mouseY);
-				else issueTracking(target);
+				TacticalContactPayload.Row target = mapEntityAt(l.map, mouseX, mouseY, mapEntities());
+				if (target == null) {
+					armedWaypoint = true; armedRoute = false; armedGuard = false; armedWork = FieldOperationType.NONE;
+					captureDraftTargets();
+					pendingMapX = mouseX; pendingMapY = mouseY;
+					pendingWorldPoint = worldPoint(l.map, mouseX, mouseY);
+				}
+				else issueTracking(target.entityId());
 			}
 		}
 		draggedEntity = -1;
@@ -1222,6 +1299,7 @@ public final class TacticalDashboard extends AbstractWidget {
 		Layout l = layout();
 		int direction = scrollY > 0 ? -1 : scrollY < 0 ? 1 : 0;
 		if (direction == 0) return false;
+		if (page < 5 && l.right.contains(x, y)) { inspectorScroll = Math.clamp(inspectorScroll + direction * 30, 0, Math.max(0, inspectorHeight() - l.right.h)); return true; }
 		if (page >= 2 && (page >= 5 || l.map.contains(x, y))) {
 			pageScroll = Math.max(0, pageScroll + direction); return true;
 		}
@@ -1231,12 +1309,47 @@ public final class TacticalDashboard extends AbstractWidget {
 		else if (l.map.contains(x, y)) {
 			mapZoom = Math.max(1.5, Math.min(14.0, mapZoom + (scrollY > 0 ? 0.75 : -0.75)));
 		}
-		else if (x < l.leftWidth && y >= l.header + 50 && y < l.dockHeaderY - 5) unitScroll += direction;
-		else if (x < l.leftWidth && y >= l.dockHeaderY) dockScroll += direction;
+		else if (x >= NAV_RAIL_WIDTH && x < l.leftWidth && y >= l.header + 50 && y < l.dockHeaderY - 5) unitScroll += direction;
+		else if (x >= NAV_RAIL_WIDTH && x < l.leftWidth && y >= l.dockHeaderY) dockScroll += direction;
 		else if (y >= l.bottomTop && x < virtualWidth() * 0.60) missionScroll += direction;
 		else if (y >= l.bottomTop) cargoScroll += direction;
 		else return false;
 		return true;
+	}
+
+	@Override
+	protected boolean isValidClickButton(net.minecraft.client.input.MouseButtonInfo button) {
+		return button.button() >= 0 && button.button() <= 2;
+	}
+
+	boolean isPanning() { return panning; }
+
+	@Override
+	public boolean charTyped(net.minecraft.client.input.CharacterEvent event) {
+		return search.isFocused() && search.charTyped(event);
+	}
+
+	@Override
+	public boolean keyPressed(KeyEvent event) {
+		if (search.isFocused() && search.keyPressed(event)) return true;
+		if (event.key() == 256 && (armedWaypoint || armedRoute || armedGuard || armedAttack
+			|| armedWork != FieldOperationType.NONE)) {
+			armedWaypoint = false;
+			armedRoute = false;
+			armedGuard = false;
+			armedAttack = false;
+			armedWork = FieldOperationType.NONE;
+			pendingMapX = pendingMapY = Double.NaN;
+			routeDraft.clear(); routeStartIndex = -1;
+			notifyAction("コマンド入力を取り消しました");
+			return true;
+		}
+		return super.keyPressed(event);
+	}
+
+	private void selectAllReceived(List<DroneEntity> drones) {
+		selected.clear();
+		drones.forEach(drone -> selected.add(drone.getId()));
 	}
 
 	private void execute(int index) {
@@ -1246,7 +1359,7 @@ public final class TacticalDashboard extends AbstractWidget {
 			if (now >= confirmStoreUntil || !selected.equals(confirmStoreSelection)) {
 				confirmStoreUntil = now + 60L;
 				confirmStoreSelection = Set.copyOf(selected);
-				notifyAction("格納すると機体はアイテム化されます。STOREをもう一度押してください");
+				notifyAction("格納すると機体はアイテム化されます。格納をもう一度押してください");
 				return;
 			}
 		}
@@ -1254,21 +1367,16 @@ public final class TacticalDashboard extends AbstractWidget {
 		confirmStoreSelection = Set.of();
 		if (ACTIONS[index].equals("follow")) {
 			issueFollowFormation();
-			notifyAction(selected.size() + "機へFOLLOWを指示しました");
+			notifyCommandResult();
 			return;
 		}
-		for (int id : selected) ClientPlayNetworking.send(new DroneCommandPayload(id, ACTIONS[index]));
-		notifyAction(selected.size() + "機へ" + actionLabel(index, drones()) + "を指示しました");
+		UUID commandId = UUID.randomUUID();
+		for (int id : selected) sendDroneCommand(commandId, id, ACTIONS[index]);
+		notifyCommandResult();
 	}
 
 	private String actionLabel(int index, List<DroneEntity> drones) {
-		return switch (ACTIONS[index]) {
-			case "follow" -> "FOLLOW ME";
-			case "return" -> "RETURN TO ME";
-			case "dock" -> "TO DOCK";
-			case "orbit" -> "ORBIT ME";
-			default -> TacticalUiPolicy.actionLabel(ACTIONS[index]);
-		};
+		return ControllerDisplayText.action(ACTIONS[index]);
 	}
 
 	private String selectionWingSummary(List<DroneEntity> drones, List<DroneEntity> selection) {
@@ -1283,6 +1391,7 @@ public final class TacticalDashboard extends AbstractWidget {
 		if (client.player == null || client.level == null || selected.isEmpty()) return;
 		List<List<DroneEntity>> formations = selectedMissionFormations();
 		String missionRoot = client.level.getGameTime() + "-follow-" + client.player.getId();
+		UUID commandId = UUID.randomUUID();
 		for (int wing = 0; wing < formations.size(); wing++) {
 			List<DroneEntity> formation = formations.get(wing).stream()
 				.sorted(Comparator.comparingDouble((DroneEntity drone) -> drone.distanceToSqr(client.player))
@@ -1291,8 +1400,8 @@ public final class TacticalDashboard extends AbstractWidget {
 			String missionId = wingMissionId(missionRoot, wing, formations.size());
 			for (int index = 0; index < formation.size(); index++) {
 				DroneEntity drone = formation.get(index);
-				ClientPlayNetworking.send(new DroneCommandPayload(drone.getId(),
-					"follow:" + missionId + ":" + formation.size() + ":" + index + ":" + leader.getId()));
+				sendDroneCommand(commandId, drone.getId(),
+					"follow:" + missionId + ":" + formation.size() + ":" + index + ":" + leader.getId());
 			}
 		}
 	}
@@ -1300,50 +1409,60 @@ public final class TacticalDashboard extends AbstractWidget {
 	private void issueFieldOperation(Layout layout, double mouseX, double mouseY) {
 		if (client.player == null || client.level == null || (!autoOperations && selected.isEmpty())
 			|| armedWork == FieldOperationType.NONE) return;
+		if (!autoOperations && !confirmDraftTargets()) return;
 		int centerX = layout.map.x + layout.map.w / 2;
 		int centerY = layout.map.y + layout.map.h / 2;
-		int worldX = (int)Math.floor(client.player.getX() + (mouseX - centerX) / mapZoom);
-		int worldZ = (int)Math.floor(client.player.getZ() + (mouseY - centerY) / mapZoom);
+		int worldX = (int)Math.floor(mapCenterX + (mouseX - centerX) / mapZoom);
+		int worldZ = (int)Math.floor(mapCenterZ + (mouseY - centerY) / mapZoom);
+		if (!client.level.hasChunkAt(new BlockPos(worldX, 0, worldZ))) {
+			notifyAction("地形未受信 / 作業高度を確認できないため未送信"); return;
+		}
 		int surfaceY = client.level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, worldX, worldZ);
 		int worldY = armedWork == FieldOperationType.ORE ? surfaceY - 16
 			: surfaceY - 1;
-		int radius = armedWork == FieldOperationType.ORE ? 32
-			: armedWork == FieldOperationType.EXCAVATE ? 8 : 20;
+		int radius = workRadii[workIndex(armedWork)];
 		String orderId = Long.toString(client.level.getGameTime(), 36).toUpperCase()
 			+ "-" + armedWork.id().toUpperCase() + "-" + worldX + "-" + worldZ;
 		if (autoOperations) {
+			if (!ClientPlayNetworking.canSend(FleetOperationPayload.TYPE)) {
+				notifyAction("自動編成の通信リンクがありません / 未送信");
+				return;
+			}
 			ClientPlayNetworking.send(new FleetOperationPayload(armedWork.id(), worldX, worldZ, radius));
-			notifyAction("AUTO OPS / " + armedWork.label() + " / Task Force編成を要求しました");
+			notifyAction("自動編成要求を送信 / " + WORK_LABELS[workIndex(armedWork)] + " / 結果未確認");
 			armedWork = FieldOperationType.NONE;
 			return;
 		}
+		UUID commandId = UUID.randomUUID();
 		for (DroneEntity drone : drones()) {
 			if (!selected.contains(drone.getId()) || !MissionAssignmentPolicy.allows(drone.role(),
 				MissionAssignmentPolicy.MissionKind.FIELD_OPERATION)) continue;
-			ClientPlayNetworking.send(new DroneCommandPayload(drone.getId(), "work:" + armedWork.id()
-				+ ":" + worldX + ":" + worldY + ":" + worldZ + ":" + radius + ":" + orderId));
+			sendDroneCommand(commandId, drone.getId(), "work:" + armedWork.id()
+				+ ":" + worldX + ":" + worldY + ":" + worldZ + ":" + radius + ":" + orderId);
 		}
-		notifyAction(armedWork.label() + "を " + TacticalUiPolicy.radiusLabel(radius) + " で開始要求しました");
+		notifyCommandResult();
 		armedWork = FieldOperationType.NONE;
 	}
 
 	private void issueSecurityPatrol(Layout layout, double mouseX, double mouseY) {
+		if (!confirmDraftTargets()) return;
 		if (client.player == null || client.level == null || selected.isEmpty()) return;
 		int centerX = layout.map.x + layout.map.w / 2;
 		int centerY = layout.map.y + layout.map.h / 2;
-		int worldX = (int)Math.floor(client.player.getX() + (mouseX - centerX) / mapZoom);
-		int worldZ = (int)Math.floor(client.player.getZ() + (mouseY - centerY) / mapZoom);
+		int worldX = (int)Math.floor(mapCenterX + (mouseX - centerX) / mapZoom);
+		int worldZ = (int)Math.floor(mapCenterZ + (mouseY - centerY) / mapZoom);
 		int worldY = client.level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, worldX, worldZ);
-		int radius = 24;
+		int radius = guardRadius;
 		String orderId = Long.toString(client.level.getGameTime(), 36).toUpperCase()
 			+ "-GUARD-" + worldX + "-" + worldZ;
+		UUID commandId = UUID.randomUUID();
 		for (DroneEntity drone : drones()) {
 			if (!selected.contains(drone.getId()) || !MissionAssignmentPolicy.allows(drone.role(),
 				MissionAssignmentPolicy.MissionKind.SECURITY_PATROL)) continue;
-			ClientPlayNetworking.send(new DroneCommandPayload(drone.getId(), "guard:"
-				+ worldX + ":" + worldY + ":" + worldZ + ":" + radius + ":" + orderId));
+			sendDroneCommand(commandId, drone.getId(), "guard:"
+				+ worldX + ":" + worldY + ":" + worldZ + ":" + radius + ":" + orderId);
 		}
-		notifyAction("GUARDを " + TacticalUiPolicy.radiusLabel(radius) + " で開始要求しました");
+		notifyCommandResult();
 		armedGuard = false;
 	}
 
@@ -1351,41 +1470,62 @@ public final class TacticalDashboard extends AbstractWidget {
 		if (client.player == null || selected.isEmpty()) return;
 		int centerX = layout.map.x + layout.map.w / 2;
 		int centerY = layout.map.y + layout.map.h / 2;
-		int worldX = (int) Math.floor(client.player.getX() + (mouseX - centerX) / mapZoom);
-		int worldZ = (int) Math.floor(client.player.getZ() + (mouseY - centerY) / mapZoom);
-		String missionRoot = client.level.getGameTime() + "-" + client.player.getId() + "-" + worldX + "-" + worldZ;
-		List<List<DroneEntity>> formations = selectedMissionFormations();
-		int total = 0;
-		for (int wing = 0; wing < formations.size(); wing++) {
-			List<DroneEntity> formation = formations.get(wing);
-			String missionId = wingMissionId(missionRoot, wing, formations.size());
-			for (int index = 0; index < formation.size(); index++) {
-				DroneEntity drone = formation.get(index);
-				ClientPlayNetworking.send(new DroneCommandPayload(drone.getId(),
-					"move:" + worldX + ":" + worldZ + ":" + missionId + ":" + formation.size() + ":" + index));
-				total++;
-			}
-		}
-		notifyAction(total + "機 / " + formations.size() + " Wingを地点 " + worldX + ", " + worldZ + " へ派遣しました");
+		int worldX = (int) Math.floor(mapCenterX + (mouseX - centerX) / mapZoom);
+		int worldZ = (int) Math.floor(mapCenterZ + (mouseY - centerY) / mapZoom);
+		issueWaypointAt(worldX, worldZ);
 	}
 
-	private void issueTracking(LivingEntity target) {
+	private void issueWaypointAt(int worldX, int worldZ) {
 		if (client.player == null || client.level == null || selected.isEmpty()) return;
-		String missionRoot = client.level.getGameTime() + "-track-" + target.getId();
+		String missionRoot = client.level.getGameTime() + "-" + client.player.getId() + "-" + worldX + "-" + worldZ;
 		List<List<DroneEntity>> formations = selectedMissionFormations();
+		UUID commandId = UUID.randomUUID();
 		int total = 0;
 		for (int wing = 0; wing < formations.size(); wing++) {
 			List<DroneEntity> formation = formations.get(wing);
 			String missionId = wingMissionId(missionRoot, wing, formations.size());
 			for (int index = 0; index < formation.size(); index++) {
 				DroneEntity drone = formation.get(index);
-				ClientPlayNetworking.send(new DroneCommandPayload(drone.getId(),
-					"track:" + target.getId() + ":" + missionId + ":" + formation.size() + ":" + index));
+				sendDroneCommand(commandId, drone.getId(),
+					"move:" + worldX + ":" + worldZ + ":" + missionId + ":" + formation.size() + ":" + index);
 				total++;
 			}
 		}
-		notifyAction(total + "機 / " + formations.size() + " Wingで "
-			+ target.getName().getString() + " を追跡します");
+		notifyCommandResult();
+	}
+
+	private void issueTracking(int targetEntityId) {
+		if (client.player == null || client.level == null || selected.isEmpty()) return;
+		String missionRoot = client.level.getGameTime() + "-track-" + targetEntityId;
+		List<List<DroneEntity>> formations = selectedMissionFormations();
+		UUID commandId = UUID.randomUUID();
+		int total = 0;
+		for (int wing = 0; wing < formations.size(); wing++) {
+			List<DroneEntity> formation = formations.get(wing);
+			String missionId = wingMissionId(missionRoot, wing, formations.size());
+			for (int index = 0; index < formation.size(); index++) {
+				DroneEntity drone = formation.get(index);
+				sendDroneCommand(commandId, drone.getId(),
+					"track:" + targetEntityId + ":" + missionId + ":" + formation.size() + ":" + index);
+				total++;
+			}
+		}
+		notifyCommandResult();
+	}
+
+	private void issueAttack(int targetEntityId) {
+		if (client.player == null || client.level == null || selected.isEmpty()) return;
+		List<DroneEntity> security = drones().stream().filter(drone -> selected.contains(drone.getId())
+			&& drone.role() == DroneRole.SECURITY).sorted(Comparator.comparing(DroneEntity::unitId)).toList();
+		if (security.isEmpty()) { notifyAction("攻撃可能な警備機が選択されていません"); return; }
+		String missionId = client.level.getGameTime() + "-attack-" + targetEntityId;
+		UUID commandId = UUID.randomUUID();
+		for (int index = 0; index < security.size(); index++) {
+			DroneEntity drone = security.get(index);
+			sendDroneCommand(commandId, drone.getId(), "attack:" + targetEntityId
+				+ ":" + missionId + ":" + security.size() + ":" + index);
+		}
+		notifyCommandResult();
 	}
 
 	private void addPatrolPoint(Layout layout, double mouseX, double mouseY) {
@@ -1395,8 +1535,8 @@ public final class TacticalDashboard extends AbstractWidget {
 		}
 		int centerX = layout.map.x + layout.map.w / 2;
 		int centerY = layout.map.y + layout.map.h / 2;
-		int worldX = (int) Math.floor(client.player.getX() + (mouseX - centerX) / mapZoom);
-		int worldZ = (int) Math.floor(client.player.getZ() + (mouseY - centerY) / mapZoom);
+		int worldX = (int) Math.floor(mapCenterX + (mouseX - centerX) / mapZoom);
+		int worldZ = (int) Math.floor(mapCenterZ + (mouseY - centerY) / mapZoom);
 		BlockPos point = new BlockPos(worldX, 0, worldZ);
 		if (!routeDraft.isEmpty() && routeDraft.getLast().distSqr(point) < 4.0) {
 			notifyAction("直前の地点と近すぎます");
@@ -1407,33 +1547,49 @@ public final class TacticalDashboard extends AbstractWidget {
 	}
 
 	private void issuePatrolRoute() {
+		if (!confirmDraftTargets()) return;
 		if (client.player == null || client.level == null || selected.isEmpty() || routeDraft.isEmpty()) {
 			notifyAction("巡回地点を1点以上設定してください");
 			return;
 		}
 		List<List<DroneEntity>> formations = selectedMissionFormations();
+		if (routeDraft.stream().anyMatch(point -> !ControllerNumericPolicy.withinRouteRange(
+			point.getX(), point.getZ(), client.player.getBlockX(), client.player.getBlockZ()))) {
+			notifyAction("未送信 / 巡回地点は現在位置からX/Z各512ブロック以内に設定してください");
+			return;
+		}
 		String missionRoot = "R" + Long.toString(client.level.getGameTime(), 36).toUpperCase();
 		String encoded = PatrolRoutePolicy.encode(routeDraft);
+		UUID commandId = UUID.randomUUID();
 		int total = 0;
 		for (int wing = 0; wing < formations.size(); wing++) {
 			List<DroneEntity> formation = formations.get(wing);
 			String missionId = wingMissionId(missionRoot, wing, formations.size());
 			Vec3 formationOrigin = PatrolRoutePolicy.formationOrigin(
 				formation.stream().map(DroneEntity::position).toList());
-			int startIndex = PatrolRoutePolicy.nearestIndex(routeDraft, formationOrigin);
+			int startIndex = routeStartIndex >= 0 && routeStartIndex < routeDraft.size()
+				? routeStartIndex : PatrolRoutePolicy.nearestIndex(routeDraft, formationOrigin);
 			int originX = (int)Math.floor(formationOrigin.x);
 			int originZ = (int)Math.floor(formationOrigin.z);
+			if (!ControllerNumericPolicy.withinRouteRange(originX, originZ, client.player.getBlockX(), client.player.getBlockZ())) {
+				suppressed += formation.size(); transmitProblem = "編隊の開始位置が操作範囲外"; continue;
+			}
+			String longestAction = "patrol:" + missionId + ":" + formation.size() + ":" + (formation.size() - 1)
+				+ ":" + startIndex + ":" + originX + ":" + originZ + ":" + encoded;
+			if (!jp.morrowgear.drone.DroneCommandPolicy.acceptablePayload(longestAction)) {
+				suppressed += formation.size(); transmitProblem = "経路情報が送信長の上限を超えています"; continue;
+			}
 			for (int index = 0; index < formation.size(); index++) {
 				DroneEntity drone = formation.get(index);
-				ClientPlayNetworking.send(new DroneCommandPayload(drone.getId(), "patrol:" + missionId
+				sendDroneCommand(commandId, drone.getId(), "patrol:" + missionId
 					+ ":" + formation.size() + ":" + index + ":" + startIndex
-					+ ":" + originX + ":" + originZ + ":" + encoded));
+					+ ":" + originX + ":" + originZ + ":" + encoded);
 				total++;
 			}
 		}
-		notifyAction(total + "機 / " + formations.size() + " Wingへ" + routeDraft.size() + "点の巡回ルートを割り当てました");
+		notifyCommandResult();
 		armedRoute = false;
-		routeDraft.clear();
+		routeDraft.clear(); routeStartIndex = -1;
 	}
 
 	private void drawPatrolRoutes(GuiGraphicsExtractor g, Rect map, List<DroneEntity> drones) {
@@ -1453,8 +1609,9 @@ public final class TacticalDashboard extends AbstractWidget {
 			if (point == null) continue;
 			MapPoint next = visible.get((index + 1) % visible.size());
 			if (points.size() > 1 && next != null) drawLine(g, point.x, point.y, next.x, next.y, color);
-			g.fill(point.x - 5, point.y - 5, point.x + 6, point.y + 6, 0xE6081014);
-			g.outline(point.x - 5, point.y - 5, 11, 11, index == activeIndex ? AMBER : color);
+			int radius = preferences.markerRadius() + 2;
+			g.fill(point.x - radius, point.y - radius, point.x + radius + 1, point.y + radius + 1, 0xE6081014);
+			g.outline(point.x - radius, point.y - radius, radius * 2 + 1, radius * 2 + 1, index == activeIndex ? AMBER : color);
 			g.centeredText(client.font, Integer.toString(index + 1), point.x, point.y - 4, TEXT);
 		}
 	}
@@ -1463,17 +1620,18 @@ public final class TacticalDashboard extends AbstractWidget {
 		Rect toggle = routeToggleRect(map);
 		g.fill(toggle.x, toggle.y, toggle.right(), toggle.bottom(), armedRoute ? 0xFF174139 : PANEL_ALT);
 		g.outline(toggle.x, toggle.y, toggle.w, toggle.h, armedRoute ? GREEN : CYAN);
-		g.centeredText(client.font, armedRoute ? "ROUTE " + routeDraft.size() + "/" + PatrolRoutePolicy.MAX_POINTS : "ROUTE",
+		g.centeredText(client.font, armedRoute ? "経路 " + routeDraft.size() + "/" + PatrolRoutePolicy.MAX_POINTS : "経路編集",
 			toggle.x + toggle.w / 2, toggle.y + 6, armedRoute ? GREEN : TEXT);
 		if (!armedRoute) return;
 		Rect start = routeStartRect(map);
 		Rect cancel = routeCancelRect(map);
 		g.fill(start.x, start.y, start.right(), start.bottom(), start.contains(mouseX, mouseY) ? PANEL_RAISED : PANEL_ALT);
 		g.outline(start.x, start.y, start.w, start.h, routeDraft.isEmpty() ? BORDER : GREEN);
-		g.centeredText(client.font, "START", start.x + start.w / 2, start.y + 6, routeDraft.isEmpty() ? MUTED : TEXT);
+		g.centeredText(client.font, "巡回を指示", start.x + start.w / 2, start.y + 6, routeDraft.isEmpty() ? MUTED : TEXT);
 		g.fill(cancel.x, cancel.y, cancel.right(), cancel.bottom(), cancel.contains(mouseX, mouseY) ? PANEL_RAISED : PANEL_ALT);
 		g.outline(cancel.x, cancel.y, cancel.w, cancel.h, RED);
-		g.centeredText(client.font, "CANCEL", cancel.x + cancel.w / 2, cancel.y + 6, TEXT);
+		g.centeredText(client.font, "取消", cancel.x + cancel.w / 2, cancel.y + 6, TEXT);
+		drawRouteEditor(g, map);
 	}
 
 	private TacticalUiPolicy.CommandAvailability availability(List<DroneEntity> drones) {
@@ -1491,7 +1649,65 @@ public final class TacticalDashboard extends AbstractWidget {
 			+ " / SEC " + availability.security();
 	}
 
+	private static ControllerCommandWatch.Observation commandObservation(DroneEntity drone) {
+		return new ControllerCommandWatch.Observation(drone.mode() + ":" + drone.groupId() + ":" + drone.role()
+			+ ":" + drone.securityLoadout() + ":" + drone.capacityTier() + ":" + drone.operationalState()
+			+ ":" + drone.patrolRoutePoints() + ":" + drone.isDocked()
+			+ ":" + drone.hasCargoSource() + ":" + drone.cargoSource()
+			+ ":" + drone.hasCargoTarget() + ":" + drone.cargoTarget(), drone.missionId());
+	}
+
+	private void sendDroneCommand(DroneCommandPayload payload) {
+		DroneEntity drone = drones().stream().filter(d -> d.getId() == payload.entityId()).findFirst().orElse(null);
+		if (drone == null || !ClientPlayNetworking.canSend(DroneCommandPayload.TYPE)) {
+			suppressed++;
+			transmitProblem = "未受信または通信リンクなし";
+			notifyAction("");
+			return;
+		}
+		if (!locallyEligible(drone)) { notifyCommandResult(); return; }
+		String rawAction = payload.action();
+		String outgoingAction = forceOverride && forceableAction(rawAction) ? "force:" + rawAction : rawAction;
+		DroneCommandPayload outgoing = outgoingAction.equals(rawAction) ? payload
+			: new DroneCommandPayload(payload.commandId(), payload.entityId(), outgoingAction);
+		String[] fields = rawAction.split(":", 8);
+		String mission = fields[0].equals("patrol") && fields.length > 1 ? fields[1]
+			: fields[0].equals("move") && fields.length > 3 ? fields[3]
+			: (fields[0].equals("track") || fields[0].equals("attack")) && fields.length > 2 ? fields[2] : "";
+		if (!commandWatch.submit(outgoing.commandId(), drone.getUUID(), outgoingAction,
+			commandObservation(drone), mission, System.currentTimeMillis())) {
+			suppressed++;
+			transmitProblem = "同じ指示の結果を確認中";
+			notifyAction("");
+			return;
+		}
+		menuRequestAt = 0;
+		ClientPlayNetworking.send(outgoing);
+		transmitted++;
+		notifyAction("");
+	}
+
+	private void sendDroneCommand(UUID commandId, int entityId, String action) {
+		sendDroneCommand(new DroneCommandPayload(commandId, entityId, action));
+	}
+
+	private static boolean forceableAction(String action) {
+		if (action == null || action.equals("decommission")) return false;
+		return action.equals("standby") || action.equals("return") || action.equals("dock")
+			|| action.equals("orbit") || action.startsWith("move:") || action.startsWith("track:")
+			|| action.startsWith("attack:") || action.startsWith("patrol:") || action.startsWith("follow:")
+			|| action.startsWith("guard:") || action.startsWith("work:");
+	}
+
+	private void notifyCommandResult() {
+		notifyAction(ControllerDispatchFeedback.describe(transmitted, suppressed, transmitProblem));
+	}
+
 	private void notifyAction(String message) {
+		if (transmitted + suppressed > 0) {
+			message = ControllerDispatchFeedback.describe(transmitted, suppressed, transmitProblem);
+		}
+		if (message != null && (message.contains("要求を送信") || message.startsWith("現地回収を要求"))) menuRequestAt = System.currentTimeMillis();
 		transientNotice = message == null ? "" : message;
 		transientNoticeUntil = client.level == null ? 0 : client.level.getGameTime() + 80L;
 	}
@@ -1502,8 +1718,16 @@ public final class TacticalDashboard extends AbstractWidget {
 	}
 
 	private List<List<DroneEntity>> selectedMissionFormations() {
+		List<DroneEntity> eligible = selectedMissionFormation().stream().filter(this::locallyEligible).toList();
 		return jp.morrowgear.drone.MissionWingPolicy.partitionByWing(
-			selectedMissionFormation(), DroneEntity::groupId);
+			eligible, DroneEntity::groupId);
+	}
+
+	private boolean locallyEligible(DroneEntity drone) {
+		if (ControllerCommandEligibility.maySubmit(drone.salvageState())) return true;
+		suppressed++;
+		transmitProblem = "回収物の搬送・整備中 / 完了後に再確認";
+		return false;
 	}
 
 	private static String wingMissionId(String root, int wing, int wingCount) {
@@ -1526,8 +1750,8 @@ public final class TacticalDashboard extends AbstractWidget {
 				.findFirst().orElse(members.getFirst());
 			int recovery = (int) members.stream().filter(member -> member.recoveryLevel() > 0).count();
 			int battery = (int)Math.round(members.stream().mapToInt(DroneEntity::batteryPercent).average().orElse(0));
-			String mission = leader.hasActiveFieldOperation() ? leader.fieldOperationType().label()
-				: leader.mode() == DroneMode.STANDBY ? "STANDBY" : statusLabel(leader);
+			String mission = leader.hasActiveFieldOperation() ? WORK_LABELS[workIndex(leader.fieldOperationType())]
+				: leader.mode() == DroneMode.STANDBY ? "待機" : statusLabel(leader);
 			result.add(new WingCard(entry.getKey(), members, leader, recovery, battery, mission));
 		}
 		result.sort(Comparator.comparing(WingCard::groupId));
@@ -1542,7 +1766,8 @@ public final class TacticalDashboard extends AbstractWidget {
 				return true;
 			}
 			String suffix = java.util.UUID.randomUUID().toString().substring(0, 6).toUpperCase();
-			members.forEach(d -> ClientPlayNetworking.send(new DroneCommandPayload(d.getId(), "wing_create:WING-" + suffix)));
+			UUID commandId = UUID.randomUUID();
+			members.forEach(d -> sendDroneCommand(commandId, d.getId(), "wing_create:WING-" + suffix));
 			notifyAction("Wing編成を要求しました / " + members.size() + "機");
 			return true;
 		}
@@ -1554,6 +1779,17 @@ public final class TacticalDashboard extends AbstractWidget {
 			WingCard wing = cards.get(firstCard + visible);
 			Rect card = wingCardRect(layout.map, visible);
 			if (!card.contains(mouseX, mouseY)) continue;
+			if (wingTransferRect(card).contains(mouseX, mouseY)) {
+				if (selected.size() != 1) { notifyAction("移籍する1機を選択してください"); return true; }
+				DroneEntity unit = drones.stream().filter(d -> selected.contains(d.getId())).findFirst().orElse(null);
+				if (unit == null) return true;
+				var result = WingMembershipPolicy.evaluate(unit.groupId(), wing.groupId, wing.members.size());
+				if (result == WingMembershipPolicy.Result.ACCEPTED) {
+					sendDroneCommand(new DroneCommandPayload(unit.getId(), "wing_join:" + wing.groupId));
+					notifyAction("Wing移籍を送信 / 結果未確認");
+				} else notifyAction(result == WingMembershipPolicy.Result.UNCHANGED ? "すでに所属しています" : "移籍先を確認してください / 定員8機");
+				return true;
+			}
 			for (int slot = 0; slot < wing.members.size() && slot < WingMembershipPolicy.MAX_MEMBERS; slot++) {
 				Rect slotRect = wingSlotRect(card, slot);
 				if (!slotRect.contains(mouseX, mouseY)) continue;
@@ -1581,7 +1817,7 @@ public final class TacticalDashboard extends AbstractWidget {
 		if (dragged == null) return;
 		if (newWingRect(layout.map).contains(mouseX, mouseY)) {
 			String suffix = client.level == null ? "NEW" : Long.toString(client.level.getGameTime(), 36).toUpperCase();
-			ClientPlayNetworking.send(new DroneCommandPayload(draggedEntity, "wing_create:WING-" + suffix));
+			sendDroneCommand(new DroneCommandPayload(draggedEntity, "wing_create:WING-" + suffix));
 			return;
 		}
 		List<WingCard> cards = wingCards(drones);
@@ -1592,24 +1828,48 @@ public final class TacticalDashboard extends AbstractWidget {
 			int cardIndex = firstCard + visible;
 			if (!wingCardRect(layout.map, visible).contains(mouseX, mouseY)) continue;
 			WingCard target = cards.get(cardIndex);
-			ClientPlayNetworking.send(new DroneCommandPayload(draggedEntity, "wing_join:" + target.groupId));
+			sendDroneCommand(new DroneCommandPayload(draggedEntity, "wing_join:" + target.groupId));
 			return;
 		}
-		ClientPlayNetworking.send(new DroneCommandPayload(draggedEntity, "wing_leave"));
+		sendDroneCommand(new DroneCommandPayload(draggedEntity, "wing_leave"));
 	}
 
 	private List<OperationalWing> operationalWings(List<DroneEntity> drones) {
 		return wingCards(drones).stream()
 			.map(wing -> new OperationalWing("manual:" + wing.groupId, wing.groupId, wing.members,
-				wing.leader, wing.recoveryCount, wing.averageBattery))
+				wing.leader, wing.recoveryCount, wing.averageBattery, wing.missionLabel))
 			.toList();
 	}
 
-	private LivingEntity mapEntityAt(Rect map, double mouseX, double mouseY, List<LivingEntity> entities) {
-		LivingEntity closest = null;
-		double closestDistance = 9.0;
-		for (LivingEntity entity : entities) {
-			MapPoint point = mapPoint(map, entity.getX(), entity.getZ());
+	private boolean selectOperationalWingAt(Rect map, List<DroneEntity> drones,
+		double mouseX, double mouseY, boolean additive) {
+		for (OperationalWing wing : operationalWings(drones)) {
+			MapPoint point = mapPoint(map, wing.leader.getX(), wing.leader.getZ());
+			if (point == null) continue;
+			String title = fitText(wing.label + " / " + wing.members.size() + "U", 94);
+			String mission = fitText(wing.missionLabel, 94);
+			int width = Math.max(82, Math.max(client.font.width(title), client.font.width(mission)) + 22);
+			int x = Math.max(map.x + 4, Math.min(point.x + 8, map.right() - width - 4));
+			int y = Math.max(map.y + 62, Math.min(point.y - 13, map.bottom() - 31));
+			boolean fullySelected = wing.members.stream().allMatch(member -> selected.contains(member.getId()));
+			if ((!fullySelected || !new Rect(x, y, width, 29).contains(mouseX, mouseY))
+				&& Math.hypot(mouseX - point.x, mouseY - point.y) > preferences.markerHitRadius()) continue;
+			if (!additive) selected.clear();
+			if (additive && fullySelected) wing.members.forEach(member -> selected.remove(member.getId()));
+			else wing.members.forEach(member -> selected.add(member.getId()));
+			selectionMode = SelectionMode.GROUP;
+			wingMapMode = true;
+			return true;
+		}
+		return false;
+	}
+
+	private TacticalContactPayload.Row mapEntityAt(Rect map, double mouseX, double mouseY,
+		List<TacticalContactPayload.Row> entities) {
+		TacticalContactPayload.Row closest = null;
+		double closestDistance = preferences.markerHitRadius() - 1;
+		for (TacticalContactPayload.Row entity : entities) {
+			MapPoint point = mapPoint(map, entity.x(), entity.z());
 			if (point == null) continue;
 			double distance = Math.hypot(mouseX - point.x, mouseY - point.y);
 			if (distance < closestDistance) {
@@ -1621,7 +1881,10 @@ public final class TacticalDashboard extends AbstractWidget {
 	}
 
 	private List<DroneEntity> drones() {
-		if (client.level == null || client.player == null) return List.of();
+		if (client.level == null || client.player == null) {
+			selected.receive(Map.of());
+			return List.of();
+		}
 		List<DroneEntity> result = new ArrayList<>(client.level.getEntitiesOfClass(
 			DroneEntity.class, new AABB(client.player.blockPosition()).inflate(256),
 			drone -> drone.matchesOwner(client.player.getUUID(), client.player.getScoreboardName())));
@@ -1632,6 +1895,9 @@ public final class TacticalDashboard extends AbstractWidget {
 			.thenComparing(drone -> drone.groupId().startsWith("WING-") ? drone.groupId() : "ZZZ-" + drone.groupId())
 			.thenComparingInt(drone -> drone.role().ordinal())
 			.thenComparing(DroneEntity::unitId));
+		Map<Integer, java.util.UUID> identities = new LinkedHashMap<>();
+		result.forEach(drone -> identities.put(drone.getId(), drone.getUUID()));
+		selected.receive(identities);
 		return result;
 	}
 
@@ -1643,23 +1909,51 @@ public final class TacticalDashboard extends AbstractWidget {
 			default -> Comparator.comparing(DroneEntity::unitId);
 		};
 		// A Wing row always represents its complete membership, even with a role filter.
+		String query = search.getValue().strip().toLowerCase(java.util.Locale.ROOT);
+		Set<String> matchingWings = new LinkedHashSet<>();
+		for (DroneEntity drone : drones) if (matchesSearch(drone, query)) matchingWings.add(drone.groupId());
 		return drones.stream().filter(d -> selectionMode == SelectionMode.GROUP && wingMapMode
-			|| roleFilter < 0 || d.role().ordinal() == roleFilter).sorted(order.thenComparing(DroneEntity::unitId)).toList();
+			? matchingWings.contains(d.groupId())
+			: (roleFilter < 0 || d.role().ordinal() == roleFilter) && matchesSearch(d, query))
+			.sorted(order.thenComparing(DroneEntity::unitId)).toList();
 	}
 
-	private Rect pageTab(int index) { return new Rect(10 + index * 108, 43, 106, 27); }
-	private Rect rosterFilterRect(Layout l, int index) { return new Rect(7 + index * (l.leftWidth - 14) / 2,
-		l.header + 54, (l.leftWidth - 20) / 2, 21); }
+	private boolean matchesSearch(DroneEntity drone, String query) {
+		return (drone.getName().getString() + " " + drone.unitId() + " " + drone.groupId())
+			.toLowerCase(java.util.Locale.ROOT).contains(query);
+	}
+
+	private Rect pageTab(int index) {
+		int position = 0;
+		while (NAV_ORDER[position] != index) position++;
+		return rect(ControllerLayoutPolicy.navigation(virtualHeight(), layout().header, position));
+	}
+	private Rect rosterFilterRect(Layout l, int index) {
+		int contentWidth = l.leftWidth - NAV_RAIL_WIDTH;
+		return new Rect(NAV_RAIL_WIDTH + 7 + index * (contentWidth - 14) / 2,
+			l.header + 54, (contentWidth - 20) / 2, 21);
+	}
 	private Rect operationRow(Layout l, int index) { return new Rect(l.map.x + 12, l.map.y + 48 + index * 50, l.map.w - 24, 46); }
 	private int operationCapacity(Layout l) { return Math.max(1, (l.map.h - 68) / 50); }
+
+	private List<List<DroneEntity>> missionGroups(List<DroneEntity> drones) {
+		Map<String, List<DroneEntity>> groups = new java.util.TreeMap<>();
+		for (DroneEntity drone : drones) {
+			String key = drone.missionId().isBlank() ? "待機 / " + drone.groupId() : drone.missionId();
+			groups.computeIfAbsent(key, ignored -> new ArrayList<>()).add(drone);
+		}
+		return List.copyOf(groups.values());
+	}
 
 	private void drawOperationsPage(GuiGraphicsExtractor g, Layout l, List<DroneEntity> drones, List<DockInfo> docks) {
 		Rect area = l.map;
 		g.fill(area.x, area.y, area.right(), area.bottom(), BG);
 		HmiArt.icon(g, PAGE_ICONS[page], area.x + 12, area.y + 12, 19);
 		g.text(client.font, PAGES[page], area.x + 40, area.y + 18, TEXT, true);
+		if (page == 4) drawIconButton(g, recoveryOverviewButton(l), "chevron-right", "救助進捗一覧", true);
+		var missions = missionGroups(drones);
 		int total = page == 3 ? docks.size() : page == 4 && client.level != null
-			? PowerLostBeaconStore.snapshot(client.level.getGameTime()).size() : drones.size();
+			? PowerLostBeaconStore.snapshot(client.level.getGameTime()).size() : missions.size();
 		pageScroll = clampScroll(pageScroll, total, operationCapacity(l));
 		if (total == 0) g.text(client.font, page == 4 ? "救難信号なし" : "現在の情報なし", area.x + 18, area.y + 60, MUTED);
 		for (int visible = 0; visible < operationCapacity(l) && pageScroll + visible < total; visible++) {
@@ -1669,123 +1963,622 @@ public final class TacticalDashboard extends AbstractWidget {
 			int index = pageScroll + visible;
 			if (page == 3) {
 				DockInfo dock = docks.get(index);
+				String access = ControllerNearbyAccess.dockReason(client, BlockPos.of(dock.pos));
+				drawCargoButton(g, dockRowButton(row, false), "現地操作", false, CYAN, access.isEmpty());
+				drawCargoButton(g, dockRowButton(row, true), "補給網", false, CYAN, true);
 				HmiArt.item(g, "dock_item", row.x + 4, row.y + 4, 38);
-				g.text(client.font, fitText(dock.id, row.w - 54), row.x + 48, row.y + 6, TEXT);
+				g.text(client.font, fitText(dock.id, row.w - 140), row.x + 48, row.y + 6, TEXT);
 				g.text(client.font, fitText(DockAllocationUiPolicy.dockStateLabel(dock.allocation)
-					+ " / 電力 " + dock.status.powerPercent() + "%", row.w - 54), row.x + 48, row.y + 19,
+					+ " / 電力 " + dock.status.powerPercent() + "%", row.w - 140), row.x + 48, row.y + 19,
 					allocationColor(dock.allocation.state()));
 				String allocation = DockAllocationUiPolicy.queueLabel(dock.allocation) + "  "
 					+ DockAllocationUiPolicy.holdingLabel(dock.allocation) + "  "
-					+ (dock.allocation.aircraftId().isBlank() ? "AIRCRAFT --" : shortId(dock.allocation.aircraftId()));
-				g.text(client.font, fitText(allocation, row.w - 54), row.x + 48, row.y + 32, MUTED);
+					+ (dock.allocation.aircraftId().isBlank() ? "接続機なし" : shortId(dock.allocation.aircraftId()));
+				g.text(client.font, fitText(access.isEmpty() ? allocation : access, row.w - 140), row.x + 48, row.y + 32, MUTED);
 			} else if (page == 4) {
 				var beacon = PowerLostBeaconStore.snapshot(client.level.getGameTime()).get(index);
+				DroneEntity recovery = recoveryTarget(beacon, drones);
+				String reason = recovery == null ? "未受信・別次元 / 現地へ接近" : ControllerNearbyAccess.entityReason(client, recovery);
+				drawIconButton(g, recoveryButton(row), "archive", "現地回収", reason.isEmpty());
+				drawIconButton(g, recoveryDetailButton(row), "chevron-right", recoveryDetailTarget(recovery, drones) == null ? "受信一覧" : "対象詳細", true);
 				HmiArt.icon(g, "radio-tower", row.x + 8, row.y + 10, 24);
-				g.text(client.font, fitText(beacon.unitId(), row.w - 54), row.x + 44, row.y + 6, AMBER);
+				g.text(client.font, fitText(beacon.unitId(), row.w - 152), row.x + 44, row.y + 6, AMBER);
 				String destination = Math.round(beacon.position().x) + ", " + Math.round(beacon.position().y) + ", " + Math.round(beacon.position().z);
-				g.text(client.font, fitText(destination + " / " + Math.round(beacon.position().distanceTo(client.player.position())) + "m", row.w - 54), row.x + 44, row.y + 20, TEXT);
-				g.text(client.font, "最終確認 " + Math.max(0, (client.level.getGameTime() - beacon.detectedTick()) / 20) + "秒前", row.x + 44, row.y + 33, MUTED);
+				g.text(client.font, fitText(destination + " / " + (ControllerDisplayText.sameDimension(beacon.dimension(), client.level.dimension().identifier().toString())
+					? Math.round(beacon.position().distanceTo(client.player.position())) + "m" : "別次元"), row.w - 152), row.x + 44, row.y + 20, TEXT);
+				g.text(client.font, fitText(reason.isEmpty() ? "現地回収可能 / 格納アイテムとして回収" : reason, row.w - 152), row.x + 44, row.y + 33, MUTED);
 			} else {
-				DroneEntity drone = drones.get(index);
-				if (selected.contains(drone.getId())) g.fill(row.x, row.y, row.x + 2, row.bottom(), CYAN);
+				List<DroneEntity> members = missions.get(index);
+				DroneEntity drone = members.getFirst();
+				if (members.stream().anyMatch(d -> selected.contains(d.getId()))) g.fill(row.x, row.y, row.x + 2, row.bottom(), CYAN);
 				HmiArt.role(g, drone.role(), row.x + 4, row.y + 5, 36);
-				g.text(client.font, fitText(shortId(drone.unitId()) + " / " + drone.groupId(), row.w - 54), row.x + 46, row.y + 6, TEXT);
-				g.text(client.font, fitText(statusLabel(drone), row.w - 54), row.x + 46, row.y + 19, CYAN);
-				g.text(client.font, "FLT " + drone.batteryPercent() + "%  WPN " + drone.weaponPowerPercent() + "%  CARGO " + drone.cargoItemCount(), row.x + 46, row.y + 32, MUTED);
+				g.text(client.font, fitText((drone.missionId().isBlank() ? "待機" : drone.missionId()) + " / " + members.size() + "機", row.w - 54), row.x + 46, row.y + 6, TEXT);
+				String states = members.stream().map(TacticalDashboard::statusLabel).distinct().collect(java.util.stream.Collectors.joining(" / "));
+				g.text(client.font, fitText(states, row.w - 54), row.x + 46, row.y + 19, CYAN);
+				g.text(client.font, fitText("着艦 " + members.stream().filter(DroneEntity::isDocked).count()
+					+ " / 要回収 " + members.stream().filter(d -> d.recoveryLevel() > 0).count(), row.w - 54), row.x + 46, row.y + 32, MUTED);
 			}
 		}
 		g.text(client.font, (total == 0 ? 0 : pageScroll + 1) + " / " + total, area.x + 14, area.bottom() - 14, MUTED);
 	}
 
 	private void drawUtilityPage(GuiGraphicsExtractor g, Layout l, List<DroneEntity> drones) {
-		g.text(client.font, PAGES[page], 24, l.header + 18, TEXT, true);
+		int contentX = NAV_RAIL_WIDTH + 20;
+		g.text(client.font, PAGES[page], contentX, l.header + 18, TEXT, true);
+		if (page == 8) { drawSupplyOverview(g, l); return; }
+		if (page == 9) { drawCarrierOverview(g, l); return; }
 		if (page == 6) {
-			int columns = Math.max(3, (virtualWidth() - 48) / 180), rows = Math.max(1, (virtualHeight() - l.header - 100) / 115);
+			if (inspectedEquipment >= 0) { drawEquipmentDetail(g, l); return; }
+			int availableWidth = virtualWidth() - contentX - 20;
+			int columns = Math.max(1, availableWidth / 180), rows = Math.max(1, (l.bottomTop - l.header - 55) / 115);
 			pageScroll = clampScroll(pageScroll, (ITEM_IDS.length + columns - 1) / columns, rows);
 			for (int i = 0; i < rows * columns && pageScroll * columns + i < ITEM_IDS.length; i++) {
 				String id = ITEM_IDS[pageScroll * columns + i];
-				int x = 24 + i % columns * ((virtualWidth() - 48) / columns), y = l.header + 44 + i / columns * 115;
-				int w = (virtualWidth() - 48) / columns - 8;
+				int x = contentX + i % columns * (availableWidth / columns), y = l.header + 44 + i / columns * 115;
+				int w = availableWidth / columns - 8;
 				g.fill(x, y, x + w, y + 105, PANEL);
-				HmiArt.item(g, id, x + (w - 72) / 2, y + 2, 72);
+				g.outline(x, y, w, 105, new Rect(x, y, w, 105).contains(hoverX, hoverY) ? CYAN : BORDER);
+				HmiArt.item(g, id, x + (w - 64) / 2, y + 2, 64);
 				String label = Component.translatable("item.morrowgear_drone." + id).getString();
-				g.text(client.font, fitText(label, w - 12), x + 6, y + 76, TEXT);
-				g.text(client.font, fitText(id, w - 12), x + 6, y + 91, MUTED);
+				g.text(client.font, fitText(label, w - 12), x + 6, y + 70, TEXT);
+				drawIconButton(g, new Rect(x + 6, y + 85, w - 12, 18), "panel-right-open", "詳細", true);
 			}
 			return;
 		}
 		if (page == 7) {
-			String[] labels = {"バイザー表示", "近接マーカー距離", "通信履歴・字幕"};
+			String[] labels = {"バイザー表示", "近接マーカー距離", "通信履歴・字幕", "文字フォント（ゲーム共通）", "Controller文字・UI倍率", "地図マーカーサイズ"};
 			for (int i = 0; i < labels.length; i++) {
 				Rect row = settingRect(l, i);
 				g.horizontalLine(row.x, row.right(), row.bottom(), BORDER);
 				g.text(client.font, labels[i], row.x, row.y + 16, TEXT);
-				String value = i == 2 ? "開く" : i == 0 ? visorConfig.enabled ? "ON" : "OFF" : visorConfig.proximityRange == 0 ? "マーカー非表示" : visorConfig.proximityRange + " m";
-				g.text(client.font, value, row.right() - 135, row.y + 16, CYAN);
+				Rect control = settingControl(l, i);
+				if (i == 0 || i == 3) {
+					boolean checked = i == 0 ? visorConfig.enabled : client.options.forceUnicodeFont().get();
+					g.fill(control.x, control.y, control.right(), control.bottom(), control.contains(hoverX, hoverY) ? PANEL_RAISED : PANEL);
+					g.outline(control.x + 3, control.y + 3, 20, 20, CYAN);
+					if (checked) HmiArt.icon(g, "check", control.x + 5, control.y + 5, 16);
+					g.text(client.font, i == 3 ? (checked ? "Unicode" : "標準") : (checked ? "表示する" : "表示しない"), control.x + 32, control.y + 9, TEXT);
+				} else if (i == 1) {
+					drawCargoButton(g, rangeStep(l, false), "-", false, CYAN, visorConfig.proximityRange > 0);
+					drawCargoButton(g, rangeStep(l, true), "+", false, CYAN, visorConfig.proximityRange < 96);
+					g.centeredText(client.font, visorConfig.proximityRange == 0 ? "非表示" : visorConfig.proximityRange + " m",
+						control.x + control.w / 2, control.y + 9, TEXT);
+				} else if (i == 2) drawIconButton(g, control, "clock", "報告履歴", true);
+                else {
+                    int value = i == 4 ? preferences.effectivePixelScale(maximumPixelScale()) : preferences.markerSize;
+                    int maximum = i == 4 ? maximumPixelScale() : 2;
+                    drawCargoButton(g, preferenceStep(l, i, false), "-", false, CYAN, value > (i == 4 ? 1 : 0));
+                    drawCargoButton(g, preferenceStep(l, i, true), "+", false, CYAN, value < maximum);
+                    if (i == 4) {
+                        Rect auto = automaticScaleRect(l);
+                        g.fill(auto.x, auto.y, auto.right(), auto.bottom(), auto.contains(hoverX, hoverY) ? PANEL_RAISED : PANEL);
+                        g.outline(auto.x + 3, auto.y + 3, 20, 20, CYAN);
+                        if (preferences.pixelScale == 0) HmiArt.icon(g, "check", auto.x + 5, auto.y + 5, 16);
+                        g.text(client.font, "自動", auto.x + 29, auto.y + 9, TEXT);
+                    }
+                    String text = i == 4 ? (preferences.pixelScale > value ? preferences.pixelScale + "x / " : "") + currentPixelScale() + "x"
+                        : switch (value) { case 0 -> "小"; case 2 -> "大"; default -> "標準"; };
+                    g.centeredText(client.font, text, control.x + control.w / 2, control.y + 9, TEXT);
+                }
 			}
 			return;
 		}
-		HmiArt.item(g, "tactical_visor", 26, l.header + 50, 128);
-		g.text(client.font, "LIVE TELEMETRY / " + drones.size() + " UNITS", 174, l.header + 60, CYAN);
+		HmiArt.item(g, "tactical_visor", contentX, l.header + 50, 48);
+		Rect history = visorHistoryButton(l);
+		drawCargoButton(g, history, "戦闘履歴", false, CYAN, ControllerVisorHistory.available());
+		if (!ControllerVisorHistory.available()) g.text(client.font, "履歴接続の初期化待ち", history.x, history.bottom() + 7, MUTED);
+		g.text(client.font, "受信状況 / " + drones.size() + "機", contentX + 60, l.header + 60, CYAN);
+		drawCargoButton(g, visorSettingsButton(l), "表示設定", false, CYAN, true);
 		int y = l.header + 90;
-		for (DroneEntity drone : drones.stream().filter(d -> selected.isEmpty() || selected.contains(d.getId())).limit(6).toList()) {
+		for (DroneEntity drone : drones.stream().filter(d -> selected.isEmpty() || selected.contains(d.getId())).limit(Math.max(1, (l.bottomTop - l.header - 95) / 40)).toList()) {
 			HmiArt.role(g, drone.role(), 174, y, 28);
-			g.text(client.font, shortId(drone.unitId()) + " / " + drone.operationalState().name(), 210, y + 2, TEXT);
-			g.text(client.font, fitText(drone.combatActive() ? drone.combatStatusLabel() : drone.dataLinkStatus(), virtualWidth() - 250), 210, y + 17, MUTED);
+			g.text(client.font, shortId(drone.unitId()) + " / " + statusLabel(drone), 210, y + 2, TEXT);
+			g.text(client.font, fitText("飛行電力 " + drone.batteryPercent() + "% / 損傷状態 " + drone.lowestSubsystemCondition() / 10 + "%", virtualWidth() - 250), 210, y + 17, MUTED);
 			y += 40;
 		}
 	}
 
-	private Rect settingRect(Layout l, int index) { return new Rect(26, l.header + 50 + index * 58, Math.min(640, virtualWidth() - 52), 50); }
+	private Rect visorSettingsButton(Layout l) { return new Rect(virtualWidth() - 330, l.header + 16, 150, 22); }
+	private Rect equipmentBackRect(Layout l) { return new Rect(NAV_RAIL_WIDTH + 20, l.header + 42, 90, 22); }
+	private Rect equipmentLinkRect(Layout l) { return new Rect(NAV_RAIL_WIDTH + 190, l.header + 142, 180, 22); }
+
+	private DroneRole equipmentRole() {
+		if (inspectedEquipment < 0) return null;
+		return switch (ITEM_IDS[inspectedEquipment]) {
+			case "field_drone_unit" -> DroneRole.FIELD;
+			case "scout_module" -> DroneRole.SCOUT; case "cargo_module" -> DroneRole.CARGO;
+			case "engineer_module" -> DroneRole.ENGINEER; case "salvage_module" -> DroneRole.SALVAGE;
+			case "security_module", "autocannon_module", "laser_module", "missile_module" -> DroneRole.SECURITY;
+			default -> null;
+		};
+	}
+
+	private void drawEquipmentDetail(GuiGraphicsExtractor g, Layout l) {
+		String id = ITEM_IDS[inspectedEquipment];
+		int x = NAV_RAIL_WIDTH + 20;
+		drawCargoButton(g, equipmentBackRect(l), "機器一覧へ", false, CYAN, true);
+		HmiArt.item(g, id, x, l.header + 76, 128);
+		int textX = x + 170, w = virtualWidth() - textX - 20;
+		g.text(client.font, fitText(Component.translatable("item.morrowgear_drone." + id).getString(), w), textX, l.header + 78, TEXT);
+		DroneRole role = equipmentRole();
+		g.text(client.font, role == null ? "装備・補給品・材料" : "対応役割: " + roleLabel(role), textX, l.header + 99, CYAN);
+		g.text(client.font, fitText(ControllerEquipmentData.conversion(id), w), textX, l.header + 120, MUTED);
+		drawCargoButton(g, equipmentLinkRect(l), role == null ? "Dock・補給へ" : "対応機体一覧へ", false, CYAN, true);
+		drawIconButton(g, equipmentRecipeRect(l), "chevron-right", "材料・レシピを開く", true);
+	}
+	private Rect equipmentRecipeRect(Layout l) { return new Rect(NAV_RAIL_WIDTH + 190, l.header + 174, 180, 22); }
+	private Rect deliveryListRect(Layout l) { return new Rect(virtualWidth() - 210, l.header + 28, 190, 22); }
+
+	private Rect visorHistoryButton(Layout l) { return new Rect(virtualWidth() - 170, l.header + 16, 150, 22); }
+	private Rect settingRect(Layout l, int index) { return new Rect(NAV_RAIL_WIDTH + 20, l.header + 38 + index * 44, Math.min(640, virtualWidth() - NAV_RAIL_WIDTH - 40), 42); }
+	private Rect settingControl(Layout l, int index) {
+		Rect row = settingRect(l, index); return new Rect(row.right() - 160, row.y + 10, 160, 26);
+	}
+
+    private int maximumPixelScale() {
+        double gui = client.getWindow().getGuiScale();
+        return Math.clamp((int)Math.floor(Math.min(width * gui / 800.0, height * gui / 450.0)), 1, 4);
+    }
+    private int currentPixelScale() { return Math.max(1, Math.round(dashboardScale() * (float)client.getWindow().getGuiScale())); }
+    private Rect automaticScaleRect(Layout l) {
+        Rect control = settingControl(l, 4);
+        return new Rect(control.x - 78, control.y, 72, 26);
+    }
+    private Rect preferenceStep(Layout l, int index, boolean increase) {
+        Rect control = settingControl(l, index);
+        return new Rect(increase ? control.right() - 26 : control.x, control.y, 26, 26);
+    }
+	private Rect rangeStep(Layout l, boolean increase) {
+		Rect control = settingControl(l, 1); return new Rect(increase ? control.right() - 26 : control.x, control.y, 26, 26);
+	}
+	private void stepVisorRange(boolean increase) {
+		int current = visorConfig.proximityRange;
+		int next = increase ? switch (current) { case 0 -> 24; case 24 -> 48; default -> 96; }
+			: switch (current) { case 96 -> 48; case 48 -> 24; default -> 0; };
+		if (current != next) { visorConfig.proximityRange = next; visorConfig.save(); }
+	}
+
+	private BlockPos worldPoint(Rect map, double x, double y) {
+		if (client.player == null) return BlockPos.ZERO;
+		return new BlockPos((int)Math.floor(mapCenterX + (x - map.x - map.w / 2) / mapZoom),
+			0, (int)Math.floor(mapCenterZ + (y - map.y - map.h / 2) / mapZoom));
+	}
+
+	private void seedRouteDraft(List<DroneEntity> drones) {
+		captureDraftTargets();
+		if (!armedRoute || !routeDraft.isEmpty()) return;
+		drones.stream().filter(d -> selected.contains(d.getId()) && d.hasPatrolRoute()).findFirst()
+			.ifPresent(d -> routeDraft.addAll(d.patrolRoutePoints()));
+		routePointIndex = routeDraft.isEmpty() ? -1 : 0;
+	}
+
+	private Rect routeNumbersRect(Rect map) {
+		Rect area = routeEditorRect(map);
+		return new Rect(area.right() - 146, area.y + 48, 140, 18);
+	}
+
+	private void openRouteNumbers() {
+		if (client.player == null) return;
+		int editing = routeDraft.isEmpty() ? -1 : Math.clamp(routePointIndex, 0, routeDraft.size() - 1);
+		BlockPos point = editing < 0 ? client.player.blockPosition() : routeDraft.get(editing);
+		int px = client.player.getBlockX(), pz = client.player.getBlockZ();
+		var fields = List.of(
+			new ControllerNumberScreen.Field("X座標", point.getX(), px - 512, px + 512),
+			new ControllerNumberScreen.Field("Z座標", point.getZ(), pz - 512, pz + 512),
+			new ControllerNumberScreen.Field("開始地点", routeStartIndex + 1, 0, Math.max(1, routeDraft.size()), true));
+		client.setScreenAndShow(new ControllerNumberScreen(client.gui.screen(), "巡回経路の下書き", fields, values -> {
+			BlockPos changed = new BlockPos(values.get(0), 0, values.get(1));
+			if (editing < 0) { routeDraft.add(changed); routePointIndex = 0; }
+			else if (editing < routeDraft.size()) routeDraft.set(editing, changed);
+			routeStartIndex = values.get(2) - 1;
+		}));
+	}
+
+	private void openRadiusEditor() {
+		boolean guard = armedGuard;
+		FieldOperationType work = armedWork;
+		int minimum = guard ? jp.morrowgear.drone.DroneStatePolicy.securityRadius(Integer.MIN_VALUE)
+			: jp.morrowgear.drone.DroneStatePolicy.fieldRadius(work, Integer.MIN_VALUE);
+		int maximum = guard ? jp.morrowgear.drone.DroneStatePolicy.securityRadius(Integer.MAX_VALUE)
+			: jp.morrowgear.drone.DroneStatePolicy.fieldRadius(work, Integer.MAX_VALUE);
+		int current = guard ? guardRadius : workRadii[workIndex(work)];
+		client.setScreenAndShow(new ControllerNumberScreen(client.gui.screen(),
+			(guard ? "警戒" : WORK_LABELS[workIndex(work)]) + "の範囲",
+			List.of(new ControllerNumberScreen.Field("半径 (ブロック)", current, minimum, maximum)), values -> {
+				int radius = values.getFirst();
+				if (guard && jp.morrowgear.drone.DroneCommandPolicy.validSecurityRadius(radius)) guardRadius = radius;
+				else if (!guard && jp.morrowgear.drone.DroneCommandPolicy.validFieldRadius(work, radius))
+					workRadii[workIndex(work)] = radius;
+			}));
+	}
+
+	private boolean confirmDraftTargets() {
+		if (!draftTargets.equals(selected.identities())) {
+			captureDraftTargets();
+			notifyAction("対象が変更されました。対象数を確認してもう一度指示してください");
+			return false;
+		}
+		if (selected.unavailableCount() > 0 || selected.isEmpty()) {
+			notifyAction("未受信または未選択の対象があります。対象を選び直してください");
+			return false;
+		}
+		if (!draftMissions.equals(currentDraftMissions())) {
+			captureDraftTargets();
+			notifyAction("編集中に任務が変わりました。対象の現在行動を確認して再度指示してください");
+			return false;
+		}
+		return true;
+	}
+
+	private Map<java.util.UUID, String> currentDraftMissions() {
+		Map<java.util.UUID, String> missions = new LinkedHashMap<>();
+		for (DroneEntity drone : drones()) if (selected.contains(drone.getId()))
+			missions.put(drone.getUUID(), drone.missionId() + ":" + drone.patrolRoutePoints());
+		return missions;
+	}
+
+	private void captureDraftTargets() {
+		draftTargets = selected.identities();
+		draftMissions = currentDraftMissions();
+	}
+
+	private static ControllerLayoutPolicy.Box box(Rect rect) { return new ControllerLayoutPolicy.Box(rect.x, rect.y, rect.w, rect.h); }
+	private static Rect rect(ControllerLayoutPolicy.Box box) { return new Rect(box.x(), box.y(), box.width(), box.height()); }
+	private Rect routeEditorRect(Rect map) { return rect(ControllerLayoutPolicy.routeEditor(box(map))); }
+
+	private void drawRouteEditor(GuiGraphicsExtractor g, Rect map) {
+		Rect area = routeEditorRect(map);
+		g.fill(area.x, area.y, area.right(), area.bottom(), PANEL);
+		g.horizontalLine(area.x, area.right(), area.y, BORDER);
+		routePointIndex = Math.max(0, Math.min(routePointIndex, routeDraft.size() - 1));
+		String point = routeDraft.isEmpty() ? "経路の下書き: 地点なし" : "地点 " + (routePointIndex + 1) + "/" + routeDraft.size()
+			+ "  X " + routeDraft.get(routePointIndex).getX() + "  Z " + routeDraft.get(routePointIndex).getZ()
+			+ " / 開始 " + (routeStartIndex < 0 ? "最寄り" : routeStartIndex + 1);
+		g.text(client.font, fitText(point, area.w - 12), area.x + 6, area.y + 7, CYAN);
+		String[] labels = {"前の点", "次の点", "順序↑", "順序↓", "削除", "移動"};
+		for (int i = 0; i < labels.length; i++) {
+			Rect button = routeEditButton(map, i);
+			drawCargoButton(g, button, labels[i], false, i == 4 ? RED : CYAN, !routeDraft.isEmpty());
+		}
+		g.text(client.font, "高度: 自動", area.x + 6, area.y + 53, MUTED);
+		drawCargoButton(g, routeNumbersRect(map), "座標・開始点", false, CYAN, true);
+		g.text(client.font, fitText(relocateRoutePoint ? "地点の移動先を選択" : "高度変更不可: 現行サーバーは水平経路のみ", area.w - 12), area.x + 6, area.bottom() - 12, MUTED);
+	}
+
+	private Rect routeEditButton(Rect map, int index) {
+		return rect(ControllerLayoutPolicy.routeButton(box(map), index));
+	}
+
+	private boolean handleRouteEditor(Rect map, double x, double y) {
+		if (!routeEditorRect(map).contains(x, y)) return false;
+		if (routeNumbersRect(map).contains(x, y)) { openRouteNumbers(); return true; }
+		if (routeDraft.isEmpty()) return true;
+		routePointIndex = Math.max(0, Math.min(routePointIndex, routeDraft.size() - 1));
+		for (int i = 0; i < 6; i++) if (routeEditButton(map, i).contains(x, y)) {
+			if (i == 0) routePointIndex = Math.max(0, routePointIndex - 1);
+			if (i == 1) routePointIndex = Math.min(routeDraft.size() - 1, routePointIndex + 1);
+			if (i == 2 && routePointIndex > 0) {
+				routeStartIndex = ControllerNumericPolicy.movedStart(routeStartIndex, routePointIndex, routePointIndex - 1);
+				java.util.Collections.swap(routeDraft, routePointIndex, --routePointIndex);
+			}
+			if (i == 3 && routePointIndex + 1 < routeDraft.size()) {
+				routeStartIndex = ControllerNumericPolicy.movedStart(routeStartIndex, routePointIndex, routePointIndex + 1);
+				java.util.Collections.swap(routeDraft, routePointIndex, ++routePointIndex);
+			}
+			if (i == 4) {
+				routeStartIndex = ControllerNumericPolicy.removedStart(routeStartIndex, routePointIndex);
+				routeDraft.remove(routePointIndex);
+			}
+			if (i == 5) relocateRoutePoint = true;
+			return true;
+		}
+		return true;
+	}
+
+	private void drawSupplyOverview(GuiGraphicsExtractor g, Layout l) {
+		SupplyNetworkClient.request();
+		var routes = SupplyNetworkClient.docks();
+		int x = NAV_RAIL_WIDTH + 20;
+		int available = virtualWidth() - x - 20;
+		int listWidth = Math.min(300, available / 2);
+		int capacity = Math.max(1, (l.bottomTop - l.header - 110) / 50);
+		pageScroll = clampScroll(pageScroll, routes.size(), capacity);
+		g.text(client.font, "遠隔状況 / 設定・在庫操作は現地Dock", x, l.header + 36, MUTED);
+		if (routes.isEmpty()) g.text(client.font, "補給経路なし、または未受信", x, l.header + 66, MUTED);
+		for (int i = 0; i < capacity && pageScroll + i < routes.size(); i++) {
+			var dock = routes.get(pageScroll + i);
+			int y = l.header + 58 + i * 50;
+			g.fill(x, y, x + listWidth, y + 44, dock.dock() == inspectedSupplyDock ? PANEL_RAISED : PANEL);
+			g.outline(x, y, listWidth, 44, dock.dock() == inspectedSupplyDock || new Rect(x, y, listWidth, 44).contains(hoverX, hoverY) ? CYAN : BORDER);
+			HmiArt.icon(g, "chevron-right", x + listWidth - 22, y + 14, 16);
+			g.text(client.font, DockBlockEntity.idFor(BlockPos.of(dock.dock())), x + 8, y + 7, TEXT);
+			g.text(client.font, (dock.enabled() ? "自動補給 ON" : "自動補給 OFF") + " / 配送 " + dock.deliveries().size(), x + 8, y + 25, CYAN);
+		}
+		var detail = routes.stream().filter(d -> d.dock() == inspectedSupplyDock).findFirst().orElse(null);
+		Rect open = nearbyDockButton(l);
+		String access = inspectedSupplyDock == Long.MIN_VALUE ? "現地Dockの受信情報がありません"
+			: ControllerNearbyAccess.dockReason(client, BlockPos.of(inspectedSupplyDock));
+		drawIconButton(g, open, "dock", "現地Dock・補給経路を開く", access.isEmpty());
+		g.text(client.font, fitText(access.isEmpty() ? "Dockの補給経路から設定を編集" : access, virtualWidth() - x - 20), x, open.bottom() + 7, MUTED);
+		drawIconButton(g, deliveryListRect(l), "chevron-right", "個別配送一覧", detail != null);
+		if (detail == null) return;
+		int dx = x + listWidth + 20;
+		int w = available - listWidth - 20;
+		g.text(client.font, fitText(detail.source() == jp.morrowgear.drone.SupplyNetworkRegistry.Route.AUTO_SOURCE
+			? "補給元 物流網から自動選択" : "補給元 " + BlockPos.of(detail.source()).toShortString(), w),
+			dx, l.header + 60, TEXT);
+		g.text(client.font, "実在庫 / 配送中 / 不足 (個)", dx, l.header + 80, MUTED);
+		int y = l.header + 103;
+		for (var stock : detail.stock()) {
+			String name = switch (stock.rule().kind()) {
+				case FUEL -> "燃料"; case GUN -> "機関砲弾"; case LASER -> "兵装電力";
+				case MISSILE -> "ミサイル"; case REPAIR -> "修理材";
+			};
+			String amount = (stock.available() < 0 ? "不明" : stock.available()) + " / " + stock.incoming()
+				+ " / " + (stock.missing() < 0 ? "不明" : stock.missing());
+			g.text(client.font, fitText(name + "  " + amount, w), dx, y, stock.missing() > 0 ? AMBER : TEXT);
+			g.text(client.font, "最低在庫 " + stock.rule().minimum() + " / 優先度 " + stock.rule().priority(), dx, y + 14, MUTED);
+			y += 40;
+		}
+	}
+
+
+    private String deliveryJumpReason(java.util.UUID identity, String dimension) {
+        if (client.level == null || !client.level.dimension().identifier().toString().equals(dimension))
+            return "別次元 / 現在位置の受信なし";
+        return drones().stream().anyMatch(d -> d.isAlive() && d.getUUID().equals(identity))
+            ? "" : "機体未受信・対象範囲外 / 最終位置には移動できません";
+    }
+
+    private ControllerDeliveryScreen.Snapshot deliverySnapshot(long dock) {
+        SupplyNetworkClient.request();
+        var received = SupplyNetworkClient.dock(dock);
+        if (received.isEmpty()) return new ControllerDeliveryScreen.Snapshot("配送情報未受信 / 更新待ち", List.of());
+        var detail = received.get();
+        var receivedDrones = drones();
+        var rows = detail.deliveries().stream().sorted(Comparator.comparing(d -> d.drone().toString())).map(delivery -> {
+            var drone = receivedDrones.stream().filter(d -> d.isAlive() && d.getUUID().equals(delivery.drone())).findFirst();
+            return new ControllerDeliveryScreen.Row(delivery.drone(), drone.map(d -> shortId(d.unitId())).orElse("機体詳細未受信"),
+                ControllerSupplyText.status(delivery.status()),
+                ControllerSupplyText.kind(delivery.kind()) + " / 配送残数 " + delivery.remaining() + " 個",
+                drone.isPresent() ? "" : "機体未受信・対象範囲外 / 地図へ移動できません");
+        }).toList();
+        return new ControllerDeliveryScreen.Snapshot(DockBlockEntity.idFor(BlockPos.of(dock)) + " / "
+            + ControllerSupplyText.status(detail.status()) + " / " + (rows.isEmpty() ? "受信中の配送なし" : "個別取消・再割当は未対応"), rows);
+    }
+
+	private void drawCarrierOverview(GuiGraphicsExtractor g, Layout l) {
+		int x = NAV_RAIL_WIDTH + 20;
+		g.text(client.font, "この入口は近接操作専用 / 遠方は母艦コンソール（128m以内）", x, l.header + 36, MUTED);
+		if (client.level == null || client.player == null) return;
+		var carriers = nearbyCarriers();
+		if (carriers.isEmpty()) g.text(client.font, "周辺256mに母艦の受信情報がありません", x, l.header + 68, MUTED);
+		int capacity = Math.max(1, (l.bottomTop - l.header - 65) / 70);
+		pageScroll = clampScroll(pageScroll, carriers.size(), capacity);
+		for (int i = 0; i < capacity && pageScroll + i < carriers.size(); i++) {
+			var carrier = carriers.get(pageScroll + i);
+			int y = l.header + 58 + i * 70;
+			Rect open = carrierOpenButton(l, i);
+			String access = ControllerNearbyAccess.entityReason(client, carrier);
+			drawIconButton(g, open, "panel-right-open", "近接操作", access.isEmpty());
+			HmiArt.item(g, "carrier_unit", x, y, 52);
+			g.text(client.font, fitText(carrier.getName().getString() + " / " + carrier.blockPosition().toShortString(), virtualWidth() - x - 192), x + 62, y + 7, TEXT);
+			g.text(client.font, "回収ブロック " + carrier.minedBlocks() + " / 収納品 " + carrier.capturedItems(), x + 62, y + 24, CYAN);
+			g.text(client.font, fitText(access.isEmpty() ? carrier.beamActive() ? "作業装置 稼働中" : "作業装置 待機" : access, virtualWidth() - x - 82), x + 62, y + 41, MUTED);
+			g.horizontalLine(x, virtualWidth() - 20, y + 62, BORDER);
+		}
+	}
+
+	private List<jp.morrowgear.drone.carrier.CarrierEntity> nearbyCarriers() {
+		if (client.level == null || client.player == null) return List.of();
+		return client.level.getEntitiesOfClass(jp.morrowgear.drone.carrier.CarrierEntity.class,
+			new AABB(client.player.blockPosition()).inflate(256), c -> c.isOwnedBy(client.player.getUUID())).stream()
+			.sorted(Comparator.comparing(c -> c.getUUID().toString())).toList();
+	}
+	private Rect carrierOpenButton(Layout l, int row) { return new Rect(virtualWidth() - 130, l.header + 63 + row * 70, 110, 22); }
+	private Rect nearbyDockButton(Layout l) { return new Rect(NAV_RAIL_WIDTH + 20, l.bottomTop - 48, 230, 22); }
+	private Rect recoveryButton(Rect row) { return new Rect(row.right() - 96, row.y + 3, 88, 18); }
+	private Rect recoveryDetailButton(Rect row) { return new Rect(row.right() - 96, row.y + 25, 88, 18); }
+	private Rect recoveryOverviewButton(Layout l) { return new Rect(l.map.right() - 152, l.map.y + 10, 140, 24); }
+	private Rect dockRowButton(Rect row, boolean network) { return new Rect(row.right() - 82, row.y + (network ? 25 : 3), 76, 18); }
+	private DroneEntity recoveryTarget(PowerLostBeaconStore.Beacon beacon, List<DroneEntity> drones) {
+		if (client.level == null || !ControllerDisplayText.sameDimension(beacon.dimension(), client.level.dimension().identifier().toString())) return null;
+		var matches = drones.stream().filter(d -> d.unitId().equals(beacon.unitId())).toList();
+		return matches.size() == 1 ? matches.getFirst() : null;
+	}
+	private DroneEntity recoveryDetailTarget(DroneEntity target, List<DroneEntity> drones) {
+		if (target == null) return null;
+		// The read-only screen includes live LOST targets and targets assigned to a received salvage drone.
+		return target.isPowerLost() || drones.stream().anyMatch(d -> d.role() == DroneRole.SALVAGE
+			&& d.salvageState() != jp.morrowgear.drone.SalvageState.IDLE && d.salvageTargetEntityId() == target.getId())
+			? target : null;
+	}
 
 	private boolean handlePageClick(Layout l, List<DroneEntity> drones, List<DockInfo> docks, double x, double y, boolean additive) {
 		for (int i = 0; i < PAGES.length; i++) if (pageTab(i).contains(x, y)) {
-			page = i; pageScroll = 0; draggedEntity = -1;
+			if (i == 10) { client.setScreenAndShow(new OperationHistoryScreen(client.gui.screen())); return true; }
+			pageOffsets[page] = pageScroll;
+			page = i; pageScroll = pageOffsets[i]; draggedEntity = -1;
+			if (i == 8 && inspectedSupplyDock == Long.MIN_VALUE && !docks.isEmpty())
+				inspectedSupplyDock = docks.stream().min(Comparator.comparingDouble(d -> BlockPos.of(d.pos).distSqr(client.player.blockPosition()))).orElseThrow().pos;
 			if (i == 1) { selectionMode = SelectionMode.GROUP; wingMapMode = false; }
 			else wingMapMode = selectionMode == SelectionMode.GROUP;
 			return true;
 		}
 		if (page >= 5) {
-			if (page == 7) for (int i = 0; i < 3; i++) if (settingRect(l, i).contains(x, y)) {
+			if (page == 6) {
+				if (inspectedEquipment >= 0) {
+					if (equipmentRecipeRect(l).contains(x, y)) {
+                        var recipes = ControllerEquipmentData.recipes(client, ITEM_IDS[inspectedEquipment]);
+                        client.setScreenAndShow(new ControllerRecipeScreen(client.gui.screen(), recipes));
+                    } else if (equipmentBackRect(l).contains(x, y)) inspectedEquipment = -1;
+					else if (equipmentLinkRect(l).contains(x, y)) {
+						DroneRole role = equipmentRole();
+						pageOffsets[6] = pageScroll; page = role == null ? 3 : 0; pageScroll = pageOffsets[page];
+						if (role != null) { roleFilter = role.ordinal(); unitScroll = 0; search.setValue(""); selectionMode = SelectionMode.UNIT; wingMapMode = false; }
+					}
+					return true;
+				}
+				int contentX = NAV_RAIL_WIDTH + 20, available = virtualWidth() - contentX - 20;
+				int columns = Math.max(1, available / 180), rows = Math.max(1, (l.bottomTop - l.header - 55) / 115);
+				for (int row = 0; row < rows * columns && pageScroll * columns + row < ITEM_IDS.length; row++) {
+					Rect card = new Rect(contentX + row % columns * (available / columns),
+						l.header + 44 + row / columns * 115, available / columns - 8, 105);
+					if (card.contains(x, y)) { inspectedEquipment = pageScroll * columns + row; return true; }
+				}
+				return true;
+			}
+			if (page == 5 && visorSettingsButton(l).contains(x, y)) {
+				client.setScreenAndShow(new VisorSettingsScreen(client.gui.screen()));
+				return true;
+			}
+			if (page == 5 && visorHistoryButton(l).contains(x, y)) {
+				ControllerVisorHistory.open(client);
+				return true;
+			}
+			if (page == 9) {
+				var carriers = nearbyCarriers();
+				for (int row = 0; row < Math.max(1, (l.bottomTop - l.header - 65) / 70); row++) {
+					if (pageScroll + row >= carriers.size() || !carrierOpenButton(l, row).contains(x, y)) continue;
+					var carrier = carriers.get(pageScroll + row);
+					String reason = ControllerNearbyAccess.entityReason(client, carrier);
+					if (reason.isEmpty() && ControllerNearbyAccess.interact(client, carrier)) notifyAction("母艦メニュー要求を送信 / サーバー応答待ち");
+					else notifyAction(reason.isEmpty() ? "操作要求を送信できませんでした" : reason);
+					return true;
+				}
+			}
+			if (page == 8) {
+                if (deliveryListRect(l).contains(x, y) && SupplyNetworkClient.dock(inspectedSupplyDock).isPresent()) {
+                    long dock = inspectedSupplyDock;
+                    var level = client.level;
+                    String dimension = level == null ? "" : level.dimension().identifier().toString();
+                    client.setScreenAndShow(new ControllerDeliveryScreen(client.gui.screen(), () -> deliverySnapshot(dock),
+                        identity -> client.level != level ? "ワールド変更 / 元画面へ戻ってください"
+                            : deliveryJumpReason(identity, dimension),
+                        identity -> client.level == level && deliveryJumpReason(identity, dimension).isEmpty()
+                            && focusReport(identity, dimension)));
+                    return true;
+                }
+				if (nearbyDockButton(l).contains(x, y) && inspectedSupplyDock != Long.MIN_VALUE) {
+					BlockPos pos = BlockPos.of(inspectedSupplyDock);
+					String reason = ControllerNearbyAccess.dockReason(client, pos);
+					if (reason.isEmpty() && ControllerNearbyAccess.openDock(client, pos)) notifyAction("Dockメニュー要求を送信 / サーバー応答待ち");
+					else notifyAction(reason.isEmpty() ? "操作要求を送信できませんでした" : reason);
+					return true;
+				}
+				var routes = SupplyNetworkClient.docks();
+				int row = (int)((y - l.header - 58) / 50);
+				int listWidth = Math.min(300, (virtualWidth() - NAV_RAIL_WIDTH - 40) / 2);
+				if (x >= NAV_RAIL_WIDTH + 20 && x < NAV_RAIL_WIDTH + 20 + listWidth
+					&& y >= l.header + 58 && row < Math.max(1, (l.bottomTop - l.header - 110) / 50)
+					&& row + pageScroll < routes.size())
+					inspectedSupplyDock = routes.get(row + pageScroll).dock();
+			}
+			if (page == 7) for (int i = 0; i < 6; i++) if (settingControl(l, i).contains(x, y)
+				|| i == 4 && automaticScaleRect(l).contains(x, y)) {
 				if (i == 0) { visorConfig.enabled = !visorConfig.enabled; visorConfig.save(); }
-				else if (i == 1) visorConfig.cycleRange();
-				else client.setScreenAndShow(new OperationHistoryScreen(client.gui.screen()));
+				else if (i == 1) {
+					if (rangeStep(l, false).contains(x, y) && visorConfig.proximityRange > 0) stepVisorRange(false);
+					if (rangeStep(l, true).contains(x, y) && visorConfig.proximityRange < 96) stepVisorRange(true);
+				}
+				else if (i == 2) client.setScreenAndShow(new OperationHistoryScreen(client.gui.screen()));
+				else if (i == 3) { client.options.forceUnicodeFont().set(!client.options.forceUnicodeFont().get()); client.options.save(); }
+                else {
+                    int direction = preferenceStep(l, i, false).contains(x, y) ? -1 : preferenceStep(l, i, true).contains(x, y) ? 1 : 0;
+                    boolean changed = i == 4 && automaticScaleRect(l).contains(x, y)
+                        ? preferences.automaticScale(preferences.pixelScale != 0, maximumPixelScale())
+                        : i == 4 ? preferences.stepPixelScale(direction, maximumPixelScale()) : preferences.stepMarkerSize(direction);
+                    if (changed && !preferences.save()) notifyAction("表示は変更済み / 設定ファイルへ保存できませんでした");
+                    return true;
+                }
 			}
 			return true;
 		}
 		if (page < 2 || !l.map.contains(x, y)) return false;
+		if (page == 4 && recoveryOverviewButton(l).contains(x, y)) {
+			client.setScreenAndShow(new DroneRecoveryScreen(client.gui.screen()));
+			return true;
+		}
 		for (int i = 0; i < operationCapacity(l); i++) if (operationRow(l, i).contains(x, y)) {
 			int index = pageScroll + i;
-			if (page == 2 && index < drones.size()) {
+			var missions = missionGroups(drones);
+			if (page == 2 && index < missions.size()) {
 				selectionMode = SelectionMode.UNIT;
 				if (!additive) selected.clear();
-				selected.add(drones.get(index).getId());
+				missions.get(index).forEach(d -> selected.add(d.getId()));
 			} else if (page == 3 && index < docks.size()) {
 				DockInfo dock = docks.get(index);
+				inspectedSupplyDock = dock.pos;
+				if (dockRowButton(operationRow(l, i), true).contains(x, y)) {
+					pageOffsets[3] = pageScroll; page = 8; pageScroll = pageOffsets[8]; return true;
+				}
+				if (dockRowButton(operationRow(l, i), false).contains(x, y)) {
+					String reason = ControllerNearbyAccess.dockReason(client, BlockPos.of(dock.pos));
+					if (reason.isEmpty() && ControllerNearbyAccess.openDock(client, BlockPos.of(dock.pos)))
+						notifyAction("Dockメニュー要求を送信 / サーバー応答待ち");
+					else notifyAction(reason.isEmpty() ? "操作要求を送信できませんでした" : reason);
+					return true;
+				}
 				notifyAction(dock.id + " / " + DockAllocationUiPolicy.dockStateLabel(dock.allocation)
 					+ " / " + DockAllocationUiPolicy.queueLabel(dock.allocation)
 					+ " / " + DockAllocationUiPolicy.holdingLabel(dock.allocation));
 			} else if (page == 4) {
-				selected.clear(); selectionMode = SelectionMode.UNIT;
-				drones.stream().filter(d -> d.role() == DroneRole.SALVAGE).forEach(d -> selected.add(d.getId()));
-				notifyAction(selected.isEmpty() ? "回収機なし" : "回収機 " + selected.size() + "機 / 自動回収状況");
+				var beacons = client.level == null ? List.<PowerLostBeaconStore.Beacon>of() : PowerLostBeaconStore.snapshot(client.level.getGameTime());
+				if (index >= beacons.size()) return true;
+				if (recoveryButton(operationRow(l, i)).contains(x, y)) {
+					DroneEntity target = recoveryTarget(beacons.get(index), drones);
+					String reason = ControllerNearbyAccess.entityReason(client, target);
+					if (reason.isEmpty() && ControllerNearbyAccess.interact(client, target)) notifyAction("現地回収を要求 / 結果未確認");
+					else notifyAction(reason.isEmpty() ? "操作要求を送信できませんでした" : reason);
+					return true;
+				}
+				DroneEntity target = recoveryDetailTarget(recoveryTarget(beacons.get(index), drones), drones);
+				if (target != null) { selected.clear(); selected.add(target.getId()); selectionMode = SelectionMode.UNIT; }
+				if (target == null) client.setScreenAndShow(new DroneRecoveryScreen(client.gui.screen()));
+				else client.setScreenAndShow(new DroneRecoveryScreen(client.gui.screen(), target.getUUID()));
 			}
 			return true;
 		}
 		return true;
 	}
 
-	private List<LivingEntity> mapEntities() {
-		if (client.level == null || client.player == null) return List.of();
+	private List<TacticalContactPayload.Row> mapEntities() {
+		return TacticalContactClient.contacts(client);
+	}
+
+	private List<DroneEntity> foreignDrones() {
+		refreshForeignMapContacts();
+		return cachedForeignDrones;
+	}
+
+	private List<ForeignDock> foreignDocks() {
+		refreshForeignMapContacts();
+		return cachedForeignDocks;
+	}
+
+	private void refreshForeignMapContacts() {
+		if (client.level == null || client.player == null) {
+			cachedForeignDrones = List.of(); cachedForeignDocks = List.of(); return;
+		}
 		long gameTime = client.level.getGameTime();
-		if (entityCacheLevel == client.level && gameTime < entityRefreshAt) return cachedMapEntities;
-		entityCacheLevel = client.level;
-		entityRefreshAt = gameTime + 5L;
-		cachedMapEntities = client.level.getEntitiesOfClass(LivingEntity.class,
-			new AABB(client.player.blockPosition()).inflate(128, 64, 128),
-			entity -> entity.isAlive() && entity != client.player && !(entity instanceof DroneEntity)
-				&& !(entity instanceof ArmorStand));
-		return cachedMapEntities;
+		if (foreignCacheLevel == client.level && gameTime < foreignRefreshAt) return;
+		foreignCacheLevel = client.level;
+		foreignRefreshAt = gameTime + 20L;
+		cachedForeignDrones = List.copyOf(client.level.getEntitiesOfClass(DroneEntity.class,
+			new AABB(client.player.blockPosition()).inflate(256), drone -> drone.isAlive()
+				&& !drone.matchesOwner(client.player.getUUID(), client.player.getScoreboardName())));
+		List<ForeignDock> docks = new ArrayList<>();
+		int cx = client.player.chunkPosition().x(), cz = client.player.chunkPosition().z();
+		for (int x = cx - 4; x <= cx + 4; x++) for (int z = cz - 4; z <= cz + 4; z++) {
+			if (!client.level.hasChunk(x, z)) continue;
+			for (BlockEntity blockEntity : client.level.getChunk(x, z).getBlockEntities().values()) {
+				if (!(blockEntity instanceof DockBlockEntity dock)
+					|| dock.matchesOwner(client.player.getUUID(), client.player.getScoreboardName())) continue;
+				String owner = dock.ownerName().isBlank() ? "他ユーザー" : dock.ownerName();
+				docks.add(new ForeignDock(dock.getBlockPos().asLong(), owner));
+			}
+		}
+		cachedForeignDocks = List.copyOf(docks);
 	}
 
 	private List<DockInfo> docks(List<DroneEntity> drones) {
@@ -1853,6 +2646,42 @@ public final class TacticalDashboard extends AbstractWidget {
 		return cachedContainers;
 	}
 
+	private void openCargoEditor(List<DroneEntity> drones) {
+		var units = drones.stream().filter(d -> selected.contains(d.getId())).toList();
+		if (units.isEmpty() || selected.unavailableCount() > 0 || units.stream().anyMatch(d -> d.role() != DroneRole.CARGO)) {
+			notifyAction("受信中の輸送機だけを選択してください"); return;
+		}
+		Set<java.util.UUID> targets = selected.identities();
+		var level = client.level;
+		client.setScreenAndShow(new ControllerCargoRouteScreen(client.gui.screen(), targets.size(),
+			() -> {
+				SupplyNetworkClient.request();
+				return SupplyNetworkClient.nodes().stream().map(node -> {
+					BlockPos position = BlockPos.of(node.position());
+					return new ControllerCargoRouteScreen.Place(node.registered() ? "登録済み / " + node.name() : node.name(),
+						node.position(), position.getX() + "," + position.getY() + "," + position.getZ(),
+						node.contents(), node.distance(), node.verticalOffset(), node.registered());
+				}).toList();
+			},
+			(sourcePosition, targetPosition) -> {
+				transmitted = suppressed = 0; transmitProblem = "";
+				boolean sourceKnown = SupplyNetworkClient.nodes().stream().anyMatch(node -> node.position() == sourcePosition);
+				boolean targetKnown = SupplyNetworkClient.nodes().stream().anyMatch(node -> node.position() == targetPosition);
+				if (client.level != level || client.player == null || level == null || !sourceKnown || !targetKnown
+					|| sourcePosition.equals(targetPosition))
+					return "未送信 / 物流ノードの受信状態を再確認";
+				var current = drones().stream().filter(d -> targets.contains(d.getUUID())).toList();
+				if (current.size() != targets.size() || current.stream().anyMatch(d -> d.role() != DroneRole.CARGO))
+					return "未送信 / 対象が未受信、または役割変更";
+				UUID commandId = UUID.randomUUID();
+				for (DroneEntity unit : current) {
+					sendDroneCommand(commandId, unit.getId(), "cargo_source:" + sourcePosition);
+					sendDroneCommand(commandId, unit.getId(), "cargo_target:" + targetPosition);
+				}
+				return ControllerDispatchFeedback.describe(transmitted, suppressed, transmitProblem);
+			}));
+	}
+
 	private Layout layout() {
 		TacticalLayoutPolicy.Metrics metrics = metrics();
 		Rect right = new Rect(metrics.width() - metrics.rightWidth(), metrics.header(),
@@ -1861,22 +2690,28 @@ public final class TacticalDashboard extends AbstractWidget {
 		return new Layout(metrics.header(), metrics.bottomTop(), metrics.leftWidth(), metrics.dockHeaderY(), map, right);
 	}
 
-	private TacticalLayoutPolicy.Metrics metrics() { return TacticalLayoutPolicy.calculateForGui(width, height, client.getWindow().getGuiScale()); }
+	private TacticalLayoutPolicy.Metrics metrics() { return TacticalLayoutPolicy.calculateForGui(width, height, client.getWindow().getGuiScale(), preferences.pixelScale); }
 	private float dashboardScale() { return metrics().scale(); }
 	private int virtualWidth() { return metrics().width(); }
 	private int virtualHeight() { return metrics().height(); }
-	private int unitCapacity(Layout l) { return Math.max(1, (l.dockHeaderY - (l.header + 81) - 20) / 34); }
+	private int unitCapacity(Layout l) { return Math.max(1, (l.dockHeaderY - (l.header + 105) - 20) / 38); }
 	private int dockCapacity(Layout l) { return Math.max(1, (l.bottomTop - (l.dockHeaderY + 17) - 8) / 26); }
 	private int missionCapacity(Layout l) { return Math.max(1, (virtualHeight() - (l.bottomTop + 55)) / 25); }
-	private Rect tabRect(Layout l, int index) { int w = l.leftWidth / 3; return new Rect(index * w, l.header + 27, index == 2 ? l.leftWidth - index * w : w, 23); }
-	private Rect unitRect(Layout l, int visible) { return new Rect(7, l.header + 81 + visible * 34, l.leftWidth - 14, 30); }
+	private Rect tabRect(Layout l, int index) {
+		int contentWidth = l.leftWidth - NAV_RAIL_WIDTH;
+		int w = contentWidth / 5;
+		return new Rect(NAV_RAIL_WIDTH + index * w, l.header + 27,
+			index == 4 ? l.leftWidth - (NAV_RAIL_WIDTH + index * w) : w, 23);
+	}
+	private Rect searchRect(Layout l) { return new Rect(NAV_RAIL_WIDTH + 7, l.header + 79, l.leftWidth - NAV_RAIL_WIDTH - 14, 20); }
+	private Rect unitRect(Layout l, int visible) { return new Rect(NAV_RAIL_WIDTH + 7, l.header + 105 + visible * 38, l.leftWidth - NAV_RAIL_WIDTH - 14, 35); }
 	private Rect selectionToggleRect(Rect row) { return new Rect(row.x + 6, row.y + 10, 8, 8); }
 	private void drawSelectionToggle(GuiGraphicsExtractor g, Rect row, boolean active, int color) {
 		Rect toggle = selectionToggleRect(row);
 		g.outline(toggle.x, toggle.y, toggle.w, toggle.h, active ? CYAN : color);
 		if (active) g.fill(toggle.x + 2, toggle.y + 2, toggle.right() - 2, toggle.bottom() - 2, CYAN);
 	}
-	private Rect dockRect(Layout l, int visible) { return new Rect(7, l.dockHeaderY + 17 + visible * 26, l.leftWidth - 14, 22); }
+	private Rect dockRect(Layout l, int visible) { return new Rect(NAV_RAIL_WIDTH + 7, l.dockHeaderY + 17 + visible * 26, l.leftWidth - NAV_RAIL_WIDTH - 14, 22); }
 	private Rect unitFirstRect(Layout l) { return new Rect(l.leftWidth - 83, l.dockHeaderY - 16, 16, 12); }
 	private Rect unitUpRect(Layout l) { return new Rect(l.leftWidth - 63, l.dockHeaderY - 16, 16, 12); }
 	private Rect unitDownRect(Layout l) { return new Rect(l.leftWidth - 43, l.dockHeaderY - 16, 16, 12); }
@@ -1914,6 +2749,7 @@ public final class TacticalDashboard extends AbstractWidget {
 		int row = visible / columns;
 		return new Rect(board.x + 10 + column * (cardWidth + gap), board.y + 37 + row * 154, cardWidth, 144);
 	}
+	private Rect wingTransferRect(Rect card) { return new Rect(card.right() - 68, card.y + 4, 60, 20); }
 	private Rect wingSlotRect(Rect card, int slot) {
 		int gap = 5;
 		int slotWidth = (card.w - 16 - gap) / 2;
@@ -1922,55 +2758,31 @@ public final class TacticalDashboard extends AbstractWidget {
 		return new Rect(card.x + 8 + column * (slotWidth + gap), card.y + 49 + row * 22, slotWidth, 18);
 	}
 
-	private Rect commandRect(Layout l, int index) {
-		int gap = 6;
-		int columns = 3;
-		int available = l.right.w - 18 - gap * (columns - 1);
-		int w = available / columns;
-		int column = index % columns;
-		int x = l.right.x + 9 + column * (w + gap);
-		int y = l.right.y + 151 + (index / columns) * 27;
-		return new Rect(x, y, column == columns - 1 ? l.right.right() - 9 - x : w, 23);
+	private Rect inspectorButton(Layout l, int offset, int index, int columns) {
+		int gap = 5, w = (l.right.w - 20 - gap * (columns - 1)) / columns;
+		return new Rect(l.right.x + 10 + (index % columns) * (w + gap),
+			l.right.y + offset + (index / columns) * 27 - inspectorScroll, w, 22);
 	}
+	private Rect commandRect(Layout l, int index) { return inspectorButton(l, 338, index, 2); }
 	private Rect routeToggleRect(Rect map) { return new Rect(map.x + 10, map.y + 34, 76, 22); }
 	private Rect routeStartRect(Rect map) { return new Rect(map.x + 92, map.y + 34, 62, 22); }
 	private Rect routeCancelRect(Rect map) { return new Rect(map.x + 160, map.y + 34, 68, 22); }
-
-	private Rect workRect(Layout l, int index) {
-		int gap = 6;
-		int columns = WORK_TYPES.length + 1;
-		int available = l.right.w - 18 - gap * (columns - 1);
-		int w = available / columns;
-		int x = l.right.x + 9 + index * (w + gap);
-		return new Rect(x, l.right.y + 220, index == columns - 1 ? l.right.right() - 9 - x : w, 23);
+	private Rect waypointApplyRect(Rect map) { return new Rect(map.right() - 154, map.bottom() - 55, 68, 22); }
+	private Rect waypointCancelRect(Rect map) { return new Rect(map.right() - 80, map.bottom() - 55, 68, 22); }
+	private Rect quickCommandRect(Layout l, int index) {
+		return rect(ControllerLayoutPolicy.quickCommand(virtualWidth(), l.bottomTop, index));
 	}
-	private Rect autoOperationsRect(Layout l) {
-		return new Rect(l.right.right() - 94, l.right.y + 202, 85, 16);
-	}
-
-	private boolean modulePanelVisible(Layout l) { return page == 3 || l.right.h >= 370; }
-	private boolean dualModulePanelVisible(Layout l) { return page == 3 || l.right.h >= 420; }
-	private Rect moduleRect(Layout l, int index) {
-		int gap = 3;
-		int available = l.right.w - 18 - gap * (MODULE_ROLES.length - 1);
-		int w = available / MODULE_ROLES.length;
-		int x = l.right.x + 9 + index * (w + gap);
-		int y = l.right.bottom() - (dualModulePanelVisible(l) ? 64 : 29);
-		return new Rect(x, y, index == MODULE_ROLES.length - 1 ? l.right.right() - 9 - x : w, 22);
-	}
-
-	private Rect capacityUpgradeRect(Layout l) {
-		return new Rect(l.right.right() - 57, l.right.bottom() - 39, 48, 13);
-	}
-
-	private Rect weaponModuleRect(Layout l, int index) {
-		int gap = 4;
-		int available = l.right.w - 18 - gap * (WEAPON_LOADOUTS.length - 1);
-		int w = available / WEAPON_LOADOUTS.length;
-		int x = l.right.x + 9 + index * (w + gap);
-		int y = l.right.bottom() - (dualModulePanelVisible(l) ? 23 : 29);
-		return new Rect(x, y, index == WEAPON_LOADOUTS.length - 1 ? l.right.right() - 9 - x : w, 20);
-	}
+	private Rect workRect(Layout l, int index) { return inspectorButton(l, 437, index, 2); }
+	private Rect autoOperationsRect(Layout l) { return inspectorButton(l, 492, 0, 2); }
+	private Rect forceOverrideRect(Layout l) { return inspectorButton(l, 492, 1, 2); }
+	private Rect attackTargetRect(Layout l) { return inspectorButton(l, 519, 0, 1); }
+	private Rect cargoEditorRect(Layout l) { return inspectorButton(l, 546, 0, 1); }
+	private Rect radiusEditorRect(Layout l) { return inspectorButton(l, 573, 0, 1); }
+	private boolean modulePanelVisible(Layout l) { return page == 3; }
+	private boolean dualModulePanelVisible(Layout l) { return page == 3; }
+	private Rect moduleRect(Layout l, int index) { return inspectorButton(l, 535, index, 2); }
+	private Rect capacityUpgradeRect(Layout l) { return inspectorButton(l, 679, 0, 1); }
+	private Rect weaponModuleRect(Layout l, int index) { return inspectorButton(l, 623, index, 2); }
 
 	private static int moduleColor(DroneRole role) {
 		return switch (role) {
@@ -1984,7 +2796,7 @@ public final class TacticalDashboard extends AbstractWidget {
 	}
 
 	private void drawAssignment(GuiGraphicsExtractor g, int x, int y, int w, String label, String state) {
-		g.fill(x, y, x + w, y + 22, 0xFF0D171B);
+		g.fill(x, y, x + w, y + 22, BG);
 		g.outline(x, y, w, 22, BORDER);
 		g.text(client.font, fitText(label, Math.max(40, w - client.font.width(state) - 18)), x + 6, y + 7, TEXT);
 		g.text(client.font, state, x + w - client.font.width(state) - 6, y + 7, MUTED);
@@ -2074,35 +2886,76 @@ public final class TacticalDashboard extends AbstractWidget {
 		};
 	}
 
+	private static String rosterStatusLabel(DroneEntity drone) {
+		if (drone.role() == DroneRole.SALVAGE && !drone.isPowerLost()
+			&& drone.salvageState() != jp.morrowgear.drone.SalvageState.IDLE) return statusLabel(drone);
+		return switch (drone.operationalState()) {
+			case POWER_LOSS -> "電力喪失 / 要回収"; case DOCKED -> "着艦中"; case SERVICE_RTB -> "補給帰還中";
+			case COMBAT -> "交戦中"; case EMERGENCY_INTERCEPT -> "緊急迎撃"; case REJOIN -> "任務に復帰中";
+			case FIELD_OPERATION, CARGO_ROUTE, ENGINEER_SUPPORT -> statusLabel(drone);
+			case SECURITY_PATROL -> "警戒中";
+			case WAYPOINT -> drone.hasPatrolRoute() ? "巡回 " + (drone.patrolRouteIndex() + 1) + "/" + drone.patrolRouteSize() : "地点へ移動";
+			case FOLLOW -> "追従中"; case RETURN -> drone.mode() == DroneMode.DOCK ? "Dock帰還中" : "集合中";
+			case ORBIT -> "旋回中"; case STANDBY -> "待機";
+		};
+	}
+
+	private static String roleLabel(DroneRole role) {
+		return switch (role) {
+			case FIELD -> "作業機"; case SCOUT -> "偵察機"; case CARGO -> "輸送機";
+			case ENGINEER -> "整備機"; case SECURITY -> "警備機"; case SALVAGE -> "回収機";
+		};
+	}
+
 	private static String statusLabel(DroneEntity drone) {
-		if (drone.combatActive()) return drone.combatStatusLabel()
-			+ " / FLT " + drone.batteryPercent() + "% " + drone.batteryTier().displayName()
-			+ " / WPN " + drone.weaponPowerPercent() + "%"
-			+ " / GUN " + drone.gunAmmo() + " / MSL " + drone.missiles()
-			+ " / HEAT " + drone.laserHeat() / 10 + "%"
-			+ " / SYS " + drone.lowestSubsystemCondition() / 10 + "%";
-		if (drone.emergencyInterceptActive()) return "EMERGENCY INTERCEPT";
-		if (drone.hasPatrolRoute()) return "ROUTE PATROL " + (drone.patrolRouteIndex() + 1)
+		if (drone.isPowerLost()) return "電力喪失 / 要回収";
+		if (drone.isDocked()) return "Dock着艦中";
+		if (drone.serviceReturnActive()) return "補給帰還中";
+		if (drone.combatActive()) return "交戦中";
+		if (drone.emergencyInterceptActive()) return "緊急迎撃";
+		if (drone.hasPatrolRoute()) return "巡回 地点 " + (drone.patrolRouteIndex() + 1)
 			+ "/" + drone.patrolRouteSize();
-		if (drone.hasSecurityPatrol()) return drone.securityStatusLabel();
-		if (drone.hasFieldOperation()) return drone.fieldStatusLabel();
+		if (drone.hasSecurityPatrol()) return drone.securityContacts() > 0 ? "警戒 / 接触 " + drone.securityContacts() : "地点警戒";
+		if (drone.hasFieldOperation()) return switch (drone.fieldOperationState()) {
+			case IDLE -> "作業待機"; case SCANNING -> "調査中"; case WAITING_DATA -> "調査情報待ち";
+			case TRANSIT -> "作業地点へ移動"; case WORKING -> "作業中"; case COLLECTING -> "資源回収中";
+			case DELIVERING -> "資源搬送中"; case PLANTING -> "植林中"; case COMPLETE -> "作業完了";
+			case BLOCKED -> "作業停止"; case SCOUT_SURVEY -> "偵察調査"; case SCOUT_OVERWATCH -> "作業監視";
+			case SCOUT_CARGO_ESCORT, GUARD_CARGO_ESCORT -> "輸送護衛";
+			case ENGINEER_WAITING_INTEL -> "整備情報待ち"; case ENGINEER_LOCAL_SURVEY -> "現地調査";
+			case CARGO_HOLD -> "輸送待機"; case GUARD_WORK_ESCORT -> "作業護衛";
+			case ENGINEER_RECOVERY_OVERWATCH -> "回収監視"; case FIELD_DATA_RELAY -> "情報中継";
+			case FIELD_MISSION_SUPPORT -> "任務支援";
+		};
 		if (drone.role() == DroneRole.CARGO && drone.cargoState() != jp.morrowgear.drone.CargoState.UNASSIGNED) {
-			return "CARGO / " + drone.cargoStatusLabel();
+			return switch (drone.cargoState()) {
+				case UNASSIGNED -> "輸送未割当"; case TO_SOURCE -> "積込元へ移動"; case WAIT_SOURCE -> "積込元待機";
+				case TO_TARGET -> "搬送先へ移動"; case WAIT_TARGET -> "搬送先待機";
+				case QUEUE_SOURCE -> "積込順番待ち"; case LOADING_SOURCE -> "積込中";
+				case QUEUE_TARGET -> "荷卸順番待ち"; case UNLOADING_TARGET -> "荷卸中";
+			};
 		}
-		if (drone.role() == DroneRole.ENGINEER) return "ENGINEER / " + drone.engineerStatusLabel();
-		String defense = drone.defenseSlot() >= 0 ? "DEF-" + (drone.defenseSlot() + 1) + " / " : "";
-		String recovery = drone.recoveryLevel() > 0 ? "RECOVERY-" + drone.recoveryLevel() + " / " : "";
+		if (drone.role() == DroneRole.ENGINEER) return switch (drone.engineerState()) {
+			case IDLE -> modeLabel(drone.mode()); case APPROACH -> "整備対象へ接近";
+			case REPAIRING -> "修理中"; case MATERIAL_LOW -> "修理材不足";
+		};
+		if (drone.role() == DroneRole.SALVAGE) return switch (drone.salvageState()) {
+			case IDLE -> modeLabel(drone.mode()); case INTERCEPT -> "回収対象へ接近"; case HOOK -> "回収接続";
+			case HOIST -> "吊り上げ中"; case RETURN -> "回収搬送中"; case DELIVER -> "引渡し中"; case SERVICE -> "復旧待ち";
+		};
+		String defense = drone.defenseSlot() >= 0 ? "防衛配置 " + (drone.defenseSlot() + 1) + " / " : "";
+		String recovery = drone.recoveryLevel() > 0 ? "回収段階 " + drone.recoveryLevel() + " / " : "";
 		defense += recovery;
-		if (drone.formationCatchUp()) defense += "CATCH-UP / ";
+		if (drone.formationCatchUp()) defense += "隊列合流 / ";
 		if (drone.mode() != DroneMode.WAYPOINT) return defense + modeLabel(drone.mode());
 		if (drone.hasTrackingTarget()) {
 			return defense + switch (drone.missionStage()) {
-				case DroneEntity.MISSION_MUSTER -> "TARGET MUSTER";
-				case DroneEntity.MISSION_MOVING -> "TARGET TRACK";
-				case DroneEntity.MISSION_ORBIT -> "TARGET WATCH";
-				case DroneEntity.MISSION_CONVERGING -> "RENDEZVOUS";
-				case DroneEntity.MISSION_ORBIT_ENTRY -> "ORBIT ENTRY";
-				default -> "TARGET MISSION";
+				case DroneEntity.MISSION_MUSTER -> "追跡集合";
+				case DroneEntity.MISSION_MOVING -> "目標追従";
+				case DroneEntity.MISSION_ORBIT -> "目標監視";
+				case DroneEntity.MISSION_CONVERGING -> "合流";
+				case DroneEntity.MISSION_ORBIT_ENTRY -> "旋回進入";
+				default -> "目標任務";
 			};
 		}
 		return defense + switch (drone.missionStage()) {
@@ -2115,16 +2968,41 @@ public final class TacticalDashboard extends AbstractWidget {
 		};
 	}
 
-	private static String shortId(String id) { return id.startsWith("MG-DRN-") ? id.substring(7) : id; }
-	private static String threatLabel(int score) {
-		if (score >= 28) return "CRITICAL";
-		if (score >= 14) return "HIGH";
-		if (score >= 6) return "GUARDED";
-		return "LOW";
+	private static DroneResourceUiPolicy.Snapshot resourceSnapshot(DroneEntity drone) {
+		int structure = Math.round(drone.getHealth() * 100.0f / Math.max(1.0f, drone.getMaxHealth()));
+		return DroneResourceUiPolicy.assess(drone.role() == DroneRole.SECURITY,
+			drone.securityLoadout(), drone.batteryPercent(), drone.weaponPowerPercent(),
+			drone.gunAmmo(), drone.gunCapacity(), drone.missiles(), drone.missileCapacity(),
+			drone.laserHeat(), structure, drone.lowestSubsystemCondition() / 10,
+			drone.serviceReturnActive());
 	}
 
-	private static void drawDiamond(GuiGraphicsExtractor g, int x, int y, int color) {
-		for (int i = 0; i < 7; i++) { int half = i <= 3 ? i : 6 - i; g.horizontalLine(x - half, x + half, y - 3 + i, color); }
+	private static String resourceSummary(DroneEntity drone) {
+		return resourceSnapshot(drone).metrics().stream()
+			.filter(metric -> !metric.code().equals("STR") && !metric.code().equals("SYS"))
+			.map(metric -> metric.code() + " " + metric.value())
+			.collect(java.util.stream.Collectors.joining("  "));
+	}
+
+	private static int resourceColor(DroneResourceUiPolicy.Tone tone) {
+		return switch (tone) {
+			case NOMINAL -> GREEN;
+			case CAUTION -> AMBER;
+			case BLOCKED -> RED;
+		};
+	}
+
+	private static String shortId(String id) { return ControllerDisplayText.shortUnitId(id); }
+	private static String threatLabel(int score) {
+		if (score >= 28) return "重大";
+		if (score >= 14) return "高";
+		if (score >= 6) return "警戒";
+		return "低";
+	}
+
+	private void drawDiamond(GuiGraphicsExtractor g, int x, int y, int color) {
+		int radius = preferences.markerRadius();
+		for (int dy = -radius; dy <= radius; dy++) { int half = radius - Math.abs(dy); g.horizontalLine(x - half, x + half, y + dy, color); }
 		g.fill(x - 1, y - 1, x + 2, y + 2, BG);
 	}
 
@@ -2156,10 +3034,11 @@ public final class TacticalDashboard extends AbstractWidget {
 	private record Rect(int x, int y, int w, int h) { int right() { return x + w; } int bottom() { return y + h; } boolean contains(double px, double py) { return px >= x && px < right() && py >= y && py < bottom(); } }
 	private record Layout(int header, int bottomTop, int leftWidth, int dockHeaderY, Rect map, Rect right) {}
 	private record DockInfo(String id, long pos, DroneEntity occupant, DockOperationalPolicy.Status status, DockView allocation) {}
+	private record ForeignDock(long pos, String owner) {}
 	private record ContainerInfo(String label, long pos, int distance, String coordinate) {}
 	private record MapPoint(int x, int y) {}
 	private record WingCard(String groupId, List<DroneEntity> members, DroneEntity leader,
 		int recoveryCount, int averageBattery, String missionLabel) {}
 	private record OperationalWing(String id, String label, List<DroneEntity> members,
-		DroneEntity leader, int recoveryCount, int averageBattery) {}
+		DroneEntity leader, int recoveryCount, int averageBattery, String missionLabel) {}
 }

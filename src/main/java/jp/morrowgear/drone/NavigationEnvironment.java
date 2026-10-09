@@ -20,6 +20,9 @@ final class NavigationEnvironment {
 	private NavigationEnvironment() {
 	}
 
+	static void clear() { CACHE.clear(); TRAVEL_HEADINGS.clear(); }
+	static void clearOwner(UUID owner) { CACHE.remove(owner); TRAVEL_HEADINGS.remove(owner); }
+
 	static Snapshot assess(ServerLevel level, ServerPlayer owner) {
 		long tick = level.getGameTime();
 		CachedSnapshot cached = CACHE.get(owner.getUUID());

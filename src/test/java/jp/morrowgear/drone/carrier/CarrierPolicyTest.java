@@ -29,7 +29,9 @@ class CarrierPolicyTest {
         var nether = CarrierPolicy.miningOperation(generation, "minecraft:the_nether", -1, -1, 80, 0, 256);
         assertEquals(-64, low.minY());
         assertEquals(99, low.maxY());
-        assertEquals((99 - -64 + 1) * 256, low.volume());
+        assertEquals(CarrierPolicy.MINING_IMPACT_RADIUS, low.footprintRadius());
+        assertTrue(low.footprintSize() > 1_700 && low.footprintSize() < 1_900);
+        assertEquals((99 - -64 + 1) * low.footprintSize(), low.volume());
         assertEquals(198, high.maxY());
         assertTrue(high.volume() > low.volume());
         assertEquals(0, nether.minY());
@@ -38,14 +40,32 @@ class CarrierPolicyTest {
         assertThrows(IllegalArgumentException.class, () -> CarrierPolicy.miningOperation(
             generation, "minecraft:overworld", 0, 0, -64, -64, 320));
     }
-    @Test void aftBoardingZoneIsInsideV27ButOutsideEveryOriginChunk() {
+
+    @Test void productionFootprintUsesAThreeByThreeChunkCircularShockwave() {
+        var op = CarrierPolicy.miningOperation(UUID.randomUUID(), "minecraft:overworld",
+            8, 8, 100, -64, 320);
+        assertEquals(-16, op.minX());
+        assertEquals(31, op.maxX());
+        assertEquals(-16, op.minZ());
+        assertEquals(31, op.maxZ());
+        assertTrue(op.contains(8, 0, 8));
+        assertTrue(op.contains(-15, 0, 8));
+        assertFalse(op.contains(-16, 0, -16), "the 3x3 envelope corners stay outside the circular shockwave");
+        var columns = new HashSet<Integer>();
+        for (int cursor = 0; cursor < op.footprintSize(); cursor++) {
+            assertTrue(columns.add(op.column(cursor)));
+            assertTrue(op.contains(op.x(cursor), op.y(cursor), op.z(cursor)));
+        }
+        assertEquals(op.footprintSize(), columns.size());
+    }
+	@Test void aftBoardingProjectionClearsTheShortV31SternAndEveryOriginChunk() {
         assertTrue(CarrierPolicy.inBoardingProjection(0, 18));
         assertTrue(CarrierPolicy.inBoardingProjection(-1.5, 16.5));
         assertFalse(CarrierPolicy.inBoardingProjection(20, 0));
         assertFalse(CarrierPolicy.inBoardingProjection(0, 16));
         assertFalse(CarrierPolicy.inBoardingProjection(Double.NaN, 18));
         assertTrue(CarrierPolicy.BOARDING_RADIUS < CarrierPolicy.WIDTH / 2);
-        assertTrue(CarrierPolicy.BOARDING_Z + CarrierPolicy.BOARDING_RADIUS < CarrierPolicy.LENGTH / 2);
+		assertTrue(CarrierPolicy.BOARDING_Z - CarrierPolicy.BOARDING_RADIUS >= CarrierPolicy.LENGTH / 2);
         for (double z : new double[] {-32, -16.01, -.01, 0, .5, 15.99, 16}) {
             int miningChunk = Math.floorDiv((int) Math.floor(z), 16);
             int minimumBoardingChunk = Math.floorDiv((int) Math.floor(z + CarrierPolicy.BOARDING_Z - CarrierPolicy.BOARDING_RADIUS), 16);
@@ -62,9 +82,26 @@ class CarrierPolicyTest {
         for (int x : new int[] {-33, -32, -17, -16, -1, 0, 15, 16}) {
             var op = CarrierPolicy.Operation.at(UUID.randomUUID(), "minecraft:overworld", x, x, -64, 319);
             assertTrue(op.contains(x, 0, x));
-            assertEquals(Math.floorDiv(x, 16) * 16, op.x(0));
-            assertEquals(Math.floorDiv(x, 16) * 16 + 15, op.x(255));
+            assertTrue(op.x(0) >= Math.floorDiv(x, 16) * 16 + 7);
+            assertTrue(op.x(0) <= Math.floorDiv(x, 16) * 16 + 8);
+            assertTrue(op.contains(op.x(255), 0, op.z(255)));
         }
+    }
+    @Test void excavationExpandsRadiallyAndRepeatsTheSameWholeChunkPatternAtEveryDepth() {
+        var op = CarrierPolicy.Operation.at(UUID.randomUUID(), "minecraft:overworld", -1, 32, -64, 4);
+        var firstLayer = new HashSet<Integer>();
+        double previousRadius = -1;
+        for (int cursor = 0; cursor < 256; cursor++) {
+            int column = op.column(cursor);
+            assertTrue(firstLayer.add(column), "Each horizontal column must appear exactly once per layer");
+            double dx = (column & 15) - 7.5, dz = (column >> 4) - 7.5;
+            double radius = dx * dx + dz * dz;
+            assertTrue(radius + 1.0e-9 >= previousRadius, "Excavation must expand from the impact centre");
+            previousRadius = radius;
+            assertEquals(column, op.column(cursor + 256));
+            assertEquals(op.y(cursor) - 1, op.y(cursor + 256));
+        }
+        assertEquals(256, firstLayer.size());
     }
     @Test void traversalIsBoundedUniqueAndTopDown() {
         var op = CarrierPolicy.Operation.at(UUID.randomUUID(), "minecraft:overworld", -1, 32, -64, 4);
@@ -88,7 +125,7 @@ class CarrierPolicyTest {
         var encoded = CarrierPolicy.Progress.CODEC.encodeStart(JsonOps.INSTANCE, input).getOrThrow();
         var result = CarrierPolicy.Progress.CODEC.parse(JsonOps.INSTANCE, encoded).getOrThrow();
         assertEquals(input, result);
-        assertEquals(List.of(3), result.sealedColumns());
+        assertEquals(List.of(op.column(3)), result.sealedColumns());
         assertTrue(new CarrierPolicy.Progress(op, 259, result.sealedColumns()).sealed());
         assertThrows(UnsupportedOperationException.class, () -> result.sealedColumns().add(4));
     }
@@ -101,7 +138,8 @@ class CarrierPolicyTest {
         assertFalse(CarrierPolicy.canActivate(op.generation(), op, until + 1L, until, true, true, true));
         assertFalse(CarrierPolicy.canActivate(op.generation(), op, -1, until, true, true, true));
         assertFalse(CarrierPolicy.canActivate(op.generation(), op, 300, until, false, true, true));
-        assertFalse(CarrierPolicy.canActivate(op.generation(), op, 300, until, true, false, true));
+        assertTrue(CarrierPolicy.canActivate(op.generation(), op, 300, until, true, false, true),
+            "accepted work waits for its bounded chunk lease instead of depending on player proximity");
         assertFalse(CarrierPolicy.canActivate(op.generation(), op, 300, until, true, true, false));
         assertFalse(CarrierPolicy.canActivate(op.generation(), null, 300, until, true, true, true));
     }

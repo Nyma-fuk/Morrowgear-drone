@@ -1,0 +1,8 @@
+const test=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');const path=require('node:path');
+const {catalog,states}=require('./design-catalog');const policy=require('./visor-policy');
+test('36 unique surfaces have complete design contracts',()=>{assert.equal(catalog.length,36);assert.equal(new Set(catalog.map(x=>x.id)).size,36);for(const row of catalog)for(const key of ['title','purpose','layout','data','action','error','back','accept','status'])assert.ok(row[key]?.length>0,`${row.id} ${key}`);});
+test('eight review states are unique',()=>{assert.equal(states.length,8);assert.equal(new Set(states.map(x=>x.id)).size,8);});
+for(const scene of Object.keys(policy.scenes))test(`visor ${scene} budgets at wide and narrow widths`,()=>{for(const width of [360,650,1280,1920]){const p=policy.layout(scene,width);assert.ok(p.ops.length<=(width<900?1:3));assert.ok(p.markers<=(width<900?2:5));assert.equal(p.fontSize,14);assert.equal(p.ops.length+p.hidden,policy.scenes[scene].ops.length);}});
+test('selection retention is identity based',()=>{assert.equal(policy.retainFocus('B',['C','B','A']),'B');assert.equal(policy.retainFocus('B',[]),null);});
+test('stale state explicitly flags unknown readings',()=>{assert.equal(policy.layout('stale',1920).stale,true);});
+test('review local scripts styles and background files exist',()=>{for(const file of ['design-review.html','visor-worn.html']){const html=fs.readFileSync(path.join(__dirname,file),'utf8');for(const match of html.matchAll(/(?:src|href)="([^"#?]+)(?:[?#][^"]*)?"/g)){assert.ok(fs.existsSync(path.join(__dirname,match[1])),match[1]);}}assert.ok(fs.existsSync(path.join(__dirname,'assets/visor-night.png')));});

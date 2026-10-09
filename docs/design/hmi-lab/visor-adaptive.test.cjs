@@ -1,0 +1,7 @@
+const test=require('node:test');const assert=require('node:assert/strict');const {frame,steps}=require('./visor-adaptive');
+test('normal flight collapses details without losing pinned identity',()=>{assert.equal(frame(0).detail,false);assert.equal(frame(0,{pinned:true}).detail,true);assert.equal(frame(0).relations.length,0);});
+test('assignment, approach and firing are distinct states for same target',()=>{assert.equal(frame(1).action,'割当済み');assert.equal(frame(2).action,'射撃位置へ移動');assert.equal(frame(3).action,'レーザー照射中');assert.equal(frame(1).target,frame(3).target);});
+test('relief removes outgoing attack relation and exposes reason resources',()=>{const p=frame(4,{pinned:true});assert.equal(p.relations.length,0);assert.equal(p.action,'Dockへ帰還');assert.equal(p.laser,8);assert.equal(p.detail,true);assert.match(p.event,/RAVEN 03/);});
+test('target defeat preserves remaining front, final resolution collapses',()=>{assert.equal(frame(5).fronts.length,1);assert.equal(frame(6).fronts.length,0);assert.equal(frame(6).detail,false);assert.equal(frame(6,{pinned:true}).detail,true);});
+test('small display reduces rows without shrinking font',()=>{assert.equal(frame(3,{width:650}).rows,1);assert.equal(frame(3,{width:650}).fontSize,frame(3,{width:1920}).fontSize);});
+test('timeline bounds resolve deterministically',()=>{assert.equal(frame(-1).name,steps[0].name);assert.equal(frame(99).name,steps.at(-1).name);});

@@ -1,0 +1,100 @@
+{
+  "proposalOnly": true,
+  "revision": "V31_INTEGRATED_MINING_RING_01",
+  "axes": {
+    "front": "-Y",
+    "up": "+Z",
+    "mirror": "X=0"
+  },
+  "bounds": [
+    [
+      -25.0,
+      25.0
+    ],
+    [
+      -16.028892517089844,
+      14.897500038146973
+    ],
+    [
+      0.20000000298023224,
+      7.150000095367432
+    ]
+  ],
+  "dimensions": [
+    50.0,
+    30.926392555236816,
+    6.950000092387199
+  ],
+  "symmetryMaxError": 0.0,
+  "evaluatedVertices": 15219,
+  "polygons": 12194,
+  "nonManifoldEdgesByObject": {},
+  "mirrorModifierCount": 304,
+  "centralAperture": {
+    "center": [
+      0,
+      0.8
+    ],
+    "innerDiameter": 9.1,
+    "outerDiameter": 12.7,
+    "verticalSamplesClear": true,
+    "samples": 5
+  },
+  "miningRing": {
+    "objectCount": 46,
+    "emitterRecessMeshPairs": 8,
+    "emitterOpticMeshPairs": 8,
+    "upperEmitterWindowMeshPairs": 8,
+    "logicalEmitterCount": 16,
+    "structurallyIntegrated": true
+  },
+  "serviceBays": {
+    "count": 4,
+    "centersX": [
+      -15,
+      -10,
+      10,
+      15
+    ],
+    "clearEnvelope": [
+      3.5999999046325684,
+      4.400000095367432,
+      2.4000000953674316
+    ],
+    "approachChecks": [
+      {
+        "centerX": -15,
+        "samples": 9,
+        "approachSamplesClear": true
+      },
+      {
+        "centerX": -10,
+        "samples": 9,
+        "approachSamplesClear": true
+      },
+      {
+        "centerX": 10,
+        "samples": 9,
+        "approachSamplesClear": true
+      },
+      {
+        "centerX": 15,
+        "samples": 9,
+        "approachSamplesClear": true
+      }
+    ]
+  },
+  "lowerFrontIntake": {
+    "exists": true,
+    "objectCount": 8,
+    "approachSamplesClear": true,
+    "samples": 6
+  },
+  "rearNozzleCount": 8,
+  "beamOriginProposal": [
+    0,
+    0.8,
+    -0.1
+  ],
+  "passed": true
+}

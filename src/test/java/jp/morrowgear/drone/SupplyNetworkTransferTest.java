@@ -54,6 +54,20 @@ final class SupplyNetworkTransferTest {
 		assertEquals(40, source.getItem(1).getCount() + cargo.getFirst().getCount());
 	}
 
+	@Test void oneTripCanCombineMatchingSplitStacksWithoutTouchingOtherItems() {
+		Job job = reserve();
+		SimpleContainer source = new SimpleContainer(4);
+		source.setItem(0, new ItemStack(Items.COAL, 5));
+		source.setItem(1, new ItemStack(Items.DIAMOND, 7));
+		source.setItem(2, new ItemStack(Items.COAL, 35));
+		List<ItemStack> cargo = new ArrayList<>();
+		assertEquals(16, SupplyNetworkRuntime.loadReserved(registry, job, source, cargo, stack -> 64));
+		assertEquals(0, source.getItem(0).getCount());
+		assertEquals(24, source.getItem(2).getCount());
+		assertEquals(7, source.getItem(1).getCount());
+		assertEquals(16, cargo.stream().mapToInt(ItemStack::getCount).sum());
+	}
+
 	@Test void reservationInvalidationCannotExtractAnything() {
 		Job job = reserve();
 		SimpleContainer source = new SimpleContainer(new ItemStack(Items.COAL, 40));

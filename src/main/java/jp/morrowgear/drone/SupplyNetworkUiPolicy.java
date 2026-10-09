@@ -7,9 +7,10 @@ import java.util.OptionalInt;
 /** A configuration is confirmed only by a later matching server snapshot. */
 public final class SupplyNetworkUiPolicy {
     public enum State { IDLE, PENDING, CONFIRMED, UNCONFIRMED }
-    public record Rule(int kind, int minimum, int priority) {
+    public record Rule(int kind, int minimum, int target, int priority) {
         public Rule {
-            if (kind < 0 || kind >= 5 || minimum < 0 || minimum > 576 || priority < 0 || priority > 100)
+            if (kind < 0 || kind >= 5 || minimum < 0 || minimum > 576 || target < minimum || target > 576
+                || priority < 0 || priority > 100)
                 throw new IllegalArgumentException("Invalid supply UI rule");
         }
     }

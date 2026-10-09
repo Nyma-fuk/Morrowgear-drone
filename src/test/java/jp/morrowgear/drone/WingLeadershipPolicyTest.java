@@ -11,10 +11,13 @@ import org.junit.jupiter.api.Test;
 class WingLeadershipPolicyTest {
 	@Test
 	void serviceAndCombatTemporarilyDetachWithoutRemovingWingMembership() {
-		assertTrue(WingLeadershipPolicy.temporarilyDetached(true, false, false));
-		assertTrue(WingLeadershipPolicy.temporarilyDetached(false, true, false));
-		assertTrue(WingLeadershipPolicy.temporarilyDetached(false, false, true));
-		assertFalse(WingLeadershipPolicy.temporarilyDetached(false, false, false));
+		assertTrue(WingLeadershipPolicy.temporarilyDetached(true, false, false, false, false, false));
+		assertTrue(WingLeadershipPolicy.temporarilyDetached(false, true, false, false, false, false));
+		assertTrue(WingLeadershipPolicy.temporarilyDetached(false, false, true, false, false, false));
+		assertTrue(WingLeadershipPolicy.temporarilyDetached(false, false, false, true, false, false));
+		assertTrue(WingLeadershipPolicy.temporarilyDetached(false, false, false, false, true, false));
+		assertTrue(WingLeadershipPolicy.temporarilyDetached(false, false, false, false, false, true));
+		assertFalse(WingLeadershipPolicy.temporarilyDetached(false, false, false, false, false, false));
 	}
 
 	@Test

@@ -36,11 +36,11 @@ class CarrierBayTest {
         assertFalse(CarrierServiceBay.stable(bay, Vec3.ZERO, bay, carrierVelocity));
         assertFalse(CarrierServiceBay.stable(bay.add(2, 0, 0), carrierVelocity, bay, carrierVelocity));
     }
-    @Test void allFourBaysMatchApprovedV27WithoutOverlapping() {
-        assertEquals(26, CarrierPolicy.WIDTH);
-        assertEquals(50, CarrierPolicy.LENGTH);
-        assertEquals(11, CarrierPolicy.HEIGHT);
-        double[][] expected = {{-7.15, -5.2}, {7.15, -5.2}, {-3.6, 7.8}, {3.6, 7.8}};
+	@Test void allFourBaysMatchApprovedV31WithoutOverlapping() {
+        assertEquals(50, CarrierPolicy.WIDTH);
+        assertEquals(31, CarrierPolicy.LENGTH);
+		assertEquals(7.2, CarrierPolicy.HEIGHT);
+		double[][] expected = {{-15, -4.65}, {-10, -4.65}, {10, -4.65}, {15, -4.65}};
         for (int slot = 0; slot < 4; slot++) {
             assertEquals(expected[slot][0], CarrierPolicy.bayX(slot));
             assertEquals(expected[slot][1], CarrierPolicy.bayZ(slot));

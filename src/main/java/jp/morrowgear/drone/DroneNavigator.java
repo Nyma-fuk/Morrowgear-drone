@@ -31,8 +31,9 @@ final class DroneNavigator {
 
 	static boolean corridorClear(ServerLevel level, DroneEntity drone, Vec3 from, Vec3 to) {
 		Vec3 delta = to.subtract(from);
-		int samples = Math.max(1, (int) Math.ceil(delta.length() / 0.45));
-		AABB box = drone.getBoundingBox();
+		int samples = NavigationWorkPolicy.corridorSamples(delta.length());
+		if (samples < 0) return false;
+		AABB box = drone.navigationClearanceBox();
 		for (int step = 1; step <= samples; step++) {
 			Vec3 point = from.add(delta.scale(step / (double) samples));
 			AABB moved = box.move(point.subtract(drone.position())).deflate(0.08);
@@ -51,6 +52,10 @@ final class DroneNavigator {
 	static Vec3 preferredClearTarget(Vec3 cachedStrategic, Vec3 directTarget, boolean directCorridorClear) {
 		if (cachedStrategic != null) return cachedStrategic;
 		return directCorridorClear ? directTarget : null;
+	}
+
+	static boolean strategicWaypointReached(Vec3 current, Vec3 waypoint) {
+		return current != null && waypoint != null && current.distanceTo(waypoint) <= 1.2;
 	}
 
 	static boolean strategicCorridorClear(ServerLevel level, DroneEntity drone, Vec3 from, Vec3 to) {
@@ -84,8 +89,9 @@ final class DroneNavigator {
 			preserveAltitude ? new double[] {2.4, 0.7, -1.8} : new double[] {2.4, 0.7, -1.8, -3.2});
 		return candidates.stream()
 			.filter(candidate -> corridorClear(level, drone, drone.position(), candidate))
-			.min(Comparator.comparingDouble(candidate -> detourScore(level, drone, candidate, target,
-				preserveAltitude)))
+			.map(candidate -> new ScoredPosition(candidate,
+				detourScore(level, drone, candidate, target, preserveAltitude)))
+			.min(Comparator.comparingDouble(ScoredPosition::score)).map(ScoredPosition::position)
 			.orElse(drone.position().add(0, 0.8, 0));
 	}
 
@@ -136,15 +142,32 @@ final class DroneNavigator {
 		if (forward.lengthSqr() < 0.001) forward = new Vec3(0, 0, 1);
 		forward = forward.normalize();
 		Vec3 right = new Vec3(-forward.z, 0, forward.x);
-		List<StrategicCandidate> candidates = new ArrayList<>();
+		List<StrategicSeed> seeds = new ArrayList<>();
 		int[] sides = preferredSide == 0 ? new int[] {-1, 1} : new int[] {preferredSide, -preferredSide};
-		for (int side : sides) {
-			for (double radius : STRATEGIC_RADII) {
-				for (double forwardOffset : STRATEGIC_FORWARD) {
-					for (double height : STRATEGIC_HEIGHTS) {
+		List<StrategicSeed> boundaryBreakers = new ArrayList<>();
+		for (double radius : new double[] {50.0, 72.0}) {
+			for (double forwardOffset : STRATEGIC_FORWARD) {
+				for (double height : new double[] {0.0, 68.0}) {
+					for (int side : sides) {
 						Vec3 candidate = drone.position().add(right.scale(side * radius))
 							.add(forward.scale(forwardOffset)).add(0, height, 0);
-						addStrategicCandidate(level, drone, target, candidates, candidate, side, preferredSide);
+						boundaryBreakers.add(new StrategicSeed(candidate, side, preferredSide));
+					}
+				}
+			}
+		}
+		for (double segment : NavigationWorkPolicy.FORWARD_SEGMENTS) {
+			for (double height : new double[] {0.0, 6.0, 14.0, -6.0})
+				seeds.add(new StrategicSeed(drone.position().add(forward.scale(segment)).add(0, height, 0),
+					preferredSide, preferredSide));
+		}
+		for (double radius : STRATEGIC_RADII) {
+			for (double forwardOffset : STRATEGIC_FORWARD) {
+				for (double height : STRATEGIC_HEIGHTS) {
+					for (int side : sides) {
+						Vec3 candidate = drone.position().add(right.scale(side * radius))
+							.add(forward.scale(forwardOffset)).add(0, height, 0);
+						seeds.add(new StrategicSeed(candidate, side, preferredSide));
 					}
 				}
 			}
@@ -156,13 +179,24 @@ final class DroneNavigator {
 			for (double radius : STRATEGIC_RADII) {
 				for (double height : new double[] {0.0, 6.0, 14.0, -6.0, -12.0}) {
 					Vec3 candidate = drone.position().add(direction.scale(radius)).add(0, height, 0);
-					addStrategicCandidate(level, drone, target, candidates, candidate, 0, preferredSide);
+					seeds.add(new StrategicSeed(candidate, 0, preferredSide));
 				}
 			}
 		}
 		for (double height : new double[] {8.0, 16.0, 28.0, 44.0, 68.0, -8.0, -16.0}) {
 			Vec3 candidate = drone.position().add(forward.scale(4.0)).add(0, height, 0);
-			addStrategicCandidate(level, drone, target, candidates, candidate, preferredSide, preferredSide);
+			seeds.add(new StrategicSeed(candidate, preferredSide, preferredSide));
+		}
+		seeds.sort(Comparator.comparingDouble(seed -> strategicSeedScore(drone, target, seed)));
+		// Keep a small guaranteed sample of the outer flight envelope. Pure score
+		// ordering favors short detours and can omit every route around a very wide
+		// or tall obstacle even though the total collision budget is still available.
+		seeds.addAll(0, boundaryBreakers);
+		List<StrategicCandidate> candidates = new ArrayList<>();
+		int probeCount = NavigationWorkPolicy.strategicProbeCount(seeds.size());
+		for (int probe = 0; probe < probeCount; probe++) {
+			StrategicSeed seed = seeds.get(NavigationWorkPolicy.strategicProbeIndex(probe, seeds.size()));
+			addStrategicCandidate(level, drone, target, candidates, seed.position(), seed.side(), preferredSide);
 		}
 		return candidates.stream().min(Comparator.comparingDouble(StrategicCandidate::score))
 			.map(candidate -> new StrategicDetour(candidate.position(), candidate.side(), candidate.directExit()))
@@ -194,6 +228,12 @@ final class DroneNavigator {
 		if (preferredSide != 0 && side == preferredSide) score -= 12.0;
 		score += Math.abs(candidate.y - drone.getY()) * 0.08;
 		candidates.add(new StrategicCandidate(candidate, side, directExit, score));
+	}
+
+	private static double strategicSeedScore(DroneEntity drone, Vec3 target, StrategicSeed seed) {
+		double score = seed.position().distanceTo(target) + drone.position().distanceTo(seed.position()) * 0.16;
+		if (seed.preferredSide() != 0 && seed.side() == seed.preferredSide()) score -= 12.0;
+		return score + Math.abs(seed.position().y - drone.getY()) * 0.08;
 	}
 
 	static Vec3 recoveryTarget(ServerLevel level, DroneEntity drone, Vec3 target,
@@ -253,5 +293,9 @@ final class DroneNavigator {
 	}
 
 	private record StrategicCandidate(Vec3 position, int side, boolean directExit, double score) {
+	}
+	private record StrategicSeed(Vec3 position, int side, int preferredSide) {
+	}
+	private record ScoredPosition(Vec3 position, double score) {
 	}
 }

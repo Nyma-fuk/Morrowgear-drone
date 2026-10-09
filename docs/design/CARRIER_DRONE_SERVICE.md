@@ -1,5 +1,9 @@
 # Carrier と Drone のサービス接続
 
+> **複合兵装改訂:** SECURITYの補給需要、兵装可用性、再出撃条件は
+> [Morrowgear 複合兵装・攻撃ウェーブ制御仕様](MORROWGEAR_COMPOSITE_WEAPON_COMBAT_SPEC.md)を優先する。
+> 以下の単一`SecurityLoadout`別需要は現行実装の記録であり、移行後の仕様ではない。
+
 ## 親タスクの接続箇所
 
 - 共通初期化で `CarrierDroneServiceAdapter.install()` を呼ぶ。これは `CarrierModule.installDronePorts(...)` だけを呼び、Carrier の登録・描画登録・アイテム登録は行わない。
@@ -24,7 +28,7 @@ HomeDock、任意 ID の手動 Wing、mission、cohort、Waypoint、保留・中
 
 移動 Carrier の速度に追従し、飛行中は重力を無効にする。給電・補充・修理は lease・所有者・割当を再検証し、bay との位置差と相対速度が `CarrierServiceBay.stable(...)` を満たす場合だけ受け入れる。受入量は offer と残容量以下。アイテム消費は Carrier 側の責務で、アダプターは実際の受入量だけを返す。
 
-非戦闘役割は武装電池・弾薬を要求しない。SECURITY は共通武装電池に加え、AUTO は両弾薬、AUTOCANNON は機関砲弾薬だけ、MISSILE はミサイルだけ、LASER は弾薬なし。現在 RAM は `CombatWeapon` の動作であり選択可能な `SecurityLoadout` ではない。UNARMED は既存 `CombatPolicy.weaponServiceNeed` の共通武装電力条件に合わせ、武装電池だけを対象とする。
+非戦闘役割は兵装資源を要求しない。SECURITYは搭載兵装と`Service Plan`の不足集合に従い、Auxiliary Power、Laser Energy、機関砲弾、ミサイルを個別に要求する。優先ドクトリンを変更しても古い不足理由を固定せず、実際の搭載兵装と任務要求から需要を再計算する。現在の単一`SecurityLoadout`別需要は互換移行中だけ読み取り、保存時に新形式へ変換する。
 
 飛行電池は98%以上で需要を0にし、毎秒の飛行消費と給電の実行順による完了待ちを防ぐ。現行最大容量は飛行3000、武装2000。アプローチは2400 tick、接触後は不足量が600 tick 改善しなければ解放する。実際の充電・補充・修理が進む限り、サービス時間の絶対上限は設けない。既に到達した不足量を超える単なる再充電は、欠品待ちの期限を延長しない。
 

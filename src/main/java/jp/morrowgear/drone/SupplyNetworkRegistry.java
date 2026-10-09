@@ -17,6 +17,8 @@ public final class SupplyNetworkRegistry {
 	private final Map<Route, Configuration> routes = new LinkedHashMap<>();
 	private final Map<UUID, Job> jobs = new LinkedHashMap<>();
 	private final Map<Route, Status> statuses = new LinkedHashMap<>();
+	private final java.util.Set<RefillKey> refilling = new java.util.HashSet<>();
+	private final java.util.Set<RefillKey> evaluated = new java.util.HashSet<>();
 	private final Runnable dirty;
 	private long generation;
 
@@ -32,15 +34,18 @@ public final class SupplyNetworkRegistry {
 			throw new IllegalStateException("Supply route limit reached");
 		if (routes.values().stream().anyMatch(c -> c.route().dimension().equals(route.dimension())
 			&& !c.route().owner().equals(route.owner())
-			&& (c.route().source() == route.source() || c.route().dock() == route.dock())))
+			&& (c.route().source() != Route.AUTO_SOURCE && route.source() != Route.AUTO_SOURCE
+				&& c.route().source() == route.source() || c.route().dock() == route.dock())))
 			throw new IllegalArgumentException("Supply endpoint belongs to another owner");
 		if (old != null && old.route().equals(route) && old.rules().equals(checked) && old.enabled() == enabled)
 			return old;
 		if (old != null) {
-			for (Job job : List.copyOf(jobs.values())) if (job.route().equals(old.route()))
+			for (Job job : List.copyOf(jobs.values())) if (sameDock(job.route(), old.route()))
 				cancel(job.token(), Status.CANCELLED);
 			routes.remove(old.route());
 			statuses.remove(old.route());
+			refilling.removeIf(key -> key.route().equals(old.route()));
+			evaluated.removeIf(key -> key.route().equals(old.route()));
 		}
 		Configuration config = new Configuration(route, checked, enabled, nextGeneration());
 		routes.put(route, config);
@@ -75,8 +80,17 @@ public final class SupplyNetworkRegistry {
 
 	private boolean configured(Job job) {
 		if (job.returning()) return true;
-		Configuration c = routes.get(job.route());
+		Configuration c = configuration(job.route());
 		return c != null && c.enabled() && c.revision() == job.revision() && job.stage() != Stage.HELD;
+	}
+
+	private Configuration configuration(Route route) {
+		return routes.values().stream().filter(c -> sameDock(c.route(), route)).findFirst().orElse(null);
+	}
+
+	private Route configurationRoute(Route route) {
+		Configuration config = configuration(route);
+		return config == null ? route : config.route();
 	}
 
 	public int reservedSource(Route route, String item) {
@@ -98,19 +112,31 @@ public final class SupplyNetworkRegistry {
 		return jobs.values().stream().anyMatch(j -> j.route().dimension().equals(route.dimension())
 			&& j.deliveryTarget() == route.dock() && j.stage() != Stage.HELD && j.stage() != Stage.RETURN_SOURCE);
 	}
+	public boolean kindReserved(Route route, SupplyKind kind) {
+		return jobs.values().stream().anyMatch(j -> j.route().dimension().equals(route.dimension())
+			&& j.deliveryTarget() == route.dock() && j.kind() == kind
+			&& j.stage() != Stage.HELD && j.stage() != Stage.RETURN_SOURCE);
+	}
 
 	public Optional<Job> reserve(Configuration config, UUID drone, SupplyKind kind, String item,
 		int quantity, int sourceStock, int targetRoom, long tick) {
-		if (!config.equals(routes.get(config.route())) || !config.enabled() || drone == null
+		return reserve(config, config.route(), drone, kind, item, quantity, sourceStock, targetRoom, tick);
+	}
+
+	/** A Dock configuration is source-agnostic; each delivery records the source selected for that trip. */
+	public Optional<Job> reserve(Configuration config, Route deliveryRoute, UUID drone, SupplyKind kind, String item,
+		int quantity, int sourceStock, int targetRoom, long tick) {
+		if (!config.equals(configuration(config.route())) || !sameDock(config.route(), deliveryRoute)
+			|| deliveryRoute.source() == Route.AUTO_SOURCE || !config.enabled() || drone == null
 			|| item == null || item.isBlank() || kind == null || jobs.containsKey(drone)
 			|| DockSupplyPolicy.kind(item) != kind
-			|| dockReserved(config.route()) || jobs.size() >= SupplyNetworkPolicy.MAX_JOBS) return Optional.empty();
-		int minimum = config.rules().stream().filter(r -> r.kind() == kind).findFirst().orElseThrow().minimum();
-		int count = Math.min(Math.min(Math.min(quantity, minimum), targetRoom),
+			|| kindReserved(config.route(), kind) || jobs.size() >= SupplyNetworkPolicy.MAX_JOBS) return Optional.empty();
+		int target = config.rules().stream().filter(r -> r.kind() == kind).findFirst().orElseThrow().target();
+		int count = Math.min(Math.min(Math.min(quantity, target), targetRoom),
 			Math.min(SupplyNetworkPolicy.MAX_TRIP_ITEMS,
-				SupplyNetworkPolicy.available(sourceStock, reservedSource(config.route(), item))));
+				SupplyNetworkPolicy.available(sourceStock, reservedSource(deliveryRoute, item))));
 		if (count <= 0) return Optional.empty();
-		Job job = new Job(new Token(UUID.randomUUID(), nextGeneration()), config.route(), config.revision(),
+		Job job = new Job(new Token(UUID.randomUUID(), nextGeneration()), deliveryRoute, config.revision(),
 			drone, kind, item, count, 0, 0, Stage.RESERVED, Status.IN_TRANSIT, tick, tick, Long.MIN_VALUE);
 		put(job);
 		return Optional.of(job);
@@ -184,11 +210,19 @@ public final class SupplyNetworkRegistry {
 	}
 
 	public void status(Route route, Status status) {
-		if (routes.containsKey(route)) statuses.put(route, Objects.requireNonNull(status));
+		Route configured = configurationRoute(route);
+		if (routes.containsKey(configured)) statuses.put(configured, Objects.requireNonNull(status));
 	}
 	public Status status(Route route) {
-		return statuses.getOrDefault(route, Status.DISABLED);
+		return statuses.getOrDefault(configurationRoute(route), Status.DISABLED);
 	}
+	public boolean updateRefill(Route route, SupplyKind kind, int trigger, int target, int stock) {
+		RefillKey key = new RefillKey(route, kind);
+		if (evaluated.add(key) && stock < target || stock < trigger) refilling.add(key);
+		else if (stock >= target) refilling.remove(key);
+		return refilling.contains(key);
+	}
+	public boolean refilling(Route route, SupplyKind kind) { return refilling.contains(new RefillKey(route, kind)); }
 
 	private void put(Job job) {
 		jobs.put(job.drone(), job);
@@ -199,14 +233,15 @@ public final class SupplyNetworkRegistry {
 	public void restore(long generation, List<Configuration> configs, List<Job> savedJobs) {
 		if (generation < 0 || configs.size() > SupplyNetworkPolicy.MAX_ROUTES || savedJobs.size() > SupplyNetworkPolicy.MAX_JOBS)
 			throw new IllegalArgumentException("Invalid supply ledger size or generation");
-		routes.clear(); jobs.clear(); statuses.clear();
+		routes.clear(); jobs.clear(); statuses.clear(); refilling.clear(); evaluated.clear();
 		this.generation = generation;
 		for (Configuration config : configs) {
 			validateRules(config.rules());
 			if (routes.values().stream().anyMatch(c -> sameDock(c.route(), config.route())
 				|| (c.route().dimension().equals(config.route().dimension())
 					&& !c.route().owner().equals(config.route().owner())
-					&& (c.route().source() == config.route().source() || c.route().dock() == config.route().dock()))))
+					&& (c.route().source() != Route.AUTO_SOURCE && config.route().source() != Route.AUTO_SOURCE
+						&& c.route().source() == config.route().source() || c.route().dock() == config.route().dock()))))
 				throw new IllegalArgumentException("Duplicate supply endpoint");
 			routes.put(config.route(), config);
 			this.generation = Math.max(this.generation, config.revision());
@@ -214,7 +249,7 @@ public final class SupplyNetworkRegistry {
 		for (Job job : savedJobs) {
 			if (jobs.containsKey(job.drone()) || jobs.values().stream().anyMatch(j -> j.token().equals(job.token())))
 				throw new IllegalArgumentException("Duplicate supply assignment");
-			boolean duplicateDock = job.stage() != Stage.HELD && dockReserved(job.route());
+			boolean duplicateDock = job.stage() != Stage.HELD && kindReserved(job.route(), job.kind());
 			Job restored = (job.stage() == Stage.HELD || configured(job)) && !duplicateDock ? job : job.withProgress(job.loaded(), job.delivered(),
 				Stage.HELD, Status.RESERVATION_INVALID, job.seenTick());
 			jobs.put(restored.drone(), restored);
@@ -228,6 +263,7 @@ public final class SupplyNetworkRegistry {
 	}
 
 	public record Route(UUID owner, String dimension, long source, long dock) {
+		public static final long AUTO_SOURCE = Long.MIN_VALUE;
 		public Route {
 			if (owner == null || dimension == null || dimension.isBlank() || source == dock)
 				throw new IllegalArgumentException("Invalid supply route");
@@ -249,6 +285,7 @@ public final class SupplyNetworkRegistry {
 	}
 
 	public enum Stage { RESERVED, LOADED, HELD, RETURN_SOURCE, RETURN_DOCK }
+	private record RefillKey(Route route, SupplyKind kind) {}
 
 	public record Job(Token token, Route route, long revision, UUID drone, SupplyKind kind, String item,
 		int requested, int loaded, int delivered, Stage stage, Status status, long assignedTick, long seenTick, long fallback) {

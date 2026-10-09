@@ -45,14 +45,13 @@ class CarrierCabinControlsContractTest {
         assertFalse(source.contains("reserveBay"));
     }
 
-    @Test void cabinScreenUsesSnapshotCandidatesAndMovesSupplyHintBelowButtons() throws Exception {
+    @Test void cabinScreenUsesSnapshotCandidatesAndHidesEmptyHintWhenCandidatesExist() throws Exception {
         String map = source("src/client/java/jp/morrowgear/drone/client/CarrierMapView.java");
         String screen = source("src/client/java/jp/morrowgear/drone/client/CarrierScreen.java");
         assertTrue(map.contains("exteriorSnapshot.available()"));
         assertTrue(map.contains("snapshot.packedAt(wx, wz)"));
         assertTrue(screen.contains("for (var candidate : view().candidates())"));
-        assertTrue(screen.contains("y + 108"));
-        assertFalse(screen.contains("y + 62, width - (small() ? 14 : 208)"));
+        assertTrue(screen.contains("if (!supplyCandidatesVisible)"));
         assertTrue(screen.contains("補給候補なし（半径64ブロック）"));
     }
 

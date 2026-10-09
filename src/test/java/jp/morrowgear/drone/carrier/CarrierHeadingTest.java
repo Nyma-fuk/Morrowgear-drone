@@ -127,7 +127,7 @@ class CarrierHeadingTest {
             for (int sample = 0; sample <= 100; sample++) {
                 double progress = sample / 100.0;
                 Vec3 center = from.add(to.subtract(from).scale(progress));
-                for (double x : new double[]{-13, 13}) for (double y : new double[]{0, 11}) for (double z : new double[]{-25, 25}) {
+				for (double x : new double[]{-25, 25}) for (double y : new double[]{0, 7.2}) for (double z : new double[]{-15.5, 15.5}) {
                     Vec3 corner = CarrierNavigation.toWorld(center, yaw + (float)(2 * progress), new Vec3(x, y, z));
                     assertTrue(sweep.contains(corner), "intermediate rotating corner outside sweep");
                 }

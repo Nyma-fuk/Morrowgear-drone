@@ -10,6 +10,7 @@ final class CarrierEffectGeometry {
     record Point(double x, double y, double z) {
         Point add(Point p) { return new Point(x + p.x, y + p.y, z + p.z); }
         Point scale(double n) { return new Point(x * n, y * n, z * n); }
+        Point lerp(Point p, double t) { return scale(1 - t).add(p.scale(t)); }
         boolean finite() { return Double.isFinite(x) && Double.isFinite(y) && Double.isFinite(z); }
     }
     record Quad(Point a, Point b, Point c, Point d) {}
@@ -52,6 +53,81 @@ final class CarrierEffectGeometry {
             List.of(ring(center, inner, i), ring(center, radius, i), ring(center, radius, i + 1), ring(center, inner, i + 1)), column);
         return List.copyOf(out);
     }
+    static Point emitter(Point center, int index, int count, double radius) {
+        if (!center.finite() || count <= 0 || index < 0 || index >= count || !Double.isFinite(radius)) return center;
+        double angle = index * Math.PI * 2 / count - Math.PI / 2;
+        return center.add(new Point(Math.cos(angle) * radius, .04, Math.sin(angle) * radius));
+    }
+    static List<Quad> sphere(Point center, double radius) {
+        if (!center.finite() || !Double.isFinite(radius) || radius <= 0 || radius > 4) return List.of();
+        int bands = 7;
+        List<Quad> out = new ArrayList<>(bands * SIDES);
+        for (int band = 0; band < bands; band++) {
+            double a0 = -1.36 + band * 2.72 / bands;
+            double a1 = -1.36 + (band + 1) * 2.72 / bands;
+            double y0 = Math.sin(a0) * radius, y1 = Math.sin(a1) * radius;
+            double r0 = Math.cos(a0) * radius, r1 = Math.cos(a1) * radius;
+            for (int side = 0; side < SIDES; side++) out.add(new Quad(
+                spherePoint(center, r0, y0, side), spherePoint(center, r0, y0, side + 1),
+                spherePoint(center, r1, y1, side + 1), spherePoint(center, r1, y1, side)));
+        }
+        return List.copyOf(out);
+    }
+    static Column chunk(Column selected, int offsetX, int offsetZ) {
+        if (selected == null) return null;
+        double width = selected.maxX - selected.minX, depth = selected.maxZ - selected.minZ;
+        return new Column(selected.minX + offsetX * width, selected.maxX + offsetX * width,
+            selected.minZ + offsetZ * depth, selected.maxZ + offsetZ * depth);
+    }
+    static Column centralChunk(Column footprint, int offsetX, int offsetZ) {
+        if (footprint == null) return null;
+        double centerX = (footprint.minX + footprint.maxX) * .5;
+        double centerZ = (footprint.minZ + footprint.maxZ) * .5;
+        double x0 = centerX - 8 + offsetX * 16, z0 = centerZ - 8 + offsetZ * 16;
+        return new Column(x0, x0 + 16, z0, z0 + 16);
+    }
+    static List<Quad> outline(Column column, double y, double width, double expand) {
+        if (column == null || !Double.isFinite(y) || !Double.isFinite(width) || width <= 0
+            || !Double.isFinite(expand) || expand < 0 || expand > 16) return List.of();
+        double x0 = column.minX - expand, x1 = column.maxX + expand;
+        double z0 = column.minZ - expand, z1 = column.maxZ + expand;
+        double half = Math.min(width, Math.min(x1 - x0, z1 - z0) / 2) / 2;
+        return List.of(
+            horizontal(x0 - half, x1 + half, z0 - half, z0 + half, y),
+            horizontal(x0 - half, x1 + half, z1 - half, z1 + half, y),
+            horizontal(x0 - half, x0 + half, z0 + half, z1 - half, y),
+            horizontal(x1 - half, x1 + half, z0 + half, z1 - half, y));
+    }
+    static List<Quad> circleOutline(Point center, double radius, double y, double width, Column column) {
+        if (center == null || !center.finite() || !Double.isFinite(radius) || radius <= 0 || radius > 32
+            || !Double.isFinite(y) || !Double.isFinite(width) || width <= 0 || width >= radius) return List.of();
+        Point atY = new Point(center.x, y, center.z);
+        List<Quad> out = new ArrayList<>(SIDES * 2);
+        for (int i = 0; i < SIDES; i++) polygon(out, List.of(
+            ring(atY, radius - width, i), ring(atY, radius, i),
+            ring(atY, radius, i + 1), ring(atY, radius - width, i + 1)), column);
+        return List.copyOf(out);
+    }
+    static List<Quad> releaseRing(Point center, double radius, double width, Column column) {
+        if (!center.finite() || !Double.isFinite(radius) || !Double.isFinite(width)
+            || radius <= 0 || radius > 32 || width <= 0 || width >= radius) return List.of();
+        List<Quad> out = new ArrayList<>(SIDES * 2);
+        double inner = radius - width;
+        for (int i = 0; i < SIDES; i++) polygon(out,
+            List.of(ring(center, inner, i), ring(center, radius, i),
+                ring(center, radius, i + 1), ring(center, inner, i + 1)), column);
+        return List.copyOf(out);
+    }
+    static List<Quad> shockCurtain(Point center, double radius, double height, Column column) {
+        if (!center.finite() || !Double.isFinite(radius) || radius <= 0 || radius > 32
+            || !Double.isFinite(height) || height <= 0 || height > 24) return List.of();
+        List<Quad> out = new ArrayList<>(SIDES);
+        for (int i = 0; i < SIDES; i++) polygon(out, List.of(
+            ring(center, radius * .72, i), ring(center, radius * .72, i + 1),
+            ring(center.add(new Point(0, height, 0)), radius, i + 1),
+            ring(center.add(new Point(0, height, 0)), radius, i)), column);
+        return List.copyOf(out);
+    }
     /** A bounded square work column, expanded below the lens instead of a wandering pencil beam. */
     static List<Quad> workColumn(Point start, double bottom, Column column, double inset) {
         if (column == null || !start.finite() || !Double.isFinite(bottom) || bottom >= start.y
@@ -78,6 +154,14 @@ final class CarrierEffectGeometry {
     private static Point ring(Point center, double radius, int i) {
         double angle = i * Math.PI * 2 / SIDES;
         return center.add(new Point(Math.cos(angle) * radius, 0, Math.sin(angle) * radius));
+    }
+    private static Point spherePoint(Point center, double radius, double y, int i) {
+        double angle = i * Math.PI * 2 / SIDES;
+        return center.add(new Point(Math.cos(angle) * radius, y, Math.sin(angle) * radius));
+    }
+    private static Quad horizontal(double x0, double x1, double z0, double z1, double y) {
+        return new Quad(new Point(x0, y, z0), new Point(x1, y, z0),
+            new Point(x1, y, z1), new Point(x0, y, z1));
     }
     private static void polygon(List<Quad> out, List<Point> polygon, Column column) {
         if (column != null) {

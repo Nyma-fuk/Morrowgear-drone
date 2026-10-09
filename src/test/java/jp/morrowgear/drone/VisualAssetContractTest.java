@@ -153,10 +153,16 @@ final class VisualAssetContractTest {
 		assertTrue(fragment.contains("apply_fog"));
 		assertTrue(renderType.contains("BlendFunction.LIGHTNING"));
 		// The 26.2 vanilla depth buffer is reversed. Both beam passes must reject occluded pixels.
-		assertEquals(2, renderType.split("CompareOp.GREATER_THAN_OR_EQUAL", -1).length - 1);
+		assertEquals(4, renderType.split("CompareOp.GREATER_THAN_OR_EQUAL", -1).length - 1);
 		assertFalse(renderType.contains("CompareOp.LESS_THAN_OR_EQUAL"));
 		assertFalse(renderType.contains("CompareOp.ALWAYS_PASS"));
 		assertTrue(renderType.contains("visibleEnergyCore"));
+		assertTrue(renderType.contains("condensedBeam"));
+		assertTrue(renderType.contains("condensedCore"));
+		String condensed = Files.readString(shaders.resolve("morrowgear_condensed_beam.fsh"));
+		assertTrue(condensed.contains("pressureFront"));
+		assertTrue(condensed.contains("ionizedEdge"));
+		assertTrue(condensed.contains("apply_fog"));
 		assertTrue(renderType.contains("false"));
 		String effects = Files.readString(Path.of(
 			"src/client/java/jp/morrowgear/drone/client/CombatEffectRenderer.java"));
@@ -165,6 +171,13 @@ final class VisualAssetContractTest {
 		assertTrue(effects.contains("renderVisibleLaser"));
 		assertTrue(effects.contains("renderVisibleTracer"));
 		assertTrue(effects.contains("renderChargingBeam"));
+		assertTrue(effects.contains("emitCondensedAtmosphere"));
+		assertTrue(effects.contains("emitCondensedCore"));
+		assertTrue(effects.contains("emitPlasmaFilament"));
+		String carrier = Files.readString(Path.of(
+			"src/client/java/jp/morrowgear/drone/client/CarrierRenderer.java"));
+		assertTrue(carrier.contains("emitCondensedAtmosphere"));
+		assertTrue(carrier.contains("emitCondensedCore"));
 		String relay = Files.readString(Path.of(
 			"src/client/java/jp/morrowgear/drone/client/ChargingRelayRenderer.java"));
 		assertTrue(relay.contains("visibleEnergyCore"));

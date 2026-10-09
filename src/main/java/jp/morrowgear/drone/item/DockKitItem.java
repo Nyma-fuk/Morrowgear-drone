@@ -33,7 +33,10 @@ public final class DockKitItem extends Item {
 			BlockPos part = center.offset(i % 5 - 2, 0, i / 5 - 2);
 			level.setBlockAndUpdate(part, MorrowgearDrone.WIDE_DOCK_PARTS[i].defaultBlockState());
 		}
-		if (level.getBlockEntity(center) instanceof DockBlockEntity dock) dock.initialize(player);
+		if (level.getBlockEntity(center) instanceof DockBlockEntity dock) {
+			dock.initialize(player);
+			MorrowgearDrone.dockTopologyChanged(level, player.getUUID());
+		}
 		if (!player.isCreative()) context.getItemInHand().shrink(1);
 		player.sendSystemMessage(Component.literal("[MORROWGEAR] " + DockBlockEntity.idFor(center) + " を登録しました。"));
 		return InteractionResult.SUCCESS;

@@ -97,9 +97,13 @@ public final class CarrierUiPolicy {
         return true;
     }
     public boolean queueMove(Destination destination, long now) {
+        return queueMove(destination, 0, now);
+    }
+    public boolean queueMove(Destination destination, int operationMode, long now) {
         if (phase != Phase.SELECT || busy() || reopenRequired || !idleOwner(latest) || !fresh(now)
-            || destination == null || !destination.dimension.equals(latest.dimension())) return false;
-        queued = new Command(CommandKind.MOVE, 0, null, destination.dimension,
+            || destination == null || !destination.dimension.equals(latest.dimension())
+            || operationMode < 0 || operationMode > 2) return false;
+        queued = new Command(CommandKind.MOVE, operationMode, null, destination.dimension,
             Math.floorDiv(destination.x, 16), Math.floorDiv(destination.z, 16), destination);
         phase = Phase.QUEUED_MOVE; requestAt = now; expired = false; moveResult = MoveResult.PENDING;
         return true;

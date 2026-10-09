@@ -20,12 +20,19 @@ final class SupplyNetworkPolicyTest {
 		for (int i = 0; i <= 12; i++) assertFalse(SupplyNetworkPolicy.dispatchable(state(i)), "boundary " + i);
 	}
 
-	@Test void manualWingCannotBeBorrowedEvenWhenIdleAndFullyCharged() {
+	@Test void manualWingCanOnlyBeBorrowedWhileDockedAndOtherwiseIdle() {
 		assertFalse(SupplyNetworkPolicy.dispatchable(state(3)));
+		assertTrue(SupplyNetworkPolicy.dispatchable(new Readiness(true, true, true, true, false,
+			false, false, false, false, false, false, false, true, 100)));
+		assertFalse(SupplyNetworkPolicy.dispatchable(new Readiness(true, true, true, true, true,
+			false, false, false, false, false, false, false, true, 100)));
+		assertFalse(SupplyNetworkPolicy.dispatchable(new Readiness(true, true, true, true, false,
+			true, false, false, false, false, false, false, true, 100)));
 		assertTrue(SupplyNetworkPolicy.protectedGroup("BETA"));
 		assertTrue(SupplyNetworkPolicy.protectedGroup("MY_CARGO"));
 		assertTrue(SupplyNetworkPolicy.protectedGroup("WING-1"));
 		assertFalse(SupplyNetworkPolicy.protectedGroup("ALPHA"));
+		assertFalse(SupplyNetworkPolicy.protectedGroup("BASE-WING-BRAVO"));
 	}
 
 	@Test void dockedCargoRequiresNormalSortieCharge() {
@@ -48,11 +55,19 @@ final class SupplyNetworkPolicyTest {
 		assertEquals(0, SupplyNetworkPolicy.demand(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE));
 	}
 
+	@Test void reorderTriggerRefillsToTargetWithoutOscillatingNearTheBoundary() {
+		assertEquals(0, SupplyNetworkPolicy.demand(6, 16, 6, 0));
+		assertEquals(11, SupplyNetworkPolicy.demand(6, 16, 5, 0));
+		assertEquals(7, SupplyNetworkPolicy.demand(6, 16, 5, 4, true));
+		assertEquals(0, SupplyNetworkPolicy.demand(6, 16, 5, 1));
+	}
+
 	@Test void defaultsPrioritizeFuelAndRepairAndExposeEverySupplyKind() {
 		var defaults = SupplyNetworkPolicy.defaults();
 		assertEquals(SupplyKind.values().length, defaults.size());
 		assertEquals(SupplyKind.FUEL, defaults.getFirst().kind());
 		assertTrue(defaults.getFirst().priority() > defaults.getLast().priority());
+		assertTrue(defaults.stream().allMatch(rule -> rule.target() >= rule.minimum()));
 	}
 
 	@Test void shortagesAndRetainedCargoAreVisibleErrors() {

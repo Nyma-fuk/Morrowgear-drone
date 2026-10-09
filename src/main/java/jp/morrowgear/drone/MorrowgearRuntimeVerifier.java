@@ -24,6 +24,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
@@ -55,14 +56,67 @@ final class MorrowgearRuntimeVerifier {
 	private static SolarServiceVerificationSession solarServiceVerification;
 	private static DockExhaustionVerificationSession dockExhaustionVerification;
 	private static DynamicDockVerificationSession dynamicDockVerification;
-	private enum VerificationScope { ALL, NAVIGATION, FIELD, COMBAT, ADAPTIVE_COMBAT, REGRESSION }
+	private enum VerificationScope { ALL, NAVIGATION, FIELD, COMBAT, COMBAT_CAS, ADAPTIVE_COMBAT, BASE_LASER, FIRING_ROUTES, REGRESSION }
 
 	private MorrowgearRuntimeVerifier() {
+	}
+
+	static int startAutomation(ServerPlayer player, String scenario) {
+		return switch (scenario) {
+			case "all" -> start(player);
+			case "navigation" -> startNavigation(player);
+			case "field" -> startField(player);
+			case "combat" -> startCombat(player);
+			case "combat_cas" -> startCombatCas(player);
+			case "adaptive_combat" -> startAdaptiveCombat(player);
+			case "base_laser" -> startBaseLaser(player);
+			case "firing_routes" -> startFiringRoutes(player);
+			case "regression" -> startRegression(player);
+			case "ui" -> prepareUi(player);
+			case "salvage" -> startSalvage(player);
+			case "salvage_service" -> startSalvageService(player);
+			case "salvage_vertical" -> startSalvageVertical(player);
+			case "salvage_clearance" -> startSalvageClearance(player, false, false);
+			case "salvage_protected" -> startSalvageClearance(player, true, false);
+			case "salvage_late_engineer" -> startSalvageClearance(player, false, true);
+			case "solar_service" -> startSolarService(player);
+			case "dock_exhaustion" -> startDockExhaustion(player);
+			case "dock_allocation" -> startDynamicDock(player);
+			default -> 0;
+		};
+	}
+
+	static MorrowgearAutomation.Result automationStatus(String scenario) {
+		if (Set.of("all", "navigation", "field", "combat", "combat_cas", "adaptive_combat", "base_laser", "firing_routes", "regression").contains(scenario)) {
+			if (active == null) return MorrowgearAutomation.Result.running("runtime session has not started");
+			if (!active.done()) return MorrowgearAutomation.Result.running(active.progress());
+			return active.failures.isEmpty()
+				? MorrowgearAutomation.Result.pass("COMPLETE PASS " + active.caseCount() + "/" + active.caseCount())
+				: MorrowgearAutomation.Result.fail("COMPLETE FAIL " + active.failures.size() + " / " + active.failures.getFirst());
+		}
+		String result = switch (scenario) {
+			case "salvage", "salvage_service", "salvage_vertical", "salvage_clearance",
+				"salvage_protected", "salvage_late_engineer" -> salvageVerification == null ? null : salvageVerification.result;
+			case "solar_service" -> solarServiceVerification == null ? null : solarServiceVerification.result;
+			case "dock_exhaustion" -> dockExhaustionVerification == null ? null : dockExhaustionVerification.result;
+			case "dock_allocation" -> dynamicDockVerification == null ? null : dynamicDockVerification.result;
+			default -> "UNKNOWN SCENARIO";
+		};
+		if (result == null || result.contains("RUNNING")) return MorrowgearAutomation.Result.running(result == null ? "session has not started" : result);
+		return result.contains("PASS") ? MorrowgearAutomation.Result.pass(result) : MorrowgearAutomation.Result.fail(result);
+	}
+
+	private static int startSalvageClearance(ServerPlayer player, boolean protectedBlock, boolean lateEngineer) {
+		if (salvageVerification != null && !salvageVerification.done()) return 0;
+		salvageVerification = new SalvageVerificationSession(player, false, false, true, protectedBlock, lateEngineer);
+		return Command.SINGLE_SUCCESS;
 	}
 
 	static void register() {
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
 			dispatcher.register(Commands.literal("morrowgear_verify")
+				.requires(source -> source.getEntity() instanceof ServerPlayer player
+					&& player.isCreative() && player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
 				.then(Commands.literal("all").executes(context -> {
 					Entity entity = context.getSource().getEntity();
 					if (!(entity instanceof ServerPlayer player)) {
@@ -102,6 +156,11 @@ final class MorrowgearRuntimeVerifier {
 						return 0;
 					}
 					return startAdaptiveCombat(player);
+				}))
+				.then(Commands.literal("firing_routes").executes(context -> {
+					Entity entity = context.getSource().getEntity();
+					if (!(entity instanceof ServerPlayer player)) return 0;
+					return startFiringRoutes(player);
 				}))
 				.then(Commands.literal("regression").executes(context -> {
 					Entity entity = context.getSource().getEntity();
@@ -182,6 +241,37 @@ final class MorrowgearRuntimeVerifier {
 					}
 					return startSalvageVertical(player);
 				}))
+				.then(Commands.literal("salvage_clearance").executes(context -> {
+					if (!(context.getSource().getEntity() instanceof ServerPlayer player)) return 0;
+					if (salvageVerification != null && !salvageVerification.done()) return 0;
+					salvageVerification = new SalvageVerificationSession(player, false, false, true);
+					return 1;
+				}))
+				.then(Commands.literal("salvage_protected").executes(context -> {
+					if (!(context.getSource().getEntity() instanceof ServerPlayer player)) return 0;
+					if (salvageVerification != null && !salvageVerification.done()) return 0;
+					salvageVerification = new SalvageVerificationSession(player, false, false, true, true);
+					return 1;
+				}))
+				.then(Commands.literal("salvage_late_engineer").executes(context -> {
+					if (!(context.getSource().getEntity() instanceof ServerPlayer player)) return 0;
+					if (salvageVerification != null && !salvageVerification.done()) return 0;
+					salvageVerification = new SalvageVerificationSession(player, false, false, true, false, true);
+					return 1;
+				}))
+				.then(Commands.literal("salvage_canopy").executes(context -> {
+					if (!(context.getSource().getEntity() instanceof ServerPlayer player)) return 0;
+					if (salvageVerification != null && !salvageVerification.done()) return 0;
+					salvageVerification = new SalvageVerificationSession(player, false, false, true);
+					for (int x = 16; x <= 20; x++) for (int z = -2; z <= 2; z++) {
+						BlockState canopy = x == 18 && z == 0 ? Blocks.OAK_LOG.defaultBlockState()
+							: Blocks.OAK_LEAVES.defaultBlockState().setValue(
+								net.minecraft.world.level.block.state.properties.BlockStateProperties.PERSISTENT, true);
+						player.level().setBlockAndUpdate(salvageVerification.base.offset(x, 10, z), canopy);
+					}
+					salvageVerification.say("SALVAGE CANOPY / persistent leaves and trunk / Engineer resume required");
+					return 1;
+				}))
 				.then(Commands.literal("solar_service").executes(context -> {
 					Entity entity = context.getSource().getEntity();
 					if (!(entity instanceof ServerPlayer player)) {
@@ -256,6 +346,13 @@ final class MorrowgearRuntimeVerifier {
 		return Command.SINGLE_SUCCESS;
 	}
 
+	private static int startCombatCas(ServerPlayer player) {
+		if (active != null && !active.done()) return 0;
+		active = new RuntimeSession(player, VerificationScope.COMBAT_CAS);
+		active.say("START focused CAS route coverage / cases " + active.caseCount());
+		return Command.SINGLE_SUCCESS;
+	}
+
 	private static int startAdaptiveCombat(ServerPlayer player) {
 		if (active != null && !active.done()) {
 			player.sendSystemMessage(Component.literal("[MORROWGEAR VERIFY] already running: " + active.progress()));
@@ -263,6 +360,20 @@ final class MorrowgearRuntimeVerifier {
 		}
 		active = new RuntimeSession(player, VerificationScope.ADAPTIVE_COMBAT);
 		active.say("START adaptive combat in Minecraft / 6 drones / 1 dock / cases " + active.caseCount());
+		return Command.SINGLE_SUCCESS;
+	}
+
+	private static int startBaseLaser(ServerPlayer player) {
+		if (active != null && !active.done()) return 0;
+		active = new RuntimeSession(player, VerificationScope.BASE_LASER);
+		active.say("START base laser Warden regression / 4 Wings / 8 laser aircraft");
+		return Command.SINGLE_SUCCESS;
+	}
+
+	private static int startFiringRoutes(ServerPlayer player) {
+		if (active != null && !active.done()) return 0;
+		active = new RuntimeSession(player, VerificationScope.FIRING_ROUTES);
+		active.say("START weapon firing-route coverage / caves, roofs, walls and shafts");
 		return Command.SINGLE_SUCCESS;
 	}
 
@@ -507,6 +618,13 @@ final class MorrowgearRuntimeVerifier {
 			this.player = player;
 			this.level = player.level();
 			BlockPos base = player.blockPosition().below().offset(0, 0, 18);
+			// This dedicated verification world is reused between command-only runs.
+			// Remove stale probes and Docks so they cannot satisfy a reservation before
+			// this scenario has observed its required no-Dock and queue phases.
+			for (DroneEntity existing : level.getEntitiesOfClass(DroneEntity.class,
+				new AABB(base).inflate(640.0), drone -> drone.isOwnedBy(player))) existing.discard();
+			for (DockBlockEntity existing : List.copyOf(MorrowgearDrone.findDocks(level, player, base, 320)))
+				MorrowgearDrone.removeDock(level, existing.getBlockPos(), false);
 			dockPos = base.above();
 			for (int x = -22; x <= 22; x++) for (int z = -22; z <= 22; z++) {
 				level.setBlockAndUpdate(base.offset(x, 0, z), Blocks.SMOOTH_STONE.defaultBlockState());
@@ -561,7 +679,7 @@ final class MorrowgearRuntimeVerifier {
 			if (!dockCreated) {
 				noDockHoldingObserved |= ordinary.dockHolding() && !ordinary.hasDock() && !ordinary.isDocked()
 					&& service.dockHolding() && !service.hasDock() && !service.isDocked();
-				if (elapsed < 40) return;
+				if (elapsed < 80) return;
 				createDock(dockPos);
 				parked.assignDock(dockPos);
 				parked.setPos(dockPos.getX() + .5, dockPos.getY() + .344, dockPos.getZ() + .5);
@@ -837,6 +955,11 @@ final class MorrowgearRuntimeVerifier {
 		private boolean returnCruiseObserved;
 		private final boolean serviceScenario;
 		private final boolean verticalScenario;
+		private final boolean clearanceScenario;
+		private final boolean protectedScenario;
+		private final boolean lateEngineerScenario;
+		private DroneEntity clearanceEngineer;
+		private boolean clearanceObserved;
 		private boolean verticalEscapeObserved;
 		private boolean serviceInjected;
 		private boolean serviceReturnObserved;
@@ -858,10 +981,28 @@ final class MorrowgearRuntimeVerifier {
 
 		private SalvageVerificationSession(ServerPlayer player, boolean serviceScenario,
 			boolean verticalScenario) {
+			this(player, serviceScenario, verticalScenario, false);
+		}
+
+		private SalvageVerificationSession(ServerPlayer player, boolean serviceScenario,
+			boolean verticalScenario, boolean clearanceScenario) {
+			this(player, serviceScenario, verticalScenario, clearanceScenario, false);
+		}
+
+		private SalvageVerificationSession(ServerPlayer player, boolean serviceScenario,
+			boolean verticalScenario, boolean clearanceScenario, boolean protectedScenario) {
+			this(player, serviceScenario, verticalScenario, clearanceScenario, protectedScenario, false);
+		}
+
+		private SalvageVerificationSession(ServerPlayer player, boolean serviceScenario,
+			boolean verticalScenario, boolean clearanceScenario, boolean protectedScenario, boolean lateEngineerScenario) {
 			this.player = player;
 			this.level = player.level();
 			this.serviceScenario = serviceScenario;
 			this.verticalScenario = verticalScenario;
+			this.clearanceScenario = clearanceScenario;
+			this.protectedScenario = protectedScenario;
+			this.lateEngineerScenario = lateEngineerScenario;
 			this.base = player.blockPosition().below().offset(14, 0, 0);
 			this.dockPos = base.offset(0, verticalScenario ? 12 : 1, 0);
 			for (DroneEntity existing : level.getEntitiesOfClass(DroneEntity.class,
@@ -873,13 +1014,23 @@ final class MorrowgearRuntimeVerifier {
 				dockPos.getZ() + .5, "VERIFY-SALVAGE-CARRIER", DroneRole.SALVAGE);
 			carrier.assignDock(dockPos);
 			carrier.setDockedForCommission();
-			load = createDrone(base.getX() + (verticalScenario ? 2.5 : 18.5),
-				base.getY() + (verticalScenario ? 1.15 : 7.15),
+			load = createDrone(base.getX() + (verticalScenario ? 7.5 : 18.5),
+				base.getY() + (verticalScenario ? 5.15 : 7.15),
 				base.getZ() + .5, "VERIFY-SALVAGE-LOAD", DroneRole.SCOUT);
 			load.assignWaypoint(base.offset(24, 0, 0), "VERIFY-SALVAGE-RESUME", 1, 0,
 				load.blockPosition(), level.getGameTime());
 			load.capturePowerLossTaskForVerification();
 			load.setPowerForVerification(0, 1000);
+			if (clearanceScenario) {
+				for (int x = 16; x <= 20; x++) for (int z = -2; z <= 2; z++)
+					level.setBlockAndUpdate(base.offset(x, 10, z),
+						(protectedScenario ? Blocks.BEDROCK : Blocks.STONE).defaultBlockState());
+			}
+			if ((clearanceScenario || verticalScenario) && !lateEngineerScenario) {
+				clearanceEngineer = createDrone(base.getX() + 9.5, base.getY() + 14,
+					base.getZ() + 5.5, "VERIFY-SALVAGE-ENGINEER", DroneRole.ENGINEER);
+				clearanceEngineer.setMode(DroneMode.FOLLOW);
+			}
 			initialLoadY = load.getY();
 			startedTick = level.getGameTime();
 			lastState = carrier.salvageState();
@@ -941,6 +1092,43 @@ final class MorrowgearRuntimeVerifier {
 				return;
 			}
 			long elapsed = level.getGameTime() - startedTick;
+			if (lateEngineerScenario && clearanceEngineer == null) {
+				boolean intact = true;
+				for (int x = 16; x <= 20; x++) for (int z = -2; z <= 2; z++)
+					intact &= level.getBlockState(base.offset(x, 10, z)).is(Blocks.STONE);
+				if (!intact || !load.isAlive() || !load.isPowerLost() || load.isNoGravity()
+					|| carrier.salvageState() == SalvageState.HOOK) {
+					finish(false, "extraction began before Engineer reinforcement");
+					return;
+				}
+				if (elapsed >= 400) {
+					clearanceEngineer = createDrone(base.getX() + 9.5, base.getY() + 14,
+						base.getZ() + 5.5, "VERIFY-SALVAGE-ENGINEER", DroneRole.ENGINEER);
+					clearanceEngineer.setMode(DroneMode.FOLLOW);
+					say("SALVAGE ENGINEER REINFORCEMENT / corridor and load preserved for 400 ticks");
+				}
+			}
+			if (protectedScenario) {
+				boolean intact = true;
+				for (int x = 16; x <= 20; x++) for (int z = -2; z <= 2; z++)
+					intact &= level.getBlockState(base.offset(x, 10, z)).is(Blocks.BEDROCK);
+				if (!intact || !load.isAlive() || !load.isPowerLost()
+					|| carrier.salvageState() == SalvageState.HOOK || load.isNoGravity()) {
+					finish(false, "protected extraction corridor was bypassed or load changed");
+					return;
+				}
+				if (elapsed >= 400) {
+					finish(carrier.isAlive() && clearanceEngineer != null && clearanceEngineer.isAlive(),
+						"PROTECTED CORRIDOR / 25 bedrock intact / load preserved / no hook after 400 ticks");
+					return;
+				}
+			}
+			if (clearanceScenario && elapsed > 20) {
+				boolean roofRemoved = true;
+				for (int x = 16; x <= 20; x++) for (int z = -2; z <= 2; z++)
+					roofRemoved &= level.getBlockState(base.offset(x, 10, z)).isAir();
+				clearanceObserved |= roofRemoved && clearanceEngineer != null && clearanceEngineer.isAlive();
+			}
 			SalvageState state = carrier.salvageState();
 			observed.add(state);
 			if (state != lastState) {
@@ -951,9 +1139,10 @@ final class MorrowgearRuntimeVerifier {
 			}
 			carrierDeparted |= !carrier.isDocked() && carrier.position().distanceTo(Vec3.atCenterOf(dockPos)) > 3.0;
 			if (verticalScenario && state == SalvageState.INTERCEPT) {
-				double horizontalFromDock = carrier.position().multiply(1, 0, 1)
-					.distanceTo(Vec3.atCenterOf(dockPos).multiply(1, 0, 1));
-				verticalEscapeObserved |= horizontalFromDock >= 8.0
+				// The rescue contract now opens the roof before descending, rather
+				// than forcing the carrier to squeeze underneath the platform.
+				verticalEscapeObserved |= SalvageClearance.obstruction(level, load) == null
+					&& clearanceEngineer != null && clearanceEngineer.isAlive()
 					&& carrier.getY() <= dockPos.getY() + 2.5;
 			}
 			if (serviceScenario && !serviceInjected && carrierDeparted
@@ -1008,13 +1197,18 @@ final class MorrowgearRuntimeVerifier {
 				boolean servicePass = !serviceScenario || serviceInjected && serviceReturnObserved
 					&& serviceDockedObserved && serviceResumeObserved;
 				boolean verticalPass = !verticalScenario || verticalEscapeObserved;
+				boolean engineerResumed = clearanceEngineer == null
+					|| clearanceEngineer.isAlive() && clearanceEngineer.mode() == DroneMode.FOLLOW;
 				if (transitions && carrierDeparted && inertialFallObserved && !suspendedBeforeHook
 					&& suspendedLoadObserved && returnedNearDock && returnCruiseObserved
 					&& load.isAlive() && loadRestoredObserved && loadMissionResumedObserved
-					&& finalState && servicePass && verticalPass) {
+					&& finalState && servicePass && verticalPass && engineerResumed
+					&& (!clearanceScenario || clearanceObserved)) {
 					finish(true, "POWER LOSS FALL>IDLE>INTERCEPT"
 						+ (serviceScenario ? ">SERVICE>RESUME" : "")
-						+ ">HOOK>HOIST>RETURN>DELIVER>SERVICE / entity mission resumed");
+						+ ">HOOK>HOIST>RETURN>DELIVER>SERVICE / entity mission resumed"
+						+ (clearanceScenario ? " / ENGINEER CLEARANCE VERIFIED" : "")
+						+ (clearanceEngineer == null ? "" : " / ENGINEER FOLLOW RESUMED"));
 				} else {
 					finish(false, "transition=" + transitions + " departed=" + carrierDeparted
 						+ " fall=" + inertialFallObserved + " preHookSuspended=" + suspendedBeforeHook
@@ -1022,6 +1216,7 @@ final class MorrowgearRuntimeVerifier {
 						+ " cruise=" + returnCruiseObserved
 						+ " entity=" + load.isAlive() + "/" + loadRestoredObserved
 						+ " resumed=" + loadMissionResumedObserved + " final=" + finalState
+						+ " engineerResumed=" + engineerResumed
 						+ " vertical=" + verticalPass + "/" + verticalEscapeObserved
 						+ " service=" + servicePass + "/" + serviceReturnObserved
 						+ "/" + serviceDockedObserved + "/" + serviceResumeObserved);
@@ -1039,6 +1234,7 @@ final class MorrowgearRuntimeVerifier {
 			say(result);
 			if (carrier.isAlive()) carrier.discard();
 			if (load.isAlive()) load.discard();
+			if (clearanceEngineer != null && clearanceEngineer.isAlive()) clearanceEngineer.discard();
 			MorrowgearDrone.removeDock(level, dockPos, false);
 		}
 
@@ -1173,6 +1369,8 @@ final class MorrowgearRuntimeVerifier {
 		private int maxLaserSpacingStableTicks;
 		private boolean laserCombatDropped;
 		private final Set<String> laserFormationEngaged = new java.util.HashSet<>();
+		private final Map<String, Double> laserFormationLastAngle = new HashMap<>();
+		private final Map<String, Double> laserFormationOrbitTravel = new HashMap<>();
 		private int airspaceSeparationTicks;
 		private int maxAirspaceSeparationTicks;
 		private double bestAirspaceMinimumDistance;
@@ -1182,12 +1380,16 @@ final class MorrowgearRuntimeVerifier {
 		private boolean triggerCombatObserved;
 		private boolean triggerCorrectTargetObserved;
 		private int maximumHighThreatResponders;
+		private final Set<UUID> highThreatExpectedLaserUnits = new HashSet<>();
+		private final Set<UUID> highThreatFiringLaserUnits = new HashSet<>();
 		private int casImpactBlocksBefore;
 		private int casImpactBlocksAfter;
 		private int casInitialFlightPower;
 		private int casInitialWeaponPower;
+		private int casInitialAuxiliaryPower;
 		private int casMinimumFlightPower;
 		private int casMinimumWeaponPower;
+		private int casMinimumAuxiliaryPower;
 		private double casMaximumRange;
 		private double casMinimumHeight;
 		private double casMaximumHeight;
@@ -1195,7 +1397,10 @@ final class MorrowgearRuntimeVerifier {
 		private int casObservedShots;
 		private boolean casRearwardShotObserved;
 		private final Set<String> adaptiveLaserFiringGroups = new HashSet<>();
+		private final Set<UUID> adaptiveExpectedLaserUnits = new HashSet<>();
+		private final Set<UUID> adaptiveLaserFiringUnits = new HashSet<>();
 		private boolean adaptiveCrossingGunShotObserved;
+		private boolean adaptiveCrossingTrafficObserved;
 		private LivingEntity adaptiveLaserDecoy;
 		private int adaptiveLaserLockedTargetId = -1;
 		private boolean adaptiveLaserTargetStable;
@@ -1234,6 +1439,15 @@ final class MorrowgearRuntimeVerifier {
 		private final List<DroneEntity> remoteOperationDrones = new ArrayList<>();
 		private boolean remoteOperationMotionObserved;
 		private boolean remoteOperationCombatObserved;
+		private final Set<UUID> firingRouteShotUnits = new HashSet<>();
+		private final Set<UUID> firingRouteAlternativeUnits = new HashSet<>();
+		private final Set<CombatWeapon> firingRouteObservedWeapons = EnumSet.noneOf(CombatWeapon.class);
+		private boolean firingRouteSuppressionObserved;
+		private float firingRouteInitialTargetHealth;
+		private DroneEntity supplyContinuityProbe;
+		private boolean supplyImmediateRedispatchObserved;
+		private boolean supplyIdleReturnObserved;
+		private LivingEntity operatorAttackProbe;
 
 		RuntimeSession(ServerPlayer player) {
 			this(player, VerificationScope.ALL);
@@ -1247,7 +1461,7 @@ final class MorrowgearRuntimeVerifier {
 			this.scope = scope;
 			this.player = player;
 			this.level = player.level();
-			this.base = scope == VerificationScope.ADAPTIVE_COMBAT
+			this.base = scope == VerificationScope.ADAPTIVE_COMBAT || scope == VerificationScope.FIRING_ROUTES
 				? player.blockPosition().below().offset(72, 0, 0)
 				: player.blockPosition().below();
 			buildCases();
@@ -1268,6 +1482,7 @@ final class MorrowgearRuntimeVerifier {
 
 		void tick() {
 			observeCombat();
+			observeSupplyContinuity();
 			if (complete || index >= cases.size()) {
 				finish();
 				return;
@@ -1326,7 +1541,8 @@ final class MorrowgearRuntimeVerifier {
 				say("ISSUE " + failure);
 				MorrowgearDrone.LOGGER.warn("[MORROWGEAR VERIFY] {}", failure);
 			}
-			if (scope == VerificationScope.ADAPTIVE_COMBAT) {
+			if (scope == VerificationScope.ADAPTIVE_COMBAT || scope == VerificationScope.BASE_LASER
+				|| scope == VerificationScope.FIRING_ROUTES) {
 				if (combatProbe != null && combatProbe.isAlive()) combatProbe.discard();
 				cleanupVerifierDrones();
 			}
@@ -1334,8 +1550,12 @@ final class MorrowgearRuntimeVerifier {
 
 		private void buildCases() {
 			cases.add(new CaseStep("sandbox setup", 5, this::setupSandbox, () -> {
-				int expectedDrones = scope == VerificationScope.ADAPTIVE_COMBAT ? 6 : 24;
-				int expectedDocks = scope == VerificationScope.ADAPTIVE_COMBAT ? 1 : 4;
+				int expectedDrones = scope == VerificationScope.ADAPTIVE_COMBAT
+					|| scope == VerificationScope.FIRING_ROUTES ? 6
+					: scope == VerificationScope.BASE_LASER ? 8 : 24;
+				int expectedDocks = scope == VerificationScope.ADAPTIVE_COMBAT
+					|| scope == VerificationScope.BASE_LASER
+					|| scope == VerificationScope.FIRING_ROUTES ? 1 : 4;
 				require(drones.size() == expectedDrones,
 					"expected " + expectedDrones + " verifier drones, got " + drones.size());
 				require(docks.size() == expectedDocks,
@@ -1343,7 +1563,18 @@ final class MorrowgearRuntimeVerifier {
 				require(level.getBlockEntity(cargoSource) instanceof Container, "cargo source chest missing");
 				require(level.getBlockEntity(cargoTarget) instanceof Container, "cargo target chest missing");
 			}).scopedTo(VerificationScope.NAVIGATION, VerificationScope.FIELD,
-				VerificationScope.COMBAT, VerificationScope.ADAPTIVE_COMBAT, VerificationScope.REGRESSION));
+				VerificationScope.COMBAT, VerificationScope.COMBAT_CAS,
+				VerificationScope.ADAPTIVE_COMBAT, VerificationScope.BASE_LASER,
+				VerificationScope.FIRING_ROUTES,
+				VerificationScope.REGRESSION));
+			cases.add(new CaseStep("remote supply source and continuous cargo dispatch", 1000,
+				this::assignContinuousSupply, this::assertContinuousSupply,
+				this::continuousSupplyComplete).scopedTo(VerificationScope.REGRESSION));
+			cases.add(new CaseStep("operator target lock and forced combat override", 500,
+				this::assignOperatorTarget, this::assertOperatorTargetOverride,
+				() -> drones.getFirst().combatState() == CombatState.LASER_CHARGE
+					|| drones.getFirst().combatState() == CombatState.LASER_FIRE)
+				.scopedTo(VerificationScope.REGRESSION));
 			cases.add(new CaseStep("identity and ownership", 1, () -> {}, this::assertIdentity));
 			cases.add(new CaseStep("dock subsystem maintenance", 140,
 				this::assignDockSubsystemMaintenance, this::assertDockSubsystemMaintenance));
@@ -1354,7 +1585,7 @@ final class MorrowgearRuntimeVerifier {
 				this::assertWingCapacity));
 			cases.add(new CaseStep("follow formation sizes", 80, this::assignFollowMatrix,
 				() -> assertMission("follow", DroneMode.FOLLOW)));
-			cases.add(new CaseStep("waypoint formation sizes", 180, this::assignWaypointMatrix,
+			cases.add(new CaseStep("waypoint formation sizes", 240, this::assignWaypointMatrix,
 				this::assertWaypointMission).scopedTo(VerificationScope.NAVIGATION));
 			cases.add(new CaseStep("mission roster shrink and stable reindex", 140, this::assignRosterShrink,
 				this::assertRosterShrink));
@@ -1366,7 +1597,7 @@ final class MorrowgearRuntimeVerifier {
 				this::assertSecurityPatrol));
 			cases.add(new CaseStep("mixed security weapon engagement", 600,
 				this::assignMixedCombat, this::assertMixedCombat).scopedTo(VerificationScope.COMBAT));
-			cases.add(new CaseStep("laser temporary formation stability", 220,
+			cases.add(new CaseStep("laser temporary formation stability", 360,
 				this::assignLaserFormation, this::assertLaserFormation).scopedTo(VerificationScope.COMBAT));
 			cases.add(new CaseStep("multi element combat airspace separation", 440,
 				this::assignCombatAirspace, this::assertCombatAirspace).scopedTo(VerificationScope.COMBAT));
@@ -1379,12 +1610,31 @@ final class MorrowgearRuntimeVerifier {
 			cases.add(new CaseStep("field guard local combat trigger", 200,
 				this::assignFieldGuardTrigger, () -> assertTriggerCase("field guard", false))
 				.scopedTo(VerificationScope.COMBAT, VerificationScope.REGRESSION));
-			cases.add(new CaseStep("high power enemy dynamic reinforcement", 260,
+			cases.add(new CaseStep("high power enemy dynamic reinforcement", 520,
 				this::assignHighThreatReinforcement, this::assertHighThreatReinforcement)
-				.scopedTo(VerificationScope.COMBAT));
+				.scopedTo(VerificationScope.COMBAT, VerificationScope.BASE_LASER));
 			cases.add(new CaseStep("linear autocannon strike and split power", 620,
 				this::assignLinearAutocannonStrike, this::assertLinearAutocannonStrike)
-				.scopedTo(VerificationScope.COMBAT));
+				.scopedTo(VerificationScope.COMBAT, VerificationScope.COMBAT_CAS));
+			cases.add(new CaseStep("cave laser acquires an individual firing aperture", 900,
+				this::assignCaveLaserRoute, this::assertCaveLaserRoute,
+				() -> firingRouteShotUnits.size() >= 2 && combatProbe != null
+					&& combatProbe.getHealth() < firingRouteInitialTargetHealth)
+				.scopedTo(VerificationScope.FIRING_ROUTES));
+			cases.add(new CaseStep("cave autocannon uses a forward alternate ingress", 1100,
+				this::assignCaveGunRoute, this::assertCaveGunRoute,
+				() -> !firingRouteShotUnits.isEmpty()).scopedTo(VerificationScope.FIRING_ROUTES));
+			cases.add(new CaseStep("shaft laser engages vertically without clipping", 900,
+				this::assignShaftLaserRoute, this::assertShaftLaserRoute,
+				() -> !firingRouteShotUnits.isEmpty() && combatProbe != null
+					&& combatProbe.getHealth() < firingRouteInitialTargetHealth)
+				.scopedTo(VerificationScope.FIRING_ROUTES));
+			cases.add(new CaseStep("sealed cave terminates missile search and replans", 500,
+				this::assignSealedMissileRoute, this::assertSealedMissileRoute,
+				() -> firingRouteSuppressionObserved).scopedTo(VerificationScope.FIRING_ROUTES));
+			cases.add(new CaseStep("multi-Wing wall routes remain independent", 1200,
+				this::assignMultiWingWallRoutes, this::assertMultiWingWallRoutes,
+				() -> firingRouteShotUnits.size() >= 4).scopedTo(VerificationScope.FIRING_ROUTES));
 			cases.add(new CaseStep("adaptive multi-group laser reservation", 360,
 				this::assignAdaptiveLaserGroups, this::assertAdaptiveLaserGroups)
 				.scopedTo(VerificationScope.ADAPTIVE_COMBAT));
@@ -1394,7 +1644,9 @@ final class MorrowgearRuntimeVerifier {
 			cases.add(new CaseStep("adaptive weapon recharge relief rotation", 1400,
 				this::assignAdaptiveRechargeRotation, this::assertAdaptiveRechargeRotation,
 				() -> adaptiveRechargeRtbObserved && adaptiveReplacementObserved
-					&& adaptiveOriginalMissionResumed).scopedTo(VerificationScope.ADAPTIVE_COMBAT));
+					&& adaptiveOriginalMissionResumed
+					&& !adaptiveRechargeOriginal.reliefMissionInheritedFrom().isBlank())
+				.scopedTo(VerificationScope.ADAPTIVE_COMBAT));
 			cases.add(new CaseStep("adaptive laser field cooling and reengagement", 700,
 				this::assignAdaptiveHeatService, this::assertAdaptiveHeatService,
 					() -> adaptiveHeatCooledObserved && adaptiveHeatCombatObserved)
@@ -1492,6 +1744,10 @@ final class MorrowgearRuntimeVerifier {
 			List<DroneEntity> foreignDrones = level.getEntitiesOfClass(DroneEntity.class,
 				new AABB(base).inflate(160.0), drone -> drone.isOwnedBy(player)
 					&& !isVerifierGroup(drone.groupId()));
+			if (scope == VerificationScope.BASE_LASER) {
+				foreignDrones.forEach(DroneEntity::discard);
+				foreignDrones = List.of();
+			}
 			if (!foreignDrones.isEmpty()) {
 				throw new IllegalStateException("test airspace is not isolated: "
 					+ foreignDrones.size() + " non-verifier owned drone(s) within 160 blocks");
@@ -1504,13 +1760,17 @@ final class MorrowgearRuntimeVerifier {
 			cargoTarget = base.offset(-8, 1, -2);
 			placeChest(cargoSource, new ItemStack(Items.COBBLESTONE, 64));
 			placeChest(cargoTarget, ItemStack.EMPTY);
-			int dockCount = scope == VerificationScope.ADAPTIVE_COMBAT ? 1 : 4;
+			int dockCount = scope == VerificationScope.ADAPTIVE_COMBAT
+				|| scope == VerificationScope.BASE_LASER
+				|| scope == VerificationScope.FIRING_ROUTES ? 1 : 4;
 			for (int i = 0; i < dockCount; i++) {
 				BlockPos dock = base.offset(-12 + i * 5, 1, 8);
 				placeDock(dock);
 				docks.add(dock);
 			}
-			int droneCount = scope == VerificationScope.ADAPTIVE_COMBAT ? 6 : 24;
+			int droneCount = scope == VerificationScope.ADAPTIVE_COMBAT
+				|| scope == VerificationScope.FIRING_ROUTES ? 6
+				: scope == VerificationScope.BASE_LASER ? 8 : 24;
 			for (int i = 0; i < droneCount; i++) {
 				DroneEntity drone = MorrowgearDrone.DRONE.create(level, EntitySpawnReason.TRIGGERED);
 				if (drone == null) continue;
@@ -1551,6 +1811,90 @@ final class MorrowgearRuntimeVerifier {
 				require(unitIds.add(drone.unitId()), "duplicate unit id " + drone.unitId());
 				require(drone.batteryPercent() == 100, drone.unitId() + " battery not full");
 			}
+		}
+
+		private void assignContinuousSupply() {
+			BlockPos remoteSource = base.offset(52, 1, -10);
+			preparePlatform(remoteSource.offset(-2, -1, 0));
+			placeChest(remoteSource, new ItemStack(SupplyItems.AUTOCANNON_MAGAZINE, 2));
+			List<SupplyNetworkPolicy.Rule> rules = java.util.Arrays.stream(DockSupplyPolicy.SupplyKind.values())
+				.map(kind -> new SupplyNetworkPolicy.Rule(kind,
+					kind == DockSupplyPolicy.SupplyKind.GUN ? 1 : 0,
+					kind == DockSupplyPolicy.SupplyKind.GUN ? 100 : 0)).toList();
+			SupplyNetworkRuntime.configure(player, remoteSource, docks.get(0), rules, true);
+			SupplyNetworkRuntime.configure(player, remoteSource, docks.get(1), rules, true);
+			supplyContinuityProbe = drones.get(2);
+			reset(supplyContinuityProbe);
+			supplyContinuityProbe.assignRole(DroneRole.CARGO);
+			// The generic verifier reset places aircraft in a protected test group.
+			// ALPHA is the unreserved default fleet pool used by autonomous logistics.
+			supplyContinuityProbe.assignGroup("ALPHA");
+			supplyContinuityProbe.setPos(Vec3.atCenterOf(remoteSource).add(0, 4, 0));
+			supplyImmediateRedispatchObserved = false;
+			supplyIdleReturnObserved = false;
+		}
+
+		private void observeSupplyContinuity() {
+			if (supplyContinuityProbe == null || !supplyContinuityProbe.isAlive() || docks.size() < 2) return;
+			int supplied = 0;
+			for (int i = 0; i < 2; i++) if (level.getBlockEntity(docks.get(i)) instanceof DockBlockEntity dock
+				&& dock.supplyCount(DockSupplyPolicy.SupplyKind.GUN) > 0) supplied++;
+			if (supplied == 1 && supplyContinuityProbe.supplyNetworkAssignedForVerification())
+				supplyImmediateRedispatchObserved = true;
+			if (supplied == 2 && !supplyContinuityProbe.supplyNetworkAssignedForVerification()
+				&& (supplyContinuityProbe.mode() == DroneMode.DOCK || supplyContinuityProbe.isDocked()
+					|| supplyContinuityProbe.dockHolding())) supplyIdleReturnObserved = true;
+		}
+
+		private boolean continuousSupplyComplete() {
+			if (docks.size() < 2) return false;
+			return level.getBlockEntity(docks.get(0)) instanceof DockBlockEntity first
+				&& level.getBlockEntity(docks.get(1)) instanceof DockBlockEntity second
+				&& first.supplyCount(DockSupplyPolicy.SupplyKind.GUN) > 0
+				&& second.supplyCount(DockSupplyPolicy.SupplyKind.GUN) > 0;
+		}
+
+		private void assertContinuousSupply() {
+			int first = level.getBlockEntity(docks.get(0)) instanceof DockBlockEntity dock
+				? dock.supplyCount(DockSupplyPolicy.SupplyKind.GUN) : -1;
+			int second = level.getBlockEntity(docks.get(1)) instanceof DockBlockEntity dock
+				? dock.supplyCount(DockSupplyPolicy.SupplyKind.GUN) : -1;
+			require(continuousSupplyComplete(), "remote source did not supply both Docks"
+				+ " / first=" + first + " second=" + second
+				+ " cargo=" + (supplyContinuityProbe == null ? "missing"
+					: supplyContinuityProbe.cargoState() + "/" + supplyContinuityProbe.mode()
+						+ "/assigned=" + supplyContinuityProbe.supplyNetworkAssignedForVerification()));
+			require(supplyImmediateRedispatchObserved,
+				"cargo aircraft entered idle between consecutive network deliveries");
+			require(supplyIdleReturnObserved,
+				"cargo aircraft did not enter dynamic Dock return after final delivery");
+		}
+
+		private void assignOperatorTarget() {
+			clearHostiles(80);
+			for (DroneEntity drone : drones) {
+				reset(drone);
+				drone.assignRole(DroneRole.FIELD);
+			}
+			DroneEntity commanded = drones.getFirst();
+			commanded.assignRole(DroneRole.SECURITY);
+			commanded.assignSecurityLoadout(SecurityLoadout.LASER);
+			commanded.setPowerForVerification(1000, 1000);
+			commanded.setPos(base.getX() - 8.0, base.getY() + 8.0, base.getZ());
+			operatorAttackProbe = durableZombie(base.getX() + 10.5, base.getY() + 1.0, base.getZ() + 0.5);
+			require(commanded.assignOperatorAttack(player, operatorAttackProbe,
+				"verify-operator-target", 1, 0), "operator attack assignment was rejected");
+		}
+
+		private void assertOperatorTargetOverride() {
+			DroneEntity commanded = drones.getFirst();
+			require(commanded.combatTargetId() == operatorAttackProbe.getId(),
+				"operator-selected target was replaced");
+			require(commanded.forceOperatorOverride(), "forced combat override was rejected");
+			commanded.setMode(DroneMode.STANDBY);
+			require(commanded.combatState() == CombatState.IDLE && !commanded.emergencyInterceptActive(),
+				"forced command did not terminate charge/fire state");
+			if (operatorAttackProbe != null && operatorAttackProbe.isAlive()) operatorAttackProbe.discard();
 		}
 
 		private void assignDockSubsystemMaintenance() {
@@ -1637,6 +1981,7 @@ final class MorrowgearRuntimeVerifier {
 		}
 
 		private void assignWaypointMatrix() {
+			clearHostiles(128.0);
 			List<DroneEntity> fleet = aliveDrones();
 			assignGroups(fleet);
 			List<DroneEntity> assigned = fleet.subList(0, Math.min(24, fleet.size()));
@@ -1841,6 +2186,7 @@ final class MorrowgearRuntimeVerifier {
 			observeHighThreatReinforcement();
 			observeLinearAutocannonStrike();
 			observeAdaptiveCombat();
+			observeFiringRoutes();
 		}
 
 		private void assignAdaptiveLaserGroups() {
@@ -1849,7 +2195,10 @@ final class MorrowgearRuntimeVerifier {
 			CombatTelemetry.clear();
 			CombatAirspaceRegistry.clear();
 			adaptiveLaserFiringGroups.clear();
+			adaptiveExpectedLaserUnits.clear();
+			adaptiveLaserFiringUnits.clear();
 			adaptiveCrossingGunShotObserved = false;
+			adaptiveCrossingTrafficObserved = false;
 			adaptiveLaserDecoy = null;
 			adaptiveLaserLockedTargetId = -1;
 			adaptiveLaserTargetStable = true;
@@ -1871,6 +2220,7 @@ final class MorrowgearRuntimeVerifier {
 				drone.setPowerForVerification(1000, 1000);
 				drone.setPos(anchor.getX() - 10.0 + i * 2.0, anchor.getY() + 5.0, anchor.getZ() - 7.0);
 					drone.assignSecurityPatrol(anchor, 18, i < 2 ? "adapt-laser-a" : "adapt-laser-b");
+				adaptiveExpectedLaserUnits.add(drone.getUUID());
 			}
 			for (int i = 4; i < 6; i++) {
 				DroneEntity drone = drones.get(i);
@@ -1881,7 +2231,9 @@ final class MorrowgearRuntimeVerifier {
 				drone.setPowerForVerification(1000, 1000);
 				drone.setPos(anchor.getX() - 30.0, anchor.getY() + 10.0,
 					anchor.getZ() - 2.0 + (i - 4) * 4.0);
-				drone.assignSecurityPatrol(anchor, 18, "adapt-gun-cross");
+				// Use a fixed ingress axis for this crossing fixture. A target-centered
+				// patrol randomizes the CAS axis from the transient entity id.
+				drone.assignSecurityPatrol(anchor.offset(-60, 0, 0), 18, "adapt-gun-cross");
 			}
 			combatProbe = durableZombie(anchor.getX() + 0.5, anchor.getY(), anchor.getZ() + 0.5);
 			for (DroneEntity drone : drones) {
@@ -1895,7 +2247,10 @@ final class MorrowgearRuntimeVerifier {
 				"laser group A stayed in constrained charge orbit");
 			require(adaptiveLaserFiringGroups.contains("VERIFY-ADAPT-LASER-B"),
 				"laser group B stayed in constrained charge orbit");
-			require(adaptiveCrossingGunShotObserved,
+			require(adaptiveLaserFiringUnits.containsAll(adaptiveExpectedLaserUnits),
+				"individual laser aircraft stayed in charge orbit: expected="
+					+ adaptiveExpectedLaserUnits.size() + " fired=" + adaptiveLaserFiringUnits.size());
+			require(adaptiveCrossingTrafficObserved,
 				"autocannon element did not cross the active laser engagement");
 			require(adaptiveLaserDecoy != null, "competing laser target was not introduced");
 			require(adaptiveLaserTargetStable,
@@ -1977,13 +2332,15 @@ final class MorrowgearRuntimeVerifier {
 			target.setInvulnerable(true);
 			if (target instanceof Mob mob) mob.setTarget(player);
 			for (DroneEntity drone : drones) {
-				drone.setEmergencyInterceptForVerification(target.getId(), target.position(), 3);
+				// This case verifies one-for-one relief inheritance. Multi-aircraft demand
+				// scaling is covered by the dedicated reinforcement cases.
+				drone.setEmergencyInterceptForVerification(target.getId(), target.position(), 1);
 			}
 			combatProbe = target;
 		}
 
 		private void assertAdaptiveRechargeRotation() {
-			require(adaptiveRechargeRtbObserved, "empty weapon reserve did not trigger Dock RTB");
+			require(adaptiveRechargeRtbObserved, "all weapon stores depleted but Dock RTB did not start");
 			require(adaptiveReplacementObserved, "no available guard relieved the charging aircraft");
 			require(adaptiveOriginalMissionResumed,
 				"rearmed aircraft did not resume mission while the relief held combat strength");
@@ -2197,12 +2554,19 @@ final class MorrowgearRuntimeVerifier {
 				if (drone.groupId().startsWith("VERIFY-ADAPT-LASER-")
 					&& drone.combatState() == CombatState.LASER_FIRE) {
 					adaptiveLaserFiringGroups.add(drone.groupId());
+					adaptiveLaserFiringUnits.add(drone.getUUID());
 				}
 				if (drone.groupId().equals("VERIFY-ADAPT-GUN-CROSS")
 					&& drone.combatShotAge() <= 1) adaptiveCrossingGunShotObserved = true;
 			}
 			boolean bothLaserGroupsFiring = adaptiveLaserFiringGroups.contains("VERIFY-ADAPT-LASER-A")
 				&& adaptiveLaserFiringGroups.contains("VERIFY-ADAPT-LASER-B");
+			if (bothLaserGroupsFiring && combatProbe != null) {
+				adaptiveCrossingTrafficObserved |= drones.stream().anyMatch(drone ->
+					drone.groupId().equals("VERIFY-ADAPT-GUN-CROSS") && drone.combatActive()
+						&& drone.position().multiply(1, 0, 1).distanceTo(
+							combatProbe.position().multiply(1, 0, 1)) <= 28.0);
+			}
 			if (bothLaserGroupsFiring && adaptiveLaserDecoy == null && combatProbe != null && combatProbe.isAlive()) {
 				adaptiveLaserDecoy = durableZombie(combatProbe.getX() + 2.0,
 					combatProbe.getY(), combatProbe.getZ() + 1.0);
@@ -2217,7 +2581,7 @@ final class MorrowgearRuntimeVerifier {
 				adaptiveLaserStableTicks = lockedLasers.size() >= 2 ? adaptiveLaserStableTicks + 1 : 0;
 				adaptiveLaserMaximumStableTicks = Math.max(adaptiveLaserMaximumStableTicks,
 					adaptiveLaserStableTicks);
-				if (adaptiveCrossingGunShotObserved && lockedLasers.size() >= 4) {
+				if (adaptiveCrossingTrafficObserved && lockedLasers.size() >= 4) {
 					for (String group : List.of("VERIFY-ADAPT-LASER-A", "VERIFY-ADAPT-LASER-B")) {
 						List<DroneEntity> groupMembers = lockedLasers.stream()
 							.filter(drone -> drone.groupId().equals(group)).toList();
@@ -2261,10 +2625,18 @@ final class MorrowgearRuntimeVerifier {
 				}
 				Set<UUID> activeNow = drones.stream().filter(drone -> drone.groupId().equals("VERIFY-ADAPT-ROTATION")
 					&& drone.combatActive()).map(DroneEntity::getUUID).collect(java.util.stream.Collectors.toSet());
-				if (adaptiveInitialResponders.isEmpty() && activeNow.size() >= 3) adaptiveInitialResponders.addAll(activeNow);
+				// This case verifies one-for-one replacement. Deplete the first committed
+				// responder immediately instead of waiting for unrelated fleet scaling.
+				if (adaptiveInitialResponders.isEmpty()
+					&& activeNow.contains(adaptiveRechargeOriginal.getUUID())) {
+					adaptiveInitialResponders.addAll(activeNow);
+				}
 				if (!adaptivePowerDepleted && adaptiveInitialResponders.contains(adaptiveRechargeOriginal.getUUID())) {
 					adaptiveRechargeOriginal.setPowerForVerification(
 						adaptiveRechargeOriginal.batteryPercent() * 10, 0);
+					// Composite armament keeps fighting while any independent store remains.
+					// Exhaust all three stores here so this case verifies actual service rotation.
+					adaptiveRechargeOriginal.setCombatResourcesForVerification(0, 0, 0);
 					adaptivePowerDepleted = true;
 				}
 				adaptiveRechargeRtbObserved |= adaptiveRechargeOriginal.weaponRechargeActive()
@@ -2274,8 +2646,8 @@ final class MorrowgearRuntimeVerifier {
 				if (adaptiveRechargeRtbObserved && !adaptiveRechargeOriginal.weaponRechargeActive()
 					&& !adaptiveRechargeOriginal.isDocked() && !adaptiveRechargeOriginal.combatActive()
 					&& adaptiveRechargeOriginal.hasSecurityPatrol()
-					&& adaptiveRechargeOriginal.batteryPercent() >= CombatPolicy.URGENT_SORTIE_POWER
-					&& adaptiveRechargeOriginal.weaponPowerPercent() >= CombatPolicy.URGENT_SORTIE_POWER) {
+					&& adaptiveRechargeOriginal.batteryPercent() >= CombatPolicy.RESOURCE_LIMITED_SORTIE_POWER
+					&& adaptiveRechargeOriginal.weaponPowerPercent() >= CombatPolicy.RESOURCE_LIMITED_SORTIE_POWER) {
 					adaptiveOriginalMissionResumed = true;
 				}
 				if (adaptiveOriginalMissionResumed && activeNow.contains(adaptiveRechargeOriginal.getUUID()))
@@ -2311,7 +2683,7 @@ final class MorrowgearRuntimeVerifier {
 						aim.multiply(1, 0, 1).distanceTo(combatProbe.position().multiply(1, 0, 1)));
 				}
 				for (DroneEntity gun : guns) {
-					if (gun.combatState() != CombatState.GUN_RUN) {
+					if (gun.combatState() != CombatState.GUN_RUN || gun.recoveryLevel() > 0) {
 						adaptiveGunPreviousSpeed.remove(gun.getUUID());
 						continue;
 					}
@@ -2326,11 +2698,230 @@ final class MorrowgearRuntimeVerifier {
 			}
 		}
 
+		private void observeFiringRoutes() {
+			if (scope != VerificationScope.FIRING_ROUTES) return;
+			for (DroneEntity drone : drones) {
+				if (!drone.groupId().startsWith("VERIFY-ROUTE-")) continue;
+				if (drone.combatActive()) firingRouteObservedWeapons.add(drone.combatWeapon());
+				if (drone.combatShotAge() <= 1) firingRouteShotUnits.add(drone.getUUID());
+				if (drone.combatFiringRouteActiveForVerification())
+					firingRouteAlternativeUnits.add(drone.getUUID());
+				if (drone.combatRouteSuppressedWeaponForVerification() != CombatWeapon.NONE)
+					firingRouteSuppressionObserved = true;
+			}
+		}
+
+		private void resetFiringRouteFixture() {
+			if (combatProbe != null && combatProbe.isAlive()) combatProbe.discard();
+			combatProbe = null;
+			firingRouteShotUnits.clear();
+			firingRouteAlternativeUnits.clear();
+			firingRouteObservedWeapons.clear();
+			firingRouteSuppressionObserved = false;
+			firingRouteInitialTargetHealth = 0;
+			FleetThreatNetwork.clear();
+			CombatTelemetry.clear();
+			CombatManeuverRegistry.clear();
+			CombatAirspaceRegistry.clear();
+			clearHostilesAt(base, 128);
+			for (DroneEntity drone : drones) {
+				reset(drone);
+				drone.assignRole(DroneRole.FIELD);
+				drone.setPos(base.getX() - 16, base.getY() + 18, base.getZ() + 34);
+			}
+		}
+
+		private void assignCaveLaserRoute() {
+			resetFiringRouteFixture();
+			BlockPos anchor = base.offset(24, 1, 0);
+			prepareRouteChamber(anchor, 36, 24, 11, false);
+			combatProbe = routeTarget(anchor.offset(10, 1, 0));
+			armRouteDrones(2, SecurityLoadout.LASER, "VERIFY-ROUTE-CAVE-LASER",
+				anchor.offset(-44, 4, 0), combatProbe);
+		}
+
+		private void assertCaveLaserRoute() {
+			require(firingRouteAlternativeUnits.size() >= 2,
+				"laser element did not leave the roof-blocked formation geometry");
+			require(firingRouteShotUnits.size() >= 2,
+				"not every cave laser aircraft acquired a firing aperture: " + firingRouteShotUnits.size());
+			require(firingRouteObservedWeapons.contains(CombatWeapon.LASER),
+				"laser cave fixture never entered laser combat");
+			require(combatProbe != null && combatProbe.getHealth() < firingRouteInitialTargetHealth,
+				"laser emission did not apply damage inside the cave");
+		}
+
+		private void assignCaveGunRoute() {
+			resetFiringRouteFixture();
+			BlockPos anchor = base.offset(24, 1, 0);
+			prepareRouteChamber(anchor, 36, 24, 11, false);
+			combatProbe = routeTarget(anchor.offset(9, 1, 0));
+			armRouteDrones(2, SecurityLoadout.AUTOCANNON, "VERIFY-ROUTE-CAVE-GUN",
+				anchor.offset(-44, 4, 0), combatProbe);
+		}
+
+		private void assertCaveGunRoute() {
+			require(firingRouteAlternativeUnits.size() >= 1,
+				"autocannon did not select an alternate cave ingress");
+			require(firingRouteShotUnits.size() >= 1, "autocannon never fired through the cave aperture");
+			require(firingRouteObservedWeapons.contains(CombatWeapon.AUTOCANNON),
+				"cave fixture did not retain autocannon doctrine");
+			require(combatProbe != null && combatProbe.getHealth() < firingRouteInitialTargetHealth,
+				"autocannon route produced no entity damage");
+		}
+
+		private void assignShaftLaserRoute() {
+			resetFiringRouteFixture();
+			BlockPos anchor = base.offset(24, 1, 0);
+			clearVolume(anchor, 40, -2, 32);
+			for (int y = 0; y <= 24; y++) for (int x = -4; x <= 4; x++) for (int z = -4; z <= 4; z++) {
+				boolean wall = Math.abs(x) >= 3 || Math.abs(z) >= 3;
+				level.setBlockAndUpdate(anchor.offset(x, y, z), wall
+					? Blocks.DEEPSLATE_BRICKS.defaultBlockState() : Blocks.AIR.defaultBlockState());
+			}
+			for (int x = -2; x <= 2; x++) for (int z = -2; z <= 2; z++)
+				level.setBlockAndUpdate(anchor.offset(x, -1, z), Blocks.DEEPSLATE_BRICKS.defaultBlockState());
+			combatProbe = routeTarget(anchor.offset(0, 1, 0));
+			armRouteDrones(1, SecurityLoadout.LASER, "VERIFY-ROUTE-SHAFT",
+				anchor.offset(0, 28, 0), combatProbe);
+		}
+
+		private void assertShaftLaserRoute() {
+			if (firingRouteShotUnits.size() != 1 || combatProbe == null
+				|| combatProbe.getHealth() >= firingRouteInitialTargetHealth) {
+				logFiringRouteDiagnostics("SHAFT");
+			}
+			require(firingRouteAlternativeUnits.size() == 1,
+				"shaft aircraft did not select the vertical firing solution");
+			require(firingRouteShotUnits.size() == 1, "shaft laser did not fire down the clear opening");
+			require(combatProbe != null && combatProbe.getHealth() < firingRouteInitialTargetHealth,
+				"shaft laser did not damage the target");
+		}
+
+		private void logFiringRouteDiagnostics(String label) {
+			MorrowgearDrone.LOGGER.info(
+				"[MORROWGEAR VERIFY] ROUTE-{} target={}:{} health={}/{} disposition={} shots={} alternatives={} weapons={}",
+				label, combatProbe == null ? -1 : combatProbe.getId(),
+				combatProbe != null && combatProbe.isAlive(),
+				combatProbe == null ? -1.0f : combatProbe.getHealth(), firingRouteInitialTargetHealth,
+				combatProbe == null ? null : ThreatAssessment.targetDisposition(combatProbe, player,
+					player.getLastHurtByMob()), firingRouteShotUnits.size(),
+				firingRouteAlternativeUnits.size(), firingRouteObservedWeapons);
+			for (DroneEntity drone : drones.stream().filter(DroneEntity::isAlive)
+				.filter(unit -> unit.groupId().startsWith("VERIFY-ROUTE-SHAFT")).toList()) {
+				MorrowgearDrone.LOGGER.info(
+					"[MORROWGEAR VERIFY] ROUTE-{} unit={} pos={} role={} mode={} state={} weapon={} emergency={}:{} active={} target={} route={}:{} recovery={} service={} power={}/{}",
+					label, drone.unitId(), drone.position(), drone.role(), drone.mode(), drone.combatState(),
+					drone.combatWeapon(), drone.emergencyInterceptActive(),
+					drone.emergencyTargetIdForVerification(), drone.combatActive(), drone.combatTargetId(),
+					drone.combatFiringRouteActiveForVerification(),
+					drone.combatRouteSuppressedWeaponForVerification(), drone.recoveryLevel(),
+					drone.serviceReturnActive(), drone.batteryPercent(), drone.weaponPowerPercent());
+			}
+		}
+
+		private void assignSealedMissileRoute() {
+			resetFiringRouteFixture();
+			BlockPos anchor = base.offset(24, 1, 0);
+			prepareRouteChamber(anchor, 18, 14, 10, true);
+			combatProbe = routeTarget(anchor.offset(0, 1, 0));
+			armRouteDrones(1, SecurityLoadout.MISSILE, "VERIFY-ROUTE-SEALED",
+				anchor.offset(-28, 5, 0), combatProbe);
+		}
+
+		private void assertSealedMissileRoute() {
+			DroneEntity drone = drones.getFirst();
+			require(firingRouteSuppressionObserved,
+				"sealed target did not terminate the bounded missile route search");
+			require(drone.missiles() == CombatPolicy.MISSILE_CAPACITY,
+				"missile ammunition was consumed through solid cover: " + drone.missiles());
+			require(combatProbe != null && combatProbe.getHealth() == firingRouteInitialTargetHealth,
+				"sealed target received damage through cover");
+		}
+
+		private void assignMultiWingWallRoutes() {
+			resetFiringRouteFixture();
+			BlockPos anchor = base.offset(24, 1, 0);
+			clearVolume(anchor, 48, -2, 24);
+			for (int z = -24; z <= 24; z++) for (int y = 0; y <= 18; y++) {
+				boolean opening = (Math.abs(z - 14) <= 3 || Math.abs(z + 14) <= 3) && y >= 1 && y <= 8;
+				level.setBlockAndUpdate(anchor.offset(0, y, z), opening
+					? Blocks.AIR.defaultBlockState() : Blocks.DEEPSLATE_BRICKS.defaultBlockState());
+			}
+			combatProbe = routeTarget(anchor.offset(12, 1, 0));
+			for (int i = 0; i < 4; i++) {
+				DroneEntity drone = drones.get(i);
+				reset(drone);
+				drone.assignRole(DroneRole.SECURITY);
+				drone.assignSecurityLoadout(SecurityLoadout.LASER);
+				drone.assignGroup(i < 2 ? "VERIFY-ROUTE-WALL-A" : "VERIFY-ROUTE-WALL-B");
+				drone.setPos(anchor.getX() - 28, anchor.getY() + 4,
+					anchor.getZ() + (i < 2 ? -16 + i * 3 : 13 + (i - 2) * 3));
+				drone.setEmergencyInterceptForVerification(combatProbe.getId(), combatProbe.position(), 4);
+			}
+		}
+
+		private void assertMultiWingWallRoutes() {
+			require(firingRouteShotUnits.size() >= 4,
+				"wall routing blocked part of the multi-Wing laser force: " + firingRouteShotUnits.size());
+			require(firingRouteAlternativeUnits.size() >= 4,
+				"multi-Wing aircraft did not retain independent alternate routes");
+			require(drones.subList(0, 2).stream().allMatch(drone -> drone.groupId().equals("VERIFY-ROUTE-WALL-A")),
+				"Wing A identity changed during individual routing");
+			require(drones.subList(2, 4).stream().allMatch(drone -> drone.groupId().equals("VERIFY-ROUTE-WALL-B")),
+				"Wing B identity changed during individual routing");
+		}
+
+		private void armRouteDrones(int count, SecurityLoadout loadout, String group,
+			BlockPos start, LivingEntity target) {
+			for (int i = 0; i < count; i++) {
+				DroneEntity drone = drones.get(i);
+				reset(drone);
+				drone.assignRole(DroneRole.SECURITY);
+				drone.assignSecurityLoadout(loadout);
+				drone.assignGroup(group);
+				drone.setPowerForVerification(1000, 1000);
+				drone.setCombatResourcesForVerification(CombatPolicy.GUN_CAPACITY,
+					CombatPolicy.MISSILE_CAPACITY, 0);
+				drone.setPos(start.getX() + .5, start.getY() + i * 2.2, start.getZ() + .5 + i * 2.2);
+				drone.setEmergencyInterceptForVerification(target.getId(), target.position(), count);
+			}
+		}
+
+		private LivingEntity routeTarget(BlockPos position) {
+			LivingEntity target = durableZombie(position.getX() + .5, position.getY(), position.getZ() + .5);
+			target.setInvulnerable(false);
+			if (target instanceof Mob mob) mob.setTarget(player);
+			firingRouteInitialTargetHealth = target.getHealth();
+			return target;
+		}
+
+		private void prepareRouteChamber(BlockPos anchor, int halfX, int halfZ, int height,
+			boolean sealed) {
+			clearVolume(anchor, Math.max(halfX, halfZ) + 8, -2, height + 8);
+			for (int x = -halfX; x <= halfX; x++) for (int z = -halfZ; z <= halfZ; z++) {
+				level.setBlockAndUpdate(anchor.offset(x, -1, z), Blocks.DEEPSLATE_BRICKS.defaultBlockState());
+				level.setBlockAndUpdate(anchor.offset(x, height, z), Blocks.DEEPSLATE_BRICKS.defaultBlockState());
+			}
+			for (int x = -halfX; x <= halfX; x++) for (int y = 0; y <= height; y++) {
+				level.setBlockAndUpdate(anchor.offset(x, y, -halfZ), Blocks.DEEPSLATE_BRICKS.defaultBlockState());
+				level.setBlockAndUpdate(anchor.offset(x, y, halfZ), Blocks.DEEPSLATE_BRICKS.defaultBlockState());
+			}
+			for (int z = -halfZ; z <= halfZ; z++) for (int y = 0; y <= height; y++) {
+				boolean entrance = !sealed && Math.abs(z) <= 4 && y >= 1 && y <= 8;
+				level.setBlockAndUpdate(anchor.offset(-halfX, y, z), entrance
+					? Blocks.AIR.defaultBlockState() : Blocks.DEEPSLATE_BRICKS.defaultBlockState());
+				level.setBlockAndUpdate(anchor.offset(halfX, y, z), Blocks.DEEPSLATE_BRICKS.defaultBlockState());
+			}
+		}
+
 		private void assignHighThreatReinforcement() {
 			clearHostiles(128);
 			FleetThreatNetwork.clear();
 			CombatTelemetry.clear();
 			maximumHighThreatResponders = 0;
+			highThreatExpectedLaserUnits.clear();
+			highThreatFiringLaserUnits.clear();
 			for (DroneEntity drone : drones) {
 				reset(drone);
 				drone.assignRole(DroneRole.FIELD);
@@ -2339,8 +2930,12 @@ final class MorrowgearRuntimeVerifier {
 			for (int i = 0; i < 8; i++) {
 				DroneEntity guard = drones.get(i);
 				guard.assignRole(DroneRole.SECURITY);
-				guard.assignGroup("VERIFY-HIGH-THREAT");
-				guard.setPos(player.getX() - 9.0 + i * 2.2, player.getY() + 4.0, player.getZ() - 7.0);
+				guard.assignSecurityLoadout(SecurityLoadout.LASER);
+				guard.assignGroup("VERIFY-BASE-WING-" + (i / 2));
+				double angle = (i / 2) * Math.PI * 0.5 + (i % 2 == 0 ? -0.12 : 0.12);
+				guard.setPos(player.getX() + Math.cos(angle) * 25.0, player.getY() + 5.0,
+					player.getZ() + Math.sin(angle) * 25.0);
+				highThreatExpectedLaserUnits.add(guard.getUUID());
 			}
 			EntityType<?> wardenType = BuiltInRegistries.ENTITY_TYPE.getValue(
 				Identifier.fromNamespaceAndPath("minecraft", "warden"));
@@ -2359,20 +2954,34 @@ final class MorrowgearRuntimeVerifier {
 
 		private void observeHighThreatReinforcement() {
 			if (!(combatProbe instanceof Warden) || !combatProbe.isAlive()) return;
-			int responders = (int)drones.stream().filter(drone -> drone.groupId().equals("VERIFY-HIGH-THREAT")
+			int responders = (int)drones.stream().filter(drone -> highThreatExpectedLaserUnits.contains(drone.getUUID())
 				&& drone.combatActive() && drone.combatTargetId() == combatProbe.getId()).count();
 			maximumHighThreatResponders = Math.max(maximumHighThreatResponders, responders);
+			drones.stream().filter(drone -> highThreatExpectedLaserUnits.contains(drone.getUUID())
+				&& drone.combatTargetId() == combatProbe.getId()
+				&& drone.combatState() == CombatState.LASER_FIRE)
+				.map(DroneEntity::getUUID).forEach(highThreatFiringLaserUnits::add);
 		}
 
 		private void assertHighThreatReinforcement() {
-			require(maximumHighThreatResponders >= 7,
+			for (DroneEntity drone : drones.stream()
+				.filter(drone -> highThreatExpectedLaserUnits.contains(drone.getUUID())).toList()) {
+				MorrowgearDrone.LOGGER.info("[MORROWGEAR VERIFY] BASE LASER DIAG {} group={} fired={} {}",
+					drone.unitId(), drone.groupId(), highThreatFiringLaserUnits.contains(drone.getUUID()),
+					drone.laserDiagnosticForVerification(level));
+			}
+			require(maximumHighThreatResponders >= 8,
 				"high-power enemy received too few responders: " + maximumHighThreatResponders);
+			require(highThreatFiringLaserUnits.containsAll(highThreatExpectedLaserUnits),
+				"base laser aircraft remained floating without firing: expected="
+					+ highThreatExpectedLaserUnits.size() + " fired=" + highThreatFiringLaserUnits.size());
 		}
 
 		private void assignLinearAutocannonStrike() {
 			clearHostiles(160);
 			FleetThreatNetwork.clear();
 			CombatTelemetry.clear();
+			prepareIsolatedCombatFleet();
 			BlockPos anchor = base.offset(72, 1, 0);
 			for (int x = -28; x <= 28; x++) for (int z = -28; z <= 28; z++) {
 				level.setBlockAndUpdate(anchor.offset(x, -1, z), (Math.floorMod(x + z, 3) == 0
@@ -2400,14 +3009,17 @@ final class MorrowgearRuntimeVerifier {
 			combatProbe = target;
 			casInitialFlightPower = gunner.batteryPercent();
 			casInitialWeaponPower = gunner.weaponPowerPercent();
+			casInitialAuxiliaryPower = gunner.auxiliaryPowerPercent();
 			casMinimumFlightPower = casInitialFlightPower;
 			casMinimumWeaponPower = casInitialWeaponPower;
+			casMinimumAuxiliaryPower = casInitialAuxiliaryPower;
 			casMaximumRange = 0.0;
 			casMinimumHeight = Double.POSITIVE_INFINITY;
 			casMaximumHeight = Double.NEGATIVE_INFINITY;
 			casLastObservedShotTick = Long.MIN_VALUE;
 			casObservedShots = 0;
 			casRearwardShotObserved = false;
+			gunner.resetCasDiagnosticsForVerification();
 		}
 
 		private void observeLinearAutocannonStrike() {
@@ -2417,6 +3029,7 @@ final class MorrowgearRuntimeVerifier {
 			if (gunner == null || gunner.combatWeapon() != CombatWeapon.AUTOCANNON) return;
 			casMinimumFlightPower = Math.min(casMinimumFlightPower, gunner.batteryPercent());
 			casMinimumWeaponPower = Math.min(casMinimumWeaponPower, gunner.weaponPowerPercent());
+			casMinimumAuxiliaryPower = Math.min(casMinimumAuxiliaryPower, gunner.auxiliaryPowerPercent());
 			casMaximumRange = Math.max(casMaximumRange, gunner.position().multiply(1, 0, 1)
 				.distanceTo(combatProbe.position().multiply(1, 0, 1)));
 			double relativeY = gunner.getY() - combatProbe.getY();
@@ -2427,7 +3040,7 @@ final class MorrowgearRuntimeVerifier {
 				casObservedShots++;
 				Vec3 muzzle = gunner.position();
 				Vec3 aim = muzzle.add(gunner.combatVisualAim());
-				if (!CombatPolicy.forwardFiringSolution(muzzle, gunner.getDeltaMovement(), aim)) {
+				if (!CombatPolicy.actualMotionFacesShot(muzzle, gunner.getDeltaMovement(), aim)) {
 					casRearwardShotObserved = true;
 				}
 			}
@@ -2436,23 +3049,31 @@ final class MorrowgearRuntimeVerifier {
 		private void assertLinearAutocannonStrike() {
 			BlockPos anchor = base.offset(72, 1, 0);
 			casImpactBlocksAfter = countCasImpactBlocks(anchor);
+			DroneEntity gunner = drones.stream().filter(drone -> drone.groupId().equals("VERIFY-CAS-LINE"))
+				.findFirst().orElse(null);
+			if (gunner != null) MorrowgearDrone.LOGGER.info(
+				"[MORROWGEAR VERIFY] CAS GATE DIAG {}", gunner.casDiagnosticForVerification());
 			require(casMaximumRange >= 42.0, "CAS did not use the extended approach: " + casMaximumRange);
 			require(casMaximumHeight - casMinimumHeight >= 8.0,
 				"CAS did not descend and climb through the strike: " + casMinimumHeight + ".." + casMaximumHeight);
 			require(casImpactBlocksAfter < casImpactBlocksBefore,
 				"linear autocannon impacts did not produce bounded terrain damage");
-			require(casMinimumWeaponPower < casInitialWeaponPower,
-				"weapon power did not drain during autocannon fire");
+			require(casMinimumAuxiliaryPower < casInitialAuxiliaryPower,
+				"auxiliary firing bus did not drain during autocannon fire");
+			require(casMinimumWeaponPower == casInitialWeaponPower,
+				"autocannon incorrectly consumed the independent laser energy store");
 			require(casObservedShots > 0, "CAS produced no observable forward gun burst");
 			require(!casRearwardShotObserved, "autocannon fired outside its forward CAS cone");
 			require(casMinimumFlightPower > 0,
 				"flight reserve was exhausted while weapon power remained independently available");
-			require(casMinimumFlightPower != casMinimumWeaponPower,
-				"flight and weapon reserves did not evolve independently");
+			require(casMinimumFlightPower != casMinimumAuxiliaryPower,
+				"flight and auxiliary firing reserves did not evolve independently");
 		}
 
 		private void prepareIsolatedCombatFleet() {
 			CombatTelemetry.clear();
+			CombatManeuverRegistry.clear();
+			CombatAirspaceRegistry.clear();
 			for (DroneEntity drone : aliveDrones()) {
 				reset(drone);
 				drone.assignRole(DroneRole.FIELD);
@@ -2475,6 +3096,16 @@ final class MorrowgearRuntimeVerifier {
 			for (DroneEntity drone : formation) {
 				if (drone.combatActive()) laserFormationEngaged.add(drone.unitId());
 				else if (laserFormationEngaged.contains(drone.unitId())) laserCombatDropped = true;
+				if (drone.combatState() == CombatState.LASER_FIRE
+					&& !drone.laserIngressForVerification(level)) {
+					double angle = Math.atan2(drone.getZ() - combatProbe.getZ(),
+						drone.getX() - combatProbe.getX());
+					Double previous = laserFormationLastAngle.put(drone.unitId(), angle);
+					if (previous != null) {
+						double delta = Math.atan2(Math.sin(angle - previous), Math.cos(angle - previous));
+						if (delta > 0.0) laserFormationOrbitTravel.merge(drone.unitId(), delta, Double::sum);
+					}
+				}
 			}
 			List<DroneEntity> firing = formation.stream()
 				.filter(drone -> drone.combatState() == CombatState.LASER_FIRE).toList();
@@ -2513,7 +3144,7 @@ final class MorrowgearRuntimeVerifier {
 				"mixed weapon allocation missing: " + observedCombatWeapons);
 			require(observedCombatShot, "no synchronized combat shot pulse was observed");
 			require(laserOrbitSamples >= 20, "laser orbit did not produce enough stability samples");
-			require(maxLaserOrbitSpeed <= 0.48,
+			require(maxLaserOrbitSpeed <= CombatPolicy.laserFlightSpeed(6.0, false) + 0.02,
 				"laser orbit exceeded dedicated speed limit: " + maxLaserOrbitSpeed);
 			require(combatProbe == null || !combatProbe.isAlive() || combatProbe.getHealth() < 1200.0f,
 				"combat weapons did not damage the target");
@@ -2529,6 +3160,8 @@ final class MorrowgearRuntimeVerifier {
 			maxLaserSpacingStableTicks = 0;
 			laserCombatDropped = false;
 			laserFormationEngaged.clear();
+			laserFormationLastAngle.clear();
+			laserFormationOrbitTravel.clear();
 			BlockPos anchor = base.offset(12, 1, 4);
 			for (int i = 0; i < 4; i++) {
 				DroneEntity drone = drones.get(4 + i);
@@ -2548,6 +3181,13 @@ final class MorrowgearRuntimeVerifier {
 				target.setHealth(2400.0f);
 			}
 			combatProbe = target;
+			// This case measures formation convergence, not autonomous contact latency.
+			// Commit the four-aircraft element in the same setup tick so every member
+			// receives the same target and requested element size from the outset.
+			for (int i = 0; i < 4; i++) {
+				drones.get(4 + i).setEmergencyInterceptForVerification(
+					target.getId(), target.position(), 4);
+			}
 		}
 
 		private void assertLaserFormation() {
@@ -2555,11 +3195,20 @@ final class MorrowgearRuntimeVerifier {
 				"laser formation did not reach four-aircraft simultaneous fire: " + simultaneousLaserFire);
 			require(bestLaserGapError <= CombatPolicy.LASER_FORMATION_MAX_GAP_ERROR,
 				"laser formation angular spacing remained uneven: " + bestLaserGapError);
-			require(maxLaserSpacingStableTicks >= 40,
-				"laser formation did not sustain even spacing for 40 ticks: "
+			int requiredStableTicks = Math.max(1, CombatPolicy.LASER_SYNC_WINDOW_TICKS - 4);
+			require(maxLaserSpacingStableTicks >= requiredStableTicks,
+				"laser formation did not sustain even spacing through the synchronization window: "
 					+ maxLaserSpacingStableTicks);
 			require(!laserCombatDropped,
 				"laser combat lock dropped while the assigned target remained alive");
+			require(laserFormationOrbitTravel.size() == 4,
+				"not every laser aircraft established a measurable firing orbit: "
+					+ laserFormationOrbitTravel);
+			double minimumTravel = laserFormationOrbitTravel.values().stream()
+				.mapToDouble(Double::doubleValue).min().orElse(0.0);
+			require(minimumTravel >= 1.5,
+				"laser formation held a static slot instead of orbiting: minimum angular travel="
+					+ minimumTravel);
 		}
 
 		private void assignCombatAirspace() {
@@ -3349,6 +3998,7 @@ final class MorrowgearRuntimeVerifier {
 		}
 
 		private void assignObstructedRegroup() {
+			clearHostiles(128.0);
 			BlockPos wall = base.offset(26, 1, 0);
 			clearVolume(wall, 8, 0, 8);
 			for (int z = -6; z <= 6; z++) for (int y = 0; y <= 7; y++) {
@@ -3380,6 +4030,7 @@ final class MorrowgearRuntimeVerifier {
 		}
 
 		private void assignLargeObstacleRoute() {
+			clearHostiles(128.0);
 			BlockPos wall = base.offset(18, 1, 0);
 			clearGiantWall(wall);
 			for (int z = -40; z <= 40; z++) for (int y = 0; y < 52; y++) {
@@ -3389,6 +4040,10 @@ final class MorrowgearRuntimeVerifier {
 			for (int i = 0; i < wing.size(); i++) {
 				DroneEntity drone = wing.get(i);
 				reset(drone);
+				// This case measures formation navigation, not autonomous threat
+				// interception.  A SECURITY role could legitimately leave the route if
+				// a mob appears during the minute-long obstacle traversal.
+				drone.assignRole(DroneRole.FIELD);
 				drone.assignGroup("WING-LARGE-OBSTACLE");
 				drone.setPos(wall.getX() - 10.5, wall.getY() + 2.0, wall.getZ() - 3.0 + i * 2.0);
 			}

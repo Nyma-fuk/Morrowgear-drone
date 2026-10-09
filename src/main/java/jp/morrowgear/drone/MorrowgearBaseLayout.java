@@ -2,21 +2,23 @@ package jp.morrowgear.drone;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.core.Direction;
 
 final class MorrowgearBaseLayout {
 	static final int HALF_SIZE = 40;
 	static final int GATE_HALF_WIDTH = 4;
-	static final int UPPER_DOCK_Y = 7;
-	private static final int[] LANES = { -27, -18, 18, 27 };
+	static final int HANGAR_DISTANCE = 34;
+	static final int DOCK_FOOTPRINT = 5;
+	private static final int[] WALL_LANES = { -24, -8, 8, 24 };
 
 	private MorrowgearBaseLayout() {}
 
 	static List<DockStation> dockStations() {
-		List<DockStation> result = new ArrayList<>(32);
-		for (int x : LANES) for (int z : LANES) {
-			result.add(new DockStation(x, 0, z));
-			result.add(new DockStation(x, UPPER_DOCK_Y, z));
-		}
+		List<DockStation> result = new ArrayList<>(16);
+		for (int lane : WALL_LANES) result.add(new DockStation(lane, 0, -HANGAR_DISTANCE, Direction.SOUTH));
+		for (int lane : WALL_LANES) result.add(new DockStation(HANGAR_DISTANCE, 0, lane, Direction.WEST));
+		for (int lane : WALL_LANES) result.add(new DockStation(lane, 0, HANGAR_DISTANCE, Direction.NORTH));
+		for (int lane : WALL_LANES) result.add(new DockStation(-HANGAR_DISTANCE, 0, lane, Direction.EAST));
 		return List.copyOf(result);
 	}
 
@@ -26,5 +28,11 @@ final class MorrowgearBaseLayout {
 		return northSouthWall || eastWestWall;
 	}
 
-	record DockStation(int x, int y, int z) {}
+	static boolean hasClearDeparture(DockStation station) {
+		int forwardX = station.x() + station.facing().getStepX() * 9;
+		int forwardZ = station.z() + station.facing().getStepZ() * 9;
+		return Math.abs(forwardX) < HALF_SIZE - 2 && Math.abs(forwardZ) < HALF_SIZE - 2;
+	}
+
+	record DockStation(int x, int y, int z, Direction facing) {}
 }

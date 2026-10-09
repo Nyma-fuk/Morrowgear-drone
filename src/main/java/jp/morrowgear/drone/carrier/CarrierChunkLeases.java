@@ -10,13 +10,13 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.world.level.ChunkPos;
 
-/** Four attended ships, each holding at most its current and one forward chunk ticket. */
+/** Four attended ships, each holding its work/current chunk and at most one forward navigation ticket. */
 final class CarrierChunkLeases {
     static final int MAX_LEASES = CarrierPolicy.MAX_ACTIVE_CHUNK_LEASES;
     static final int RADIUS = CarrierNavigation.TICKET_RADIUS;
     private static final TicketType TYPE = new TicketType(40,
         TicketType.FLAG_LOADING | TicketType.FLAG_SIMULATION | TicketType.FLAG_KEEP_DIMENSION_ACTIVE
-            | TicketType.FLAG_CAN_EXPIRE_IF_UNLOADED);
+    );
     private record Lease(ServerLevel level, Set<ChunkPos> chunks, long firstTick) {}
     private static final Map<UUID, Lease> ACTIVE = new HashMap<>();
     private static final Set<UUID> FAILED = new HashSet<>();
@@ -62,7 +62,9 @@ final class CarrierChunkLeases {
     }
     static boolean wantsLease(UUID id, CarrierShip ship, UUID player, UUID cabin, boolean alive) {
         return alive && ship != null && !ship.destroyed && ship.owner.equals(player)
-            && (id.equals(cabin) || ship.destination != null && !ship.navigationPaused);
+            && (id.equals(cabin) || ship.mode != CarrierPolicy.Mode.IDLE
+                || ship.destination != null && !ship.navigationPaused
+                || ship.arrivalOperation != CarrierPolicy.Mode.IDLE || ship.preview != null);
     }
     private static void release(UUID id) {
         Lease lease = ACTIVE.remove(id);

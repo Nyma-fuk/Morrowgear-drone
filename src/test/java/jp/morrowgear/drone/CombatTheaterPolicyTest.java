@@ -23,13 +23,31 @@ final class CombatTheaterPolicyTest {
 
 		assertEquals(1, plan.clusters().size());
 		assertEquals(50, plan.hostileCount());
-		assertEquals(19, plan.assignments().size());
-		assertEquals(5, plan.reserveCount());
+		assertEquals(24, plan.assignments().size());
+		assertEquals(0, plan.reserveCount());
 		Map<Integer, Long> byTarget = plan.assignments().values().stream().collect(
 			java.util.stream.Collectors.groupingBy(CombatTheaterPolicy.Assignment::targetId,
 				java.util.stream.Collectors.counting()));
-		assertTrue(byTarget.size() > 1);
+		assertEquals(24, byTarget.size());
 		assertTrue(byTarget.values().stream().allMatch(count -> count <= 8));
+	}
+
+	@Test
+	void largeBaseCoversEveryHostileBeforeAddingReinforcements() {
+		List<CombatTheaterPolicy.Contact> contacts = IntStream.range(0, 50)
+			.mapToObj(index -> contact(2000 + index, new Vec3(index % 10, 64, index / 10), 8, 0)).toList();
+		List<CombatTheaterPolicy.Unit> units = IntStream.range(0, 100)
+			.mapToObj(index -> unit("BASE-" + index, "WING-" + index / 8, -1, false)).toList();
+
+		CombatTheaterPolicy.Plan plan = CombatTheaterPolicy.allocate(contacts, units);
+		Map<Integer, Long> byTarget = plan.assignments().values().stream().collect(
+			java.util.stream.Collectors.groupingBy(CombatTheaterPolicy.Assignment::targetId,
+				java.util.stream.Collectors.counting()));
+
+		assertEquals(100, plan.assignments().size());
+		assertEquals(50, byTarget.size());
+		assertTrue(byTarget.values().stream().allMatch(count -> count >= 1 && count <= 8));
+		assertEquals(0, plan.reserveCount());
 	}
 
 	@Test

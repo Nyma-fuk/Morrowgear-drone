@@ -97,7 +97,11 @@ public final class CarrierModule {
             entries.accept(DEPLOYMENT_ITEM); entries.accept(CONSOLE_ITEM);
         });
         ServerTickEvents.END_SERVER_TICK.register(server -> { CarrierInterior.tick(server); CarrierChunkLeases.tick(server); });
-        ServerLifecycleEvents.SERVER_STOPPED.register(server -> { CarrierInterior.reset(); CarrierChunkLeases.clear(); });
+        ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
+            CarrierInterior.reset();
+            CarrierChunkLeases.clear();
+            CarrierTerrainQueryCache.clear();
+        });
         ServerPlayerEvents.JOIN.register(CarrierInterior::recover);
         ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> CarrierInterior.recover(newPlayer));
         // Remote mining coordinates belong to the event level, not the operator's cabin dimension.

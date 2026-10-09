@@ -50,9 +50,18 @@ final class GuardDispatchPolicy {
 		return observedStrength || theaterPlanKnown && !originalAssigned;
 	}
 
+	static boolean confirmedReliefStrength(boolean observedStrength,
+		boolean sameCoveredTarget, boolean rememberedReliefCommitted) {
+		return observedStrength || sameCoveredTarget && rememberedReliefCommitted;
+	}
+
 	static RechargeCompletion rechargeCompletion(boolean liveEngagement, boolean activeRelief,
 		boolean theaterPlanKnown, boolean originalAssigned, boolean observedStrength,
 		boolean reliefMissionAvailable) {
+		// A live replacement with a captured mission is newer evidence than a cached
+		// theater plan which still names the aircraft completing service.
+		if (liveEngagement && activeRelief && theaterPlanKnown && reliefMissionAvailable)
+			return RechargeCompletion.INHERIT_RELIEF_MISSION;
 		if (reliefHolds(liveEngagement, activeRelief, theaterPlanKnown, originalAssigned, observedStrength)) {
 			return reliefMissionAvailable ? RechargeCompletion.INHERIT_RELIEF_MISSION
 				: RechargeCompletion.RESUME_ORIGINAL_MISSION;

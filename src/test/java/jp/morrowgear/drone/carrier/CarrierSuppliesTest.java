@@ -74,6 +74,10 @@ class CarrierSuppliesTest {
     }
 
     @Test void cellsRequireRoomForAllEnergyAndDoNotDrainAnEmptyOrUnrelatedInventory() {
+        assertEquals(1200, CarrierSupplies.cellEnergy(false));
+        assertEquals(1000, CarrierSupplies.cellEnergy(true));
+        assertTrue(CarrierSupplies.canCharge(98800, false));
+        assertFalse(CarrierSupplies.canCharge(98801, false));
         assertTrue(CarrierSupplies.canCharge(0));
         assertTrue(CarrierSupplies.canCharge(99000));
         for (int energy : new int[] {-1, 99001, 100000, Integer.MAX_VALUE}) assertFalse(CarrierSupplies.canCharge(energy));

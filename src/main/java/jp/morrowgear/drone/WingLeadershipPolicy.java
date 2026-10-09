@@ -7,9 +7,11 @@ final class WingLeadershipPolicy {
 	private WingLeadershipPolicy() {
 	}
 
-	static boolean temporarilyDetached(boolean serviceReturn, boolean emergencyIntercept,
+	static boolean temporarilyDetached(boolean serviceReturn, boolean solarService,
+		boolean powerLost, boolean carrierService, boolean emergencyIntercept,
 		boolean combatActive) {
-		return serviceReturn || emergencyIntercept || combatActive;
+		return serviceReturn || solarService || powerLost || carrierService
+			|| emergencyIntercept || combatActive;
 	}
 
 	static int successorIndex(List<Candidate> candidates) {

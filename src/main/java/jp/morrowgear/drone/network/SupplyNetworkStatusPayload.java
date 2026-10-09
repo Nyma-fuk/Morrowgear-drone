@@ -14,7 +14,8 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 
-public record SupplyNetworkStatusPayload(int requestId, UUID owner, String dimension, List<DockStatus> docks)
+public record SupplyNetworkStatusPayload(int requestId, UUID owner, String dimension, List<DockStatus> docks,
+    List<LogisticsNode> nodes)
     implements CustomPacketPayload {
     public static final Type<SupplyNetworkStatusPayload> TYPE = new Type<>(
         Identifier.fromNamespaceAndPath("morrowgear_drone", "supply_network_status"));
@@ -28,7 +29,7 @@ public record SupplyNetworkStatusPayload(int requestId, UUID owner, String dimen
             ByteBufCodecs.stringUtf8(40).encode(buf, dock.status.name());
             for (Stock stock : dock.stock) {
                 buf.writeByte(stock.rule.kind().index());
-                buf.writeInt(stock.rule.minimum()).writeByte(stock.rule.priority());
+                buf.writeInt(stock.rule.minimum()).writeInt(stock.rule.target()).writeByte(stock.rule.priority());
                 buf.writeInt(stock.available).writeInt(stock.incoming).writeInt(stock.missing);
             }
             buf.writeByte(dock.deliveries.size());
@@ -37,6 +38,13 @@ public record SupplyNetworkStatusPayload(int requestId, UUID owner, String dimen
                 ByteBufCodecs.stringUtf8(40).encode(buf, job.status.name());
                 buf.writeByte(job.kind.index()).writeInt(job.remaining);
             }
+        }
+        buf.writeByte(value.nodes.size());
+        for (LogisticsNode node : value.nodes) {
+            buf.writeLong(node.position);
+            ByteBufCodecs.stringUtf8(96).encode(buf, node.name);
+            ByteBufCodecs.stringUtf8(160).encode(buf, node.contents);
+            buf.writeShort(node.distance).writeByte(node.verticalOffset).writeBoolean(node.registered);
         }
     }, buf -> {
         int request = buf.readInt();
@@ -51,7 +59,7 @@ public record SupplyNetworkStatusPayload(int requestId, UUID owner, String dimen
             List<Stock> stocks = new ArrayList<>(5);
             for (int j = 0; j < 5; j++) {
                 SupplyKind kind = kind(buf.readUnsignedByte());
-                Rule rule = new Rule(kind, buf.readInt(), buf.readUnsignedByte());
+                Rule rule = new Rule(kind, buf.readInt(), buf.readInt(), buf.readUnsignedByte());
                 stocks.add(new Stock(rule, buf.readInt(), buf.readInt(), buf.readInt()));
             }
             int jobs = boundedCount(buf, SupplyNetworkPolicy.MAX_JOBS);
@@ -60,13 +68,23 @@ public record SupplyNetworkStatusPayload(int requestId, UUID owner, String dimen
                 kind(buf.readUnsignedByte()), buf.readInt()));
             docks.add(new DockStatus(source, dock, enabled, status, stocks, deliveries));
         }
-        return new SupplyNetworkStatusPayload(request, owner, dimension, docks);
+        int nodeCount = boundedCount(buf, SupplyNetworkPolicy.MAX_DISCOVERED_NODES);
+        List<LogisticsNode> nodes = new ArrayList<>(nodeCount);
+        for (int i = 0; i < nodeCount; i++) nodes.add(new LogisticsNode(buf.readLong(),
+            ByteBufCodecs.stringUtf8(96).decode(buf), ByteBufCodecs.stringUtf8(160).decode(buf),
+            buf.readUnsignedShort(), buf.readByte(), buf.readBoolean()));
+        return new SupplyNetworkStatusPayload(request, owner, dimension, docks, nodes);
     });
 
     public SupplyNetworkStatusPayload {
-        if (owner == null || dimension == null || dimension.length() > 256 || docks.size() > SupplyNetworkPolicy.MAX_ROUTES)
+        if (owner == null || dimension == null || dimension.length() > 256 || docks.size() > SupplyNetworkPolicy.MAX_ROUTES
+            || nodes.size() > SupplyNetworkPolicy.MAX_DISCOVERED_NODES)
             throw new IllegalArgumentException("Invalid supply snapshot");
         docks = List.copyOf(docks);
+        nodes = List.copyOf(nodes);
+    }
+    public SupplyNetworkStatusPayload(int requestId, UUID owner, String dimension, List<DockStatus> docks) {
+        this(requestId, owner, dimension, docks, List.of());
     }
     public record DockStatus(long source, long dock, boolean enabled, Status status, List<Stock> stock, List<Delivery> deliveries) {
         public DockStatus {
@@ -87,6 +105,14 @@ public record SupplyNetworkStatusPayload(int requestId, UUID owner, String dimen
         public Delivery {
             if (drone == null || status == null || kind == null || remaining < 0 || remaining > SupplyNetworkPolicy.MAX_TRIP_ITEMS)
                 throw new IllegalArgumentException("Invalid supply delivery");
+        }
+    }
+    public record LogisticsNode(long position, String name, String contents, int distance,
+        int verticalOffset, boolean registered) {
+        public LogisticsNode {
+            if (name == null || name.isBlank() || name.length() > 96 || contents == null || contents.length() > 160
+                || distance < 0 || distance > 4096 || verticalOffset < -128 || verticalOffset > 127)
+                throw new IllegalArgumentException("Invalid logistics node");
         }
     }
     private static int boundedCount(ByteBuf buf, int max) {

@@ -19,9 +19,19 @@ final class DockAllocationRuntimeTest {
 		assertTrue(runtime.contains("level == key.level"));
 		assertTrue(runtime.contains("System.identityHashCode(level)"));
 		assertTrue(runtime.contains("return size() > CACHE_LIMIT"));
-		assertTrue(runtime.contains("ServerLifecycleEvents.SERVER_STOPPED.register(server -> CACHE.clear())"));
+		assertTrue(runtime.contains("ServerLifecycleEvents.SERVER_STOPPED.register"));
+		assertTrue(runtime.contains("CACHE.clear()"));
+		assertTrue(runtime.contains("COMPATIBILITY.clear()"));
 		assertFalse(runtime.contains("level.dimension().toString()"));
 		String initializer = Files.readString(Path.of("src/main/java/jp/morrowgear/drone/MorrowgearDrone.java"));
 		assertTrue(initializer.contains("DockAllocationRuntime.register()"));
+	}
+
+	@Test void compatibilityChecksAreSharedForAllAircraftInTheOwnerTick() throws Exception {
+		String runtime = Files.readString(Path.of("src/main/java/jp/morrowgear/drone/DockAllocationRuntime.java"));
+		assertTrue(runtime.contains("cached.tick() == tick"));
+		assertTrue(runtime.contains("CompatibilitySnapshot"));
+		String entity = Files.readString(Path.of("src/main/java/jp/morrowgear/drone/DroneEntity.java"));
+		assertTrue(entity.contains("DockAllocationRuntime.compatible(level, owner, fleet"));
 	}
 }

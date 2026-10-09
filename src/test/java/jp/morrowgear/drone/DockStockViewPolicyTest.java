@@ -75,7 +75,7 @@ final class DockStockViewPolicyTest {
 
     @Test void screenReadsSynchronizedCreditsAndUsesTotalsNotPartialOnlyGauges() throws Exception {
         String source = Files.readString(Path.of("src/client/java/jp/morrowgear/drone/client/DockScreen.java"));
-        assertTrue(source.contains("private int page = 2, stockPage;"));
+        assertTrue(source.contains("private int page, stockPage;"));
         assertTrue(source.contains("DockStockViewPolicy.flightReserve(stored, credit)"));
         assertTrue(source.contains("DockStockViewPolicy.packStock(menu.supplyCount(supply), menu.value(field), units)"));
         for (String field : new String[] {"WEAPON_POWER", "GUN_CREDIT", "MISSILE_CREDIT", "FUEL_CREDIT"})
@@ -89,7 +89,11 @@ final class DockStockViewPolicyTest {
     @Test void menuAppendsCapacityFieldsAndUsesActualDroneUpgradeValues() throws Exception {
         String source = Files.readString(Path.of("src/main/java/jp/morrowgear/drone/DockMenu.java"));
         assertTrue(source.contains("DRONE_WEAPON_CAPACITY = 20, DRONE_GUN_CAPACITY = 21, DRONE_MISSILE_CAPACITY = 22"));
-        assertTrue(source.contains("VALUE_COUNT = 23, DATA_COUNT = VALUE_COUNT * 2"));
+		assertTrue(source.contains("DRONE_LASER_HEAT = 23, DRONE_LOADOUT = 24"));
+		assertTrue(source.contains("DRONE_STRUCTURE_PERCENT = 25, DRONE_SYSTEM_PERCENT = 26"));
+		assertTrue(source.contains("DRONE_SECURITY = 27"));
+		assertTrue(source.contains("VALUE_COUNT = 31, DATA_COUNT = VALUE_COUNT * 2"));
+		assertTrue(source.contains("setValue(DOCK_X, dock.getBlockPos().getX())"));
         assertTrue(source.contains("setValue(DRONE_WEAPON_CAPACITY, drone == null ? PayloadCapacity.energy(0) : drone.weaponCapacity())"));
         assertTrue(source.contains("setValue(DRONE_GUN_CAPACITY, drone == null ? PayloadCapacity.gun(0) : drone.gunCapacity())"));
         assertTrue(source.contains("setValue(DRONE_MISSILE_CAPACITY, drone == null ? PayloadCapacity.missiles(0) : drone.missileCapacity())"));

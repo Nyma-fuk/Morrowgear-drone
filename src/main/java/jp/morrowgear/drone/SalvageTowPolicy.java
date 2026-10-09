@@ -10,6 +10,14 @@ public final class SalvageTowPolicy {
 
 	private SalvageTowPolicy() {}
 
+	public static Vec3 transferPosition(Vec3 dock, double loadHeight) {
+		return new Vec3(dock.x, requiredFlightY(dock.y, loadHeight), dock.z);
+	}
+
+	public static boolean alignedForTransfer(Vec3 carrier, Vec3 destination, double speed) {
+		return carrier.distanceTo(destination) <= 0.8 && speed <= 0.22;
+	}
+
 	public static double requiredFlightY(double surfaceY, double loadHeight) {
 		return surfaceY + HOOK_DROP + ROPE_LENGTH + Math.max(0.0, loadHeight) + LOAD_CLEARANCE;
 	}

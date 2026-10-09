@@ -149,4 +149,23 @@ final class FieldOperationRegistryTest {
 		assertEquals(new BlockPos(32, 64, 32), replacement.snapshot(4L).anchor());
 		assertEquals(24, replacement.snapshot(4L).radius());
 	}
+
+	@Test
+	void fourPointEnvelopeScansEveryVoxelOnceAndNothingOutsideIt() {
+		BlockPos min = new BlockPos(-3, 61, 7);
+		BlockPos max = new BlockPos(2, 64, 11);
+		FieldOperationRegistry.Operation operation = FieldOperationRegistry.acquire(
+			"overworld", UUID.randomUUID(), "MARKED", FieldOperationType.EXCAVATE,
+			new BlockPos(0, 62, 9), 8, min, max, 1L);
+		java.util.Set<BlockPos> positions = new java.util.HashSet<>();
+		BlockPos pos;
+		while ((pos = operation.nextScanPos(2L)) != null) {
+			assertTrue(pos.getX() >= min.getX() && pos.getX() <= max.getX());
+			assertTrue(pos.getY() >= min.getY() && pos.getY() <= max.getY());
+			assertTrue(pos.getZ() >= min.getZ() && pos.getZ() <= max.getZ());
+			assertTrue(positions.add(pos));
+		}
+		assertEquals(6 * 4 * 5, positions.size());
+		assertTrue(operation.snapshot(3L).scanComplete());
+	}
 }

@@ -64,8 +64,17 @@ final class MissileLockIntegrationTest {
 		assertTrue(section(source, "private void tickPowerLoss(", "private void capturePowerLossTask(").contains("clearCombatState()"));
 		assertTrue(section(source, "public void setMode(", "public void assignFollowFormation(").contains("cancelMissileAttack()"));
 		assertTrue(section(source, "public void assignSecurityLoadout(", "public int combatTargetId(").contains("clearCombatState()"));
-		assertTrue(source.substring(source.indexOf("protected void readAdditionalSaveData("))
-			.contains("if (combatWeapon() == CombatWeapon.MISSILE) clearCombatState()"));
+		String reload = source.substring(source.indexOf("protected void readAdditionalSaveData("));
+		assertTrue(reload.contains("interruptedAttackWave ? CombatState.REJOIN"));
+		assertTrue(reload.contains("interruptedAttackWave ? -1"));
+		assertTrue(reload.contains("cannot duplicate a shot"));
+	}
+
+	@Test void missilesUseTheirOwnStoreAndAuxiliaryBusInsteadOfLaserEnergy() throws Exception {
+		String attack = section(source(), "private void tickMissileAttack(", "private boolean missilePassCommitted(");
+		assertTrue(attack.contains("entityData.set(MISSILES, missiles() - 1)"));
+		assertTrue(attack.contains("entityData.set(AUXILIARY_POWER"));
+		assertFalse(attack.contains("entityData.set(WEAPON_POWER"));
 	}
 
 	@Test void lateLockDoesNotLoseRemainingSalvoAtApproachDeadline() throws Exception {

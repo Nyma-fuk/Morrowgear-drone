@@ -15,6 +15,8 @@ final class OrbitAltitudePlanner {
 	private OrbitAltitudePlanner() {
 	}
 
+	static void clear() { PLANS.clear(); }
+
 	static Vec3 stabilize(ServerLevel level, String missionId, Vec3 center, int count) {
 		long tick = level.getGameTime();
 		Key key = new Key(level.dimension().toString(), missionId);

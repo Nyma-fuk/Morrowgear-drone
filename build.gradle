@@ -3,6 +3,9 @@ plugins {
 	id 'maven-publish'
 }
 
+def automationWidth = providers.environmentVariable("MORROWGEAR_AUTOMATION_WIDTH").getOrElse("1280")
+def automationHeight = providers.environmentVariable("MORROWGEAR_AUTOMATION_HEIGHT").getOrElse("720")
+
 version = project.mod_version
 group = project.maven_group
 
@@ -22,6 +25,20 @@ loom {
 			configName = "Morrowgear isolated carrier verification"
 			runDir = "run-carrier-verification"
 			programArgs "--width", "1280", "--height", "720", "--username", "Player705"
+		}
+		automatedDrone {
+			client()
+			configName = "Morrowgear mouse-free drone automation"
+			runDir = "run"
+			programArgs "--quickPlaySingleplayer", "Morrowgear Drone Test",
+				"--width", automationWidth, "--height", automationHeight, "--username", "Player705"
+		}
+		automatedCarrier {
+			client()
+			configName = "Morrowgear mouse-free carrier automation"
+			runDir = "run-carrier-verification"
+			programArgs "--quickPlaySingleplayer", "MG Carrier V27 Verification",
+				"--width", automationWidth, "--height", automationHeight, "--username", "Player705"
 		}
 	}
 

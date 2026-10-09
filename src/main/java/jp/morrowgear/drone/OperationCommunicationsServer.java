@@ -157,9 +157,7 @@ public final class OperationCommunicationsServer {
                         drone.batteryPercent(), drone.weaponPowerPercent(), drone.gunAmmo(), drone.missiles(), drone.laserHeat(), false)
                 : DroneServicePolicy.nonCombatSortieReady(drone.getHealth() / drone.getMaxHealth(), drone.batteryPercent());
         String wing = OperationEvent.bounded(drone.groupId(), OperationEvent.TEXT_LIMIT);
-        String number = (wing.isBlank() ? drone.unitId() : wing).replaceAll("[^0-9]", "");
-        if (number.isBlank()) number = Integer.toString(Math.floorMod((wing.isBlank() ? drone.unitId() : wing).hashCode(), 100));
-        if (number.length() > 3) number = number.substring(number.length() - 3);
+        String number = displayNumber(wing.isBlank() ? drone.unitId() : wing);
         return new OperationObservation(drone.ownerId(), drone.getUUID(), missionKey(drone, salvage), wing,
                 drone.level().dimension().toString(),
                 OperationEvent.bounded(drone.hasCustomName() ? drone.getName().getString() : drone.unitId(), OperationEvent.TEXT_LIMIT),
@@ -169,6 +167,18 @@ public final class OperationCommunicationsServer {
                 missionRunning && (drone.hasActiveFieldOperation() || drone.hasSecurityPatrol()
                         || drone.mode() == DroneMode.FOLLOW || drone.mode() == DroneMode.WAYPOINT
                         || drone.mode() == DroneMode.ORBIT || drone.cargoState() != CargoState.UNASSIGNED), drone.cargoItemCount());
+    }
+
+    static String displayNumber(String value) {
+        String source = value == null ? "" : value;
+        char[] digits = new char[3];
+        int count = 0;
+        for (int index = source.length() - 1; index >= 0 && count < digits.length; index--) {
+            char character = source.charAt(index);
+            if (character >= '0' && character <= '9') digits[digits.length - 1 - count++] = character;
+        }
+        if (count == 0) return Integer.toString(Math.floorMod(source.hashCode(), 100));
+        return new String(digits, digits.length - count, count);
     }
 
     private static String missionKey(DroneEntity drone, Entity salvage) {

@@ -15,6 +15,8 @@ import net.minecraft.resources.Identifier;
 public final class MorrowgearRenderTypes {
 	private static final Identifier BEAM_SHADER = Identifier.fromNamespaceAndPath(
 		MorrowgearDrone.MOD_ID, "core/morrowgear_energy_beam");
+	private static final Identifier CONDENSED_BEAM_SHADER = Identifier.fromNamespaceAndPath(
+		MorrowgearDrone.MOD_ID, "core/morrowgear_condensed_beam");
 	private static final RenderPipeline ENERGY_BEAM_PIPELINE = RenderPipelines.register(
 		RenderPipeline.builder()
 			.withLocation(Identifier.fromNamespaceAndPath(MorrowgearDrone.MOD_ID,
@@ -46,10 +48,38 @@ public final class MorrowgearRenderTypes {
 			.withPrimitiveTopology(PrimitiveTopology.QUADS)
 			.withCull(false)
 			.build());
+	private static final RenderPipeline CONDENSED_BEAM_PIPELINE = RenderPipelines.register(
+		RenderPipeline.builder()
+			.withLocation(Identifier.fromNamespaceAndPath(MorrowgearDrone.MOD_ID,
+				"pipeline/condensed_beam"))
+			.withVertexShader(CONDENSED_BEAM_SHADER).withFragmentShader(CONDENSED_BEAM_SHADER)
+			.withBindGroupLayout(BindGroupLayouts.GLOBALS)
+			.withBindGroupLayout(BindGroupLayouts.MATRICES_PROJECTION)
+			.withBindGroupLayout(BindGroupLayouts.FOG)
+			.withColorTargetState(new ColorTargetState(BlendFunction.LIGHTNING))
+			.withDepthStencilState(new DepthStencilState(CompareOp.GREATER_THAN_OR_EQUAL, false))
+			.withVertexBinding(0, DefaultVertexFormat.ENTITY)
+			.withPrimitiveTopology(PrimitiveTopology.QUADS).withCull(false).build());
+	private static final RenderPipeline CONDENSED_CORE_PIPELINE = RenderPipelines.register(
+		RenderPipeline.builder()
+			.withLocation(Identifier.fromNamespaceAndPath(MorrowgearDrone.MOD_ID,
+				"pipeline/condensed_core"))
+			.withVertexShader(CONDENSED_BEAM_SHADER).withFragmentShader(CONDENSED_BEAM_SHADER)
+			.withBindGroupLayout(BindGroupLayouts.GLOBALS)
+			.withBindGroupLayout(BindGroupLayouts.MATRICES_PROJECTION)
+			.withBindGroupLayout(BindGroupLayouts.FOG)
+			.withColorTargetState(new ColorTargetState(BlendFunction.LIGHTNING))
+			.withDepthStencilState(new DepthStencilState(CompareOp.GREATER_THAN_OR_EQUAL, false))
+			.withVertexBinding(0, DefaultVertexFormat.ENTITY)
+			.withPrimitiveTopology(PrimitiveTopology.QUADS).withCull(false).build());
 	private static final RenderType ENERGY_BEAM = RenderType.create("morrowgear_energy_beam",
 		RenderSetup.builder(ENERGY_BEAM_PIPELINE).sortOnUpload().createRenderSetup());
 	private static final RenderType VISIBLE_ENERGY_CORE = RenderType.create("morrowgear_visible_energy_core",
 		RenderSetup.builder(VISIBLE_ENERGY_CORE_PIPELINE).sortOnUpload().createRenderSetup());
+	private static final RenderType CONDENSED_BEAM = RenderType.create("morrowgear_condensed_beam",
+		RenderSetup.builder(CONDENSED_BEAM_PIPELINE).sortOnUpload().createRenderSetup());
+	private static final RenderType CONDENSED_CORE = RenderType.create("morrowgear_condensed_core",
+		RenderSetup.builder(CONDENSED_CORE_PIPELINE).sortOnUpload().createRenderSetup());
 
 	private MorrowgearRenderTypes() {}
 
@@ -59,5 +89,13 @@ public final class MorrowgearRenderTypes {
 
 	public static RenderType visibleEnergyCore() {
 		return VISIBLE_ENERGY_CORE;
+	}
+
+	public static RenderType condensedBeam() {
+		return CONDENSED_BEAM;
+	}
+
+	public static RenderType condensedCore() {
+		return CONDENSED_CORE;
 	}
 }

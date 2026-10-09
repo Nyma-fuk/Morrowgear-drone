@@ -8,6 +8,32 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 class SalvageMissionRegistryTest {
+	@Test void eitherLoadOrderReclaimsSameReservationWithoutAllowingAnotherResponder() {
+		UUID load = UUID.randomUUID(), carrier = UUID.randomUUID(), other = UUID.randomUUID();
+		for (boolean loadFirst : new boolean[]{true, false}) {
+			SalvageMissionRegistry.clear();
+			assertTrue(SalvageMissionRegistry.reserve(load, carrier));
+			if (!loadFirst) SalvageMissionRegistry.setSuspended(load, carrier, true);
+			assertFalse(SalvageMissionRegistry.reserve(load, other));
+			assertTrue(SalvageMissionRegistry.reserve(load, carrier));
+			SalvageMissionRegistry.setSuspended(load, carrier, true);
+			assertTrue(SalvageMissionRegistry.isSuspended(load));
+		}
+	}
+
+	@Test void orphanTimeoutAndTargetDestructionReleaseBothReservationAndSuspension() {
+		UUID load = UUID.randomUUID(), carrier = UUID.randomUUID();
+		SalvageMissionRegistry.reserve(load, carrier);
+		SalvageMissionRegistry.setSuspended(load, carrier, true);
+		SalvageMissionRegistry.release(load, carrier);
+		assertFalse(SalvageMissionRegistry.isReserved(load));
+		assertFalse(SalvageMissionRegistry.isSuspended(load));
+		SalvageMissionRegistry.reserve(load, carrier);
+		SalvageMissionRegistry.setSuspended(load, carrier, true);
+		SalvageMissionRegistry.targetDestroyed(load);
+		assertFalse(SalvageMissionRegistry.isReserved(load));
+		assertFalse(SalvageMissionRegistry.isSuspended(load));
+	}
 	@AfterEach
 	void reset() {
 		SalvageMissionRegistry.clear();

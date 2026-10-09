@@ -6,11 +6,18 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.LinkedHashSet;
+import java.util.UUID;
 
 import jp.morrowgear.drone.DroneEntity;
+import jp.morrowgear.drone.DroneResourceUiPolicy;
+import jp.morrowgear.drone.DroneRole;
 import jp.morrowgear.drone.MorrowgearDrone;
 import jp.morrowgear.drone.SolarServiceStationEntity;
 import jp.morrowgear.drone.VisorHudPolicy;
+import jp.morrowgear.drone.VisorCombatLedger;
+import jp.morrowgear.drone.VisorCombatLayout;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
@@ -31,14 +38,14 @@ final class VisorHudOverlay implements HudElement {
 	private static final int RED = HmiArt.RED;
 	private static final int WHITE = HmiArt.TEXT;
 	private static final int MUTED = HmiArt.MUTED;
-	private static final int PANEL = 0xC71A1E21;
-	private static final int PANEL_SOFT = 0xBD111416;
-	private static final int LINE = 0xB9394347;
+	private static final int PANEL = 0xD91A1E1C;
+	private static final int PANEL_SOFT = 0xBD121514;
+	private static final int LINE = 0xB9343C36;
 	private static final int CACHE_TICKS = 5;
 	private static final int FOCUS_DWELL_TICKS = 12;
 	private static final float TEXT_SCALE = 2.0f;
 	private static final int MAX_CONTACTS = 64;
-	private static final int MAX_BEACONS = 16;
+	private static final int MAX_BEACONS = 3;
 	private final VisorHudCache<Boolean> visibility = new VisorHudCache<>(128);
 	private final VisorHudCache<Projection> projections = new VisorHudCache<>(128);
 	private final Map<String, Object> tickMemo = new HashMap<>();
@@ -59,6 +66,12 @@ final class VisorHudOverlay implements HudElement {
 	private int focusEntityId = -1;
 	private int focusCandidateId = -1;
 	private int focusCandidateTicks;
+	private final VisorCombatLedger combatLedger = new VisorCombatLedger();
+	private final Map<java.util.UUID, LivingEntity> observedTargets = new LinkedHashMap<>();
+	private java.util.UUID pinnedUuid;
+	private java.util.UUID selectedFrontTarget;
+	private final List<VisorCombatLayout.Box> occupiedLabels = new ArrayList<>();
+	private int worldLabels;
 
 	void tick(Minecraft client) {
 		ensureContext(client);
@@ -70,6 +83,7 @@ final class VisorHudOverlay implements HudElement {
 		if (!worn || !config.enabled) return;
 		refreshRoster(client);
 		updateFocus(client);
+		if (client.player.tickCount % CACHE_TICKS == 0) updateCombatLedger(client);
 	}
 
 	void toggleEnabled(Minecraft client) {
@@ -79,12 +93,20 @@ final class VisorHudOverlay implements HudElement {
 
 	void togglePin(Minecraft client) {
 		if (!visorWorn(client)) return;
-		pinnedEntityId = pinnedEntityId >= 0 ? -1 : focusEntityId;
+		pinnedEntityId = pinnedUuid != null ? -1 : focusEntityId;
+		DroneEntity pinned = findById(pinnedEntityId);
+		pinnedUuid = pinned == null ? null : pinned.getUUID();
 	}
 
 	void cycleContext(Minecraft client) {
 		if (!visorWorn(client)) return;
 		refreshRoster(client);
+		if (!combatLedger.active().isEmpty()) {
+			selectedFrontTarget = combatLedger.nextActive(selectedFrontTarget);
+			tickMemo.clear();
+			return;
+		}
+		selectedFrontTarget = null;
 		List<String> groups = roster.stream().map(DroneEntity::groupId).filter(id -> !id.isBlank())
 			.distinct().sorted().toList();
 		if (groups.isEmpty()) {
@@ -106,33 +128,32 @@ final class VisorHudOverlay implements HudElement {
 		ensureContext(client);
 		if (client.player == null || client.level == null || !config.enabled || !visorWorn(client)) return;
 		refreshRoster(client);
-		int width = client.getWindow().getWidth();
-		int height = client.getWindow().getHeight();
+		float hudScale = config.hudScale(client.getWindow().getWidth(), client.getWindow().getHeight());
+		int width = Math.round(client.getWindow().getWidth() / hudScale);
+		int height = Math.round(client.getWindow().getHeight() / hudScale);
 		float partialTick = deltaTracker.getGameTimeDeltaPartialTick(true);
 		int wingCount = memo("wings", () -> (int)roster.stream().map(this::groupKey).distinct().count());
 		int actionable = memo("actionable", () -> (int)roster.stream().filter(d -> markerPriority(d) <= 1).count());
 		int combat = memo("combat", () -> (int)roster.stream().filter(DroneEntity::combatActive).count());
 		VisorHudPolicy.DisplayPlan plan = VisorHudPolicy.displayPlan(roster.size(), wingCount,
 			actionable, combat, width, height);
-		float pixelScale = 1.0f / Math.max(1, client.getWindow().getGuiScale());
+		float pixelScale = hudScale / Math.max(1, client.getWindow().getGuiScale());
 		g.pose().pushMatrix();
 		g.pose().scale(pixelScale, pixelScale);
 		try {
+			occupiedLabels.clear();
+			worldLabels = 0;
 			List<Projection> contacts = proximityContacts(client, width, height, partialTick, plan);
 			Map<String, List<Projection>> clusters = cluster(contacts.stream()
 				.filter(p -> p.depth > 0 && p.onScreen(width, height)).toList());
 			int clusterCount = (int)clusters.values().stream().filter(group -> group.size() > 1).count();
 			if (bootTicks > 0) drawBoot(g, client, width, height);
-			drawFleetStrip(g, client, width, contacts.size(), clusterCount, plan);
-			boolean inspecting = findById(pinnedEntityId >= 0 ? pinnedEntityId : focusEntityId) != null;
-			if (!inspecting || HmiArt.hudSidesFit(width)) drawCommandContext(g, client, width, plan);
+			drawAdaptiveCombat(g, client, width, height);
 			drawInspectionContext(g, client, width, plan.compactContext());
-			drawOperationOverview(g, client, width);
-			drawSafeZone(g, width, height);
+			drawActionRail(g, client, width, height, plan);
 			drawEngagements(g, client, contacts, width, height, partialTick, plan);
 			drawProximity(g, client, contacts, clusters, width, height, plan);
 			drawPowerLostBeacons(g, client, width, height);
-			drawActionRail(g, client, width, height, plan);
 		} finally {
 			g.pose().popMatrix();
 		}
@@ -155,7 +176,92 @@ final class VisorHudOverlay implements HudElement {
 			commandGroup = roster.stream().map(DroneEntity::groupId).filter(id -> !id.isBlank()).sorted()
 				.findFirst().orElse("");
 		}
-		if (pinnedEntityId >= 0 && roster.stream().noneMatch(d -> d.getId() == pinnedEntityId)) pinnedEntityId = -1;
+		if (pinnedUuid != null) {
+			DroneEntity match = roster.stream().filter(d -> d.getUUID().equals(pinnedUuid)).findFirst().orElse(null);
+			pinnedEntityId = match == null ? -1 : match.getId();
+		}
+	}
+
+	private void updateCombatLedger(Minecraft client) {
+		Map<UUID, Set<String>> attackers = new LinkedHashMap<>();
+		Map<UUID, LivingEntity> current = new LinkedHashMap<>();
+		roster.stream().filter(d -> d.isAlive() && !d.isRemoved() && d.combatActive())
+			.sorted(Comparator.comparing(d -> d.getUUID().toString())).forEach(drone -> {
+				Entity entity = client.level.getEntity(drone.combatTargetId());
+				if (!(entity instanceof LivingEntity target)) return;
+				current.put(target.getUUID(), target);
+				attackers.computeIfAbsent(target.getUUID(), ignored -> new LinkedHashSet<>()).add(drone.getUUID().toString());
+			});
+		for (var entry : current.entrySet()) {
+			if (!observedTargets.containsKey(entry.getKey()) && observedTargets.size() >= VisorCombatLedger.CAPACITY) {
+				UUID expired = observedTargets.keySet().stream().filter(id -> !current.containsKey(id)).findFirst().orElse(null);
+				if (expired == null) continue;
+				observedTargets.remove(expired);
+			}
+			observedTargets.put(entry.getKey(), entry.getValue());
+		}
+		List<VisorCombatLedger.Observation> observations = new ArrayList<>();
+		for (var entry : observedTargets.entrySet()) {
+			LivingEntity target = entry.getValue();
+			// isAlive() also becomes false when a live entity unloads; only explicit death is evidence.
+			boolean dead = target.getHealth() <= 0 || target.deathTime > 0 || target.getRemovalReason() == Entity.RemovalReason.KILLED;
+			Boolean alive = VisorCombatLayout.life(dead, target.isRemoved(), target.level() == client.level
+				&& client.level.getEntity(target.getId()) == target);
+			Vec3 relative = target.position().subtract(client.player.position());
+			observations.add(new VisorCombatLedger.Observation(entry.getKey(), target.getName().getString(),
+				attackers.getOrDefault(entry.getKey(), Set.of()), alive,
+				VisorCombatLayout.location(relative.x, relative.y, relative.z)));
+		}
+		combatLedger.update(client.level.getGameTime(), observations);
+	}
+
+	List<VisorCombatLedger.Event> combatHistory() { return combatLedger.history(); }
+	void openCombatHistory(Minecraft client) {
+		ensureContext(client);
+		if (client.player != null) client.setScreenAndShow(new VisorCombatHistoryScreen(client.gui.screen(), this::combatHistory));
+	}
+
+	private void drawAdaptiveCombat(GuiGraphicsExtractor g, Minecraft client, int width, int height) {
+		List<VisorCombatLedger.Front> active = combatLedger.active();
+		var summary = VisorCombatLayout.summary(width, active.size());
+		occupiedLabels.add(summary);
+		g.fill(summary.x(), summary.y(), summary.x() + summary.width(), summary.y() + summary.height(), config.panelAlpha(PANEL));
+		g.fill(summary.x(), summary.y(), summary.x() + 2, summary.y() + summary.height(), CYAN);
+		int x = summary.x() + 12;
+		drawText(g, client, fit(client, "MORROWGEAR / 受信 " + roster.size() + "機", summary.width() - 24), x, 32, CYAN);
+		int responding = active.stream().mapToInt(f -> f.attackers().size()).sum();
+		String status = active.isEmpty() ? "受信範囲内 / 交戦割当なし" : active.size() + "戦線 / 対応 " + responding + "機";
+		if (active.size() > 3) status += " / 他 " + (active.size() - 3);
+		drawText(g, client, fit(client, status, summary.width() - 24), x, 56, WHITE);
+		List<VisorCombatLedger.Front> visibleFronts = combatLedger.page(selectedFrontTarget, 3);
+		for (int i = 0; i < visibleFronts.size(); i++) {
+			var front = visibleFronts.get(i);
+			int y = 86 + i * 48;
+			boolean selected = front.target().equals(selectedFrontTarget);
+			if (selected) g.fill(summary.x(), y - 3, summary.x() + 3, y + 41, CYAN);
+			drawText(g, client, fit(client, "交戦" + front.number() + " / " + front.location(), summary.width() - 24), x, y, selected ? CYAN : AMBER);
+			drawText(g, client, fit(client, front.name() + " / 味方 " + front.attackers().size() + "機", summary.width() - 24), x, y + 22, WHITE);
+		}
+		List<VisorCombatLedger.Event> events = combatLedger.recent(client.level.getGameTime(), 3);
+		var feed = VisorCombatLayout.feed(width, events.size());
+		if (!events.isEmpty()) occupiedLabels.add(feed);
+		for (int i = 0; i < events.size(); i++) {
+			var event = events.get(events.size() - i - 1);
+			int y = feed.y() + i * 62;
+			int color = event.label().equals("目標撃破") ? GREEN : event.label().equals("交戦開始") ? RED : AMBER;
+			g.fill(feed.x(), y, feed.x() + feed.width(), y + 56, config.panelAlpha(PANEL));
+			g.fill(feed.x(), y, feed.x() + 2, y + 56, color);
+			drawText(g, client, fit(client, event.label() + " / 交戦" + event.front(), feed.width() - 24), feed.x() + 12, y + 7, color);
+			drawText(g, client, fit(client, event.detail(), feed.width() - 24), feed.x() + 12, y + 31, WHITE);
+		}
+	}
+
+	private boolean isPinned(DroneEntity drone) { return pinnedUuid != null && pinnedUuid.equals(drone.getUUID()); }
+	private boolean selectedRelationship(DroneEntity drone) {
+		if (pinnedUuid != null) return isPinned(drone);
+		if (selectedFrontTarget != null) return combatLedger.active().stream()
+			.anyMatch(f -> f.target().equals(selectedFrontTarget) && f.attackers().contains(drone.getUUID().toString()));
+		return drone.getId() == focusEntityId;
 	}
 
 	private void ensureContext(Minecraft client) {
@@ -166,6 +272,7 @@ final class VisorHudOverlay implements HudElement {
 			cacheUntil = 0; memoTick = Long.MIN_VALUE;
 			pinnedEntityId = focusEntityId = focusCandidateId = -1;
 			focusCandidateTicks = 0; commandGroup = ""; wornLastTick = false;
+			combatLedger.clear(); observedTargets.clear(); pinnedUuid = null; selectedFrontTarget = null;
 		}
 		long tick = client.level == null ? Long.MIN_VALUE : client.level.getGameTime();
 		if (tick != memoTick || memoPin != pinnedEntityId || !memoGroup.equals(commandGroup)) {
@@ -183,7 +290,7 @@ final class VisorHudOverlay implements HudElement {
 	private List<DroneEntity> contactRoster(Minecraft client) {
 		return memo("contacts:" + config.proximityRange, () -> roster.stream()
 			.filter(d -> d.isAlive() && !d.isRemoved())
-			.filter(d -> d.distanceTo(client.player) <= config.proximityRange || d.getId() == pinnedEntityId)
+			.filter(d -> d.distanceTo(client.player) <= config.proximityRange || isPinned(d))
 			.sorted(Comparator.comparingInt(this::markerPriority)
 				.thenComparingDouble(d -> d.distanceToSqr(client.player)).thenComparingInt(DroneEntity::getId))
 			.limit(MAX_CONTACTS).toList());
@@ -215,7 +322,7 @@ final class VisorHudOverlay implements HudElement {
 		Map<String, Projection> representatives = new LinkedHashMap<>();
 		List<Projection> selected = new ArrayList<>();
 		for (Projection p : candidates) {
-			boolean exception = markerPriority(p.drone) <= 1 || p.drone.getId() == pinnedEntityId;
+			boolean exception = markerPriority(p.drone) <= 1 || isPinned(p.drone);
 			boolean selectedLeader = leader(p.drone) && p.drone.groupId().equals(commandGroup);
 			if (exception || selectedLeader) selected.add(p);
 			else representatives.putIfAbsent(groupKey(p.drone), p);
@@ -231,7 +338,7 @@ final class VisorHudOverlay implements HudElement {
 		int y = 28;
 		int stripWidth = Math.min(width - 24, VisorHudPolicy.topStripWidth(width));
 		int x = (width - stripWidth) / 2;
-		g.fill(x, y, x + stripWidth, y + 44, PANEL);
+		g.fill(x, y, x + stripWidth, y + 44, config.panelAlpha(PANEL));
 		g.horizontalLine(x, x + stripWidth, y, CYAN);
 		int active = (int)roster.stream().filter(d -> !d.isDocked()).count();
 		int docked = roster.size() - active;
@@ -269,7 +376,7 @@ final class VisorHudOverlay implements HudElement {
 		int y = 86;
 		int panelWidth = HmiArt.hudSideWidth(width);
 		int panelHeight = plan.compactContext() ? 122 : 158;
-		g.fill(x, y, x + panelWidth, y + panelHeight, PANEL);
+		g.fill(x, y, x + panelWidth, y + panelHeight, config.panelAlpha(PANEL));
 		g.fill(x, y, x + 2, y + panelHeight, CYAN);
 		g.horizontalLine(x, x + panelWidth, y, LINE);
 		drawText(g, client, fit(client, "COMMAND CONTEXT" + (pinned == null ? "" : " / PINNED"), panelWidth - 26), x + 13, y + 12, CYAN);
@@ -308,7 +415,7 @@ final class VisorHudOverlay implements HudElement {
 		int y = 86;
 		int panelHeight = source.operationFronts().isBlank() ? 44 : 76;
 		int color = source.operationSummary().contains("CRITICAL") ? RED : AMBER;
-		g.fill(x, y, x + panelWidth, y + panelHeight, PANEL);
+		g.fill(x, y, x + panelWidth, y + panelHeight, config.panelAlpha(PANEL));
 		g.fill(x, y, x + 3, y + panelHeight, color);
 		g.horizontalLine(x, x + panelWidth, y, color);
 		drawText(g, client, fit(client, source.operationSummary(), panelWidth - 26),
@@ -320,14 +427,29 @@ final class VisorHudOverlay implements HudElement {
 	}
 
 	private void drawInspectionContext(GuiGraphicsExtractor g, Minecraft client, int width, boolean compact) {
-		DroneEntity drone = findById(pinnedEntityId >= 0 ? pinnedEntityId : focusEntityId);
+		DroneEntity drone = findById(pinnedUuid != null ? pinnedEntityId : focusEntityId);
+		if (pinnedUuid != null && (drone == null || !pinnedUuid.equals(drone.getUUID()))) {
+			var missing = VisorCombatLayout.inspection(width, client.getWindow().getHeight(), 36);
+			occupiedLabels.add(missing);
+			g.fill(missing.x(), missing.y(), missing.x() + missing.width(), missing.y() + missing.height(), config.panelAlpha(PANEL));
+			drawText(g, client, "固定機体 / 未受信", missing.x() + 12, 240, AMBER);
+			return;
+		}
 		if (drone == null) return;
-		int panelWidth = HmiArt.hudSideWidth(width);
-		int x = width - 42 - panelWidth;
-		int y = 86;
-		int panelHeight = compact ? 116 : 210;
+		int structure = Math.round(drone.getHealth() * 100.0f / Math.max(1.0f, drone.getMaxHealth()));
+		var resources = DroneResourceUiPolicy.assess(drone.role() == DroneRole.SECURITY,
+			drone.securityLoadout(), drone.batteryPercent(), drone.weaponPowerPercent(),
+			drone.gunAmmo(), drone.gunCapacity(), drone.missiles(), drone.missileCapacity(),
+			drone.laserHeat(), structure, drone.lowestSubsystemCondition() / 10,
+			drone.serviceReturnActive());
+		int desired = 142 + resources.metrics().size() * 22;
+		var box = VisorCombatLayout.inspection(width, client.getWindow().getHeight(), compact ? 116 : desired);
+		compact |= box.height() < desired;
+		if (box.height() < 116) return;
+		int panelWidth = box.width(), x = box.x(), y = box.y(), panelHeight = compact ? 116 : desired;
+		occupiedLabels.add(new VisorCombatLayout.Box(x, y, panelWidth, panelHeight));
 		int stateColor = stateColor(drone);
-		g.fill(x, y, x + panelWidth, y + panelHeight, PANEL);
+		g.fill(x, y, x + panelWidth, y + panelHeight, config.panelAlpha(PANEL));
 		g.fill(x + panelWidth - 2, y, x + panelWidth, y + panelHeight, stateColor);
 		g.horizontalLine(x, x + panelWidth, y, LINE);
 		drawText(g, client, fit(client, pinnedEntityId >= 0 ? "INSPECTION / PINNED" : "INSPECTION / FOCUS", panelWidth - 26),
@@ -337,18 +459,39 @@ final class VisorHudOverlay implements HudElement {
 		String state = conciseState(drone) + contextSuffix(drone);
 		drawText(g, client, fit(client, state, panelWidth - 26), x + 13, y + 68, stateColor);
 		if (compact) {
-			drawText(g, client, fit(client, "FLT " + drone.batteryPercent() + "% / SYS "
-				+ drone.lowestSubsystemCondition() / 10 + "%", panelWidth - 26), x + 13, y + 91, WHITE);
+			drawText(g, client, fit(client, resources.readiness(), panelWidth - 26), x + 13, y + 91,
+				resourceColor(resources.tone()));
 			return;
 		}
 		drawText(g, client, fit(client, drone.dataLinkStatus(), panelWidth - 26),
 			x + 13, y + 91, drone.dataLinkStatus().contains("WAIT") ? AMBER : MUTED);
-		drawTelemetryBar(g, client, x + 13, y + 120, "FLT", drone.batteryPercent(), CYAN, panelWidth - 26);
-		drawTelemetryBar(g, client, x + 13, y + 142, "WPN", drone.weaponPowerPercent(), AMBER, panelWidth - 26);
-		int structure = Math.round(drone.getHealth() * 100.0f / Math.max(1.0f, drone.getMaxHealth()));
-		drawTelemetryBar(g, client, x + 13, y + 164, "STR", structure, GREEN, panelWidth - 26);
-		drawTelemetryBar(g, client, x + 13, y + 186, "SYS", drone.lowestSubsystemCondition() / 10,
-			CYAN, panelWidth - 26);
+		drawText(g, client, fit(client, resources.readiness(), panelWidth - 26), x + 13, y + 115,
+			resourceColor(resources.tone()), true);
+		int metricY = y + 146;
+		for (var metric : resources.metrics()) {
+			drawResourceBar(g, client, x + 13, metricY, metric, panelWidth - 26);
+			metricY += 22;
+		}
+	}
+
+	private void drawResourceBar(GuiGraphicsExtractor g, Minecraft client, int x, int y,
+		DroneResourceUiPolicy.Metric metric, int width) {
+		int color = resourceColor(metric.tone());
+		int barX = x + 58;
+		int valueWidth = textWidth(client, metric.value());
+		int barWidth = Math.max(0, x + width - valueWidth - 12 - barX);
+		drawText(g, client, metric.code(), x, y - 7, MUTED);
+		g.fill(barX, y, barX + barWidth, y + 6, 0xB3263B3F);
+		g.fill(barX, y, barX + Math.round(barWidth * metric.percent() / 100.0f), y + 6, color);
+		drawText(g, client, metric.value(), x + width - valueWidth, y - 7, WHITE);
+	}
+
+	private int resourceColor(DroneResourceUiPolicy.Tone tone) {
+		return switch (tone) {
+			case NOMINAL -> CYAN;
+			case CAUTION -> AMBER;
+			case BLOCKED -> RED;
+		};
 	}
 
 	private void drawTelemetryBar(GuiGraphicsExtractor g, Minecraft client, int x, int y,
@@ -367,16 +510,23 @@ final class VisorHudOverlay implements HudElement {
 	private void drawProximity(GuiGraphicsExtractor g, Minecraft client, List<Projection> projected,
 		Map<String, List<Projection>> clusters,
 		int width, int height, VisorHudPolicy.DisplayPlan plan) {
-		int budget = plan.markerBudget();
+		int budget = Math.min(5, plan.markerBudget());
+		int ordinaryBudget = config.ordinaryMarkerBudget(budget);
+		int ordinaryLabels = config.ordinaryLabelBudget(plan.labelBudget());
+		int ordinaryDrawn = 0, ordinaryLabeled = 0;
 		int labels = 0;
 		int drawn = 0;
 		for (List<Projection> group : clusters.values()) {
 			Projection p = group.getFirst();
-			boolean pinned = group.stream().anyMatch(c -> c.drone.getId() == pinnedEntityId);
-			boolean focused = group.stream().anyMatch(c -> c.drone.getId() == focusEntityId);
+			boolean pinned = group.stream().anyMatch(c -> isPinned(c.drone));
+			boolean focused = pinnedUuid == null && group.stream().anyMatch(c -> c.drone.getId() == focusEntityId);
 			boolean actionable = group.stream().anyMatch(c -> markerPriority(c.drone) <= 1);
 			if (drawn >= budget) continue;
+			boolean protectedContact = pinned || focused || actionable;
+			if (!protectedContact && ordinaryDrawn >= ordinaryBudget) continue;
+			if (!labelFree((int)p.x - 12, (int)p.y - 20, 36, 42)) continue;
 			drawn++;
+			if (!protectedContact) ordinaryDrawn++;
 			boolean visible = group.stream().anyMatch(c -> visibleFromCamera(client, c));
 			int alpha = VisorHudPolicy.markerAlpha(p.screenDistance,
 				Math.min(width, height) * VisorHudPolicy.SAFE_ZONE_RATIO, pinned, actionable);
@@ -387,7 +537,9 @@ final class VisorHudOverlay implements HudElement {
 			boolean selectedLeader = leader(p.drone) && p.drone.groupId().equals(commandGroup);
 			boolean automaticLabel = (selectedLeader || actionable) && !p.drone.combatActive();
 			if ((pinned || focused || automaticLabel)
-				&& labels++ < plan.labelBudget()) {
+				&& labels < plan.labelBudget() && (protectedContact || ordinaryLabeled < ordinaryLabels)) {
+				labels++;
+				if (!protectedContact) ordinaryLabeled++;
 				String role = actionable ? conciseState(p.drone)
 					: leader(p.drone) ? "LEAD" : p.drone.role().id().toUpperCase();
 				String identity = group.size() > 1 ? groupKey(p.drone) + " x" + group.size() : shortId(p.drone.unitId());
@@ -395,8 +547,9 @@ final class VisorHudOverlay implements HudElement {
 					+ Math.round(p.distance) + "m", color);
 			}
 			if (Math.abs(p.relativeY) >= 4.0) {
-				drawText(g, client, p.relativeY > 0 ? "^" : "v", (int)p.x - 3,
-					(int)p.y + (p.relativeY > 0 ? -17 : 11), color);
+				int hy = (int)p.y + (p.relativeY > 0 ? -17 : 11);
+				if (claimLabel((int)p.x - 3, hy, 12, 20))
+					drawText(g, client, p.relativeY > 0 ? "^" : "v", (int)p.x - 3, hy, color);
 			}
 			if ((pinned || selectedLeader) && group.size() == 1) drawMotionVector(g, client, p, color, width, height);
 		}
@@ -414,7 +567,8 @@ final class VisorHudOverlay implements HudElement {
 		});
 		List<Integer> targets = memo("engagementTargets", () -> byTarget.keySet().stream()
 			.filter(id -> client.level.getEntity(id) instanceof LivingEntity target && target.isAlive())
-			.sorted(Comparator.comparingDouble(id -> client.level.getEntity(id).distanceToSqr(client.player)))
+			.sorted(Comparator.<Integer>comparingInt(id -> byTarget.get(id).stream().anyMatch(this::selectedRelationship) ? 0 : 1)
+				.thenComparingInt(id -> combatLedger.number(client.level.getEntity(id).getUUID())))
 			.limit(6).toList());
 		List<Engagement> engagements = new ArrayList<>();
 		for (int targetId : targets) {
@@ -423,44 +577,60 @@ final class VisorHudOverlay implements HudElement {
 			TargetProjection projection = projectTarget(client, target, width, height, partialTick);
 			engagements.add(new Engagement(target, projection, byTarget.get(targetId)));
 		}
-		engagements.sort(Comparator.comparingDouble(e -> e.projection.distance));
-		int displayLimit = VisorHudPolicy.engagementDisplayLimit(plan.detail());
+		engagements.sort(Comparator.<Engagement>comparingInt(e -> e.attackers.stream().anyMatch(this::selectedRelationship) ? 0 : 1)
+			.thenComparingInt(e -> combatLedger.number(e.target.getUUID())));
+		int displayLimit = Math.min(3, VisorHudPolicy.engagementDisplayLimit(plan.detail()));
 		for (int index = 0; index < Math.min(displayLimit, engagements.size()); index++) {
-			drawEngagement(g, client, engagements.get(index), index + 1, width, height, partialTick);
+			drawEngagement(g, client, engagements.get(index), combatLedger.number(engagements.get(index).target.getUUID()), width, height, partialTick);
 		}
 	}
 
 	private void drawEngagement(GuiGraphicsExtractor g, Minecraft client, Engagement engagement,
 		int ordinal, int width, int height, float partialTick) {
 		TargetProjection target = engagement.projection;
+		if (ordinal <= 0) return;
+		boolean selected = engagement.attackers.stream().anyMatch(this::selectedRelationship);
 		String assignment = memo("assignment:" + engagement.target.getId(), () -> assignmentLabel(engagement.attackers));
 		String targetName = engagement.target.getName().getString().toUpperCase();
 		int health = Math.round(engagement.target.getHealth() * 100.0f
 			/ Math.max(1.0f, engagement.target.getMaxHealth()));
-		String label = String.format("ENG-%02d / %s > %s / HP %d%%",
+		String label = String.format("交戦%02d / %s > %s / HP %d%%",
 			ordinal, assignment, targetName, Math.max(0, health));
 		boolean visible = visibleWorldFromCamera(client, engagement.target, target.anchor, true,
 			engagement.target.isAlive());
 		int color = visible ? RED : withAlpha(RED, 105);
 		if (target.depth <= 0 || !target.onScreen(width, height)) {
-			drawTargetEdge(g, client, target, label, width, height, color);
+			drawTargetEdge(g, client, target, selected ? label : "交戦" + ordinal, width, height, color);
 			return;
 		}
 		int radius = target.distance <= 12 ? 11 : target.distance <= 36 ? 9 : 7;
+		if (!labelFree((int)target.x - radius, (int)target.y - radius, radius * 2, radius * 2)) return;
 		drawTargetBracket(g, (int)target.x, (int)target.y, radius, color, !visible);
-		if (visible) {
+		if (visible && selected) {
 			for (DroneEntity attacker : engagement.attackers.stream().limit(8).toList()) {
 				Projection drone = project(client, attacker, width, height, partialTick);
-				if (drone.depth > 0 && drone.onScreen(width, height)) {
+				if (drone.depth > 0 && drone.onScreen(width, height)
+					&& labelFree((int)Math.min(drone.x, target.x), (int)Math.min(drone.y, target.y),
+						Math.max(1, (int)Math.abs(drone.x - target.x)), Math.max(1, (int)Math.abs(drone.y - target.y)))) {
 					drawDashedLine(g, (int)drone.x, (int)drone.y, (int)target.x, (int)target.y,
 						withAlpha(RED, 72), 7);
 				}
 			}
 		}
+		if (!selected) {
+			String number = "交戦" + ordinal;
+			int nx = (int)target.x + radius + 8, ny = (int)target.y - 10;
+			if (claimLabel(nx, ny, textWidth(client, number), 20)) drawText(g, client, number, nx, ny, color);
+			return;
+		}
 		int tagX = (int)target.x + radius + 8;
 		int tagY = (int)target.y - 18;
+		label = fit(client, label, Math.min(450, width - 32));
 		int tagWidth = textWidth(client, label) + 16;
-		g.fill(tagX, tagY, tagX + tagWidth, tagY + 32, PANEL_SOFT);
+		tagX = Math.clamp(tagX, 8, Math.max(8, width - tagWidth - 8));
+		tagY = Math.clamp(tagY, 8, Math.max(8, height - 110));
+		if (!claimLabel(tagX, tagY, tagWidth, 32)) return;
+		g.fill(tagX, tagY, tagX + tagWidth, tagY + 32, config.panelAlpha(PANEL_SOFT));
 		g.fill(tagX, tagY, tagX + 3, tagY + 32, color);
 		drawText(g, client, label, tagX + 8, tagY + 7, WHITE, true);
 	}
@@ -491,7 +661,11 @@ final class VisorHudOverlay implements HudElement {
 		drawChevron(g, x, y, dx, dy, color);
 		String compact = fit(client, label, 420);
 		int tx = dx >= 0 ? x - textWidth(client, compact) - 16 : x + 16;
-		drawText(g, client, compact, tx, Math.max(40, Math.min(height - 108, y - 6)), color, true);
+		int ty = Math.max(40, Math.min(height - 108, y - 6));
+		if (claimLabel(tx - 4, ty - 3, textWidth(client, compact) + 8, 26)) {
+			g.fill(tx - 4, ty - 3, tx + textWidth(client, compact) + 4, ty + 23, config.panelAlpha(PANEL_SOFT));
+			drawText(g, client, compact, tx, ty, color, true);
+		}
 	}
 
 	private String assignmentLabel(List<DroneEntity> attackers) {
@@ -518,14 +692,17 @@ final class VisorHudOverlay implements HudElement {
 		Projection p, int color) {
 		drawDiamond(g, (int)p.x, (int)p.y, 5, color, false);
 		String name = "x" + group.size();
-		drawText(g, client, name, (int)p.x + 12, (int)p.y - 6, color);
+		if (claimLabel((int)p.x + 12, (int)p.y - 6, textWidth(client, name), 20))
+			drawText(g, client, name, (int)p.x + 12, (int)p.y - 6, color);
 	}
 
 	private void drawWorldTag(GuiGraphicsExtractor g, Minecraft client, Projection p, String label, int color) {
+		label = fit(client, label, 340);
 		int x = (int)p.x + 17;
 		int y = (int)p.y - 18;
 		int tagWidth = textWidth(client, label) + 16;
-		g.fill(x, y, x + tagWidth, y + 32, PANEL_SOFT);
+		if (!claimLabel(x, y, tagWidth, 32)) return;
+		g.fill(x, y, x + tagWidth, y + 32, config.panelAlpha(PANEL_SOFT));
 		g.fill(x, y, x + 2, y + 32, color);
 		drawText(g, client, label, x + 8, y + 7, WHITE);
 	}
@@ -561,7 +738,10 @@ final class VisorHudOverlay implements HudElement {
 			+ Math.round(group.stream().mapToDouble(Projection::distance).average().orElse(p.distance)) + "m";
 		int tx = dx >= 0 ? x - textWidth(client, text) - 15 : x + 15;
 		int ty = Math.max(36, Math.min(height - 94, y - 4));
-		drawText(g, client, text, tx, ty, color);
+		if (claimLabel(tx - 4, ty - 3, textWidth(client, text) + 8, 26)) {
+			g.fill(tx - 4, ty - 3, tx + textWidth(client, text) + 4, ty + 23, config.panelAlpha(PANEL_SOFT));
+			drawText(g, client, text, tx, ty, color);
+		}
 	}
 
 	private void drawActionRail(GuiGraphicsExtractor g, Minecraft client, int width, int height,
@@ -599,22 +779,25 @@ final class VisorHudOverlay implements HudElement {
 		if (!maintenance.isEmpty()) alerts.add(new AlertLine(AMBER,
 			"P1 / SUBSYSTEM SERVICE x" + maintenance.size(), wingImpact(maintenance)));
 		if (alerts.isEmpty()) return;
-		alerts = alerts.stream().limit(VisorHudPolicy.visibleAlertCount(alerts.size(), Math.max(1, plan.alertRows()))).toList();
+		int visibleRows = VisorHudPolicy.visibleAlertCount(alerts.size(), Math.max(1, plan.alertRows()));
+		int additional = alerts.size() - visibleRows;
+		alerts = alerts.stream().limit(visibleRows).toList();
 		if (alerts.isEmpty()) return;
-		int railWidth = Math.min(width - 24, VisorHudPolicy.actionRailWidth(width));
-		int x = (width - railWidth) / 2;
-		boolean stacked = alerts.stream().anyMatch(line -> textWidth(client, line.label)
-			+ textWidth(client, line.response) + 40 > railWidth);
+		int railWidth = VisorCombatLayout.sideWidth(width);
+		int x = 24;
+		boolean stacked = railWidth < 300;
 		int rowHeight = stacked ? 48 : 32;
 		int railHeight = 12 + alerts.size() * rowHeight;
-		int y = height - 96 - railHeight;
+		int y = height * 81 / 100 - railHeight;
+		if (!labelFree(x, y, railWidth, railHeight)) return;
+		occupiedLabels.add(new VisorCombatLayout.Box(x, y, railWidth, railHeight));
 		g.fill(x, y, x + railWidth, y + railHeight, 0xD20E1312);
 		g.fill(x, y, x + 3, y + railHeight, alerts.getFirst().color);
 		g.horizontalLine(x, x + railWidth, y, alerts.getFirst().color);
 		for (int i = 0; i < alerts.size(); i++) {
 			AlertLine line = alerts.get(i);
 			int lineY = y + 10 + i * rowHeight;
-			drawText(g, client, fit(client, line.label, railWidth - 24), x + 12, lineY, line.color, i == 0);
+			drawText(g, client, fit(client, line.label + (additional > 0 ? " / 他" + additional + "件" : ""), railWidth - 24), x + 12, lineY, line.color, i == 0);
 			String response = fit(client, line.response, railWidth - 24);
 			drawText(g, client, response, stacked ? x + 12 : x + railWidth - textWidth(client, response) - 12,
 				lineY + (stacked ? 22 : 0), MUTED);
@@ -661,7 +844,8 @@ final class VisorHudOverlay implements HudElement {
 			String label = "LOST / " + shortId(beacon.unitId()) + " / "
 				+ Math.round(beacon.position().distanceTo(client.player.position())) + "m";
 			int tx = x < width / 2 ? x + 14 : x - textWidth(client, label) - 14;
-			drawText(g, client, label, tx, Math.max(78, Math.min(height - 112, y - 5)), RED, true);
+			int ty = Math.max(78, Math.min(height - 112, y - 5));
+			if (claimLabel(tx, ty, textWidth(client, label), 20)) drawText(g, client, label, tx, ty, RED, true);
 		}
 	}
 
@@ -804,6 +988,7 @@ final class VisorHudOverlay implements HudElement {
 	}
 
 	private void drawDiamond(GuiGraphicsExtractor g, int x, int y, int radius, int color, boolean faint) {
+		if (!labelFree(x - radius, y - radius, radius * 2, radius * 2)) return;
 		int actual = faint ? withAlpha(color, 96) : color;
 		drawLine(g, x, y - radius, x + radius, y, actual);
 		drawLine(g, x + radius, y, x, y + radius, actual);
@@ -812,6 +997,7 @@ final class VisorHudOverlay implements HudElement {
 	}
 
 	private void drawChevron(GuiGraphicsExtractor g, int x, int y, double dx, double dy, int color) {
+		if (!labelFree(x - 10, y - 10, 20, 20)) return;
 		double length = Math.max(1.0, Math.hypot(dx, dy));
 		double nx = dx / length;
 		double ny = dy / length;
@@ -824,6 +1010,7 @@ final class VisorHudOverlay implements HudElement {
 	}
 
 	private void drawCircle(GuiGraphicsExtractor g, int centerX, int centerY, int radius, int color) {
+		if (!labelFree(centerX - radius, centerY - radius, radius * 2, radius * 2)) return;
 		int previousX = centerX + radius;
 		int previousY = centerY;
 		for (int step = 1; step <= 96; step++) {
@@ -857,6 +1044,20 @@ final class VisorHudOverlay implements HudElement {
 		}
 	}
 
+	private boolean labelFree(int x, int y, int width, int height) {
+		var box = new VisorCombatLayout.Box(x, y, width, height);
+		return occupiedLabels.stream().noneMatch(box::intersects);
+	}
+
+	private boolean claimLabel(int x, int y, int width, int height) {
+		var window = Minecraft.getInstance().getWindow();
+		if (worldLabels >= 8 || x < 8 || y < 8 || x + width > window.getWidth() - 8 || y + height > window.getHeight() * 81 / 100
+			|| !labelFree(x, y, width, height)) return false;
+		occupiedLabels.add(new VisorCombatLayout.Box(x - 3, y - 3, width + 6, height + 6));
+		worldLabels++;
+		return true;
+	}
+
 	private void drawText(GuiGraphicsExtractor g, Minecraft client, String text, int x, int y,
 		int color) {
 		drawText(g, client, text, x, y, color, false);
@@ -876,6 +1077,7 @@ final class VisorHudOverlay implements HudElement {
 
 	private DroneEntity findById(int entityId) {
 		DroneEntity drone = rosterById.get(entityId);
+		if (drone != null && entityId == pinnedEntityId && pinnedUuid != null && !isPinned(drone)) return null;
 		return drone == null || !drone.isAlive() || drone.isRemoved() || drone.level() != hudLevel ? null : drone;
 	}
 
@@ -884,7 +1086,7 @@ final class VisorHudOverlay implements HudElement {
 	}
 
 	private int markerPriority(DroneEntity drone) {
-		return VisorHudPolicy.informationPriority(drone.getId() == pinnedEntityId,
+		return VisorHudPolicy.informationPriority(isPinned(drone),
 			drone.groupId().equals(commandGroup), drone.combatActive(), drone.threatScore(),
 			drone.recoveryLevel(), drone.batteryPercent(), drone.weaponPowerPercent(),
 			drone.serviceReturnActive());

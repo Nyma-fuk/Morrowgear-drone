@@ -8,6 +8,14 @@ import net.minecraft.world.phys.Vec3;
 import org.junit.jupiter.api.Test;
 
 final class LaserFormationRegressionTest {
+	@Test void transientAvoidanceDoesNotEvictAnAircraftFromItsLockedLaserElement() {
+		assertTrue(CombatPolicy.recoveryAllowsAssignment(0, false, false));
+		assertTrue(CombatPolicy.recoveryAllowsAssignment(1, true, true));
+		assertTrue(CombatPolicy.recoveryAllowsAssignment(1, false, true));
+		assertFalse(CombatPolicy.recoveryAllowsAssignment(1, false, false));
+		assertFalse(CombatPolicy.recoveryAllowsAssignment(2, false, true));
+	}
+
 	@Test void laserLaneHardCapsInheritedEntrySpeed() {
 		Vec3 current = new Vec3(0.5117385, 0, 0);
 		Vec3 requested = FlightDynamics.steerLaserFormation(current, Vec3.ZERO,
@@ -47,8 +55,8 @@ final class LaserFormationRegressionTest {
 				Vec3 nextSlot = CombatPolicy.laserOrbit(center, index, 4, tick + 1, charge);
 				Vec3 velocity = motion.get(index).step(velocities.get(index),
 					FlightDynamics.steerLaserFormation(velocities.get(index), positions.get(index),
-						slot, nextSlot.subtract(slot), .46), tick, false);
-				velocity = FlightDynamics.limitLaserVelocity(velocity, .46);
+						slot, nextSlot.subtract(slot), .68), tick, false);
+				velocity = FlightDynamics.limitLaserVelocity(velocity, .68);
 				positions.set(index, positions.get(index).add(velocity));
 				velocities.set(index, velocity.scale(.91));
 			}

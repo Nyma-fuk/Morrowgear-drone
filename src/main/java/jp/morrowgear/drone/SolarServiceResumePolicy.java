@@ -8,10 +8,13 @@ final class SolarServiceResumePolicy {
 	static Action choose(boolean savedTaskValid, boolean wingMissionAvailable,
 		boolean dockRequestAvailable, boolean ownerAvailable) {
 		if (savedTaskValid) return Action.RESUME_SAVED;
-		if (wingMissionAvailable) return Action.REJOIN_WING;
-		if (dockRequestAvailable) return Action.REQUEST_DOCK;
-		if (ownerAvailable) return Action.FOLLOW_OWNER;
-		return Action.SAFE_ORBIT;
+		return switch (MissionFallbackPolicy.choose(wingMissionAvailable,
+			dockRequestAvailable, ownerAvailable)) {
+			case REJOIN_WING -> Action.REJOIN_WING;
+			case REQUEST_DOCK -> Action.REQUEST_DOCK;
+			case FOLLOW_OWNER -> Action.FOLLOW_OWNER;
+			case SAFE_ORBIT -> Action.SAFE_ORBIT;
+		};
 	}
 
 	enum Action { RESUME_SAVED, REJOIN_WING, REQUEST_DOCK, FOLLOW_OWNER, SAFE_ORBIT }

@@ -1,0 +1,94 @@
+{
+  "artifacts.json": {
+    "bytes": 3021,
+    "sha256": "3c32f3745043e6ac4a96389f84eb8a900be574b39bd65f3403fe300f8144f8ab"
+  },
+  "bay-intake-functional-closeup.png": {
+    "bytes": 1612623,
+    "sha256": "80a67b3906803c05d12f413b2999f5a515b3b7ebd66c30d51169cddead985d97"
+  },
+  "bay-role-fit.json": {
+    "bytes": 2850,
+    "sha256": "280166e062eae3e08ce09c378abd9a0f40ae857deb7c44b7a4a3606342252079"
+  },
+  "bay-scale-witness.png": {
+    "bytes": 1667814,
+    "sha256": "f124a42d6e9f46018296fcbeadeaf996e59b1225b551e6755c0df574f8b6b6ff"
+  },
+  "bottom-functional-closeup.png": {
+    "bytes": 1800557,
+    "sha256": "2e496f3b2ca37a092efb43fb76c71ceea9fa246f35c2f147415dcf82b364cad2"
+  },
+  "bottom.png": {
+    "bytes": 1492099,
+    "sha256": "1bfc38962304e7c3699c404c4ac18c7efc19e5597ab9395f9764a737120858c3"
+  },
+  "carrier-v31-ring-proposal.blend": {
+    "bytes": 277116,
+    "sha256": "ca1ebb0aa0cf92c8ca5f7942aa852f3ed8af7733c1b68a064148897ae3f322ba"
+  },
+  "carrier-v31-ring-proposal.glb": {
+    "bytes": 1482124,
+    "sha256": "09ada4f292e08426f361b947c0e5f4045038cf458d4b583956916caf2083cf21"
+  },
+  "component-state-spec.json": {
+    "bytes": 2011,
+    "sha256": "b6d0f573d5a917d7f933f69bc92a44c5678588bf7e7d314e5bf5f449372228d9"
+  },
+  "contact-sheet.png": {
+    "bytes": 2739263,
+    "sha256": "739cef2383cbdb3b4ba126845cfea37d0a5518bc72757cca4f3e997e5a1db9e3"
+  },
+  "front.png": {
+    "bytes": 1425953,
+    "sha256": "6d3931ec0f72be90d090c34b89c43b0f44384b0a6f0e8f27dffc3549b0537f2d"
+  },
+  "functional-sheet-ja.png": {
+    "bytes": 2050179,
+    "sha256": "eace0248969211f5ef77b87d7a11360cda82c337ead72ffe6956ac080c955a20"
+  },
+  "hero.png": {
+    "bytes": 1480532,
+    "sha256": "0c3d7e0d7263bac686fdac28b1cc1a34262ad538ac20253ac0efa84e12cebf9d"
+  },
+  "left.png": {
+    "bytes": 1416407,
+    "sha256": "0d8edf8989c090603a9c8e67e5de6ae37ebffd1efc318eedd6ed1dbc0a74f073"
+  },
+  "mining-active-state.png": {
+    "bytes": 1743776,
+    "sha256": "76064cd9ad808b678dc9ab858b8e1dc3bd60842fadd559c687053f05c8bf8a2b"
+  },
+  "output-checks.json": {
+    "bytes": 2022,
+    "sha256": "a641884b064ddc66aabee8daa5be2b04f846ee5ccfa5dc69cd12a4700f5ca37c"
+  },
+  "rear.png": {
+    "bytes": 1440363,
+    "sha256": "7ffcdc9128af79cc5bbe5f243fa7126537c3cd060c6d7727050f151fcfd1d359"
+  },
+  "right.png": {
+    "bytes": 1419768,
+    "sha256": "71472f0c2c04e5cd355976ce9d0158f4986ef5ee8ce85f9a9e2c8f4ddd9fdcd5"
+  },
+  "ring-functional-closeup.png": {
+    "bytes": 1462913,
+    "sha256": "7f77b312c02a50ad2be8c333ec2ccb92e7bc9e21e28922fa25f75aff7e19f330"
+  },
+  "top.png": {
+    "bytes": 1508859,
+    "sha256": "39f6e00bec79c75a277b50e14b341ad7572836714e6217701d532b8cd673fc10"
+  },
+  "underside.png": {
+    "bytes": 1520763,
+    "sha256": "3d2569780ae589ab13c68ee6d1ac2790e380136d65238b2cabfc5a725e33bbc4"
+  },
+  "validation.json": {
+    "bytes": 1897,
+    "sha256": "ec5b3e8a2b8a24dc60c97e74137e3922e6bd52992f4633f6a72f172127898511"
+  },
+  "README.md": {
+    "bytes": 3769,
+    "sha256": "b644aa600fab606463784deb1158c3665438942c4b53f69d52a341b1fa527919"
+  }
+}

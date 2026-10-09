@@ -36,13 +36,13 @@ class CarrierInteriorPolicyTest {
         assertEquals(java.util.List.of(bedFoot), CarrierInterior.placementFootprint(Blocks.CHEST, bedFoot, Direction.NORTH));
     }
 
-    @Test void runtimeHullBoxMatchesTheApprovedRectangularV27Envelope() {
+	@Test void runtimeHullBoxMatchesTheApprovedRectangularV31Envelope() {
         var origin = new net.minecraft.world.phys.Vec3(-100.5, 120, 30.5);
         var box = CarrierEntity.exteriorBounds(origin);
-        assertEquals(-113.5, box.minX); assertEquals(-87.5, box.maxX);
-        assertEquals(120, box.minY); assertEquals(131, box.maxY);
-        assertEquals(5.5, box.minZ); assertEquals(55.5, box.maxZ);
-        assertEquals(26, box.getXsize()); assertEquals(50, box.getZsize()); assertEquals(11, box.getYsize());
+		assertEquals(-125.5, box.minX); assertEquals(-75.5, box.maxX);
+		assertEquals(120, box.minY); assertEquals(127.2, box.maxY);
+		assertEquals(15, box.minZ); assertEquals(46, box.maxZ);
+		assertEquals(50, box.getXsize()); assertEquals(31, box.getZsize()); assertEquals(7.2, box.getYsize(), 1.0e-9);
     }
 
     @Test void ordinaryBuildingAndStorageRemainAllowedWhileEscapeAndFluidItemsAreBlocked() {

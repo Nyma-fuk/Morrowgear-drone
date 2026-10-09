@@ -21,6 +21,25 @@ final class DroneTaskStackTest {
 	}
 
 	@Test
+	void activeMissionFallbackReconstructsTheReservedRouteAfterService() {
+		DroneTaskStack.Task resumed = DroneTaskStack.serviceFallback(DroneMode.STANDBY,
+			SalvageState.IDLE, null, "mission-27", true);
+
+		assertEquals(DroneTaskStack.Kind.ROUTE, resumed.kind());
+		assertEquals(DroneMode.WAYPOINT, resumed.mode());
+		assertEquals("mission-27", resumed.missionId());
+	}
+
+	@Test
+	void inactiveFallbackMayRemainStandby() {
+		DroneTaskStack.Task resumed = DroneTaskStack.serviceFallback(DroneMode.STANDBY,
+			SalvageState.IDLE, null, "", false);
+
+		assertEquals(DroneTaskStack.Kind.IDLE, resumed.kind());
+		assertEquals(DroneMode.STANDBY, resumed.mode());
+	}
+
+	@Test
 	void higherPriorityQueuedTaskRunsBeforeLowerPrioritySuspendedRoute() {
 		DroneTaskStack stack = new DroneTaskStack();
 		stack.suspend(new DroneTaskStack.Task(DroneTaskStack.Kind.ROUTE,

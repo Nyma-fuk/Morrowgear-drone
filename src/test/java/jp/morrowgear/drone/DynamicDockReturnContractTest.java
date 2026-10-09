@@ -20,13 +20,20 @@ final class DynamicDockReturnContractTest {
 	@Test void allSelectionSendsReturnWithoutRequiringAnExistingReservation() throws Exception {
 		String ui = Files.readString(Path.of("src/client/java/jp/morrowgear/drone/client/TacticalDashboard.java"));
 		String execute = ui.substring(ui.indexOf("private void execute("), ui.indexOf("private String actionLabel("));
-		assertTrue(execute.contains("for (int id : selected) ClientPlayNetworking.send(new DroneCommandPayload(id, ACTIONS[index]))"));
+		assertTrue(execute.contains("for (int id : selected) sendDroneCommand(commandId, id, ACTIONS[index])"));
 		assertFalse(execute.contains("hasDock()"));
+		String all = ui.substring(ui.indexOf("private void selectAllReceived("), ui.indexOf("private void execute("));
+		assertTrue(all.contains("drones.forEach(drone -> selected.add(drone.getId()))"));
+		assertFalse(all.contains("hasDock()"));
+		assertFalse(all.contains("visibleRoster("), "All received must include units hidden by the role filter");
+		String dispatch = ui.substring(ui.indexOf("private void sendDroneCommand("), ui.indexOf("private void notifyAction("));
+		assertTrue(dispatch.contains("ClientPlayNetworking.send(outgoing)"));
+		assertFalse(dispatch.contains("hasDock()"), "Command observation must not require an existing Dock reservation");
 		String server = Files.readString(JAVA.resolve("MorrowgearDrone.java"));
 		String simple = server.substring(server.indexOf("if (!DroneCommandPolicy.isSimpleAction"),
 			server.indexOf("MorrowgearRuntimeVerifier.register()"));
 		assertFalse(simple.contains("hasDock()"));
-		assertTrue(simple.contains("if (payload.action().equals(\"dock\")) drone.requestManualDockReturn()"));
+		assertTrue(simple.contains("if (action.equals(\"dock\")) drone.requestManualDockReturn()"));
 	}
 
 	@Test void manualReturnPreemptsEveryWeaponWithoutChangingAutomaticSetMode() throws Exception {
@@ -36,7 +43,7 @@ final class DynamicDockReturnContractTest {
 		assertTrue(manual.contains("clearSolarService(false)"));
 		assertTrue(manual.contains("manualDockReturn = true"));
 		assertTrue(manual.contains("setMode(DroneMode.DOCK)"));
-		String mode = entitySection("public void setMode(", "public void assignFollowFormation(");
+		String mode = entitySection("private void setModeInternal(", "public void assignFollowFormation(");
 		assertTrue(mode.contains("if (mode != DroneMode.DOCK) manualDockReturn = false"));
 		assertTrue(mode.contains("taskStack.queue(currentTaskSnapshot(mode))"));
 		assertFalse(mode.contains("clearCombatState()"));
@@ -97,7 +104,7 @@ final class DynamicDockReturnContractTest {
 		assertTrue(dynamic.contains("ordinary.requestManualDockReturn()"));
 		assertTrue(dynamic.contains("service.beginAirborneServiceReturnForVerification"));
 		assertTrue(dynamic.contains("!service.hasDock() && !service.isDocked()"));
-		assertTrue(dynamic.contains("if (elapsed < 40) return"));
+		assertTrue(dynamic.contains("if (elapsed < 80) return"));
 		assertTrue(dynamic.contains("noDockHoldingObserved && lateDockCreated && serviceLandingObserved && ordinary.isDocked()"));
 		assertTrue(dynamic.contains("ordinary.dockPos().equals(dockPos.offset(10, 0, 0))"));
 		assertTrue(dynamic.contains("DockServicePolicy.serviceEnvelope(ordinary.position()"));

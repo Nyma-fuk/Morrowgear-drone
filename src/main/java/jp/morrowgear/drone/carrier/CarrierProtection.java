@@ -26,6 +26,20 @@ public final class CarrierProtection {
         public boolean permits(ServerPlayer owner, ServerLevel level, BlockPos pos) { return true; }
     };
     private CarrierProtection() {}
+
+    /** Explicitly requested rescue corridor, not unrestricted terrain excavation. */
+    public static boolean rescuePermitted(ServerPlayer owner, ServerLevel level, BlockPos pos, BlockState state) {
+        if (!owner.mayBuild() || owner.isSpectator() || !level.getWorldBorder().isWithinBounds(pos)
+            || !level.mayInteract(owner, pos) || !owner.mayInteract(level, pos)
+            || state.is(PROTECTED) || state.is(Blocks.BEDROCK) || state.hasBlockEntity()
+            || level.getBlockEntity(pos) != null || state.getDestroySpeed(level, pos) < 0
+            || !state.getFluidState().isEmpty()) return false;
+        try {
+            return !CarrierSavedData.get(level.getServer()).playerBuilt(level.dimension().identifier().toString(), pos.asLong())
+                && guard.provenance(level, pos) != Provenance.PLAYER_BUILT && guard.permits(owner, level, pos)
+                && PlayerBlockBreakEvents.BEFORE.invoker().beforeBlockBreak(level, owner, pos, state, null);
+        } catch (RuntimeException ex) { return false; }
+    }
     public static void install(Guard integration) { guard = java.util.Objects.requireNonNull(integration); }
     /** Parent automation/piston integrations may record placements that bypass player interaction. */
     public static void recordPlayerBuild(ServerLevel level, BlockPos pos) {
