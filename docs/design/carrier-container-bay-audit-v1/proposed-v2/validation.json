@@ -1,0 +1,103 @@
+{
+  "proposalOnly": true,
+  "runtimePublished": false,
+  "recognitionFeatures": [
+    "eight mirrored ventral recessed wells",
+    "per-row hull-conforming collar height",
+    "four-point vertical winch geometry",
+    "container top inserted 0.42 blocks into the local belly envelope",
+    "flush split hatches and structural shoulders"
+  ],
+  "hardpoints": [
+    {
+      "slot": 0,
+      "x": -11.4,
+      "z": -8.4,
+      "localHullUnderside": 4.8,
+      "collarTop": 4.88,
+      "collarEmbed": 0.08000000000000007,
+      "containerOriginY": 2.680909843444824,
+      "containerTop": 5.22,
+      "containerInsertion": 0.41999999999999993
+    },
+    {
+      "slot": 1,
+      "x": -11.4,
+      "z": -2.8,
+      "localHullUnderside": 2.02,
+      "collarTop": 2.1,
+      "collarEmbed": 0.08000000000000007,
+      "containerOriginY": -0.09909015655517578,
+      "containerTop": 2.44,
+      "containerInsertion": 0.41999999999999993
+    },
+    {
+      "slot": 2,
+      "x": -11.4,
+      "z": 2.8,
+      "localHullUnderside": 2.49,
+      "collarTop": 2.5700000000000003,
+      "collarEmbed": 0.08000000000000007,
+      "containerOriginY": 0.3709098434448244,
+      "containerTop": 2.91,
+      "containerInsertion": 0.41999999999999993
+    },
+    {
+      "slot": 3,
+      "x": -11.4,
+      "z": 8.4,
+      "localHullUnderside": 2.486,
+      "collarTop": 2.5660000000000003,
+      "collarEmbed": 0.08000000000000007,
+      "containerOriginY": 0.3669098434448244,
+      "containerTop": 2.906,
+      "containerInsertion": 0.41999999999999993
+    },
+    {
+      "slot": 4,
+      "x": 11.4,
+      "z": -8.4,
+      "localHullUnderside": 4.8,
+      "collarTop": 4.88,
+      "collarEmbed": 0.08000000000000007,
+      "containerOriginY": 2.680909843444824,
+      "containerTop": 5.22,
+      "containerInsertion": 0.41999999999999993
+    },
+    {
+      "slot": 5,
+      "x": 11.4,
+      "z": -2.8,
+      "localHullUnderside": 2.02,
+      "collarTop": 2.1,
+      "collarEmbed": 0.08000000000000007,
+      "containerOriginY": -0.09909015655517578,
+      "containerTop": 2.44,
+      "containerInsertion": 0.41999999999999993
+    },
+    {
+      "slot": 6,
+      "x": 11.4,
+      "z": 2.8,
+      "localHullUnderside": 2.49,
+      "collarTop": 2.5700000000000003,
+      "collarEmbed": 0.08000000000000007,
+      "containerOriginY": 0.3709098434448244,
+      "containerTop": 2.91,
+      "containerInsertion": 0.41999999999999993
+    },
+    {
+      "slot": 7,
+      "x": 11.4,
+      "z": 8.4,
+      "localHullUnderside": 2.486,
+      "collarTop": 2.5660000000000003,
+      "collarEmbed": 0.08000000000000007,
+      "containerOriginY": 0.3669098434448244,
+      "containerTop": 2.906,
+      "containerInsertion": 0.41999999999999993
+    }
+  ],
+  "symmetryTolerance": 0.0,
+  "validation": "PASS"
+}

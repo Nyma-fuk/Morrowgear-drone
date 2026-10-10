@@ -14,10 +14,12 @@ import jp.morrowgear.drone.DroneEntity;
 import jp.morrowgear.drone.DroneResourceUiPolicy;
 import jp.morrowgear.drone.DroneRole;
 import jp.morrowgear.drone.MorrowgearDrone;
+import jp.morrowgear.drone.MorrowgearMissileEntity;
 import jp.morrowgear.drone.SolarServiceStationEntity;
 import jp.morrowgear.drone.VisorHudPolicy;
 import jp.morrowgear.drone.VisorCombatLedger;
 import jp.morrowgear.drone.VisorCombatLayout;
+import jp.morrowgear.drone.carrier.CarrierEntity;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
@@ -152,6 +154,7 @@ final class VisorHudOverlay implements HudElement {
 			drawInspectionContext(g, client, width, plan.compactContext());
 			drawActionRail(g, client, width, height, plan);
 			drawEngagements(g, client, contacts, width, height, partialTick, plan);
+			drawCarrierMissileLocks(g, client, width, height, partialTick);
 			drawProximity(g, client, contacts, clusters, width, height, plan);
 			drawPowerLostBeacons(g, client, width, height);
 		} finally {
@@ -191,6 +194,16 @@ final class VisorHudOverlay implements HudElement {
 				if (!(entity instanceof LivingEntity target)) return;
 				current.put(target.getUUID(), target);
 				attackers.computeIfAbsent(target.getUUID(), ignored -> new LinkedHashSet<>()).add(drone.getUUID().toString());
+			});
+		client.level.getEntitiesOfClass(MorrowgearMissileEntity.class,
+			new AABB(client.player.blockPosition()).inflate(512),missile->missile.heavy()&&missile.isAlive()
+				&&missile.ownedBy(client.player.getUUID()))
+			.stream().sorted(Comparator.comparing(missile->missile.getUUID().toString())).forEach(missile->{
+				Entity entity=client.level.getEntity(missile.targetId());
+				if(!(entity instanceof LivingEntity target))return;
+				current.put(target.getUUID(),target);
+				attackers.computeIfAbsent(target.getUUID(),ignored->new LinkedHashSet<>())
+					.add("CARRIER-MSL-"+missile.getUUID());
 			});
 		for (var entry : current.entrySet()) {
 			if (!observedTargets.containsKey(entry.getKey()) && observedTargets.size() >= VisorCombatLedger.CAPACITY) {
@@ -648,6 +661,57 @@ final class VisorHudOverlay implements HudElement {
 		drawLine(g, x + radius, y + radius, x + radius, y + radius - arm, color);
 		if (estimated) drawDashedLine(g, x - radius, y + radius + 5, x + radius, y + radius + 5,
 			color, 3);
+	}
+
+	private void drawCarrierMissileLocks(GuiGraphicsExtractor g, Minecraft client, int width,
+		int height, float partialTick) {
+		Map<Integer, Long> inFlight = client.level.getEntitiesOfClass(MorrowgearMissileEntity.class,
+			new AABB(client.player.blockPosition()).inflate(512), missile -> missile.heavy() && missile.isAlive()
+				&& missile.ownedBy(client.player.getUUID()) && missile.targetId() >= 0).stream()
+			.collect(java.util.stream.Collectors.groupingBy(MorrowgearMissileEntity::targetId,
+				LinkedHashMap::new, java.util.stream.Collectors.counting()));
+		Map<Integer, Long> queued = new LinkedHashMap<>();
+		Map<Integer, String> phases = new LinkedHashMap<>();
+		for (CarrierEntity carrier : client.level.getEntitiesOfClass(CarrierEntity.class,
+			new AABB(client.player.blockPosition()).inflate(512), carrier -> carrier.isAlive()
+				&& carrier.isOwnedBy(client.player.getUUID()))) {
+			String phase = switch (carrier.missileLaunchPhase()) {
+				case HATCH_OPEN -> "HATCH";
+				case RIPPLE_FIRE -> "LAUNCH";
+				case HATCH_CLOSE -> "CLOSE";
+				default -> "LOCK";
+			};
+			for (int target : carrier.missileLockedTargetIds()) {
+				queued.merge(target, 1L, Long::sum);
+				phases.put(target, phase);
+			}
+		}
+		var targetIds = new LinkedHashSet<Integer>();
+		targetIds.addAll(queued.keySet()); targetIds.addAll(inFlight.keySet());
+		int drawn = 0;
+		for (int targetId : targetIds) {
+			if (drawn++ >= 4) break;
+			Entity entity = client.level.getEntity(targetId);
+			if (!(entity instanceof LivingEntity target) || !target.isAlive()) continue;
+			TargetProjection projection = projectTarget(client, target, width, height, partialTick);
+			long waiting=queued.getOrDefault(targetId,0L), flying=inFlight.getOrDefault(targetId,0L);
+			String phase=flying>0?"TRACK":phases.getOrDefault(targetId,"LOCK");
+			String label = "母艦 MSL " + phase + " x" + (waiting+flying) + " / "
+				+ target.getName().getString().toUpperCase();
+			if (projection.depth <= 0 || !projection.onScreen(width, height)) {
+				drawTargetEdge(g, client, projection, label, width, height, AMBER);
+				continue;
+			}
+			int x = (int)projection.x, y = (int)projection.y;
+			if (!labelFree(x - 13, y - 13, 26, 26)) continue;
+			drawTargetBracket(g, x, y, 13, AMBER, false);
+			int tx = Math.clamp(x + 20, 8, Math.max(8, width - textWidth(client, label) - 20));
+			int ty = Math.clamp(y + 14, 8, Math.max(8, height - 100));
+			if (!claimLabel(tx - 4, ty - 3, textWidth(client, label) + 8, 26)) continue;
+			g.fill(tx - 4, ty - 3, tx + textWidth(client, label) + 4, ty + 23,
+				config.panelAlpha(PANEL_SOFT));
+			drawText(g, client, label, tx, ty, AMBER, true);
+		}
 	}
 
 	private void drawTargetEdge(GuiGraphicsExtractor g, Minecraft client, TargetProjection target,

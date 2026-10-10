@@ -1,4 +1,4 @@
-Morrowgear: Drone Command 0.20.4 / Minecraft 26.2
+Morrowgear: Drone Command 0.20.5 / Minecraft 26.2
 ==================================================
 
 サーバーを立てる人:

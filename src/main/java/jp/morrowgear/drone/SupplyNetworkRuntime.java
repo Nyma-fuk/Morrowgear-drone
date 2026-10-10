@@ -15,6 +15,7 @@ import jp.morrowgear.drone.SupplyNetworkRegistry.Route;
 import jp.morrowgear.drone.SupplyNetworkRegistry.Stage;
 import jp.morrowgear.drone.SupplyNetworkRegistry.Token;
 import jp.morrowgear.drone.block.DockBlockEntity;
+import jp.morrowgear.drone.carrier.CarrierCargoContainerBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -64,7 +65,7 @@ public final class SupplyNetworkRuntime {
 			|| source.distSqr(dock) > square(SupplyNetworkPolicy.MAX_ROUTE_DISTANCE)
 			|| !level.hasChunkAt(source) || !level.hasChunkAt(dock))
 			throw new IllegalArgumentException("Supply endpoints must be loaded and within 256 blocks");
-		Container warehouse = source(level, source);
+		Container warehouse = source(level, source, owner.getUUID());
 		// The tactical map may select any already-loaded source on the route.  The
 		// vanilla stillValid check is a player interaction range check (roughly
 		// eight blocks), not an automation ownership or route-safety check.
@@ -100,7 +101,7 @@ public final class SupplyNetworkRuntime {
 		long dx = pos.getX() - origin.getX(), dz = pos.getZ() - origin.getZ();
 		if (Math.abs(pos.getY() - origin.getY()) > SupplyNetworkPolicy.DISCOVERY_VERTICAL
 			|| dx * dx + dz * dz > (long)SupplyNetworkPolicy.DISCOVERY_RADIUS * SupplyNetworkPolicy.DISCOVERY_RADIUS
-			|| !level.hasChunkAt(pos) || source(level, pos) == null) return false;
+			|| !level.hasChunkAt(pos) || source(level, pos, owner.getUUID()) == null) return false;
 		data.registerNode(owner.getUUID(), dimension(level), pos.asLong());
 		return true;
 	}
@@ -184,15 +185,18 @@ public final class SupplyNetworkRuntime {
 			if (position.distSqr(dockPos) > square(SupplyNetworkPolicy.MAX_ROUTE_DISTANCE)) continue;
 			if (!level.hasChunkAt(position)) continue;
 			loaded = true;
-			Container source = source(level, position);
+			Container source = source(level, position, route.owner());
 			if (source == null) continue;
 			valid = true;
 			Route delivery = new Route(route.owner(), route.dimension(), packed, route.dock());
-			for (int slot = 0; slot < source.getContainerSize(); slot++) {
-				ItemStack stack = source.getItem(slot);
-				if (DockSupplyPolicy.kind(stack) != demand.rule().kind() || !source.canTakeItem(source, slot, stack)) continue;
-				String item = DockSupplyPolicy.itemId(stack);
-				int stock = count(source, item);
+			List<SourceStock> stocks = source instanceof CarrierCargoContainerBlockEntity cargo
+				? cargo.indexedSupplyStocks().stream().map(stock -> new SourceStock(stock.item(), stock.kind(), stock.count(), stock.sample())).toList()
+				: sourceStocks(source);
+			for (SourceStock stockEntry : stocks) {
+				if (stockEntry.kind() != demand.rule().kind()) continue;
+				ItemStack stack = stockEntry.sample();
+				String item = stockEntry.item();
+				int stock = stockEntry.count();
 				int free = SupplyNetworkPolicy.available(stock, registry.reservedSource(delivery, item));
 				if (free <= 0) continue;
 				hasSupply = true;
@@ -320,7 +324,7 @@ public final class SupplyNetworkRuntime {
 	private static ServiceResult load(ServerLevel level, SupplyNetworkRegistry registry, DroneEntity drone,
 		Job job, CargoHooks hooks) {
 		if (job.stage() != Stage.RESERVED) return job.stage() == Stage.LOADED ? ServiceResult.TO_TARGET : ServiceResult.HOLD;
-		Container source = source(level, BlockPos.of(job.route().source()));
+		Container source = source(level, BlockPos.of(job.route().source()), job.route().owner());
 		Status target = targetStatus(level, job.route());
 		if (target == Status.WAIT_CHUNK) return ServiceResult.WAIT;
 		if (source == null || target != Status.READY) {
@@ -336,12 +340,13 @@ public final class SupplyNetworkRuntime {
 	// Only serviceEndpoint calls this in production, after distance, dwell, loaded-chunk and lease checks.
 	static int loadReserved(SupplyNetworkRegistry registry, Job job, Container source, List<ItemStack> cargo,
 		java.util.function.ToIntFunction<ItemStack> targetRoom) {
-		if (!cargoMatches(job, cargo) || source.getContainerSize() > SupplyNetworkPolicy.MAX_SOURCE_SLOTS) return -1;
+		if (!cargoMatches(job, cargo) || !supportedSourceSize(source)) return -1;
 		if (!registry.current(job) || job.stage() != Stage.RESERVED) return 0;
 		int otherReservations = Math.max(0, registry.reservedSource(job.route(), job.item()) - job.requested());
 		int remaining = Math.min(job.requested(), SupplyNetworkPolicy.available(count(source, job.item()), otherReservations));
 		List<ItemStack> loaded = new ArrayList<>();
-		for (int slot = 0; slot < source.getContainerSize() && remaining > 0 && cargo.size() < 9; slot++) {
+		for (int slot : sourceSlots(source, job.item())) {
+			if (remaining <= 0 || cargo.size() >= 9) break;
 			ItemStack stack = source.getItem(slot);
 			if (!source.canTakeItem(source, slot, stack) || !allowed(job, stack)) continue;
 			int allowance = Math.min(remaining, Math.min(stack.getCount(), targetRoom.applyAsInt(stack)));
@@ -373,7 +378,8 @@ public final class SupplyNetworkRuntime {
 
 	private static ServiceResult unload(ServerLevel level, SupplyNetworkRegistry registry, DroneEntity drone,
 		Job job, CargoHooks hooks) {
-		Container target = job.stage() == Stage.RETURN_SOURCE ? source(level, BlockPos.of(job.deliveryTarget()))
+		Container target = job.stage() == Stage.RETURN_SOURCE
+			? source(level, BlockPos.of(job.deliveryTarget()), job.route().owner())
 			: deliveryDock(level, job);
 		if (target == null) {
 			hold(registry, drone, job, hooks, Status.DOCK_LOST);
@@ -485,7 +491,7 @@ public final class SupplyNetworkRuntime {
 		if (alternate != null) { endpoint = alternate.route().dock(); returningSource = false; }
 		else {
 			endpoint = held.route().source(); returningSource = true;
-			Container source = source(level, BlockPos.of(endpoint));
+			Container source = source(level, BlockPos.of(endpoint), held.route().owner());
 			if (source == null || containerRoom(source, stack) < held.remaining()
 				|| drone.position().distanceToSqr(Vec3.atCenterOf(BlockPos.of(endpoint))) > square(SupplyNetworkPolicy.MAX_ROUTE_DISTANCE)) return;
 		}
@@ -497,7 +503,8 @@ public final class SupplyNetworkRuntime {
 	private static Status fallbackStatus(ServerLevel level, Job job) {
 		BlockPos endpoint = BlockPos.of(job.deliveryTarget());
 		if (!level.hasChunkAt(endpoint)) return Status.WAIT_CHUNK;
-		if (job.stage() == Stage.RETURN_SOURCE) return source(level, endpoint) == null ? Status.SOURCE_LOST : Status.READY;
+		if (job.stage() == Stage.RETURN_SOURCE)
+			return source(level, endpoint, job.route().owner()) == null ? Status.SOURCE_LOST : Status.READY;
 		return deliveryDock(level, job) == null ? Status.DOCK_LOST : Status.READY;
 	}
 
@@ -508,6 +515,7 @@ public final class SupplyNetworkRuntime {
 	}
 
 	private static int containerRoom(Container target, ItemStack stack) {
+		if (target instanceof CarrierCargoContainerBlockEntity cargo) return cargo.indexedRoom(stack);
 		int room = 0;
 		for (int slot = 0; slot < target.getContainerSize(); slot++) {
 			ItemStack present = target.getItem(slot);
@@ -518,6 +526,10 @@ public final class SupplyNetworkRuntime {
 	}
 
 	static void returnToContainer(Container target, ItemStack stack) {
+		if (target instanceof CarrierCargoContainerBlockEntity cargo) {
+			cargo.indexedInsert(stack);
+			return;
+		}
 		for (int slot = 0; slot < target.getContainerSize() && !stack.isEmpty(); slot++) {
 			ItemStack present = target.getItem(slot);
 			if (!target.canPlaceItem(slot, stack) || (!present.isEmpty() && !ItemStack.isSameItemSameComponents(present, stack))) continue;
@@ -548,7 +560,7 @@ public final class SupplyNetworkRuntime {
 		if (target != Status.READY) return target;
 		BlockPos pos = BlockPos.of(route.source());
 		if (!level.hasChunkAt(pos)) return Status.WAIT_CHUNK;
-		return source(level, pos) == null ? Status.SOURCE_LOST : Status.READY;
+		return source(level, pos, route.owner()) == null ? Status.SOURCE_LOST : Status.READY;
 	}
 
 	private static Status targetStatus(ServerLevel level, Route route) {
@@ -564,9 +576,11 @@ public final class SupplyNetworkRuntime {
 			&& level.getBlockEntity(pos) instanceof DockBlockEntity dock && dock.isOwnedBy(route.owner()) ? dock : null;
 	}
 
-	private static Container source(ServerLevel level, BlockPos pos) {
+	private static Container source(ServerLevel level, BlockPos pos, UUID owner) {
 		if (!level.hasChunkAt(pos)) return null;
 		var entity = level.getBlockEntity(pos);
+		if (entity instanceof CarrierCargoContainerBlockEntity cargo)
+			return cargo.logisticsAccessible(owner) ? cargo : null;
 		// Whitelist local storage only: never service/recovery buffers or remote/virtual inventories.
 		return (entity instanceof ChestBlockEntity || entity instanceof BarrelBlockEntity || entity instanceof ShulkerBoxBlockEntity)
 			&& entity instanceof net.minecraft.world.level.block.entity.BaseContainerBlockEntity base && !base.isLocked()
@@ -575,13 +589,40 @@ public final class SupplyNetworkRuntime {
 	}
 
 	private static int count(Container container, String item) {
-		if (container.getContainerSize() > SupplyNetworkPolicy.MAX_SOURCE_SLOTS) return 0;
+		if (container instanceof CarrierCargoContainerBlockEntity cargo) return cargo.indexedCount(item);
+		if (!supportedSourceSize(container)) return 0;
 		int count = 0;
 		for (int slot = 0; slot < container.getContainerSize(); slot++) {
 			ItemStack stack = container.getItem(slot);
 			if (DockSupplyPolicy.itemId(stack).equals(item) && container.canTakeItem(container, slot, stack)) count += stack.getCount();
 		}
 		return count;
+	}
+
+	private static boolean supportedSourceSize(Container container) {
+		return container instanceof CarrierCargoContainerBlockEntity
+			|| container.getContainerSize() <= SupplyNetworkPolicy.MAX_SOURCE_SLOTS;
+	}
+
+	private static int[] sourceSlots(Container source, String item) {
+		if (source instanceof CarrierCargoContainerBlockEntity cargo) return cargo.indexedSlots(item);
+		int[] result = new int[source.getContainerSize()];
+		for (int slot = 0; slot < result.length; slot++) result[slot] = slot;
+		return result;
+	}
+
+	private static List<SourceStock> sourceStocks(Container source) {
+		java.util.LinkedHashMap<String, SourceStock> stocks = new java.util.LinkedHashMap<>();
+		for (int slot = 0; slot < source.getContainerSize(); slot++) {
+			ItemStack stack = source.getItem(slot);
+			DockSupplyPolicy.SupplyKind kind = DockSupplyPolicy.kind(stack);
+			if (kind == null || !source.canTakeItem(source, slot, stack)) continue;
+			String item = DockSupplyPolicy.itemId(stack);
+			stocks.compute(item, (ignored, current) -> current == null
+				? new SourceStock(item, kind, stack.getCount(), stack.copyWithCount(1))
+				: new SourceStock(item, kind, current.count() + stack.getCount(), current.sample()));
+		}
+		return List.copyOf(stocks.values());
 	}
 
 	private static int room(DockBlockEntity dock, ItemStack stack) {
@@ -639,6 +680,7 @@ public final class SupplyNetworkRuntime {
 	private static String dimension(ServerLevel level) { return level.dimension().identifier().toString(); }
 	private static double square(double value) { return value * value; }
 	private record Demand(Configuration config, Rule rule, int missing) {}
+	private record SourceStock(String item, DockSupplyPolicy.SupplyKind kind, int count, ItemStack sample) {}
 	private record SourceChoice(BlockPos position, Container container, ItemStack stack, int movable,
 		int priority, double distance) {}
 	public record StockSummary(SupplyKind kind, int minimum, int target, int priority, int stock, int incoming, int missing) {}

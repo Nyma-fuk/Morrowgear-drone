@@ -133,8 +133,10 @@ public final class DroneAudioController {
 		Set<UUID> ids = new HashSet<>();
 		for (MorrowgearMissileEntity missile : emitters) {
 			ids.add(missile.getUUID());
-			MOTORS.computeIfAbsent(missile.getUUID(), ignored -> new Loop(missile, MorrowgearDrone.MISSILE_MOTOR_SOUND))
-				.update(client, .28f * DroneAudioPolicy.fleetGain(emitters.size()), 1.0f, now);
+			MOTORS.computeIfAbsent(missile.getUUID(), ignored -> new Loop(missile, missile.heavy()
+				? MorrowgearDrone.CARRIER_MISSILE_MOTOR_SOUND : MorrowgearDrone.MISSILE_MOTOR_SOUND))
+				.update(client, (missile.heavy()?.58f:.28f) * DroneAudioPolicy.fleetGain(emitters.size()),
+					missile.heavy()?.9f:1.0f, now);
 		}
 		MOTORS.entrySet().removeIf(entry -> {
 			if (ids.contains(entry.getKey())) return false;

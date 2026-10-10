@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import jp.morrowgear.drone.MorrowgearDrone;
 import jp.morrowgear.drone.network.PowerLostBeaconPayload;
 import jp.morrowgear.drone.network.DroneCommandResultPayload;
+import jp.morrowgear.drone.network.CargoLiftStatusPayload;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
@@ -38,16 +39,25 @@ public final class MorrowgearDroneClient implements ClientModInitializer {
 	public void onInitializeClient() {
 		ControllerVisorHistory.bind(VISOR_HUD::openCombatHistory);
 		TacticalContactClient.register();
+		FleetLinkClient.register();
 		OperationCommunicationsClient.register();
 		SupplyNetworkClient.register();
 		jp.morrowgear.drone.carrier.client.CarrierClientApi.register();
 		net.minecraft.client.gui.screens.MenuScreens.register(
 			jp.morrowgear.drone.carrier.CarrierModule.MENU, CarrierScreen::new);
+		net.minecraft.client.gui.screens.MenuScreens.register(
+			jp.morrowgear.drone.carrier.CarrierModule.CARGO_CONTAINER_MENU, CarrierCargoContainerScreen::new);
 		net.minecraft.client.gui.screens.MenuScreens.register(jp.morrowgear.drone.DockMenu.TYPE, DockScreen::new);
 		DroneAudioController.register();
 		CarrierAudioController.register();
 		net.fabricmc.fabric.api.client.rendering.v1.BlockEntityRendererRegistry.register(
 			MorrowgearDrone.DOCK_BLOCK_ENTITY, context -> new DockRenderer());
+		net.fabricmc.fabric.api.client.rendering.v1.BlockEntityRendererRegistry.register(
+			jp.morrowgear.drone.carrier.CarrierModule.CARGO_CONTAINER_BLOCK_ENTITY,
+			context -> new CarrierCargoContainerRenderer());
+		net.fabricmc.fabric.api.client.rendering.v1.BlockEntityRendererRegistry.register(
+			jp.morrowgear.drone.carrier.CarrierModule.MISSILE_CONTAINER_BLOCK_ENTITY,
+			context -> new CarrierMissileContainerRenderer());
 		net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin.register(plugin ->
 			plugin.modifyItemModelAfterBake().register((model, context) -> {
 				if (!context.itemId().getNamespace().equals(MorrowgearDrone.MOD_ID)) return model;
@@ -61,6 +71,7 @@ public final class MorrowgearDroneClient implements ClientModInitializer {
 		EntityRenderers.register(MorrowgearDrone.MISSILE, MissileRenderer::new);
 		EntityRenderers.register(MorrowgearDrone.SOLAR_SERVICE_STATION, SolarServiceStationRenderer::new);
 		EntityRenderers.register(MorrowgearDrone.CHARGING_RELAY, ChargingRelayRenderer::new);
+		EntityRenderers.register(MorrowgearDrone.CARGO_LIFT_LOAD, CargoLiftLoadRenderer::new);
 		HudElementRegistry.attachElementAfter(VanillaHudElements.CROSSHAIR,
 			Identifier.fromNamespaceAndPath(MorrowgearDrone.MOD_ID, "tactical_visor"), VISOR_HUD);
 		HudElementRegistry.attachElementAfter(VanillaHudElements.CROSSHAIR,
@@ -69,10 +80,14 @@ public final class MorrowgearDroneClient implements ClientModInitializer {
 			context.client().execute(() -> PowerLostBeaconStore.accept(payload)));
 		ClientPlayNetworking.registerGlobalReceiver(DroneCommandResultPayload.TYPE, (payload, context) ->
 			context.client().execute(() -> ControllerCommandResults.accept(payload)));
+		ClientPlayNetworking.registerGlobalReceiver(CargoLiftStatusPayload.TYPE, (payload, context) ->
+			context.client().execute(() -> CargoLiftClientStore.accept(payload)));
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
 			PowerLostBeaconStore.clear();
 			ControllerCommandResults.clear();
+			CargoLiftClientStore.clear();
 			TacticalContactClient.clear();
+			FleetLinkClient.clear();
 		});
 		MorrowgearAutomationClient.register();
 

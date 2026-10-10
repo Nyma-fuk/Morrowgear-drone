@@ -80,6 +80,7 @@ try {
     Copy-Item -LiteralPath (Join-Path $templates 'VERIFY_PACKAGE.ps1') -Destination $staging
     Copy-Item -LiteralPath (Join-Path $root 'docs/distribution/MORROWGEAR_MULTIPLAYER_SETUP_JA.md') -Destination $documents
     Copy-Item -LiteralPath (Join-Path $root 'docs/distribution/MORROWGEAR_SERVER_OPERATIONS_JA.md') -Destination $documents
+    Copy-Item -LiteralPath (Join-Path $root "docs/distribution/MORROWGEAR_MULTIPLAYER_RELEASE_$modVersion`_JA.md") -Destination $documents
     Copy-Item -LiteralPath (Join-Path $root 'LICENSE') -Destination (Join-Path $documents 'LICENSE-MORROWGEAR.txt')
 
     $manifest = [ordered]@{
@@ -98,7 +99,9 @@ try {
         Where-Object { $_.Extension -eq '.jar' } |
         Sort-Object FullName |
         ForEach-Object {
-            $relative = [IO.Path]::GetRelativePath($staging, $_.FullName).Replace('\', '/')
+            # Windows PowerShell 5.1 runs on a framework without Path.GetRelativePath.
+            # The staging path was already bounded above, so a prefix-relative path is safe here.
+            $relative = $_.FullName.Substring($staging.Length).TrimStart('\', '/').Replace('\', '/')
             $hash = (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
             "$hash  $relative"
         }
@@ -107,8 +110,12 @@ try {
     $zip = Join-Path $outputRoot "$packageName.zip"
     if (Test-Path -LiteralPath $zip) { Remove-Item -LiteralPath $zip -Force }
     Compress-Archive -Path $staging -DestinationPath $zip -CompressionLevel Optimal
+    $zipHash = (Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash.ToLowerInvariant()
+    "$zipHash  $([IO.Path]::GetFileName($zip))" |
+        Set-Content -LiteralPath "$zip.sha256" -Encoding ascii
 
     Write-Host "Package: $zip"
+    Write-Host "Checksum: $zip.sha256"
     Write-Host "Staging: $staging"
 } finally {
     Pop-Location

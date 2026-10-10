@@ -1,0 +1,122 @@
+{
+  "proposalOnly": true,
+  "runtimePublished": false,
+  "recognitionFeatures": [
+    "eight mirrored ventral recessed wells",
+    "per-row hull-conforming recessed receiver",
+    "four-point vertical winch geometry",
+    "shallow alignment key separated from the primary load path",
+    "dual longitudinal keels and fore/aft cross-members",
+    "four hydraulic trunnion locks per module",
+    "power, data, cooling and fire-suppression service spine",
+    "perimeter pressure shutters and emergency jettison actuator"
+  ],
+  "hardpoints": [
+    {
+      "slot": 0,
+      "x": -11.4,
+      "z": -8.4,
+      "localHullUnderside": 4.8,
+      "containerOriginY": 2.440909843444824,
+      "containerTop": 4.98,
+      "alignmentKeyInsertion": 0.1800000000000006,
+      "primaryLoadMembers": 4,
+      "hydraulicLocks": 4,
+      "utilityInterfaces": 3,
+      "unsupportedGap": 0.0
+    },
+    {
+      "slot": 1,
+      "x": -11.4,
+      "z": -2.8,
+      "localHullUnderside": 2.02,
+      "containerOriginY": -0.33909015655517577,
+      "containerTop": 2.2,
+      "alignmentKeyInsertion": 0.18000000000000016,
+      "primaryLoadMembers": 4,
+      "hydraulicLocks": 4,
+      "utilityInterfaces": 3,
+      "unsupportedGap": 0.0
+    },
+    {
+      "slot": 2,
+      "x": -11.4,
+      "z": 2.8,
+      "localHullUnderside": 2.49,
+      "containerOriginY": 0.13090984344482443,
+      "containerTop": 2.6700000000000004,
+      "alignmentKeyInsertion": 0.18000000000000016,
+      "primaryLoadMembers": 4,
+      "hydraulicLocks": 4,
+      "utilityInterfaces": 3,
+      "unsupportedGap": 0.0
+    },
+    {
+      "slot": 3,
+      "x": -11.4,
+      "z": 8.4,
+      "localHullUnderside": 2.486,
+      "containerOriginY": 0.12690984344482442,
+      "containerTop": 2.6660000000000004,
+      "alignmentKeyInsertion": 0.18000000000000016,
+      "primaryLoadMembers": 4,
+      "hydraulicLocks": 4,
+      "utilityInterfaces": 3,
+      "unsupportedGap": 0.0
+    },
+    {
+      "slot": 4,
+      "x": 11.4,
+      "z": -8.4,
+      "localHullUnderside": 4.8,
+      "containerOriginY": 2.440909843444824,
+      "containerTop": 4.98,
+      "alignmentKeyInsertion": 0.1800000000000006,
+      "primaryLoadMembers": 4,
+      "hydraulicLocks": 4,
+      "utilityInterfaces": 3,
+      "unsupportedGap": 0.0
+    },
+    {
+      "slot": 5,
+      "x": 11.4,
+      "z": -2.8,
+      "localHullUnderside": 2.02,
+      "containerOriginY": -0.33909015655517577,
+      "containerTop": 2.2,
+      "alignmentKeyInsertion": 0.18000000000000016,
+      "primaryLoadMembers": 4,
+      "hydraulicLocks": 4,
+      "utilityInterfaces": 3,
+      "unsupportedGap": 0.0
+    },
+    {
+      "slot": 6,
+      "x": 11.4,
+      "z": 2.8,
+      "localHullUnderside": 2.49,
+      "containerOriginY": 0.13090984344482443,
+      "containerTop": 2.6700000000000004,
+      "alignmentKeyInsertion": 0.18000000000000016,
+      "primaryLoadMembers": 4,
+      "hydraulicLocks": 4,
+      "utilityInterfaces": 3,
+      "unsupportedGap": 0.0
+    },
+    {
+      "slot": 7,
+      "x": 11.4,
+      "z": 8.4,
+      "localHullUnderside": 2.486,
+      "containerOriginY": 0.12690984344482442,
+      "containerTop": 2.6660000000000004,
+      "alignmentKeyInsertion": 0.18000000000000016,
+      "primaryLoadMembers": 4,
+      "hydraulicLocks": 4,
+      "utilityInterfaces": 3,
+      "unsupportedGap": 0.0
+    }
+  ],
+  "symmetryTolerance": 0.0,
+  "validation": "PASS"
+}

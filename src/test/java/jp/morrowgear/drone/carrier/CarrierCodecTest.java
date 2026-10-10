@@ -41,7 +41,20 @@ class CarrierCodecTest {
                 new CarrierViewPayload.Storage(63, 64, 3456, 3456, 221184),
                 new CarrierViewPayload.Effects(CarrierPolicy.WorkPhase.FIRE, 100, 480, 987,
                     List.of(new net.minecraft.world.phys.Vec3(40.25, 70.75, -90.5)), 16384, 16384, 18000,
-                    new net.minecraft.core.BlockPos(-1, -63, 8), 96), true, 97))
+                    new net.minecraft.core.BlockPos(-1, -63, 8), 96), true, 97,3,
+                List.of(new CarrierViewPayload.Expansion(UUID.randomUUID(),
+                    CarrierExpansionPolicy.Type.MISSILE_BATTERY.ordinal(),2,19)),
+                new CarrierViewPayload.MissileStatus(19,3,1,
+                    jp.morrowgear.drone.CarrierHeavyMissilePolicy.LaunchPhase.RIPPLE_FIRE.ordinal(),
+                    List.of(UUID.randomUUID(),UUID.randomUUID())),
+                new CarrierViewPayload.ContainerTransfer(true,
+                    CarrierContainerTransferPolicy.Direction.LOAD.ordinal(),
+                    CarrierContainerTransferPolicy.Phase.HOIST.ordinal(),2,
+                    CarrierExpansionPolicy.Type.CARGO.ordinal(),new net.minecraft.core.BlockPos(10,64,-20),
+                    20,CarrierContainerTransferPolicy.HOIST_TICKS,false,"LOAD_ACCEPTED"),
+                List.of(new CarrierViewPayload.ContainerCandidate(UUID.randomUUID(),
+                    CarrierExpansionPolicy.Type.CARGO.ordinal(),new net.minecraft.core.BlockPos(32,70,-48),
+                    57,false))))
             .withTerrain(new CarrierViewPayload.Terrain("minecraft:overworld", 232, 200, 4, 49, 49, terrainColors))
             .withCandidates(List.of(new CarrierViewPayload.DroneCandidate(candidate, "MG-DRN-TEST")));
         var buffer = Unpooled.buffer();
@@ -62,7 +75,8 @@ class CarrierCodecTest {
         var effects = new CarrierViewPayload.Effects(CarrierPolicy.WorkPhase.FIRE, 0, 480, 5,
             java.util.Collections.nCopies(17, net.minecraft.world.phys.Vec3.ZERO), 0, 0, 0, net.minecraft.core.BlockPos.ZERO, 96);
         assertTrue(CarrierViewPayload.Effects.CODEC.encodeStart(com.mojang.serialization.JsonOps.INSTANCE, effects).error().isPresent());
-        var storage = new CarrierViewPayload.Storage(64, 64, 0, 3456, 0);
+        var storage = new CarrierViewPayload.Storage(CarrierPolicy.MAX_CARGO_PAGES,
+            CarrierPolicy.MAX_CARGO_PAGES, 0, CarrierPolicy.MAX_STORAGE_SLOTS, 0);
         assertTrue(CarrierViewPayload.Storage.CODEC.encodeStart(com.mojang.serialization.JsonOps.INSTANCE, storage).error().isPresent());
     }
     @Test void terrainIsBoundedDefensiveAndWorldAddressable() {

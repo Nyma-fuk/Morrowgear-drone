@@ -48,6 +48,9 @@ public final class CarrierSavedData extends SavedData {
         if (playerBuilds.putIfAbsent(dimension + "/" + position, true) == null) setDirty();
     }
     public boolean playerBuilt(String dimension, long position) { return playerBuilds.containsKey(dimension + "/" + position); }
+    public void clearPlayerBuilt(String dimension, long position) {
+        if (playerBuilds.remove(dimension + "/" + position) != null) setDirty();
+    }
     public void visit(UUID player, Visit visit) { visits.put(player, visit); assignments.put(player, visit); setDirty(); }
     public void leave(UUID player) { if (visits.remove(player) != null) setDirty(); }
     /** Roll back only an unspawned, unused allocation; never recycle an inhabited or supplied cabin. */

@@ -17,12 +17,17 @@ import org.junit.jupiter.api.Test;
 
 class CarrierTerrainPolicyTest {
     private static Set<String> natural;
+    private static Set<String> ablative;
     @BeforeAll static void bootstrap() throws Exception {
         SharedConstants.tryDetectVersion(); Bootstrap.bootStrap();
         natural = new HashSet<>();
         var json = com.google.gson.JsonParser.parseString(Files.readString(Path.of(
             "src/main/resources/data/morrowgear_drone/tags/block/carrier_mineable.json"))).getAsJsonObject();
         json.getAsJsonArray("values").forEach(value -> natural.add(value.getAsString()));
+        ablative = new HashSet<>();
+        var plasma = com.google.gson.JsonParser.parseString(Files.readString(Path.of(
+            "src/main/resources/data/morrowgear_drone/tags/block/carrier_plasma_ablative.json"))).getAsJsonObject();
+        plasma.getAsJsonArray("values").forEach(value -> ablative.add(value.getAsString()));
     }
 
     @Test void naturalTagUsesOnlyRealCachedMinecraftBlockIds() {
@@ -63,5 +68,95 @@ class CarrierTerrainPolicyTest {
         assertNotEquals(0, CarrierWork.REMOVE_FLAGS & Block.UPDATE_SUPPRESS_DROPS);
         assertNotEquals(0, CarrierWork.REMOVE_FLAGS & Block.UPDATE_CLIENTS);
         assertEquals(0, CarrierWork.REMOVE_FLAGS & Block.UPDATE_NEIGHBORS);
+    }
+
+    @Test void nonPhysicalLightMarkersVaporizeButCannotOverrideExplicitProtection() {
+        var light = Blocks.LIGHT.defaultBlockState();
+        assertNull(CarrierProtection.materialStop(light, false, false));
+        assertEquals(CarrierProtection.PlasmaResponse.VAPORIZE,
+            CarrierProtection.plasmaResponse(light, false, false, false));
+        assertEquals(CarrierPolicy.Stop.PROTECTED,
+            CarrierProtection.materialStop(light, false, true));
+        assertEquals(CarrierProtection.PlasmaResponse.RESIST,
+            CarrierProtection.plasmaResponse(light, false, false, true));
+        assertFalse(CarrierProtection.recoversDrops(CarrierProtection.PlasmaResponse.VAPORIZE, false));
+    }
+
+    @Test void plasmaMaterialTiersDecideWhetherAnyMiningRewardSurvives() {
+        assertTrue(natural.containsAll(ablative));
+        for (String id : ablative) assertTrue(BuiltInRegistries.BLOCK.containsKey(Identifier.parse(id)), id);
+        for (Block block : new Block[] {Blocks.DIRT, Blocks.STONE, Blocks.GOLD_ORE})
+            assertEquals(CarrierProtection.PlasmaResponse.VAPORIZE,
+                CarrierProtection.plasmaResponse(block.defaultBlockState(), true, false, false));
+        for (Block block : new Block[] {Blocks.DEEPSLATE, Blocks.TUFF, Blocks.ANCIENT_DEBRIS})
+            assertEquals(CarrierProtection.PlasmaResponse.ABLATE,
+                CarrierProtection.plasmaResponse(block.defaultBlockState(), true, true, false));
+        assertEquals(CarrierProtection.PlasmaResponse.RESIST,
+            CarrierProtection.plasmaResponse(Blocks.BEDROCK.defaultBlockState(), true, false, false));
+        assertEquals(CarrierProtection.PlasmaResponse.RESIST,
+            CarrierProtection.plasmaResponse(Blocks.CHEST.defaultBlockState(), false, false, true));
+    }
+
+    @Test void plasmaClassificationCoversEveryTagBoundaryAndUsesStrictPriority() {
+        var state = Blocks.STONE.defaultBlockState();
+        for (boolean naturalTag : new boolean[] {false, true})
+            for (boolean ablativeTag : new boolean[] {false, true})
+                for (boolean protectedTag : new boolean[] {false, true}) {
+                    var expected = protectedTag ? CarrierProtection.PlasmaResponse.RESIST
+                        : ablativeTag ? CarrierProtection.PlasmaResponse.ABLATE
+                        : naturalTag ? CarrierProtection.PlasmaResponse.VAPORIZE
+                        : CarrierProtection.PlasmaResponse.RESIST;
+                    assertEquals(expected, CarrierProtection.plasmaResponse(
+                        state, naturalTag, ablativeTag, protectedTag),
+                        "natural=" + naturalTag + " ablative=" + ablativeTag + " protected=" + protectedTag);
+                }
+        assertEquals(CarrierProtection.PlasmaResponse.RESIST,
+            CarrierProtection.plasmaResponse(Blocks.BEDROCK.defaultBlockState(), true, true, false));
+        assertEquals(CarrierProtection.PlasmaResponse.RESIST,
+            CarrierProtection.plasmaResponse(Blocks.CHEST.defaultBlockState(), true, true, false));
+    }
+
+    @Test void onlyNonFluidAblativeResidueCanGenerateDrops() {
+        for (var response : CarrierProtection.PlasmaResponse.values())
+            for (boolean fluid : new boolean[] {false, true})
+                assertEquals(response == CarrierProtection.PlasmaResponse.ABLATE && !fluid,
+                    CarrierProtection.recoversDrops(response, fluid), response + " fluid=" + fluid);
+    }
+
+    @Test void strategicCarrierMiningNeverResistsProtectedOrUnbreakableBlocks() {
+        for (Block block : new Block[] {Blocks.BEDROCK, Blocks.BARRIER, Blocks.CHEST, Blocks.SPAWNER,
+            Blocks.COMMAND_BLOCK, Blocks.END_PORTAL_FRAME, Blocks.REINFORCED_DEEPSLATE})
+            assertEquals(CarrierProtection.PlasmaResponse.VAPORIZE,
+                CarrierProtection.carrierMiningResponse(block.defaultBlockState()), block::toString);
+        assertEquals(CarrierProtection.PlasmaResponse.VAPORIZE,
+            CarrierProtection.carrierMiningResponse(false));
+        assertEquals(CarrierProtection.PlasmaResponse.ABLATE,
+            CarrierProtection.carrierMiningResponse(true));
+    }
+
+    @Test void carrierMiningHotLoopCannotRegressToClaimOrBedrockVetoes() throws Exception {
+        String source = Files.readString(Path.of(
+            "src/main/java/jp/morrowgear/drone/carrier/CarrierWork.java"));
+        assertTrue(source.contains("CarrierProtection.carrierMiningResponse(state)"));
+        assertFalse(source.contains("CarrierProtection.permitted(owner, level, pos, state)"));
+        assertFalse(source.contains("sameUnclaimedBlock"));
+        assertFalse(source.contains("if (state.is(Blocks.BEDROCK))"));
+    }
+
+    @Test void plasmaCacheIsOneEntryPerCanonicalStateAndCanBeInvalidatedAfterReload() {
+        CarrierProtection.clearPlasmaResponseCache();
+        var stone = Blocks.STONE.defaultBlockState();
+        var dirt = Blocks.DIRT.defaultBlockState();
+        CarrierProtection.plasmaResponse(stone);
+        CarrierProtection.plasmaResponse(stone);
+        assertEquals(1, CarrierProtection.plasmaResponseCacheSize());
+        CarrierProtection.plasmaResponse(dirt);
+        assertEquals(2, CarrierProtection.plasmaResponseCacheSize());
+        CarrierProtection.carrierMiningResponse(stone);
+        CarrierProtection.carrierMiningResponse(stone);
+        assertEquals(1, CarrierProtection.carrierMiningResponseCacheSize());
+        CarrierProtection.clearPlasmaResponseCache();
+        assertEquals(0, CarrierProtection.plasmaResponseCacheSize());
+        assertEquals(0, CarrierProtection.carrierMiningResponseCacheSize());
     }
 }

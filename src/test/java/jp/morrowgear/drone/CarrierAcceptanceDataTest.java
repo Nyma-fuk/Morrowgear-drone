@@ -44,7 +44,7 @@ class CarrierAcceptanceDataTest {
         var data = new CarrierAcceptanceData();
         for (int index = 0; index < CarrierAcceptancePolicy.MINE_BLOCKS; index++) assertTrue(data.recordBreak(index));
         data.generation = UUID.randomUUID();
-        data.counts.putAll(Map.of("broken", 16_384, "captured", 16_394, "full_pending_index", 75));
+        data.counts.putAll(Map.of("broken", 16_640, "captured", 16_394, "full_pending_index", 75));
         data.passed.addAll(List.of("M07_FULL", "M07_RESUME", "M01-M03"));
         data.resume = "MINED";
         data.restartEvidence = Optional.of(new CarrierAcceptanceData.Evidence(

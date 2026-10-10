@@ -23,7 +23,7 @@ public final class CarrierShip {
         CarrierAnchor.CODEC.fieldOf("exterior").forGetter(s -> s.exterior),
         CarrierPolicy.UUID_CODEC.listOf(0, 32).fieldOf("guests").forGetter(s -> List.copyOf(s.guests)),
         CarrierPolicy.Progress.CODEC.optionalFieldOf("progress").forGetter(s -> Optional.ofNullable(s.progress)),
-        ItemStack.OPTIONAL_CODEC.listOf(0, CarrierPolicy.STORAGE_SLOTS).fieldOf("cargo").forGetter(s -> s.cargo.snapshot()),
+        ItemStack.OPTIONAL_CODEC.listOf(0, CarrierPolicy.MAX_STORAGE_SLOTS).fieldOf("cargo").forGetter(s -> s.cargo.snapshot()),
         Codec.intRange(0, CarrierPolicy.MAX_ENERGY).fieldOf("energy").forGetter(s -> s.energy),
         Codec.intRange(0, CarrierPolicy.MAX_ENERGY).optionalFieldOf("weapon_energy", 0).forGetter(s -> s.weaponEnergy),
         Pending.CODEC.optionalFieldOf("pending").forGetter(s -> Optional.ofNullable(s.pending)),
@@ -31,7 +31,7 @@ public final class CarrierShip {
         CarrierServiceBay.Stock.CODEC.optionalFieldOf("bay_stock", new CarrierServiceBay.Stock(0, 0)).forGetter(s -> s.bayStock),
         ItemStack.OPTIONAL_CODEC.listOf(0, CarrierSupplies.SIZE).optionalFieldOf("supplies", List.of()).forGetter(s -> s.supplies.snapshot()),
         TravelIntent.CODEC.optionalFieldOf("navigation_intent").forGetter(s -> s.destination == null
-            ? Optional.empty() : Optional.of(new TravelIntent(s.destination, s.arrivalOperation))),
+            ? Optional.empty() : Optional.of(new TravelIntent(s.destination, s.arrivalOperation, s.combatWeapon))),
         Codec.BOOL.optionalFieldOf("mining_startup_charged", false).forGetter(s -> s.miningStartupCharged)
     ).apply(i, CarrierShip::new));
 
@@ -41,6 +41,7 @@ public final class CarrierShip {
     public final CarrierCargoStorage cargo;
     public final CarrierSupplies supplies;
     public final CarrierServiceBay bay;
+    public int attachedCargoModules;
     public boolean cabinReady, destroyed;
     public CarrierAnchor exterior;
     public CarrierPolicy.Progress progress;
@@ -58,6 +59,8 @@ public final class CarrierShip {
     public CarrierAnchor destination;
     /** Operation requested together with travel. Kept server-side so closing the screen cannot lose it. */
     public CarrierPolicy.Mode arrivalOperation = CarrierPolicy.Mode.IDLE;
+    /** Selected combat system. It travels with queued navigation and never changes during an active operation. */
+    public CarrierPolicy.CombatWeapon combatWeapon = CarrierPolicy.CombatWeapon.LASER;
     public boolean navigationPaused;
     public int navigationWaitTicks, combatCursor;
     public boolean miningStartupCharged;
@@ -70,9 +73,12 @@ public final class CarrierShip {
     public int commandRevision;
     /** SCAN identities are visible candidates; FIRE identities are successful area impacts. */
     public List<UUID> combatBeamTargets = List.of();
+    /** One immutable heavy-missile assignment pass per combat operation generation. */
+    public UUID missileSalvoGeneration;
+    public List<UUID> missileLockedTargets = List.of();
     /** Entity sync should use this for mining too; SCAN endpoints are not damaging beams. */
     public CarrierPolicy.WorkPhase workPhase() {
-        if (mode == CarrierPolicy.Mode.COMBAT) return CarrierPolicy.combatPhase(combatRemaining);
+        if (mode == CarrierPolicy.Mode.COMBAT) return CarrierPolicy.combatPhase(combatRemaining, combatWeapon);
         if (mode != CarrierPolicy.Mode.MINING) return CarrierPolicy.WorkPhase.IDLE;
         if (progress == null || miningScanGeneration == null
             || !progress.operation().generation().equals(miningScanGeneration)
@@ -81,7 +87,7 @@ public final class CarrierShip {
             ? CarrierPolicy.WorkPhase.CHARGE : CarrierPolicy.WorkPhase.FIRE;
     }
     public int workPhaseTick() {
-        if (mode == CarrierPolicy.Mode.COMBAT) return CarrierPolicy.phaseTick(combatRemaining);
+        if (mode == CarrierPolicy.Mode.COMBAT) return CarrierPolicy.phaseTick(combatRemaining, combatWeapon);
         if (progress == null || miningScanGeneration == null
             || !progress.operation().generation().equals(miningScanGeneration)) return 0;
         return workPhase() == CarrierPolicy.WorkPhase.SCAN ? miningScanTicks
@@ -91,7 +97,7 @@ public final class CarrierShip {
     }
     public int workPhaseDuration() {
         CarrierPolicy.WorkPhase phase = workPhase();
-        if (mode == CarrierPolicy.Mode.COMBAT) return CarrierPolicy.phaseDuration(phase);
+        if (mode == CarrierPolicy.Mode.COMBAT) return CarrierPolicy.phaseDuration(phase, combatWeapon);
         return switch (phase) {
             case SCAN -> CarrierPolicy.SCAN_TICKS;
             case CHARGE -> CarrierPolicy.MINING_CHARGE_TICKS;
@@ -126,10 +132,11 @@ public final class CarrierShip {
         this.destination = travel == null ? null : travel.destination();
         this.navigationPaused = destination != null;
         this.arrivalOperation = travel == null ? CarrierPolicy.Mode.IDLE : travel.arrivalOperation();
+        this.combatWeapon = travel == null ? CarrierPolicy.CombatWeapon.LASER : travel.combatWeapon();
         this.miningStartupCharged = miningStartupCharged;
         this.pending = pending.orElse(null);
-        this.cargo = new CarrierCargoStorage(cargo, () -> dirty.run());
         this.supplies = new CarrierSupplies(supplies, () -> dirty.run());
+        this.cargo = new CarrierCargoStorage(cargo, () -> dirty.run(), () -> attachedCargoModules);
         this.bay = new CarrierServiceBay(leases, () -> dirty.run());
     }
 
@@ -146,6 +153,8 @@ public final class CarrierShip {
         combatBeamTargets = List.of();
         combatPrimaryTarget = null;
         combatScanAims = List.of();
+        missileSalvoGeneration = null;
+        missileLockedTargets = List.of();
         miningScanTicks = 0;
         miningScanGeneration = null;
         dirty.run();
@@ -158,6 +167,22 @@ public final class CarrierShip {
         dirty.run();
     }
 
+    /** Retains the active operation and its visual phase while an external resource is unavailable. */
+    public void pauseWork(CarrierPolicy.Stop reason) {
+        if (mode == CarrierPolicy.Mode.IDLE) return;
+        if (stop != reason) {
+            stop = reason;
+            dirty.run();
+        }
+    }
+
+    public void resumeWork() {
+        if (mode != CarrierPolicy.Mode.IDLE && stop != CarrierPolicy.Stop.RUNNING) {
+            stop = CarrierPolicy.Stop.RUNNING;
+            dirty.run();
+        }
+    }
+
     public record Pending(BlockPos pos, BlockState state, List<ItemStack> drops) {
         public static final Codec<Pending> CODEC = RecordCodecBuilder.create(i -> i.group(
             BlockPos.CODEC.fieldOf("pos").forGetter(Pending::pos),
@@ -167,18 +192,27 @@ public final class CarrierShip {
         public Pending { pos = pos.immutable(); drops = drops.stream().map(ItemStack::copy).toList(); }
     }
 
-    public record TravelIntent(CarrierAnchor destination, CarrierPolicy.Mode arrivalOperation) {
+    public record TravelIntent(CarrierAnchor destination, CarrierPolicy.Mode arrivalOperation,
+                               CarrierPolicy.CombatWeapon combatWeapon) {
         private static final Codec<TravelIntent> CURRENT = RecordCodecBuilder.create(i -> i.group(
             CarrierAnchor.CODEC.fieldOf("destination").forGetter(TravelIntent::destination),
             Codec.intRange(0, CarrierPolicy.Mode.values().length - 1).optionalFieldOf("arrival_operation", 0)
-                .forGetter(value -> value.arrivalOperation.ordinal())
-        ).apply(i, (destination, mode) -> new TravelIntent(destination, CarrierPolicy.Mode.values()[mode])));
+                .forGetter(value -> value.arrivalOperation.ordinal()),
+            Codec.intRange(0, CarrierPolicy.CombatWeapon.values().length - 1).optionalFieldOf("combat_weapon", 0)
+                .forGetter(value -> value.combatWeapon.ordinal())
+        ).apply(i, (destination, mode, weapon) -> new TravelIntent(destination,
+            CarrierPolicy.Mode.values()[mode], CarrierPolicy.CombatWeapon.values()[weapon])));
         /** Reads legacy saves where navigation_intent contained only a CarrierAnchor. */
         public static final Codec<TravelIntent> CODEC = Codec.either(CarrierAnchor.CODEC, CURRENT).xmap(
-            value -> value.map(anchor -> new TravelIntent(anchor, CarrierPolicy.Mode.IDLE), intent -> intent),
+            value -> value.map(anchor -> new TravelIntent(anchor, CarrierPolicy.Mode.IDLE,
+                CarrierPolicy.CombatWeapon.LASER), intent -> intent),
             Either::right);
+        public TravelIntent(CarrierAnchor destination, CarrierPolicy.Mode arrivalOperation) {
+            this(destination, arrivalOperation, CarrierPolicy.CombatWeapon.LASER);
+        }
         public TravelIntent {
             if (arrivalOperation == null) arrivalOperation = CarrierPolicy.Mode.IDLE;
+            if (combatWeapon == null) combatWeapon = CarrierPolicy.CombatWeapon.LASER;
         }
     }
 }

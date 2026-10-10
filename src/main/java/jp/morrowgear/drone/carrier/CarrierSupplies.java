@@ -9,7 +9,7 @@ import net.minecraft.world.item.ItemStack;
 
 /** Dedicated supply inputs, separate from the paged cargo hold. */
 public final class CarrierSupplies extends SimpleContainer {
-    public static final int FLIGHT = 0, WEAPON = 1, GUN = 2, MISSILES = 3, REPAIR = 4, SIZE = 5;
+    public static final int FLIGHT = 0, WEAPON = 1, GUN = 2, MISSILES = 3, REPAIR = 4, CARGO_MODULE = 5, SIZE = 6;
     public static final int FLIGHT_CELL_ENERGY = DockSupplyPolicy.POWER_CELL_ENERGY;
     public static final int WEAPON_CELL_ENERGY = DockSupplyPolicy.LASER_CELL_ENERGY;
     /** Source compatibility for integrations that used the former shared cell size. */
@@ -33,8 +33,16 @@ public final class CarrierSupplies extends SimpleContainer {
             case GUN -> id.equals("morrowgear_drone:autocannon_magazine");
             case MISSILES -> id.equals("morrowgear_drone:micro_missile_pack");
             case REPAIR -> DockSupplyPolicy.kind(id) == DockSupplyPolicy.SupplyKind.REPAIR;
+            // Physical carrier modules are loaded from the world by the winch workflow.
+            // The retained slot exists only so old saves can be migrated by CarrierEntity.
+            case CARGO_MODULE -> false;
             default -> false;
         };
+    }
+
+    public int cargoModules() {
+        ItemStack stack = getItem(CARGO_MODULE);
+        return 0;
     }
 
     public List<ItemStack> snapshot() {

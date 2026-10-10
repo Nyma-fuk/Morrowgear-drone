@@ -29,6 +29,7 @@ import jp.morrowgear.drone.TacticalUiPolicy;
 import jp.morrowgear.drone.WingMembershipPolicy;
 import jp.morrowgear.drone.block.DockBlockEntity;
 import jp.morrowgear.drone.network.DroneCommandPayload;
+import jp.morrowgear.drone.network.FleetLinkPayload;
 import jp.morrowgear.drone.network.FleetOperationPayload;
 import jp.morrowgear.drone.network.TacticalContactPayload;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -272,12 +273,17 @@ public final class TacticalDashboard extends AbstractWidget {
 		g.horizontalLine(0, virtualWidth(), l.header - 1, BORDER);
 		g.fill(10, 10, 13, 29, CYAN);
 		g.text(client.font, "MORROWGEAR", 21, 14, TEXT);
-		g.text(client.font, "受信 " + drones.size() + "機   選択 " + selected.size() + "機   敵性 "
+		int linkedUnits = FleetLinkClient.units(client).size();
+		int relayCount = FleetLinkClient.relays(client).size();
+		g.text(client.font, "受信 " + linkedUnits + "機   中継 " + relayCount + "局   選択 " + selected.size() + "機   敵性 "
 			+ mapEntities.size(), NAV_RAIL_WIDTH + 14, 14, CYAN);
 		String dimension = client.level == null ? "未接続" : client.level.dimension().identifier().toString();
-		g.text(client.font, fitText(ControllerDisplayText.dimensionName(dimension) + " / 周辺256m", 230), virtualWidth() - 240, 14, MUTED);
+		g.text(client.font, fitText(ControllerDisplayText.dimensionName(dimension) + " / データリンク網", 230), virtualWidth() - 240, 14, MUTED);
 		Map<java.util.UUID, ControllerCommandWatch.Observation> received = new LinkedHashMap<>();
 		drones.forEach(d -> received.put(d.getUUID(), commandObservation(d)));
+		FleetLinkClient.units(client).forEach(unit -> received.putIfAbsent(unit.id(),
+			new ControllerCommandWatch.Observation(unit.status() + ":" + unit.groupId()
+				+ ":" + unit.role() + ":" + unit.mode() + ":" + unit.docked(), unit.mission())));
 		var counts = commandWatch.observe(received, System.currentTimeMillis());
 		String status = menuRequestAt > 0 ? System.currentTimeMillis() - menuRequestAt < 5000
 			? "操作要求: サーバー応答待ち" : "操作要求: 結果未確認 / 自動再送なし"
@@ -307,6 +313,7 @@ public final class TacticalDashboard extends AbstractWidget {
 
 	private void drawLeftPanel(GuiGraphicsExtractor g, Layout l, List<DroneEntity> drones, List<DockInfo> docks, int mouseX, int mouseY) {
 		drones = visibleRoster(drones);
+		List<FleetLinkPayload.Unit> remote = visibleRemoteRoster(drones);
 		g.fill(NAV_RAIL_WIDTH, l.header, l.leftWidth, l.bottomTop, PANEL);
 		g.verticalLine(l.leftWidth - 1, l.header, l.bottomTop, BORDER);
 		g.text(client.font, "機体一覧", NAV_RAIL_WIDTH + 10, l.header + 9, TEXT, true);
@@ -316,7 +323,7 @@ public final class TacticalDashboard extends AbstractWidget {
 			g.text(client.font, i == 0 ? roleFilter < 0 ? "全役割" : roleLabel(DroneRole.values()[roleFilter])
 				: new String[] {"ID順", "役割順", "電力順", "任務順"}[sortMode], filter.x + 6, filter.y + 5, MUTED);
 		}
-		String roster = drones.size() + "機";
+		String roster = (drones.size() + remote.size()) + "機";
 		g.text(client.font, roster, l.leftWidth - client.font.width(roster) - 10, l.header + 9, CYAN);
 		Rect searchBounds = searchRect(l);
 		search.setX(searchBounds.x); search.setY(searchBounds.y); search.setWidth(searchBounds.w); search.setHeight(searchBounds.h);
@@ -332,7 +339,7 @@ public final class TacticalDashboard extends AbstractWidget {
 		}
 
 		List<OperationalWing> wings = operationalWings(drones);
-		int rowCount = selectionMode == SelectionMode.GROUP && wingMapMode ? wings.size() : drones.size();
+		int rowCount = selectionMode == SelectionMode.GROUP && wingMapMode ? wings.size() : drones.size() + remote.size();
 		int unitCapacity = unitCapacity(l);
 		unitScroll = clampScroll(unitScroll, rowCount, unitCapacity);
 		for (int visible = 0; visible < unitCapacity && unitScroll + visible < rowCount; visible++) {
@@ -353,7 +360,25 @@ public final class TacticalDashboard extends AbstractWidget {
 				g.text(client.font, battery, row.right() - client.font.width(battery) - 7, row.y + 10, stateColor, true);
 				continue;
 			}
-			DroneEntity drone = drones.get(unitScroll + visible);
+			int rowIndex = unitScroll + visible;
+			if (rowIndex >= drones.size()) {
+				FleetLinkPayload.Unit unit = remote.get(rowIndex - drones.size());
+				boolean active = selected.contains(unit.entityId());
+				boolean hover = row.contains(mouseX, mouseY);
+				g.fill(row.x, row.y, row.right(), row.bottom(), active ? 0xFF17343B : hover ? PANEL_RAISED : PANEL);
+				g.outline(row.x, row.y, row.w, row.h, active ? CYAN : BORDER);
+				int stateColor = unit.batteryPercent() < 35 ? AMBER : GREEN;
+				drawSelectionToggle(g, row, active, stateColor);
+				DroneRole role = DroneRole.byId(unit.role());
+				HmiArt.role(g, role, row.x + 16, row.y + 3, 26);
+				g.text(client.font, fitText(ControllerDisplayText.unitName(unit.name(), unit.unitId()), row.w - 52), row.x + 44, row.y + 3, TEXT, true);
+				g.text(client.font, roleLabel(role) + " / RELAY H" + unit.relayHops(), row.x + 44, row.y + 14, MUTED);
+				g.text(client.font, fitText(unit.status(), row.w - 72), row.x + 44, row.y + 25, CYAN);
+				String battery = unit.batteryPercent() + "% / Q" + unit.linkQuality();
+				g.text(client.font, battery, row.right() - client.font.width(battery) - 7, row.y + 14, stateColor, true);
+				continue;
+			}
+			DroneEntity drone = drones.get(rowIndex);
 			boolean active = selected.contains(drone.getId());
 			boolean hover = row.contains(mouseX, mouseY);
 			g.fill(row.x, row.y, row.right(), row.bottom(), active ? 0xFF17343B : hover ? PANEL_RAISED : PANEL);
@@ -407,6 +432,26 @@ public final class TacticalDashboard extends AbstractWidget {
 				}
 			}
 		}
+		Set<java.util.UUID> localIds = drones.stream().map(DroneEntity::getUUID).collect(java.util.stream.Collectors.toSet());
+		for (FleetLinkPayload.Unit unit : FleetLinkClient.units(client)) {
+			if (localIds.contains(unit.id())) continue;
+			MapPoint point = mapPoint(map, unit.x(), unit.z());
+			if (point == null) continue;
+			boolean active = selected.contains(unit.entityId());
+			drawDiamond(g, point.x, point.y, active ? CYAN : 0xFF65AFA8);
+			if (active) {
+				g.outline(point.x - 6, point.y - 6, 13, 13, CYAN);
+				g.text(client.font, fitText(unit.unitId() + " / H" + unit.relayHops(), 112),
+					Math.min(point.x + 10, map.right() - 116), point.y - 5, TEXT);
+			}
+		}
+		for (FleetLinkPayload.Relay relay : FleetLinkClient.relays(client)) {
+			MapPoint point = mapPoint(map, relay.x(), relay.z());
+			if (point == null) continue;
+			g.outline(point.x - 4, point.y - 4, 9, 9, CYAN);
+			g.fill(point.x - 1, point.y - 1, point.x + 2, point.y + 2, GREEN);
+			if (mapZoom >= 3.0) g.text(client.font, "R" + relay.hops(), point.x + 6, point.y - 4, MUTED);
+		}
 		for (DroneEntity drone : foreignDrones()) {
 			MapPoint point = mapPoint(map, drone.getX(), drone.getZ());
 			if (point == null) continue;
@@ -434,9 +479,9 @@ public final class TacticalDashboard extends AbstractWidget {
 
 	private void recenterMap(boolean selection) {
 		if (client.player == null) return;
-		var units = selection ? drones().stream().filter(d -> selected.contains(d.getId())).toList() : List.<DroneEntity>of();
-		mapCenterX = units.isEmpty() ? client.player.getX() : units.stream().mapToDouble(DroneEntity::getX).average().orElseThrow();
-		mapCenterZ = units.isEmpty() ? client.player.getZ() : units.stream().mapToDouble(DroneEntity::getZ).average().orElseThrow();
+		var units = selection ? selectedCommandUnits() : List.<CommandUnit>of();
+		mapCenterX = units.isEmpty() ? client.player.getX() : units.stream().mapToDouble(unit -> unit.position().x).average().orElseThrow();
+		mapCenterZ = units.isEmpty() ? client.player.getZ() : units.stream().mapToDouble(unit -> unit.position().z).average().orElseThrow();
 	}
 
 	private boolean selectUnitAt(Rect map, List<DroneEntity> drones, double x, double y, boolean additive) {
@@ -448,9 +493,20 @@ public final class TacticalDashboard extends AbstractWidget {
 			double candidate = Math.hypot(point.x - x, point.y - y);
 			if (candidate < distance) { distance = candidate; nearest = drone; }
 		}
-		if (nearest == null) return false;
+		FleetLinkPayload.Unit remote = null;
+		double remoteDistance = distance;
+		Set<java.util.UUID> localIds = drones.stream().map(DroneEntity::getUUID).collect(java.util.stream.Collectors.toSet());
+		for (FleetLinkPayload.Unit unit : FleetLinkClient.units(client)) {
+			if (localIds.contains(unit.id())) continue;
+			MapPoint point = mapPoint(map, unit.x(), unit.z());
+			if (point == null) continue;
+			double candidate = Math.hypot(point.x - x, point.y - y);
+			if (candidate < remoteDistance) { remoteDistance = candidate; remote = unit; }
+		}
+		if (nearest == null && remote == null) return false;
 		if (!additive) selected.clear();
-		if (additive && selected.contains(nearest.getId())) selected.remove(nearest.getId()); else selected.add(nearest.getId());
+		int id = remote != null && remoteDistance < distance ? remote.entityId() : nearest.getId();
+		if (additive && selected.contains(id)) selected.remove(id); else selected.add(id);
 		selectionMode = SelectionMode.UNIT;
 		wingMapMode = false;
 		return true;
@@ -759,7 +815,11 @@ public final class TacticalDashboard extends AbstractWidget {
 		int x = right.x + 10, y = right.y + 10 - inspectorScroll, w = right.w - 20;
 		List<DroneEntity> units = drones.stream().filter(d -> selected.contains(d.getId())).toList();
 		DroneEntity unit = units.size() == 1 ? units.getFirst() : null;
-		g.text(client.font, units.isEmpty() ? "選択詳細" : units.size() + "機を選択", x, y, CYAN);
+		List<FleetLinkPayload.Unit> remoteUnits = selectedRemoteUnits(drones);
+		FleetLinkPayload.Unit remoteUnit = unit == null && units.isEmpty() && remoteUnits.size() == 1
+			? remoteUnits.getFirst() : null;
+		int selectedCount = units.size() + remoteUnits.size();
+		g.text(client.font, selectedCount == 0 ? "選択詳細" : selectedCount + "機を選択", x, y, CYAN);
 		if (unit != null) {
 			HmiArt.role(g, unit.role(), right.x + (right.w - 104) / 2, y + 17, 104);
 			g.text(client.font, fitText(unit.getName().getString(), w), x, y + 124, TEXT);
@@ -774,11 +834,23 @@ public final class TacticalDashboard extends AbstractWidget {
 				g.text(client.font, fitText(metric.value(), w / 2), x + w / 2, ry, resourceColor(metric.tone()));
 				ry += 14;
 			}
+		} else if (remoteUnit != null) {
+			DroneRole role = DroneRole.byId(remoteUnit.role());
+			HmiArt.role(g, role, right.x + (right.w - 104) / 2, y + 17, 104);
+			g.text(client.font, fitText(remoteUnit.name(), w), x, y + 124, TEXT);
+			g.text(client.font, "役割: " + roleLabel(role), x, y + 138, MUTED);
+			g.text(client.font, "所属 " + (remoteUnit.groupId().isBlank() ? "未所属" : remoteUnit.groupId()), x, y + 153, TEXT);
+			g.text(client.font, fitText("現在 " + remoteUnit.status(), w), x, y + 168, CYAN);
+			g.text(client.font, "中継 H" + remoteUnit.relayHops() + " / LINK Q" + remoteUnit.linkQuality(), x, y + 187, GREEN);
+			g.text(client.font, "飛行電力", x, y + 204, MUTED);
+			g.text(client.font, remoteUnit.batteryPercent() + "%", x + w / 2, y + 204,
+				remoteUnit.batteryPercent() < 35 ? AMBER : GREEN);
 		} else {
-			g.text(client.font, units.isEmpty() ? "対象を選択してください" : "複数対象の共通操作", x, y + 35, TEXT);
+			g.text(client.font, selectedCount == 0 ? "対象を選択してください" : "複数対象の共通操作", x, y + 35, TEXT);
 			int ry = y + 60;
 			for (DroneRole role : MODULE_ROLES) {
-				long count = units.stream().filter(d -> d.role() == role).count();
+				long count = units.stream().filter(d -> d.role() == role).count()
+					+ remoteUnits.stream().filter(d -> DroneRole.byId(d.role()) == role).count();
 				if (count == 0) continue;
 				HmiArt.role(g, role, x, ry, 24);
 				g.text(client.font, roleLabel(role) + " " + count + "機", x + 30, ry + 8, TEXT);
@@ -790,7 +862,7 @@ public final class TacticalDashboard extends AbstractWidget {
 		for (int i = 0; i < ACTIONS.length; i++) {
 			Rect button = commandRect(l, i);
 			boolean confirming = i == 5 && client.level != null && client.level.getGameTime() < confirmStoreUntil;
-			drawCargoButton(g, button, fitText(confirming ? "格納を確定" : actionLabel(i, drones), button.w - 8), false, i == 5 ? RED : CYAN, !units.isEmpty());
+			drawCargoButton(g, button, fitText(confirming ? "格納を確定" : actionLabel(i, drones), button.w - 8), false, i == 5 ? RED : CYAN, selectedCount > 0);
 		}
 		g.text(client.font, "作業地点を指定", x, right.y + 422 - inspectorScroll, MUTED);
 		var available = availability(drones);
@@ -800,12 +872,13 @@ public final class TacticalDashboard extends AbstractWidget {
 		}
 		drawCargoButton(g, autoOperationsRect(l), autoOperations ? "自動編成 ON" : "自動編成 OFF", autoOperations, GREEN, true);
 		drawCargoButton(g, forceOverrideRect(l), forceOverride ? "強制介入 ON" : "強制介入 OFF",
-			forceOverride, forceOverride ? RED : AMBER, !units.isEmpty());
+			forceOverride, forceOverride ? RED : AMBER, selectedCount > 0);
 		if (page != 3) drawCargoButton(g, attackTargetRect(l), armedAttack
 			? "攻撃対象を地図で選択" : "特定モブを攻撃", armedAttack, RED,
-			!units.isEmpty() && units.stream().anyMatch(d -> d.role() == DroneRole.SECURITY));
+			selectedCount > 0 && available.securityEnabled());
 		if (page != 3) drawCargoButton(g, cargoEditorRect(l), "輸送経路を設定", false, CYAN,
-			!units.isEmpty() && units.stream().allMatch(d -> d.role() == DroneRole.CARGO));
+			selectedCount > 0 && units.stream().allMatch(d -> d.role() == DroneRole.CARGO)
+				&& remoteUnits.stream().allMatch(d -> DroneRole.byId(d.role()) == DroneRole.CARGO));
 		if (page != 3) drawCargoButton(g, radiusEditorRect(l), "作業・警戒の範囲", false, CYAN,
 			armedGuard || armedWork != FieldOperationType.NONE);
 		if (page == 3) {
@@ -1088,8 +1161,9 @@ public final class TacticalDashboard extends AbstractWidget {
 		if (page == 1
 			&& beginWingCardInteraction(l, drones, mouseX, mouseY)) return;
 		List<DroneEntity> displayed = visibleRoster(drones);
+		List<FleetLinkPayload.Unit> remoteDisplayed = visibleRemoteRoster(displayed);
 		List<OperationalWing> wings = operationalWings(displayed);
-		int rowCount = selectionMode == SelectionMode.GROUP && wingMapMode ? wings.size() : displayed.size();
+		int rowCount = selectionMode == SelectionMode.GROUP && wingMapMode ? wings.size() : displayed.size() + remoteDisplayed.size();
 		for (int visible = 0; visible < unitCapacity(l) && unitScroll + visible < rowCount; visible++) {
 			if (!unitRect(l, visible).contains(mouseX, mouseY)) continue;
 			if (selectionMode == SelectionMode.GROUP && wingMapMode) {
@@ -1103,6 +1177,16 @@ public final class TacticalDashboard extends AbstractWidget {
 				return;
 			}
 			int clickedIndex = unitScroll + visible;
+			if (clickedIndex >= displayed.size()) {
+				FleetLinkPayload.Unit unit = remoteDisplayed.get(clickedIndex - displayed.size());
+				boolean toggle = event.hasControlDown()
+					|| selectionToggleRect(unitRect(l, visible)).contains(mouseX, mouseY);
+				if (!toggle) selected.clear();
+				if (toggle && selected.contains(unit.entityId())) selected.remove(unit.entityId());
+				else selected.add(unit.entityId());
+				selectionAnchor = unit.id();
+				return;
+			}
 			DroneEntity drone = displayed.get(clickedIndex);
 			{
 				boolean toggle = event.hasControlDown()
@@ -1180,8 +1264,7 @@ public final class TacticalDashboard extends AbstractWidget {
 			return;
 		}
 		if (page != 3 && attackTargetRect(l).contains(mouseX, mouseY)) {
-			boolean securitySelected = drones.stream().anyMatch(d -> selected.contains(d.getId())
-				&& d.role() == DroneRole.SECURITY);
+			boolean securitySelected = availability(drones).securityEnabled();
 			if (!securitySelected) { notifyAction("攻撃には警備機を選択してください"); return; }
 			armedAttack = !armedAttack;
 			armedWaypoint = armedRoute = armedGuard = false;
@@ -1350,6 +1433,7 @@ public final class TacticalDashboard extends AbstractWidget {
 	private void selectAllReceived(List<DroneEntity> drones) {
 		selected.clear();
 		drones.forEach(drone -> selected.add(drone.getId()));
+		FleetLinkClient.units(client).forEach(unit -> selected.add(unit.entityId()));
 	}
 
 	private void execute(int index) {
@@ -1389,19 +1473,19 @@ public final class TacticalDashboard extends AbstractWidget {
 
 	private void issueFollowFormation() {
 		if (client.player == null || client.level == null || selected.isEmpty()) return;
-		List<List<DroneEntity>> formations = selectedMissionFormations();
+		List<List<CommandUnit>> formations = selectedCommandFormations();
 		String missionRoot = client.level.getGameTime() + "-follow-" + client.player.getId();
 		UUID commandId = UUID.randomUUID();
 		for (int wing = 0; wing < formations.size(); wing++) {
-			List<DroneEntity> formation = formations.get(wing).stream()
-				.sorted(Comparator.comparingDouble((DroneEntity drone) -> drone.distanceToSqr(client.player))
-					.thenComparing(DroneEntity::unitId)).toList();
-			DroneEntity leader = formation.getFirst();
+			List<CommandUnit> formation = formations.get(wing).stream()
+				.sorted(Comparator.comparingDouble((CommandUnit drone) -> drone.position().distanceToSqr(client.player.position()))
+					.thenComparing(CommandUnit::unitId)).toList();
+			CommandUnit leader = formation.getFirst();
 			String missionId = wingMissionId(missionRoot, wing, formations.size());
 			for (int index = 0; index < formation.size(); index++) {
-				DroneEntity drone = formation.get(index);
-				sendDroneCommand(commandId, drone.getId(),
-					"follow:" + missionId + ":" + formation.size() + ":" + index + ":" + leader.getId());
+				CommandUnit drone = formation.get(index);
+				sendDroneCommand(commandId, drone.entityId(),
+					"follow:" + missionId + ":" + formation.size() + ":" + index + ":" + leader.entityId());
 			}
 		}
 	}
@@ -1414,10 +1498,9 @@ public final class TacticalDashboard extends AbstractWidget {
 		int centerY = layout.map.y + layout.map.h / 2;
 		int worldX = (int)Math.floor(mapCenterX + (mouseX - centerX) / mapZoom);
 		int worldZ = (int)Math.floor(mapCenterZ + (mouseY - centerY) / mapZoom);
-		if (!client.level.hasChunkAt(new BlockPos(worldX, 0, worldZ))) {
-			notifyAction("地形未受信 / 作業高度を確認できないため未送信"); return;
-		}
-		int surfaceY = client.level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, worldX, worldZ);
+		int surfaceY = client.level.hasChunkAt(new BlockPos(worldX, 0, worldZ))
+			? client.level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, worldX, worldZ)
+			: client.player.getBlockY();
 		int worldY = armedWork == FieldOperationType.ORE ? surfaceY - 16
 			: surfaceY - 1;
 		int radius = workRadii[workIndex(armedWork)];
@@ -1434,10 +1517,10 @@ public final class TacticalDashboard extends AbstractWidget {
 			return;
 		}
 		UUID commandId = UUID.randomUUID();
-		for (DroneEntity drone : drones()) {
-			if (!selected.contains(drone.getId()) || !MissionAssignmentPolicy.allows(drone.role(),
+		for (CommandUnit drone : selectedCommandUnits()) {
+			if (!MissionAssignmentPolicy.allows(drone.role(),
 				MissionAssignmentPolicy.MissionKind.FIELD_OPERATION)) continue;
-			sendDroneCommand(commandId, drone.getId(), "work:" + armedWork.id()
+			sendDroneCommand(commandId, drone.entityId(), "work:" + armedWork.id()
 				+ ":" + worldX + ":" + worldY + ":" + worldZ + ":" + radius + ":" + orderId);
 		}
 		notifyCommandResult();
@@ -1456,10 +1539,10 @@ public final class TacticalDashboard extends AbstractWidget {
 		String orderId = Long.toString(client.level.getGameTime(), 36).toUpperCase()
 			+ "-GUARD-" + worldX + "-" + worldZ;
 		UUID commandId = UUID.randomUUID();
-		for (DroneEntity drone : drones()) {
-			if (!selected.contains(drone.getId()) || !MissionAssignmentPolicy.allows(drone.role(),
+		for (CommandUnit drone : selectedCommandUnits()) {
+			if (!MissionAssignmentPolicy.allows(drone.role(),
 				MissionAssignmentPolicy.MissionKind.SECURITY_PATROL)) continue;
-			sendDroneCommand(commandId, drone.getId(), "guard:"
+			sendDroneCommand(commandId, drone.entityId(), "guard:"
 				+ worldX + ":" + worldY + ":" + worldZ + ":" + radius + ":" + orderId);
 		}
 		notifyCommandResult();
@@ -1478,15 +1561,15 @@ public final class TacticalDashboard extends AbstractWidget {
 	private void issueWaypointAt(int worldX, int worldZ) {
 		if (client.player == null || client.level == null || selected.isEmpty()) return;
 		String missionRoot = client.level.getGameTime() + "-" + client.player.getId() + "-" + worldX + "-" + worldZ;
-		List<List<DroneEntity>> formations = selectedMissionFormations();
+		List<List<CommandUnit>> formations = selectedCommandFormations();
 		UUID commandId = UUID.randomUUID();
 		int total = 0;
 		for (int wing = 0; wing < formations.size(); wing++) {
-			List<DroneEntity> formation = formations.get(wing);
+			List<CommandUnit> formation = formations.get(wing);
 			String missionId = wingMissionId(missionRoot, wing, formations.size());
 			for (int index = 0; index < formation.size(); index++) {
-				DroneEntity drone = formation.get(index);
-				sendDroneCommand(commandId, drone.getId(),
+				CommandUnit drone = formation.get(index);
+				sendDroneCommand(commandId, drone.entityId(),
 					"move:" + worldX + ":" + worldZ + ":" + missionId + ":" + formation.size() + ":" + index);
 				total++;
 			}
@@ -1497,15 +1580,15 @@ public final class TacticalDashboard extends AbstractWidget {
 	private void issueTracking(int targetEntityId) {
 		if (client.player == null || client.level == null || selected.isEmpty()) return;
 		String missionRoot = client.level.getGameTime() + "-track-" + targetEntityId;
-		List<List<DroneEntity>> formations = selectedMissionFormations();
+		List<List<CommandUnit>> formations = selectedCommandFormations();
 		UUID commandId = UUID.randomUUID();
 		int total = 0;
 		for (int wing = 0; wing < formations.size(); wing++) {
-			List<DroneEntity> formation = formations.get(wing);
+			List<CommandUnit> formation = formations.get(wing);
 			String missionId = wingMissionId(missionRoot, wing, formations.size());
 			for (int index = 0; index < formation.size(); index++) {
-				DroneEntity drone = formation.get(index);
-				sendDroneCommand(commandId, drone.getId(),
+				CommandUnit drone = formation.get(index);
+				sendDroneCommand(commandId, drone.entityId(),
 					"track:" + targetEntityId + ":" + missionId + ":" + formation.size() + ":" + index);
 				total++;
 			}
@@ -1515,14 +1598,14 @@ public final class TacticalDashboard extends AbstractWidget {
 
 	private void issueAttack(int targetEntityId) {
 		if (client.player == null || client.level == null || selected.isEmpty()) return;
-		List<DroneEntity> security = drones().stream().filter(drone -> selected.contains(drone.getId())
-			&& drone.role() == DroneRole.SECURITY).sorted(Comparator.comparing(DroneEntity::unitId)).toList();
+		List<CommandUnit> security = selectedCommandUnits().stream().filter(drone -> drone.role() == DroneRole.SECURITY)
+			.sorted(Comparator.comparing(CommandUnit::unitId)).toList();
 		if (security.isEmpty()) { notifyAction("攻撃可能な警備機が選択されていません"); return; }
 		String missionId = client.level.getGameTime() + "-attack-" + targetEntityId;
 		UUID commandId = UUID.randomUUID();
 		for (int index = 0; index < security.size(); index++) {
-			DroneEntity drone = security.get(index);
-			sendDroneCommand(commandId, drone.getId(), "attack:" + targetEntityId
+			CommandUnit drone = security.get(index);
+			sendDroneCommand(commandId, drone.entityId(), "attack:" + targetEntityId
 				+ ":" + missionId + ":" + security.size() + ":" + index);
 		}
 		notifyCommandResult();
@@ -1552,36 +1635,28 @@ public final class TacticalDashboard extends AbstractWidget {
 			notifyAction("巡回地点を1点以上設定してください");
 			return;
 		}
-		List<List<DroneEntity>> formations = selectedMissionFormations();
-		if (routeDraft.stream().anyMatch(point -> !ControllerNumericPolicy.withinRouteRange(
-			point.getX(), point.getZ(), client.player.getBlockX(), client.player.getBlockZ()))) {
-			notifyAction("未送信 / 巡回地点は現在位置からX/Z各512ブロック以内に設定してください");
-			return;
-		}
+		List<List<CommandUnit>> formations = selectedCommandFormations();
 		String missionRoot = "R" + Long.toString(client.level.getGameTime(), 36).toUpperCase();
 		String encoded = PatrolRoutePolicy.encode(routeDraft);
 		UUID commandId = UUID.randomUUID();
 		int total = 0;
 		for (int wing = 0; wing < formations.size(); wing++) {
-			List<DroneEntity> formation = formations.get(wing);
+			List<CommandUnit> formation = formations.get(wing);
 			String missionId = wingMissionId(missionRoot, wing, formations.size());
 			Vec3 formationOrigin = PatrolRoutePolicy.formationOrigin(
-				formation.stream().map(DroneEntity::position).toList());
+				formation.stream().map(CommandUnit::position).toList());
 			int startIndex = routeStartIndex >= 0 && routeStartIndex < routeDraft.size()
 				? routeStartIndex : PatrolRoutePolicy.nearestIndex(routeDraft, formationOrigin);
 			int originX = (int)Math.floor(formationOrigin.x);
 			int originZ = (int)Math.floor(formationOrigin.z);
-			if (!ControllerNumericPolicy.withinRouteRange(originX, originZ, client.player.getBlockX(), client.player.getBlockZ())) {
-				suppressed += formation.size(); transmitProblem = "編隊の開始位置が操作範囲外"; continue;
-			}
 			String longestAction = "patrol:" + missionId + ":" + formation.size() + ":" + (formation.size() - 1)
 				+ ":" + startIndex + ":" + originX + ":" + originZ + ":" + encoded;
 			if (!jp.morrowgear.drone.DroneCommandPolicy.acceptablePayload(longestAction)) {
 				suppressed += formation.size(); transmitProblem = "経路情報が送信長の上限を超えています"; continue;
 			}
 			for (int index = 0; index < formation.size(); index++) {
-				DroneEntity drone = formation.get(index);
-				sendDroneCommand(commandId, drone.getId(), "patrol:" + missionId
+				CommandUnit drone = formation.get(index);
+				sendDroneCommand(commandId, drone.entityId(), "patrol:" + missionId
 					+ ":" + formation.size() + ":" + index + ":" + startIndex
 					+ ":" + originX + ":" + originZ + ":" + encoded);
 				total++;
@@ -1635,8 +1710,13 @@ public final class TacticalDashboard extends AbstractWidget {
 	}
 
 	private TacticalUiPolicy.CommandAvailability availability(List<DroneEntity> drones) {
-		return TacticalUiPolicy.availability(drones.stream().filter(drone -> selected.contains(drone.getId()))
+		List<DroneRole> roles = new ArrayList<>(drones.stream().filter(drone -> selected.contains(drone.getId()))
 			.map(DroneEntity::role).toList());
+		Set<java.util.UUID> localIds = drones.stream().map(DroneEntity::getUUID)
+			.collect(java.util.stream.Collectors.toSet());
+		FleetLinkClient.units(client).stream().filter(unit -> !localIds.contains(unit.id())
+			&& selected.contains(unit.entityId())).map(unit -> DroneRole.byId(unit.role())).forEach(roles::add);
+		return TacticalUiPolicy.availability(roles);
 	}
 
 	private static int workIndex(FieldOperationType type) {
@@ -1659,13 +1739,15 @@ public final class TacticalDashboard extends AbstractWidget {
 
 	private void sendDroneCommand(DroneCommandPayload payload) {
 		DroneEntity drone = drones().stream().filter(d -> d.getId() == payload.entityId()).findFirst().orElse(null);
-		if (drone == null || !ClientPlayNetworking.canSend(DroneCommandPayload.TYPE)) {
+		FleetLinkPayload.Unit remote = drone == null ? FleetLinkClient.units(client).stream()
+			.filter(unit -> unit.entityId() == payload.entityId()).findFirst().orElse(null) : null;
+		if (drone == null && remote == null || !ClientPlayNetworking.canSend(DroneCommandPayload.TYPE)) {
 			suppressed++;
 			transmitProblem = "未受信または通信リンクなし";
 			notifyAction("");
 			return;
 		}
-		if (!locallyEligible(drone)) { notifyCommandResult(); return; }
+		if (drone != null && !locallyEligible(drone)) { notifyCommandResult(); return; }
 		String rawAction = payload.action();
 		String outgoingAction = forceOverride && forceableAction(rawAction) ? "force:" + rawAction : rawAction;
 		DroneCommandPayload outgoing = outgoingAction.equals(rawAction) ? payload
@@ -1674,8 +1756,12 @@ public final class TacticalDashboard extends AbstractWidget {
 		String mission = fields[0].equals("patrol") && fields.length > 1 ? fields[1]
 			: fields[0].equals("move") && fields.length > 3 ? fields[3]
 			: (fields[0].equals("track") || fields[0].equals("attack")) && fields.length > 2 ? fields[2] : "";
-		if (!commandWatch.submit(outgoing.commandId(), drone.getUUID(), outgoingAction,
-			commandObservation(drone), mission, System.currentTimeMillis())) {
+		java.util.UUID identity = drone != null ? drone.getUUID() : remote.id();
+		ControllerCommandWatch.Observation observation = drone != null ? commandObservation(drone)
+			: new ControllerCommandWatch.Observation(remote.status() + ":" + remote.groupId()
+				+ ":" + remote.role() + ":" + remote.mode() + ":" + remote.docked(), remote.mission());
+		if (!commandWatch.submit(outgoing.commandId(), identity, outgoingAction,
+			observation, mission, System.currentTimeMillis())) {
 			suppressed++;
 			transmitProblem = "同じ指示の結果を確認中";
 			notifyAction("");
@@ -1723,12 +1809,35 @@ public final class TacticalDashboard extends AbstractWidget {
 			eligible, DroneEntity::groupId);
 	}
 
+	private List<CommandUnit> selectedCommandUnits() {
+		Map<java.util.UUID, CommandUnit> result = new LinkedHashMap<>();
+		for (DroneEntity drone : drones()) {
+			if (!selected.contains(drone.getId()) || !locallyEligible(drone)) continue;
+			result.put(drone.getUUID(), new CommandUnit(drone.getId(), drone.getUUID(), drone.unitId(),
+				drone.groupId(), drone.role(), drone.position()));
+		}
+		for (FleetLinkPayload.Unit unit : FleetLinkClient.units(client)) {
+			if (!selected.contains(unit.entityId()) || result.containsKey(unit.id())) continue;
+			result.put(unit.id(), new CommandUnit(unit.entityId(), unit.id(), unit.unitId(), unit.groupId(),
+				DroneRole.byId(unit.role()), new Vec3(unit.x(), unit.y(), unit.z())));
+		}
+		return result.values().stream().sorted(Comparator.comparing(CommandUnit::groupId)
+			.thenComparing(CommandUnit::unitId)).toList();
+	}
+
+	private List<List<CommandUnit>> selectedCommandFormations() {
+		return jp.morrowgear.drone.MissionWingPolicy.partitionByWing(selectedCommandUnits(), CommandUnit::groupId);
+	}
+
 	private boolean locallyEligible(DroneEntity drone) {
 		if (ControllerCommandEligibility.maySubmit(drone.salvageState())) return true;
 		suppressed++;
 		transmitProblem = "回収物の搬送・整備中 / 完了後に再確認";
 		return false;
 	}
+
+	private record CommandUnit(int entityId, java.util.UUID id, String unitId, String groupId,
+		DroneRole role, Vec3 position) {}
 
 	private static String wingMissionId(String root, int wing, int wingCount) {
 		return wingCount <= 1 ? root : root + "-W" + (wing + 1);
@@ -1897,8 +2006,34 @@ public final class TacticalDashboard extends AbstractWidget {
 			.thenComparing(DroneEntity::unitId));
 		Map<Integer, java.util.UUID> identities = new LinkedHashMap<>();
 		result.forEach(drone -> identities.put(drone.getId(), drone.getUUID()));
+		FleetLinkClient.units(client).forEach(unit -> identities.put(unit.entityId(), unit.id()));
 		selected.receive(identities);
 		return result;
+	}
+
+	private List<FleetLinkPayload.Unit> visibleRemoteRoster(List<DroneEntity> visibleLocal) {
+		Set<java.util.UUID> localIds = visibleLocal.stream().map(DroneEntity::getUUID)
+			.collect(java.util.stream.Collectors.toSet());
+		String query = search.getValue().strip().toLowerCase(java.util.Locale.ROOT);
+		Comparator<FleetLinkPayload.Unit> order = switch (sortMode) {
+			case 1 -> Comparator.comparing(unit -> DroneRole.byId(unit.role()).ordinal());
+			case 2 -> Comparator.comparingInt(FleetLinkPayload.Unit::batteryPercent);
+			case 3 -> Comparator.comparing(FleetLinkPayload.Unit::status);
+			default -> Comparator.comparing(FleetLinkPayload.Unit::unitId);
+		};
+		return FleetLinkClient.units(client).stream()
+			.filter(unit -> !localIds.contains(unit.id()))
+			.filter(unit -> roleFilter < 0 || DroneRole.byId(unit.role()).ordinal() == roleFilter)
+			.filter(unit -> (unit.name() + " " + unit.unitId() + " " + unit.groupId())
+				.toLowerCase(java.util.Locale.ROOT).contains(query))
+			.sorted(order.thenComparing(FleetLinkPayload.Unit::unitId)).toList();
+	}
+
+	private List<FleetLinkPayload.Unit> selectedRemoteUnits(List<DroneEntity> local) {
+		Set<java.util.UUID> localIds = local.stream().map(DroneEntity::getUUID)
+			.collect(java.util.stream.Collectors.toSet());
+		return FleetLinkClient.units(client).stream().filter(unit -> !localIds.contains(unit.id())
+			&& selected.contains(unit.entityId())).toList();
 	}
 
 	private List<DroneEntity> visibleRoster(List<DroneEntity> drones) {
@@ -1950,7 +2085,10 @@ public final class TacticalDashboard extends AbstractWidget {
 		g.fill(area.x, area.y, area.right(), area.bottom(), BG);
 		HmiArt.icon(g, PAGE_ICONS[page], area.x + 12, area.y + 12, 19);
 		g.text(client.font, PAGES[page], area.x + 40, area.y + 18, TEXT, true);
-		if (page == 4) drawIconButton(g, recoveryOverviewButton(l), "chevron-right", "救助進捗一覧", true);
+		if (page == 4) {
+			drawIconButton(g, cargoLiftButton(l), "container", "コンテナ共同輸送", true);
+			drawIconButton(g, recoveryOverviewButton(l), "chevron-right", "救助進捗一覧", true);
+		}
 		var missions = missionGroups(drones);
 		int total = page == 3 ? docks.size() : page == 4 && client.level != null
 			? PowerLostBeaconStore.snapshot(client.level.getGameTime()).size() : missions.size();
@@ -2380,6 +2518,7 @@ public final class TacticalDashboard extends AbstractWidget {
 	private Rect recoveryButton(Rect row) { return new Rect(row.right() - 96, row.y + 3, 88, 18); }
 	private Rect recoveryDetailButton(Rect row) { return new Rect(row.right() - 96, row.y + 25, 88, 18); }
 	private Rect recoveryOverviewButton(Layout l) { return new Rect(l.map.right() - 152, l.map.y + 10, 140, 24); }
+	private Rect cargoLiftButton(Layout l) { return new Rect(l.map.right() - 310, l.map.y + 10, 150, 24); }
 	private Rect dockRowButton(Rect row, boolean network) { return new Rect(row.right() - 82, row.y + (network ? 25 : 3), 76, 18); }
 	private DroneEntity recoveryTarget(PowerLostBeaconStore.Beacon beacon, List<DroneEntity> drones) {
 		if (client.level == null || !ControllerDisplayText.sameDimension(beacon.dimension(), client.level.dimension().identifier().toString())) return null;
@@ -2497,6 +2636,10 @@ public final class TacticalDashboard extends AbstractWidget {
 		if (page < 2 || !l.map.contains(x, y)) return false;
 		if (page == 4 && recoveryOverviewButton(l).contains(x, y)) {
 			client.setScreenAndShow(new DroneRecoveryScreen(client.gui.screen()));
+			return true;
+		}
+		if (page == 4 && cargoLiftButton(l).contains(x, y)) {
+			client.setScreenAndShow(new ControllerCargoLiftScreen(client.gui.screen()));
 			return true;
 		}
 		for (int i = 0; i < operationCapacity(l); i++) if (operationRow(l, i).contains(x, y)) {

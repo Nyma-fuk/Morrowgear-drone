@@ -16,9 +16,10 @@ final class SalvageEffectRenderer {
 	private SalvageEffectRenderer() {}
 
 	static void render(DroneRenderState state, PoseStack poseStack, SubmitNodeCollector collector) {
-		if (state.salvageTargetOffset == null || state.salvageState.ordinal() < SalvageState.HOOK.ordinal()) return;
+		Vec3 load = state.cargoLiftAnchorOffset != null ? state.cargoLiftAnchorOffset
+			: state.salvageState.ordinal() >= SalvageState.HOOK.ordinal() ? state.salvageTargetOffset : null;
+		if (load == null) return;
 		Vec3 hook = new Vec3(0, -jp.morrowgear.drone.SalvageTowPolicy.HOOK_DROP, 0);
-		Vec3 load = state.salvageTargetOffset;
 		collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WHITE_TEXTURE),
 			(pose, consumer) -> {
 				CombatEffectRenderer.emitBeam(pose, consumer, hook, load, 0.045f,

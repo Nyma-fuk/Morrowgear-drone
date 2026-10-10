@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": ["AMA", "CHC", "AMA"],
+  "key": {
+    "A": "morrowgear_drone:morrow_alloy",
+    "M": "morrowgear_drone:cargo_module",
+    "C": "minecraft:chest",
+    "H": "minecraft:hopper"
+  },
+  "result": {"id": "morrowgear_drone:carrier_cargo_module", "count": 1}
+}

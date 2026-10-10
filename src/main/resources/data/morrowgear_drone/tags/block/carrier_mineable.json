@@ -1,7 +1,7 @@
 {
   "replace": false,
   "values": [
-    "minecraft:stone", "minecraft:deepslate", "minecraft:dirt", "minecraft:grass_block",
+    "minecraft:stone", "minecraft:deepslate", "minecraft:cobbled_deepslate", "minecraft:dirt", "minecraft:grass_block",
     "minecraft:granite", "minecraft:diorite", "minecraft:andesite", "minecraft:tuff", "minecraft:calcite",
     "minecraft:netherrack", "minecraft:basalt", "minecraft:blackstone", "minecraft:end_stone",
     "minecraft:clay", "minecraft:terracotta", "minecraft:coal_ore", "minecraft:deepslate_coal_ore",

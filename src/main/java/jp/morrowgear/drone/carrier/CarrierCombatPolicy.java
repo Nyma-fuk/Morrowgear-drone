@@ -80,6 +80,15 @@ public final class CarrierCombatPolicy {
         double extent = CarrierPolicy.COMBAT_RADIUS + margin;
         return new AABB(x - extent, minY - margin, z - extent, x + extent, originY + margin, z + extent);
     }
+    /** Missile sensors scan the complete build height; only the selected X/Z combat theatre is bounded. */
+    public static AABB missileSearchBounds(double x, double z, int minY, int maxY) {
+        double extent = CarrierPolicy.COMBAT_RADIUS + 1.0;
+        return new AABB(x - extent, minY, z - extent, x + extent, maxY, z + extent);
+    }
+    public static boolean missileInRange(Vec3 point, double x, double z) {
+        double dx = point.x - x, dz = point.z - z;
+        return dx * dx + dz * dz <= CarrierPolicy.COMBAT_RADIUS * CarrierPolicy.COMBAT_RADIUS;
+    }
     public static <T> List<T> retainBeams(List<T> targets, java.util.function.Predicate<T> safe) {
         return targets.stream().limit(CarrierPolicy.COMBAT_TARGETS).filter(safe).toList();
     }

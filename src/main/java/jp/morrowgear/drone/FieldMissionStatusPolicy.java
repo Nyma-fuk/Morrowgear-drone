@@ -14,6 +14,15 @@ final class FieldMissionStatusPolicy {
 		return FieldOperationState.COMPLETE;
 	}
 
+	static FieldOperationState engineer(boolean scanComplete, boolean linkedScout,
+		boolean sharedWorkComplete, boolean cargoPending) {
+		if (!scanComplete) return linkedScout
+			? FieldOperationState.ENGINEER_WAITING_INTEL
+			: FieldOperationState.ENGINEER_LOCAL_SURVEY;
+		if (!sharedWorkComplete || cargoPending) return FieldOperationState.ENGINEER_RECOVERY_OVERWATCH;
+		return FieldOperationState.COMPLETE;
+	}
+
 	static FieldOperationState cargo(boolean engineersComplete, boolean workComplete,
 		boolean hasGroundItems, boolean carryingCargo, long quietTicks) {
 		if (hasGroundItems) return FieldOperationState.COLLECTING;

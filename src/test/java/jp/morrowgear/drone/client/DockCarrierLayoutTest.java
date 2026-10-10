@@ -18,11 +18,11 @@ class DockCarrierLayoutTest {
         }
     }
 
-    @Test void threeSupplyTabsFitWithoutUsingHiddenInventoryColumn() {
+    @Test void fourSupplyAndHandlingTabsFitWithoutUsingHiddenInventoryColumn() {
         for (int width : new int[]{320, 426, 640, 960, 1280, 1920}) {
-            int x = 6, tab = DockCarrierLayout.supplyTabWidth(width, x);
-            assertTrue(tab >= 96);
-            assertTrue(x + 3 * tab + 8 <= width - 6);
+            int x = 6, tab = DockCarrierLayout.supplyTabWidth(width, x, 4);
+            assertTrue(tab >= 72);
+            assertTrue(x + 4 * tab + 12 <= width - 6);
         }
     }
 }

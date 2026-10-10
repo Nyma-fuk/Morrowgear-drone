@@ -8,7 +8,9 @@ import net.minecraft.server.level.ServerLevel;
 
 final class MissileDetonationRuntime {
 	static final int MAX_DETONATIONS_PER_LEVEL_TICK = 8;
+	static final int MAX_HEAVY_DETONATIONS_PER_LEVEL_TICK = 1;
 	private static final Map<ServerLevel, TickBudget> LEVELS = new WeakHashMap<>();
+	private static final Map<ServerLevel, TickBudget> HEAVY_LEVELS = new WeakHashMap<>();
 	private static boolean registered;
 
 	private MissileDetonationRuntime() {}
@@ -17,13 +19,18 @@ final class MissileDetonationRuntime {
 		if (registered) return;
 		registered = true;
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
-			synchronized (MissileDetonationRuntime.class) { LEVELS.clear(); }
+			synchronized (MissileDetonationRuntime.class) { LEVELS.clear(); HEAVY_LEVELS.clear(); }
 		});
 	}
 
 	static synchronized boolean tryAcquire(ServerLevel level) {
 		return LEVELS.computeIfAbsent(level, ignored -> new TickBudget(MAX_DETONATIONS_PER_LEVEL_TICK))
 			.tryAcquire(level.getGameTime());
+	}
+
+	static synchronized boolean tryAcquireHeavy(ServerLevel level) {
+		return HEAVY_LEVELS.computeIfAbsent(level,
+			ignored -> new TickBudget(MAX_HEAVY_DETONATIONS_PER_LEVEL_TICK)).tryAcquire(level.getGameTime());
 	}
 
 	static final class TickBudget {

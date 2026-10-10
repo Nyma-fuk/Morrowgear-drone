@@ -30,6 +30,7 @@ public final class CarrierMenu extends AbstractContainerMenu {
     private long lastExteriorSync;
     private CarrierViewPayload.Terrain terrain;
     private List<CarrierViewPayload.DroneCandidate> candidates;
+    private List<CarrierViewPayload.ContainerCandidate> containers;
 
     public CarrierMenu(int id, Inventory inventory, CarrierViewPayload initial) {
         this(id, inventory, initial, new SimpleContainer(CarrierPolicy.CARGO_SLOTS) {
@@ -42,6 +43,7 @@ public final class CarrierMenu extends AbstractContainerMenu {
         view = initial;
         terrain = initial.terrain();
         candidates = initial.candidates();
+        containers = initial.navigation().containers();
         viewer = inventory.player;
         if (viewer instanceof ServerPlayer player) lastExteriorSync = player.level().getServer().getTickCount();
         cargoPage = initial.navigation().storage().page();
@@ -54,9 +56,17 @@ public final class CarrierMenu extends AbstractContainerMenu {
         for (int slot = 0; slot < CarrierSupplies.SIZE; slot++) {
             final int supply = slot;
             addSlot(new Slot(supplies, slot, 8 + slot * 36, SUPPLY_Y) {
-                @Override public boolean mayPickup(Player player) { return owner() && stillValid(player); }
+                @Override public boolean mayPickup(Player player) {
+                    if (!owner() || !stillValid(player)) return false;
+                    if (supply != CarrierSupplies.CARGO_MODULE || !(player instanceof ServerPlayer serverPlayer)) return true;
+                    var ship = CarrierSavedData.get(serverPlayer.level().getServer()).ship(shipId);
+                    return ship != null && ship.cargo.canReduceToModules(0);
+                }
                 @Override public boolean mayPlace(ItemStack stack) {
                     return owner() && stillValid(viewer) && CarrierSupplies.accepts(supply, jp.morrowgear.drone.DockSupplyPolicy.itemId(stack));
+                }
+                @Override public int getMaxStackSize() {
+                    return supply == CarrierSupplies.CARGO_MODULE ? CarrierPolicy.CARGO_MODULE_SLOTS : super.getMaxStackSize();
                 }
             });
         }
@@ -69,7 +79,8 @@ public final class CarrierMenu extends AbstractContainerMenu {
             && update.navigation().storage().page() == cargoPage) {
             if (update.terrain().specified()) terrain = update.terrain();
             candidates = update.candidates();
-            view = update.withTerrain(terrain).withCandidates(candidates);
+            containers = update.navigation().containers();
+            view = update.withTerrain(terrain).withCandidates(candidates).withContainers(containers);
         }
     }
     private boolean owner() {
@@ -135,10 +146,12 @@ public final class CarrierMenu extends AbstractContainerMenu {
                 : CarrierExteriorSnapshot.terrain(exterior);
             candidates = ship.owner.equals(player.getUUID())
                 ? CarrierExteriorSnapshot.candidates(exterior, ship.owner) : List.of();
+            containers = ship.owner.equals(player.getUUID())
+                ? CarrierExteriorSnapshot.containers(exterior, ship.owner) : List.of();
             lastExteriorSync = now;
         }
         view = CarrierViewPayload.of(containerId, shipId, ship, player, cargoPage)
-            .withTerrain(terrain).withCandidates(candidates);
+            .withTerrain(terrain).withCandidates(candidates).withContainers(containers);
         CarrierViewPayload outbound = refreshExterior ? view : view.withTerrain(CarrierViewPayload.Terrain.EMPTY);
         if (ServerPlayNetworking.canSend(player, CarrierViewPayload.TYPE)) ServerPlayNetworking.send(player, outbound);
     }
@@ -148,8 +161,8 @@ public final class CarrierMenu extends AbstractContainerMenu {
     }
 
     static boolean validPageRequest(int requestedPage, int expectedStateId, int expectedPage,
-                                    int stateId, int currentPage, boolean carriedEmpty) {
-        return requestedPage >= 0 && requestedPage < CarrierPolicy.CARGO_PAGES
+                                    int stateId, int currentPage, int pages, boolean carriedEmpty) {
+        return requestedPage >= 0 && requestedPage < pages
             && requestedPage != currentPage && expectedPage == currentPage
             && expectedStateId == stateId && carriedEmpty;
     }
@@ -157,7 +170,9 @@ public final class CarrierMenu extends AbstractContainerMenu {
     public boolean changeCargoPage(ServerPlayer player, int requestedPage, int expectedStateId, int expectedPage) {
         if (!activeFor(player) || !owner() || !stillValid(player)) return false;
         resetQuickCraft();
-        if (!validPageRequest(requestedPage, expectedStateId, expectedPage, getStateId(), cargoPage, getCarried().isEmpty())) {
+        var ship = CarrierSavedData.get(player.level().getServer()).ship(shipId);
+        int pages = ship == null ? CarrierPolicy.BASE_CARGO_PAGES : ship.cargo.pages();
+        if (!validPageRequest(requestedPage, expectedStateId, expectedPage, getStateId(), cargoPage, pages, getCarried().isEmpty())) {
             broadcastFullState();
             sync(player);
             return false;
@@ -177,19 +192,22 @@ public final class CarrierMenu extends AbstractContainerMenu {
     private static void open(ServerPlayer player, UUID id, int page) {
         if (!accessible(player, id)) return;
         var ship = CarrierSavedData.get(player.level().getServer()).ship(id);
+        final int openPage = page < 0 || page >= ship.cargo.pages() ? 0 : page;
         var exterior = CarrierModule.find(player.level().getServer(), id);
-        var opening = CarrierViewPayload.of(-1, id, ship, player, page)
+        var opening = CarrierViewPayload.of(-1, id, ship, player, openPage)
             .withTerrain(exterior == null ? CarrierViewPayload.Terrain.unavailable(ship.exterior.dimension())
                 : CarrierExteriorSnapshot.terrain(exterior))
             .withCandidates(ship.owner.equals(player.getUUID())
-                ? CarrierExteriorSnapshot.candidates(exterior, ship.owner) : List.of());
+                ? CarrierExteriorSnapshot.candidates(exterior, ship.owner) : List.of())
+            .withContainers(ship.owner.equals(player.getUUID())
+                ? CarrierExteriorSnapshot.containers(exterior, ship.owner) : List.of());
         player.openMenu(new ExtendedMenuProvider<CarrierViewPayload>() {
             @Override public CarrierViewPayload getScreenOpeningData(ServerPlayer viewer) {
                 return opening;
             }
             @Override public Component getDisplayName() { return Component.translatable("container.morrowgear_drone.carrier"); }
             @Override public AbstractContainerMenu createMenu(int menu, Inventory inventory, Player viewer) {
-                return new CarrierMenu(menu, inventory, opening.withMenu(menu), ship.cargo.page(page), ship.supplies);
+                return new CarrierMenu(menu, inventory, opening.withMenu(menu), ship.cargo.page(openPage), ship.supplies);
             }
         });
     }

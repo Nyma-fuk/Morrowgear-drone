@@ -138,6 +138,13 @@ class CarrierCombatPolicyTest {
         assertFalse(CarrierCombatPolicy.inCylinder(new Vec3(8, 100, 8), 8, 8, -64, 100));
         assertFalse(CarrierCombatPolicy.inCylinder(new Vec3(8, -65, 8), 8, 8, -64, 100));
     }
+    @Test void missileSensorUsesFullDimensionHeightAndOnlyBoundsHorizontalTheatre() {
+        AABB query=CarrierCombatPolicy.missileSearchBounds(8,8,-2032,4064);
+        assertEquals(-2032,query.minY,0);
+        assertEquals(4064,query.maxY,0);
+        assertTrue(CarrierCombatPolicy.missileInRange(new Vec3(104,Integer.MAX_VALUE,8),8,8));
+        assertFalse(CarrierCombatPolicy.missileInRange(new Vec3(104.01,Integer.MIN_VALUE,8),8,8));
+    }
     @Test void continuousBeamValidationCannotAcquireUnknownTargetsOrKeepUnsafeOnes() {
         var successful = java.util.List.of("confirmed-a", "confirmed-b", "confirmed-c");
         var safe = new HashSet<>(java.util.List.of("confirmed-a", "confirmed-b", "confirmed-c", "new-enemy"));

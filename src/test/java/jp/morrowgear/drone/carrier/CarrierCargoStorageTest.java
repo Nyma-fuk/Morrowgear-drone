@@ -32,10 +32,10 @@ class CarrierCargoStorageTest {
     @Test void finiteCapacityAndVisibleMenuSizeAreIndependent() {
         var cargo = empty();
         assertEquals(3456, cargo.getContainerSize());
-        assertEquals(64, CarrierPolicy.CARGO_PAGES);
+        assertEquals(64, CarrierPolicy.BASE_CARGO_PAGES);
         assertEquals(54, CarrierMenu.SUPPLY_START);
-        assertEquals(59, CarrierMenu.PLAYER_START);
-        assertEquals(95, CarrierMenu.TOTAL_SLOTS);
+        assertEquals(60, CarrierMenu.PLAYER_START);
+        assertEquals(96, CarrierMenu.TOTAL_SLOTS);
         for (int page = 0; page < 64; page++) assertEquals(54, cargo.page(page).getContainerSize());
         assertThrows(IllegalArgumentException.class, () -> cargo.page(-1));
         assertThrows(IllegalArgumentException.class, () -> cargo.page(64));
@@ -161,7 +161,7 @@ class CarrierCargoStorageTest {
         assertTrue(cargo.plan(List.of(new ItemStack(Items.COBBLESTONE))).isEmpty());
         assertEquals(221184, cargo.itemCount());
         assertThrows(IllegalArgumentException.class, () -> new CarrierCargoStorage(
-            java.util.Collections.nCopies(3457, ItemStack.EMPTY), () -> {}));
+            java.util.Collections.nCopies(CarrierPolicy.MAX_STORAGE_SLOTS + 1, ItemStack.EMPTY), () -> {}));
     }
 
     @Test void successiveBlockPlansHaveConstantWorkEvenAcrossManyPages() {
@@ -266,12 +266,29 @@ class CarrierCargoStorageTest {
     }
 
     @Test void pageSwitchPolicyRejectsCarriedStacksStaleStateAndOutOfRangePages() {
-        assertTrue(CarrierMenu.validPageRequest(63, 8, 0, 8, 0, true));
-        assertFalse(CarrierMenu.validPageRequest(1, 8, 0, 8, 0, false));
-        assertFalse(CarrierMenu.validPageRequest(1, 7, 0, 8, 0, true));
-        assertFalse(CarrierMenu.validPageRequest(1, 8, 1, 8, 0, true));
-        assertFalse(CarrierMenu.validPageRequest(0, 8, 0, 8, 0, true));
-        assertFalse(CarrierMenu.validPageRequest(-1, 8, 0, 8, 0, true));
-        assertFalse(CarrierMenu.validPageRequest(64, 8, 0, 8, 0, true));
+        assertTrue(CarrierMenu.validPageRequest(63, 8, 0, 8, 0, 64, true));
+        assertFalse(CarrierMenu.validPageRequest(1, 8, 0, 8, 0, 64, false));
+        assertFalse(CarrierMenu.validPageRequest(1, 7, 0, 8, 0, 64, true));
+        assertFalse(CarrierMenu.validPageRequest(1, 8, 1, 8, 0, 64, true));
+        assertFalse(CarrierMenu.validPageRequest(0, 8, 0, 8, 0, 64, true));
+        assertFalse(CarrierMenu.validPageRequest(-1, 8, 0, 8, 0, 64, true));
+        assertFalse(CarrierMenu.validPageRequest(64, 8, 0, 8, 0, 64, true));
+    }
+
+
+    @Test void cargoModulesUnlockHalfOfBaseCapacityEachWithoutHidingOccupiedCargo() {
+        var modules = new AtomicInteger();
+        var cargo = new CarrierCargoStorage(List.of(), () -> {}, modules::get);
+        assertEquals(64, cargo.pages());
+        assertEquals(3456, cargo.activeSlots());
+        modules.set(1);
+        assertEquals(96, cargo.pages());
+        assertEquals(5184, cargo.activeSlots());
+        modules.set(8);
+        assertEquals(320, cargo.pages());
+        assertEquals(17280, cargo.activeSlots());
+        cargo.page(319).setItem(53, new ItemStack(Items.DIAMOND));
+        assertFalse(cargo.canReduceToModules(7));
+        assertTrue(cargo.canReduceToModules(8));
     }
 }

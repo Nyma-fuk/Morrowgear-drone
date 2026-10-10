@@ -16,6 +16,14 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 class CarrierSavedDataTest {
+    @Test void strategicExcavationCanClearStalePlayerBuildProvenance() {
+        var data = new CarrierSavedData();
+        long position = new BlockPos(1, 2, 3).asLong();
+        data.markPlayerBuilt("minecraft:overworld", position);
+        assertTrue(data.playerBuilt("minecraft:overworld", position));
+        data.clearPlayerBuilt("minecraft:overworld", position);
+        assertFalse(data.playerBuilt("minecraft:overworld", position));
+    }
     private static net.minecraft.core.HolderLookup.Provider registries;
     @BeforeAll static void bootstrap() {
         SharedConstants.tryDetectVersion(); Bootstrap.bootStrap();

@@ -10,6 +10,7 @@ final class MissileRenderState extends EntityRenderState {
 	boolean impacted;
 	boolean motorIgnited;
 	boolean ejecting;
+	boolean heavy;
 	double trailTime;
 	List<MissileTrailHistory.Point> trail = List.of();
 }

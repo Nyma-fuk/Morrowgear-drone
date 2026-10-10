@@ -5,6 +5,7 @@ import com.mojang.serialization.JsonOps;
 import java.util.UUID;
 import net.minecraft.SharedConstants;
 import net.minecraft.server.Bootstrap;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.Vec3;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -83,6 +84,24 @@ class CarrierNavigationTest {
         assertFalse(CarrierChunkLeases.wantsLease(id, ship, owner, null, true));
     }
 
+    @Test void physicalContainerTransferRetainsLeaseAfterNavigationDestinationClears() {
+        UUID id = UUID.randomUUID(), owner = UUID.randomUUID();
+        var ship = new CarrierShip(owner, 0, new CarrierAnchor("minecraft:overworld", 8, 150, 8));
+        assertFalse(CarrierChunkLeases.wantsLease(id, ship, owner, null, true, false));
+        assertTrue(CarrierChunkLeases.wantsLease(id, ship, owner, null, true, true));
+        assertFalse(CarrierChunkLeases.wantsLease(id, ship, owner, null, false, true));
+        assertFalse(CarrierChunkLeases.wantsLease(id, ship, UUID.randomUUID(), null, true, true));
+    }
+
+    @Test void transferLeaseIncludesTheContainerChunkAcrossABoundary() {
+        var carrierChunk=new ChunkPos(13,-2);
+        var containerChunk=new ChunkPos(12,-2);
+        var chunks=CarrierChunkLeases.leaseChunks(carrierChunk,null,containerChunk);
+        assertEquals(java.util.Set.of(carrierChunk,containerChunk),chunks);
+        assertEquals(java.util.Set.of(carrierChunk),
+            CarrierChunkLeases.leaseChunks(carrierChunk,null,carrierChunk));
+    }
+
     @Test void tinyResidualDistanceCompletesInsteadOfLeavingAnInvisibleActiveRoute() {
         Vec3 target = new Vec3(10, 120, -4);
         assertTrue(CarrierNavigation.arrived(target.add(1.0e-7, 0, 0), target));
@@ -115,14 +134,16 @@ class CarrierNavigationTest {
         UUID id = UUID.randomUUID(), owner = UUID.randomUUID();
         var ship = new CarrierShip(owner, 0, new CarrierAnchor("minecraft:overworld", 8, 150, 8));
         ship.destination = new CarrierAnchor("minecraft:overworld", 1032, 150, 8);
-        ship.arrivalOperation = CarrierPolicy.Mode.MINING;
+        ship.arrivalOperation = CarrierPolicy.Mode.COMBAT;
+        ship.combatWeapon = CarrierPolicy.CombatWeapon.MISSILE;
         ship.navigationPaused = false;
 
         var encoded = CarrierShip.CODEC.encodeStart(JsonOps.INSTANCE, ship).getOrThrow();
         var loaded = CarrierShip.CODEC.parse(JsonOps.INSTANCE, encoded).getOrThrow();
 
         assertEquals(ship.destination, loaded.destination);
-        assertEquals(CarrierPolicy.Mode.MINING, loaded.arrivalOperation);
+        assertEquals(CarrierPolicy.Mode.COMBAT, loaded.arrivalOperation);
+        assertEquals(CarrierPolicy.CombatWeapon.MISSILE, loaded.combatWeapon);
         assertTrue(CarrierChunkLeases.wantsLease(id, loaded, owner, null, true));
         loaded.destination = null;
         assertTrue(CarrierChunkLeases.wantsLease(id, loaded, owner, null, true),
@@ -140,5 +161,6 @@ class CarrierNavigationTest {
         var loaded = CarrierShip.CODEC.parse(JsonOps.INSTANCE, encoded).getOrThrow();
         assertEquals(ship.destination, loaded.destination);
         assertEquals(CarrierPolicy.Mode.IDLE, loaded.arrivalOperation);
+        assertEquals(CarrierPolicy.CombatWeapon.LASER, loaded.combatWeapon);
     }
 }

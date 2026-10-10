@@ -141,6 +141,7 @@ public final class DroneEntity extends PathfinderMob {
 	private static final EntityDataAccessor<Integer> FIELD_PROGRESS = SynchedEntityData.defineId(DroneEntity.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> FIELD_FOUND = SynchedEntityData.defineId(DroneEntity.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> FIELD_STOCK = SynchedEntityData.defineId(DroneEntity.class, EntityDataSerializers.INT);
+	private static final EntityDataAccessor<Long> FIELD_WORK_TARGET = SynchedEntityData.defineId(DroneEntity.class, EntityDataSerializers.LONG);
 	private static final EntityDataAccessor<String> SECURITY_ORDER = SynchedEntityData.defineId(DroneEntity.class, EntityDataSerializers.STRING);
 	private static final EntityDataAccessor<Long> SECURITY_ANCHOR = SynchedEntityData.defineId(DroneEntity.class, EntityDataSerializers.LONG);
 	private static final EntityDataAccessor<Integer> SECURITY_RADIUS = SynchedEntityData.defineId(DroneEntity.class, EntityDataSerializers.INT);
@@ -167,6 +168,9 @@ public final class DroneEntity extends PathfinderMob {
 	private static final EntityDataAccessor<Integer> COMBAT_AIM_TARGET = SynchedEntityData.defineId(DroneEntity.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> SALVAGE_TARGET = SynchedEntityData.defineId(DroneEntity.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> SALVAGE_STAGE = SynchedEntityData.defineId(DroneEntity.class, EntityDataSerializers.INT);
+	private static final EntityDataAccessor<String> CARGO_LIFT_MISSION = SynchedEntityData.defineId(DroneEntity.class, EntityDataSerializers.STRING);
+	private static final EntityDataAccessor<Integer> CARGO_LIFT_LOAD = SynchedEntityData.defineId(DroneEntity.class, EntityDataSerializers.INT);
+	private static final EntityDataAccessor<Integer> CARGO_LIFT_CORNER = SynchedEntityData.defineId(DroneEntity.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> PROPULSION_CONDITION = SynchedEntityData.defineId(DroneEntity.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> SENSOR_CONDITION = SynchedEntityData.defineId(DroneEntity.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> PAYLOAD_CONDITION = SynchedEntityData.defineId(DroneEntity.class, EntityDataSerializers.INT);
@@ -390,6 +394,16 @@ public final class DroneEntity extends PathfinderMob {
 	private BlockPos clearanceWorkPos;
 	private boolean clearanceWasDocked;
 	private double salvageHoistY = Double.NaN;
+	private UUID cargoLiftMissionId;
+	private UUID cargoLiftLoadId;
+	private int cargoLiftMissingTicks;
+	private Vec3 cargoLiftRouteWaypoint;
+	private Vec3 cargoLiftRouteGoal;
+	private Vec3 cargoLiftProgressSample;
+	private int cargoLiftRouteRefreshTicks;
+	private int cargoLiftProgressSampleTick;
+	private int cargoLiftStalledTicks;
+	private int cargoLiftRouteReplans;
 
 	public DroneEntity(EntityType<? extends DroneEntity> type, Level level) {
 		super(type, level);
@@ -477,6 +491,7 @@ public final class DroneEntity extends PathfinderMob {
 		builder.define(FIELD_PROGRESS, 0);
 		builder.define(FIELD_FOUND, 0);
 		builder.define(FIELD_STOCK, 0);
+		builder.define(FIELD_WORK_TARGET, Long.MIN_VALUE);
 		builder.define(SECURITY_ORDER, "");
 		builder.define(SECURITY_ANCHOR, Long.MIN_VALUE);
 		builder.define(SECURITY_RADIUS, 0);
@@ -504,6 +519,9 @@ public final class DroneEntity extends PathfinderMob {
 		builder.define(COMBAT_AIM_TARGET, -1);
 		builder.define(SALVAGE_TARGET, -1);
 		builder.define(SALVAGE_STAGE, SalvageState.IDLE.ordinal());
+		builder.define(CARGO_LIFT_MISSION, "");
+		builder.define(CARGO_LIFT_LOAD, -1);
+		builder.define(CARGO_LIFT_CORNER, -1);
 		builder.define(PROPULSION_CONDITION, DroneSubsystemPolicy.MAX);
 		builder.define(SENSOR_CONDITION, DroneSubsystemPolicy.MAX);
 		builder.define(PAYLOAD_CONDITION, DroneSubsystemPolicy.MAX);
@@ -625,6 +643,173 @@ public final class DroneEntity extends PathfinderMob {
 		return entityData.get(SALVAGE_TARGET);
 	}
 
+	public int cargoLiftLoadEntityId() { return entityData.get(CARGO_LIFT_LOAD); }
+
+	public CargoLiftPolicy.Corner cargoLiftCorner() {
+		int value = entityData.get(CARGO_LIFT_CORNER);
+		return value < 0 || value >= CargoLiftPolicy.Corner.values().length
+			? null : CargoLiftPolicy.Corner.values()[value];
+	}
+
+	public boolean cargoLiftAssigned() { return cargoLiftMissionId != null; }
+
+	boolean cargoLiftCandidate() {
+		return role() == DroneRole.SALVAGE && isAlive() && !isPowerLost() && !serviceReturn
+			&& cargoLiftMissionId == null && salvageTargetId == null && salvageState == SalvageState.IDLE
+			&& batteryPercent() >= 35 && payloadCondition() > DroneSubsystemPolicy.CRITICAL_THRESHOLD;
+	}
+
+	boolean cargoLiftAssignedTo(UUID mission) {
+		return mission != null && mission.equals(cargoLiftMissionId);
+	}
+
+	boolean cargoLiftOperational(UUID mission) {
+		return cargoLiftAssignedTo(mission) && role() == DroneRole.SALVAGE && isAlive()
+			&& !isPowerLost() && !serviceReturn && batteryPercent() >= 28
+			&& payloadCondition() > DroneSubsystemPolicy.CRITICAL_THRESHOLD;
+	}
+
+	void assignCargoLift(CargoLiftLoadEntity load, CargoLiftPolicy.Corner corner) {
+		if (load == null || corner == null || role() != DroneRole.SALVAGE || isPowerLost()) return;
+		UUID mission = load.missionId();
+		if (!mission.equals(cargoLiftMissionId)) {
+			if (cargoLiftMissionId == null) taskStack.suspend(currentTaskSnapshot(mode(), true));
+			if (salvageTargetId != null || salvageState != SalvageState.IDLE) cancelSalvageMission();
+			cargoLiftMissionId = mission;
+		}
+		cargoLiftLoadId = load.getUUID();
+		cargoLiftMissingTicks = 0;
+		resetCargoLiftRoute();
+		entityData.set(CARGO_LIFT_MISSION, mission.toString());
+		entityData.set(CARGO_LIFT_LOAD, load.getId());
+		entityData.set(CARGO_LIFT_CORNER, corner.ordinal());
+		entityData.set(DOCKED, false);
+		entityData.set(MODE, DroneMode.WAYPOINT.id());
+		entityData.set(DATA_LINK_STATUS, "CONTAINER LIFT / " + corner.name());
+	}
+
+	void completeCargoLift(UUID mission, String reason) {
+		if (mission == null || !mission.equals(cargoLiftMissionId)) return;
+		cargoLiftMissionId = null;
+		cargoLiftLoadId = null;
+		cargoLiftMissingTicks = 0;
+		resetCargoLiftRoute();
+		entityData.set(CARGO_LIFT_MISSION, "");
+		entityData.set(CARGO_LIFT_LOAD, -1);
+		entityData.set(CARGO_LIFT_CORNER, -1);
+		if (!(level() instanceof ServerLevel level)) return;
+		DroneTaskStack.Task resume = taskStack.resume(candidate -> resolveTaskForResume(level, candidate))
+			.orElse(new DroneTaskStack.Task(DroneTaskStack.Kind.IDLE,
+				DroneMode.STANDBY, SalvageState.IDLE, null, ""));
+		if (resume.kind() == DroneTaskStack.Kind.IDLE || resume.mode() == DroneMode.STANDBY) {
+			applySafeMissionFallback(level, reason, true);
+		} else {
+			entityData.set(MODE, resume.mode().id());
+			entityData.set(DATA_LINK_STATUS, reason + " / " + resume.kind().name() + " RESUME");
+		}
+	}
+
+	private boolean tickCargoLiftAssignment(ServerLevel level) {
+		if (cargoLiftMissionId == null) return false;
+		Entity entity = cargoLiftLoadId == null ? null : level.getEntity(cargoLiftLoadId);
+		CargoLiftLoadEntity load = entity instanceof CargoLiftLoadEntity cargoLoad ? cargoLoad : null;
+		if (load == null || !cargoLiftMissionId.equals(load.missionId())) {
+			if (++cargoLiftMissingTicks <= 200) {
+				setDeltaMovement(smoothFlightMotion(level, getDeltaMovement(),
+					FlightDynamics.brake(getDeltaMovement()), false, true));
+				entityData.set(DATA_LINK_STATUS, "CONTAINER LIFT / WAITING FOR LOAD LINK");
+				return true;
+			}
+			completeCargoLift(cargoLiftMissionId, "CONTAINER LIFT LINK LOST");
+			return false;
+		}
+		cargoLiftMissingTicks = 0;
+		entityData.set(CARGO_LIFT_LOAD, load.getId());
+		CargoLiftPolicy.Corner corner = cargoLiftCorner();
+		if (corner == null) { completeCargoLift(cargoLiftMissionId, "CONTAINER LIFT CORNER LOST"); return false; }
+		Vec3 station = load.aircraftTarget(corner);
+		Vec3 target = cargoLiftFlightTarget(level, load, station);
+		Vec3 delta = target.subtract(position());
+		boolean stationTarget = target.distanceToSqr(station) < .01;
+		boolean precision = stationTarget && delta.length() < 1.8
+			&& load.phase() != CargoLiftPolicy.Phase.TRANSIT;
+		double speed = CargoLiftPolicy.aircraftSpeed(load.phase(), delta.length());
+		Vec3 requested = FlightDynamics.steer(getDeltaMovement(), position(), target, load.getDeltaMovement(),
+			speed, precision);
+		setDeltaMovement(smoothFlightMotion(level, getDeltaMovement(), requested,
+			horizontalCollision || verticalCollision || isInWater() || isInLava(), precision));
+		float yaw = FlightAttitude.movementYaw(getDeltaMovement().multiply(1, 0, 1), getYRot());
+		setYRot(yaw); setYHeadRot(yaw); setYBodyRot(yaw);
+		entityData.set(DATA_LINK_STATUS, "CONTAINER LIFT / " + load.phase().name()
+			+ (cargoLiftRouteWaypoint == null ? "" : " / REROUTING") + " / " + corner.name());
+		return true;
+	}
+
+	private Vec3 cargoLiftFlightTarget(ServerLevel level, CargoLiftLoadEntity load, Vec3 station) {
+		CargoLiftPolicy.Phase phase = load.phase();
+		if (phase.ordinal() >= CargoLiftPolicy.Phase.LIFT.ordinal()) {
+			cargoLiftRouteWaypoint = null;
+			cargoLiftRouteGoal = station;
+			cargoLiftRouteRefreshTicks = 0;
+			return station;
+		}
+		boolean goalChanged = cargoLiftRouteGoal == null || cargoLiftRouteGoal.distanceToSqr(station) > 2.25;
+		if (goalChanged) {
+			cargoLiftRouteGoal = station;
+			cargoLiftRouteWaypoint = null;
+			cargoLiftRouteRefreshTicks = 0;
+		}
+		observeCargoLiftProgress(load, station);
+		if (--cargoLiftRouteRefreshTicks <= 0 || cargoLiftStalledTicks >= CargoLiftPolicy.ROUTE_STALLED_TICKS) {
+			boolean direct = DroneNavigator.corridorClear(level, this, position(), station);
+			if (direct) {
+				cargoLiftRouteWaypoint = null;
+				cargoLiftStalledTicks = 0;
+			} else {
+				Vec3 detour = DroneNavigator.cargoLiftDetour(level, this, station, cargoLiftRouteReplans % 3);
+				if (detour != null) cargoLiftRouteWaypoint = detour;
+				cargoLiftRouteReplans++;
+				cargoLiftStalledTicks = 0;
+				load.reportApproachReplan(getUUID());
+			}
+			cargoLiftRouteRefreshTicks = CargoLiftPolicy.ROUTE_REFRESH_TICKS;
+		}
+		if (cargoLiftRouteWaypoint != null && position().distanceTo(cargoLiftRouteWaypoint) < 1.1) {
+			cargoLiftRouteWaypoint = null;
+			cargoLiftRouteRefreshTicks = 0;
+		}
+		return cargoLiftRouteWaypoint == null ? station : cargoLiftRouteWaypoint;
+	}
+
+	private void observeCargoLiftProgress(CargoLiftLoadEntity load, Vec3 station) {
+		if (cargoLiftProgressSample == null) {
+			cargoLiftProgressSample = position();
+			cargoLiftProgressSampleTick = tickCount;
+			return;
+		}
+		int elapsed = tickCount - cargoLiftProgressSampleTick;
+		if (elapsed < CargoLiftPolicy.ROUTE_PROGRESS_TICKS) return;
+		if (position().distanceTo(cargoLiftProgressSample) < .35 && position().distanceTo(station) > 1.8)
+			cargoLiftStalledTicks += elapsed;
+		else cargoLiftStalledTicks = 0;
+		cargoLiftProgressSample = position();
+		cargoLiftProgressSampleTick = tickCount;
+		if (cargoLiftStalledTicks >= CargoLiftPolicy.ROUTE_STALLED_TICKS)
+			load.reportApproachReplan(getUUID());
+	}
+
+	private void resetCargoLiftRoute() {
+		cargoLiftRouteWaypoint = null;
+		cargoLiftRouteGoal = null;
+		cargoLiftProgressSample = null;
+		cargoLiftRouteRefreshTicks = 0;
+		cargoLiftProgressSampleTick = tickCount;
+		cargoLiftStalledTicks = 0;
+		cargoLiftRouteReplans = 0;
+	}
+
+	int cargoLiftRouteReplansForVerification() { return cargoLiftRouteReplans; }
+
 	/** Observes existing state only: never acquires reservations or resolves/resumes tasks. */
 	public jp.morrowgear.drone.network.RecoverySnapshotPayload.Row recoverySnapshotFor(UUID requester) {
 		if (!(level() instanceof ServerLevel level) || !RecoverySnapshotPolicy.owned(requester, ownerId())) return null;
@@ -659,6 +844,14 @@ public final class DroneEntity extends PathfinderMob {
 	}
 
 	public String salvageStatusLabel() {
+		if (cargoLiftMissionId != null) {
+			String phase = "LINK";
+			if (level() instanceof ServerLevel level && cargoLiftLoadId != null
+				&& level.getEntity(cargoLiftLoadId) instanceof CargoLiftLoadEntity load)
+				phase = load.phase().name();
+			CargoLiftPolicy.Corner corner = cargoLiftCorner();
+			return "CONTAINER LIFT / " + phase + (corner == null ? "" : " / " + corner.name());
+		}
 		String target = salvageTargetUnitId();
 		return "SALVAGE " + salvageState().name() + (target.isBlank() ? "" : " / " + target);
 	}
@@ -1020,6 +1213,10 @@ public final class DroneEntity extends PathfinderMob {
 	public int fieldProgress() { return entityData.get(FIELD_PROGRESS); }
 	public int fieldFound() { return entityData.get(FIELD_FOUND); }
 	public int fieldStockItems() { return entityData.get(FIELD_STOCK); }
+	public BlockPos fieldWorkTargetForRender() {
+		long packed = entityData.get(FIELD_WORK_TARGET);
+		return packed == Long.MIN_VALUE ? null : BlockPos.of(packed);
+	}
 	public String fieldStatusLabel() {
 		return fieldOperationType().label() + " / " + fieldOperationState().label()
 			+ " / " + fieldProgress() + "% / FOUND " + fieldFound();
@@ -1219,6 +1416,7 @@ public final class DroneEntity extends PathfinderMob {
 		entityData.set(FIELD_FOUND, 0);
 		entityData.set(FIELD_STOCK, 0);
 		fieldWorkTarget = null;
+		entityData.set(FIELD_WORK_TARGET, Long.MIN_VALUE);
 		fieldWorkApproach = null;
 		fieldReplantTarget = null;
 		fieldPickupTarget = null;
@@ -1240,6 +1438,9 @@ public final class DroneEntity extends PathfinderMob {
 	private void launchStationaryMission() {
 		entityData.set(DOCKED, false);
 		entityData.set(DOCK_STAGE, 0);
+		entityData.set(DOCK_HOLDING, false);
+		entityData.set(DOCK_QUEUE_POSITION, 0);
+		dockRequestTick = -1L;
 		dockApproachDirection = null;
 	}
 
@@ -1259,6 +1460,7 @@ public final class DroneEntity extends PathfinderMob {
 		entityData.set(FIELD_FOUND, 0);
 		entityData.set(FIELD_STOCK, 0);
 		fieldWorkTarget = null;
+		entityData.set(FIELD_WORK_TARGET, Long.MIN_VALUE);
 		fieldWorkApproach = null;
 		fieldReplantTarget = null;
 		fieldPickupTarget = null;
@@ -1508,7 +1710,7 @@ public final class DroneEntity extends PathfinderMob {
 		return combatActive() || emergencyInterceptActive() || hasActiveFieldOperation()
 			|| engineerState() != EngineerState.IDLE || hasSecurityPatrol() || hasPatrolRoute()
 			|| hasTrackingTarget() || hasWaypoint() || cargoState() != CargoState.UNASSIGNED
-			|| salvageTargetId != null || serviceReturn;
+			|| salvageTargetId != null || cargoLiftMissionId != null || serviceReturn;
 	}
 
 	private void maintainDockAllocation(ServerLevel level, ServerPlayer owner, List<DroneEntity> fleet) {
@@ -1581,6 +1783,7 @@ public final class DroneEntity extends PathfinderMob {
 				BlockPos yielded = yielding.dockPos();
 				yielding.dockHoldingAnchor = yielded.asLong();
 				yielding.releaseDockReservation();
+				yielding.entityData.set(MODE, DroneMode.DOCK.id());
 				yielding.entityData.set(DOCK_HOLDING, true);
 				yielding.requestDockSlot();
 				yielding.entityData.set(DATA_LINK_STATUS, "DOCK YIELD / HOLDING");
@@ -1646,13 +1849,14 @@ public final class DroneEntity extends PathfinderMob {
 	}
 
 	/** Operator commands must be checked before acknowledgement or consuming role modules. */
-	public boolean acceptsOperatorFlightCommand() { return !salvageTowCommitted(); }
+	public boolean acceptsOperatorFlightCommand() { return !salvageTowCommitted() && cargoLiftMissionId == null; }
 
 	/** Explicit operator override. Physical tow/load custody remains non-preemptible. */
 	public boolean forceOperatorOverride() {
 		if (!acceptsOperatorFlightCommand() || isPowerLost()
 			|| supplyNetworkToken != null && cargo.stream().anyMatch(stack -> !stack.isEmpty())) {
 			entityData.set(DATA_LINK_STATUS, isPowerLost() ? "COMMAND REJECTED / POWER LOST"
+				: cargoLiftMissionId != null ? "COMMAND REJECTED / CONTAINER LIFT SAFETY"
 				: salvageTowCommitted() ? "COMMAND REJECTED / SALVAGE LOAD SAFETY"
 				: "COMMAND REJECTED / SUPPLY LOAD SAFETY");
 			return false;
@@ -1695,11 +1899,14 @@ public final class DroneEntity extends PathfinderMob {
 	}
 
 	public String operatorFlightCommandRejection() {
-		return acceptsOperatorFlightCommand() ? "" : "回収物の搬送・整備中です。完了後に指示してください";
+		return acceptsOperatorFlightCommand() ? "" : cargoLiftMissionId != null
+			? "4機共同でコンテナを搬送中です。安全着地または共同輸送画面から中止してください"
+			: "回収物の搬送・整備中です。完了後に指示してください";
 	}
 
 	public String forcedOperatorCommandRejection() {
 		if (isPowerLost()) return "電力喪失中です";
+		if (cargoLiftMissionId != null) return "共同輸送中のコンテナを保持しています";
 		if (salvageTowCommitted()) return "回収物を搬送中です";
 		if (supplyNetworkToken != null && cargo.stream().anyMatch(stack -> !stack.isEmpty()))
 			return "補給物資を搬送中です";
@@ -2181,11 +2388,16 @@ public final class DroneEntity extends PathfinderMob {
 			dock.adoptOwner(owner);
 		// Contact power and maintenance do not require a running flight controller or an online owner.
 		tickDockSupplies(level);
-		if (tickCount % 20 == 0 && (isPowerLost() || carrierService != null && ownerSupportsExterior
-			|| RemoteOperationPolicy.keepsChunkActive(ownerSupportsExterior,
-			isDocked(), serviceReturn, combatState().controlsFlight(), hasActiveFieldOperation(),
-			hasSecurityPatrol(), hasPatrolRoute(), mode()))) {
-			OperationChunkLeaseRuntime.refresh(level, chunkPosition());
+		if (tickCount % 20 == 0) {
+			int relayHops = ownerInDimension ? DataLinkRelayNetwork.link(owner, position()).hops() : -1;
+			if (isPowerLost() || carrierService != null && ownerSupportsExterior
+				|| RemoteOperationPolicy.keepsChunkActive(ownerSupportsExterior,
+				isDocked(), serviceReturn, combatState().controlsFlight(), hasActiveFieldOperation(),
+				hasSecurityPatrol(), hasPatrolRoute(), mode())) {
+				OperationChunkLeaseRuntime.refresh(level, chunkPosition());
+			} else if (RemoteOperationPolicy.keepsDataLinkChunkActive(ownerInDimension, relayHops)) {
+				OperationChunkLeaseRuntime.refreshDataLink(level, chunkPosition());
+			}
 		}
 		// Keep the existing bounded operation ticket alive before either exterior-only flight branch returns.
 		if (tickCarrierService(level, owner)) return;
@@ -2228,6 +2440,10 @@ public final class DroneEntity extends PathfinderMob {
 				}
 			}
 		}
+		// A four-aircraft lift owns flight guidance until the load is released or safely landed.
+		// Service demand is still calculated above, so low reserve moves the shared mission into
+		// emergency descent instead of silently diverting one corner aircraft to a Dock.
+		if (tickCargoLiftAssignment(level)) return;
 
 		if (mode() == DroneMode.DOCK && hasDock() && level.hasChunkAt(dockPos())
 			&& !(level.getBlockState(dockPos()).getBlock() instanceof jp.morrowgear.drone.block.DockCenterBlock)) {
@@ -3349,7 +3565,12 @@ public final class DroneEntity extends PathfinderMob {
 		List<DroneEntity> members) {
 		double nominalSurveyRange = Math.max(14.0, Math.min(22.0, fieldRadius() * 0.58 + 4.0));
 		double surveyRange = nominalSurveyRange * DroneSubsystemPolicy.sensorScale(sensorCondition());
-		if (position().distanceToSqr(Vec3.atCenterOf(fieldAnchor()).add(0, 6, 0)) > surveyRange * surveyRange) {
+		Vec3 surveyCenter = Vec3.atCenterOf(fieldAnchor()).add(0,
+			fieldOperationType() == FieldOperationType.FORESTRY ? 14.0 : 6.0, 0);
+		boolean ready = fieldOperationType() == FieldOperationType.FORESTRY
+			? ForestryOperationPolicy.surveyReady(position().distanceToSqr(surveyCenter), fieldRadius())
+			: position().distanceToSqr(surveyCenter) <= surveyRange * surveyRange;
+		if (!ready) {
 			entityData.set(FIELD_STATE, FieldOperationState.TRANSIT.id());
 			return;
 		}
@@ -3369,13 +3590,19 @@ public final class DroneEntity extends PathfinderMob {
 
 	private void tickFieldEngineer(ServerLevel level, ServerPlayer owner,
 		FieldOperationRegistry.Operation operation, boolean linkedScout, List<DroneEntity> members) {
-		FieldOperationRegistry.Snapshot snapshot = operation.snapshot(level.getGameTime());
-		if (linkedScout && !snapshot.scanComplete()) {
-			if (position().distanceToSqr(Vec3.atCenterOf(fieldAnchor()).add(0, 3, 0)) > 12.0 * 12.0) {
+		FieldOperationRegistry.Snapshot beforeSurvey = operation.snapshot(level.getGameTime());
+		if (fieldOperationType() == FieldOperationType.FORESTRY && !beforeSurvey.scanComplete()) {
+			Vec3 surveyCenter = Vec3.atCenterOf(fieldAnchor()).add(0, 14.0, 0);
+			if (!ForestryOperationPolicy.surveyReady(position().distanceToSqr(surveyCenter), fieldRadius())) {
 				entityData.set(FIELD_STATE, FieldOperationState.TRANSIT.id());
 				return;
 			}
-			entityData.set(FIELD_STATE, FieldOperationState.ENGINEER_WAITING_INTEL.id());
+			entityData.set(FIELD_STATE, FieldOperationState.ENGINEER_LOCAL_SURVEY.id());
+			if (!linkedScout && !fieldLocalSurveyed) {
+				surveyLocalField(level, operation);
+				fieldLocalSurveyed = true;
+			}
+			scanFieldTargets(level, operation, linkedScout ? 128 : 512);
 			return;
 		}
 		if (!linkedScout && !fieldLocalSurveyed) {
@@ -3394,6 +3621,7 @@ public final class DroneEntity extends PathfinderMob {
 			&& tickFieldReplant(level, owner, operation)) return;
 		if (fieldWorkTarget == null) {
 			fieldWorkTarget = operation.claimTarget(level.getGameTime());
+			entityData.set(FIELD_WORK_TARGET, fieldWorkTarget == null ? Long.MIN_VALUE : fieldWorkTarget.asLong());
 			fieldWorkApproach = fieldWorkTarget == null ? null : selectFieldWorkPosition(level, fieldWorkTarget);
 		}
 		if (fieldWorkTarget != null) {
@@ -3406,6 +3634,7 @@ public final class DroneEntity extends PathfinderMob {
 				|| level.getBlockEntity(fieldWorkTarget) != null) {
 				operation.completeTarget(fieldWorkTarget, level.getGameTime());
 				fieldWorkTarget = null;
+				entityData.set(FIELD_WORK_TARGET, Long.MIN_VALUE);
 				fieldWorkApproach = null;
 				return;
 			}
@@ -3437,18 +3666,15 @@ public final class DroneEntity extends PathfinderMob {
 			for (ItemStack drop : drops) if (!drop.isEmpty()) spawnFieldDrop(level, operation, fieldWorkTarget, drop);
 			operation.completeTarget(fieldWorkTarget, level.getGameTime());
 			fieldWorkTarget = null;
+			entityData.set(FIELD_WORK_TARGET, Long.MIN_VALUE);
 			fieldWorkApproach = null;
 			return;
 		}
-		if (linkedScout && !operation.snapshot(level.getGameTime()).scanComplete())
-			entityData.set(FIELD_STATE, FieldOperationState.ENGINEER_WAITING_INTEL.id());
-		else {
-			boolean cargoPending = members.stream().anyMatch(member -> member.role() == DroneRole.CARGO)
-				&& !roleComplete(members, DroneRole.CARGO);
-			entityData.set(FIELD_STATE, cargoPending
-				? FieldOperationState.ENGINEER_RECOVERY_OVERWATCH.id()
-				: FieldOperationState.COMPLETE.id());
-		}
+		FieldOperationRegistry.Snapshot current = operation.snapshot(level.getGameTime());
+		boolean cargoPending = members.stream().anyMatch(member -> member.role() == DroneRole.CARGO)
+			&& !roleComplete(members, DroneRole.CARGO);
+		entityData.set(FIELD_STATE, FieldMissionStatusPolicy.engineer(current.scanComplete(),
+			linkedScout, current.workComplete(), cargoPending).id());
 	}
 
 	private boolean tickFieldReplant(ServerLevel level, ServerPlayer owner,
@@ -3497,10 +3723,10 @@ public final class DroneEntity extends PathfinderMob {
 					BlockPos neighbor = current.offset(dx, dy, dz);
 					BlockState neighborState = level.getBlockState(neighbor);
 					if (neighborState.is(BlockTags.LOGS)) {
-						operation.promoteTarget(neighbor, -20, level.getGameTime());
+						operation.promoteForestryTarget(neighbor, true, level.getGameTime());
 						if (!visited.contains(neighbor.asLong())) pending.addLast(neighbor.immutable());
 					} else if (neighborState.is(BlockTags.LEAVES)) {
-						operation.promoteTarget(neighbor, -10, level.getGameTime());
+						operation.promoteForestryTarget(neighbor, false, level.getGameTime());
 					}
 				}
 			}
@@ -3522,9 +3748,9 @@ public final class DroneEntity extends PathfinderMob {
 			operation.recordSurveySample(state.isAir(), !state.getFluidState().isEmpty(), level.getGameTime());
 			if (fieldOperationType() == FieldOperationType.ORE && isOre(state)) operation.addTarget(pos);
 			else if (fieldOperationType() == FieldOperationType.FORESTRY && state.is(BlockTags.LOGS))
-				operation.addTarget(pos, 0);
-			else if (fieldOperationType() == FieldOperationType.FORESTRY && state.is(BlockTags.LEAVES))
-				operation.addTarget(pos, 1);
+				operation.addForestryTarget(pos, true);
+			else if (fieldOperationType() == FieldOperationType.FORESTRY && isForestryVegetation(state))
+				operation.addForestryTarget(pos, false);
 			else if (fieldOperationType() == FieldOperationType.EXCAVATE && !state.isAir()
 				&& state.getDestroySpeed(level, pos) >= 0 && level.getBlockEntity(pos) == null)
 				operation.addTarget(pos, fieldAnchor().getY() - pos.getY());
@@ -3548,9 +3774,9 @@ public final class DroneEntity extends PathfinderMob {
 					if (fieldOperationType() == FieldOperationType.ORE && isOre(state))
 						operation.addTarget(pos, -4);
 					else if (fieldOperationType() == FieldOperationType.FORESTRY && state.is(BlockTags.LOGS))
-						operation.addTarget(pos, -4);
-					else if (fieldOperationType() == FieldOperationType.FORESTRY && state.is(BlockTags.LEAVES))
-						operation.addTarget(pos, -2);
+						operation.addForestryTarget(pos, true);
+					else if (fieldOperationType() == FieldOperationType.FORESTRY && isForestryVegetation(state))
+						operation.addForestryTarget(pos, false);
 					else if (fieldOperationType() == FieldOperationType.EXCAVATE && !state.isAir()
 						&& state.getDestroySpeed(level, pos) >= 0 && level.getBlockEntity(pos) == null)
 						operation.addTarget(pos, anchor.getY() - pos.getY());
@@ -3804,6 +4030,14 @@ public final class DroneEntity extends PathfinderMob {
 			|| state.is(Blocks.DIAMOND_ORE) || state.is(Blocks.DEEPSLATE_DIAMOND_ORE)
 			|| state.is(Blocks.NETHER_GOLD_ORE) || state.is(Blocks.NETHER_QUARTZ_ORE)
 			|| state.is(Blocks.ANCIENT_DEBRIS);
+	}
+
+	private static boolean isForestryVegetation(BlockState state) {
+		return state.is(BlockTags.LEAVES) || state.is(BlockTags.FLOWERS)
+			|| state.is(Blocks.SHORT_GRASS) || state.is(Blocks.TALL_GRASS)
+			|| state.is(Blocks.FERN) || state.is(Blocks.LARGE_FERN)
+			|| state.is(Blocks.DEAD_BUSH) || state.is(Blocks.VINE)
+			|| state.is(Blocks.HANGING_ROOTS) || state.is(Blocks.MOSS_CARPET);
 	}
 
 	private static ItemStack fieldToolFor(BlockState state) {
@@ -6180,6 +6414,7 @@ public final class DroneEntity extends PathfinderMob {
 			if (operation != null) operation.retryTarget(fieldWorkTarget, serverLevel.getGameTime());
 		}
 		fieldWorkTarget = null;
+		entityData.set(FIELD_WORK_TARGET, Long.MIN_VALUE);
 		fieldWorkApproach = null;
 		fieldReplantTarget = null;
 		fieldPickupTarget = null;
@@ -6709,7 +6944,8 @@ public final class DroneEntity extends PathfinderMob {
 			case SCOUT -> 14.0;
 			case CARGO -> 8.0;
 			case SECURITY -> 20.0;
-			default -> 8.0;
+			default -> fieldOperationType() == FieldOperationType.FORESTRY
+				&& !fieldOperationState().equals(FieldOperationState.WORKING) ? 14.0 : 8.0;
 		};
 		if (role() == DroneRole.SCOUT) radius += 2.5;
 		else if (role() == DroneRole.SECURITY) radius += 4.0;
@@ -7896,6 +8132,9 @@ public final class DroneEntity extends PathfinderMob {
 		if (clearanceCarrierId != null && clearanceResumeTask != null)
 			output.store("ClearanceResumeTask", ClearanceResumeSnapshot.CODEC, clearanceResumeTask);
 		if (salvageSuspendedBy != null) output.putString("SalvageSuspendedBy", salvageSuspendedBy.toString());
+		if (cargoLiftMissionId != null) output.putString("CargoLiftMission", cargoLiftMissionId.toString());
+		if (cargoLiftLoadId != null) output.putString("CargoLiftLoad", cargoLiftLoadId.toString());
+		output.putInt("CargoLiftCorner", entityData.get(CARGO_LIFT_CORNER));
 		output.putLong("DockPos", entityData.get(DOCK_POS));
 		output.putBoolean("Docked", entityData.get(DOCKED));
 		output.putInt("DockStage", entityData.get(DOCK_STAGE));
@@ -8030,6 +8269,19 @@ public final class DroneEntity extends PathfinderMob {
 			String carrier = input.getStringOr("SalvageSuspendedBy", "");
 			salvageSuspendedBy = carrier.isBlank() ? null : UUID.fromString(carrier);
 		} catch (IllegalArgumentException ignored) { salvageSuspendedBy = null; }
+		try {
+			String mission = input.getStringOr("CargoLiftMission", "");
+			cargoLiftMissionId = mission.isBlank() ? null : UUID.fromString(mission);
+		} catch (IllegalArgumentException ignored) { cargoLiftMissionId = null; }
+		try {
+			String load = input.getStringOr("CargoLiftLoad", "");
+			cargoLiftLoadId = load.isBlank() ? null : UUID.fromString(load);
+		} catch (IllegalArgumentException ignored) { cargoLiftLoadId = null; }
+		int liftCorner = Mth.clamp(input.getIntOr("CargoLiftCorner", -1), -1,
+			CargoLiftPolicy.Corner.values().length - 1);
+		entityData.set(CARGO_LIFT_MISSION, cargoLiftMissionId == null ? "" : cargoLiftMissionId.toString());
+		entityData.set(CARGO_LIFT_LOAD, -1);
+		entityData.set(CARGO_LIFT_CORNER, liftCorner);
 		entityData.set(DOCK_POS, input.getLongOr("DockPos", Long.MIN_VALUE));
 		entityData.set(DOCKED, input.getBooleanOr("Docked", false));
 		entityData.set(DOCK_STAGE, input.getIntOr("DockStage", 0));

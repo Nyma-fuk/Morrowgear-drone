@@ -27,12 +27,23 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 
 /** Parent entrypoint calls register(); this module does not modify the existing mod initializer. */
 public final class CarrierModule {
     public static EntityType<CarrierEntity> ENTITY;
-    public static Item DEPLOYMENT_ITEM, CONSOLE_ITEM;
+    public static Item DEPLOYMENT_ITEM, CONSOLE_ITEM, CARGO_MODULE_ITEM, MISSILE_MODULE_ITEM,
+        BUNKER_MISSILE_ITEM;
+    public static CarrierCargoContainerBlock CARGO_CONTAINER_BLOCK;
+    public static CarrierMissileContainerBlock MISSILE_CONTAINER_BLOCK;
+    public static CarrierContainerPartBlock CONTAINER_PART_BLOCK;
+    public static BlockEntityType<CarrierCargoContainerBlockEntity> CARGO_CONTAINER_BLOCK_ENTITY;
+    public static BlockEntityType<CarrierMissileContainerBlockEntity> MISSILE_CONTAINER_BLOCK_ENTITY;
     public static ExtendedMenuType<CarrierMenu, CarrierViewPayload> MENU;
+    public static ExtendedMenuType<CarrierCargoContainerMenu, CarrierCargoContainerPayload> CARGO_CONTAINER_MENU;
     private static boolean registered;
     public interface DronePorts { CarrierServiceBay.DronePort find(CarrierEntity carrier, UUID drone); }
     private static DronePorts ports = (carrier, drone) -> null;
@@ -88,19 +99,60 @@ public final class CarrierModule {
         var consoleKey = ResourceKey.create(Registries.ITEM, id("carrier_console"));
         CONSOLE_ITEM = Registry.register(BuiltInRegistries.ITEM, consoleKey,
             new CarrierConsoleItem(new Item.Properties().setId(consoleKey).stacksTo(1)));
+        var containerPartKey = ResourceKey.create(Registries.BLOCK, id("carrier_container_part"));
+        CONTAINER_PART_BLOCK = Registry.register(BuiltInRegistries.BLOCK, containerPartKey,
+            new CarrierContainerPartBlock(BlockBehaviour.Properties.of().setId(containerPartKey)
+                .strength(-1.0f, 3600000.0f).noOcclusion()));
+        var cargoBlockKey = ResourceKey.create(Registries.BLOCK, id("carrier_cargo_container"));
+        CARGO_CONTAINER_BLOCK = Registry.register(BuiltInRegistries.BLOCK, cargoBlockKey,
+            new CarrierCargoContainerBlock(BlockBehaviour.Properties.of().setId(cargoBlockKey)
+                .strength(-1.0f, 3600000.0f).noOcclusion()));
+        CARGO_CONTAINER_BLOCK_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE,
+            id("carrier_cargo_container"),
+            FabricBlockEntityTypeBuilder.create(CarrierCargoContainerBlockEntity::new, CARGO_CONTAINER_BLOCK).build());
+        var cargoModuleKey = ResourceKey.create(Registries.ITEM, id("carrier_cargo_module"));
+        CARGO_MODULE_ITEM = Registry.register(BuiltInRegistries.ITEM, cargoModuleKey,
+            new BlockItem(CARGO_CONTAINER_BLOCK,
+                new Item.Properties().setId(cargoModuleKey).stacksTo(1).fireResistant()));
+        var missileBlockKey = ResourceKey.create(Registries.BLOCK, id("carrier_missile_container"));
+        MISSILE_CONTAINER_BLOCK = Registry.register(BuiltInRegistries.BLOCK, missileBlockKey,
+            new CarrierMissileContainerBlock(BlockBehaviour.Properties.of().setId(missileBlockKey)
+                .strength(-1.0f, 3600000.0f).noOcclusion()));
+        MISSILE_CONTAINER_BLOCK_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE,
+            id("carrier_missile_container"), FabricBlockEntityTypeBuilder.create(
+                CarrierMissileContainerBlockEntity::new, MISSILE_CONTAINER_BLOCK).build());
+        var missileModuleKey = ResourceKey.create(Registries.ITEM, id("carrier_missile_module"));
+        MISSILE_MODULE_ITEM = Registry.register(BuiltInRegistries.ITEM, missileModuleKey,
+            new BlockItem(MISSILE_CONTAINER_BLOCK,
+                new Item.Properties().setId(missileModuleKey).stacksTo(1).fireResistant()));
+        var bunkerMissileKey = ResourceKey.create(Registries.ITEM, id("carrier_bunker_missile"));
+        BUNKER_MISSILE_ITEM = Registry.register(BuiltInRegistries.ITEM, bunkerMissileKey,
+            new Item(new Item.Properties().setId(bunkerMissileKey).stacksTo(20).fireResistant()));
         MENU = Registry.register(BuiltInRegistries.MENU, id("carrier"), new ExtendedMenuType<>(CarrierMenu::new, CarrierViewPayload.CODEC));
+        CARGO_CONTAINER_MENU = Registry.register(BuiltInRegistries.MENU, id("carrier_cargo_container"),
+            new ExtendedMenuType<>(CarrierCargoContainerMenu::new, CarrierCargoContainerPayload.CODEC));
         PayloadTypeRegistry.serverboundPlay().register(CarrierCommandPayload.TYPE, CarrierCommandPayload.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(CarrierViewPayload.TYPE, CarrierViewPayload.CODEC);
         ServerPlayNetworking.registerGlobalReceiver(CarrierCommandPayload.TYPE,
             (payload, context) -> context.server().execute(() -> CarrierCommands.handle(payload, context.player())));
         CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(entries -> {
-            entries.accept(DEPLOYMENT_ITEM); entries.accept(CONSOLE_ITEM);
+            entries.accept(DEPLOYMENT_ITEM); entries.accept(CONSOLE_ITEM); entries.accept(CARGO_MODULE_ITEM);
+            entries.accept(MISSILE_MODULE_ITEM); entries.accept(BUNKER_MISSILE_ITEM);
         });
-        ServerTickEvents.END_SERVER_TICK.register(server -> { CarrierInterior.tick(server); CarrierChunkLeases.tick(server); });
+        ServerTickEvents.END_SERVER_TICK.register(server -> {
+            CarrierInterior.tick(server);
+            CarrierChunkLeases.tick(server);
+            CarrierContainerFootprint.tick(server);
+        });
+        ServerLifecycleEvents.END_DATA_PACK_RELOAD.register((server, resources, success) -> {
+            if (success) CarrierProtection.clearPlasmaResponseCache();
+        });
         ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
             CarrierInterior.reset();
             CarrierChunkLeases.clear();
             CarrierTerrainQueryCache.clear();
+            CarrierProtection.clearPlasmaResponseCache();
+            CarrierContainerFootprint.clearPending();
         });
         ServerPlayerEvents.JOIN.register(CarrierInterior::recover);
         ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> CarrierInterior.recover(newPlayer));

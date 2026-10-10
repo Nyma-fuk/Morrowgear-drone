@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.function.IntSupplier;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -16,12 +17,13 @@ import net.minecraft.world.item.ItemStack;
 
 /** Finite server hold. Mining copies only changed slots; menus expose one fixed page. */
 public final class CarrierCargoStorage implements Container {
-    private final ItemStack[] stacks = new ItemStack[CarrierPolicy.STORAGE_SLOTS];
+    private final ItemStack[] stacks = new ItemStack[CarrierPolicy.MAX_STORAGE_SLOTS];
     private final Item[] indexedItems = new Item[stacks.length];
     private final int[] indexedCounts = new int[stacks.length];
     private final BitSet empty = new BitSet(stacks.length), occupied = new BitSet(stacks.length);
     private final Map<Item, BitSet> partial = new IdentityHashMap<>();
     private final Runnable dirty;
+    private final IntSupplier modules;
     private boolean indexDirty;
     private long revision;
     private long items;
@@ -30,8 +32,13 @@ public final class CarrierCargoStorage implements Container {
     private long lookupCalls, lookupSlots;
 
     public CarrierCargoStorage(List<ItemStack> saved, Runnable dirty) {
+        this(saved, dirty, () -> 0);
+    }
+
+    public CarrierCargoStorage(List<ItemStack> saved, Runnable dirty, IntSupplier modules) {
         if (saved.size() > stacks.length) throw new IllegalArgumentException("Oversized carrier cargo");
         this.dirty = dirty;
+        this.modules = java.util.Objects.requireNonNull(modules);
         Arrays.fill(stacks, ItemStack.EMPTY);
         empty.set(0, stacks.length);
         for (int slot = 0; slot < saved.size(); slot++) {
@@ -41,7 +48,7 @@ public final class CarrierCargoStorage implements Container {
         indexRefreshSlots = 0;
     }
 
-    @Override public int getContainerSize() { return stacks.length; }
+    @Override public int getContainerSize() { return activeSlots(); }
     @Override public int getMaxStackSize() { return 64; }
     @Override public boolean isEmpty() { return usedSlots() == 0; }
     @Override public ItemStack getItem(int slot) { checkSlot(slot); return stacks[slot]; }
@@ -90,14 +97,42 @@ public final class CarrierCargoStorage implements Container {
     /** External callers that mutate a returned stack must notify the container. */
     @Override public void setChanged() { indexDirty = true; revision++; dirty.run(); }
 
-    public int usedSlots() { ensureIndex(); return occupied.cardinality(); }
+    public int usedSlots() { ensureIndex(); return occupied.get(0, activeSlots()).cardinality(); }
     public long itemCount() { ensureIndex(); return items; }
+    public int pages() { return CarrierPolicy.cargoPages(modules.getAsInt()); }
+    public int activeSlots() { return CarrierPolicy.cargoSlots(modules.getAsInt()); }
+    public boolean canReduceToModules(int count) {
+        ensureIndex();
+        return occupied.nextSetBit(CarrierPolicy.cargoSlots(count)) < 0;
+    }
+
+    public List<ItemStack> moduleContents(int module) {
+        if (module < 0 || module >= CarrierPolicy.CARGO_MODULE_SLOTS) throw new IllegalArgumentException("Invalid cargo module");
+        int start = CarrierPolicy.BASE_STORAGE_SLOTS + module * CarrierPolicy.STORAGE_SLOTS_PER_MODULE;
+        List<ItemStack> result = new ArrayList<>(CarrierPolicy.STORAGE_SLOTS_PER_MODULE);
+        for (int i=0;i<CarrierPolicy.STORAGE_SLOTS_PER_MODULE;i++) result.add(stacks[start+i].copy());
+        return result;
+    }
+
+    public void importModule(int module, List<ItemStack> contents) {
+        if (module < 0 || module >= CarrierPolicy.CARGO_MODULE_SLOTS || contents.size() > CarrierPolicy.STORAGE_SLOTS_PER_MODULE)
+            throw new IllegalArgumentException("Invalid cargo module contents");
+        int start = CarrierPolicy.BASE_STORAGE_SLOTS + module * CarrierPolicy.STORAGE_SLOTS_PER_MODULE;
+        for (int i=0;i<CarrierPolicy.STORAGE_SLOTS_PER_MODULE;i++) {
+            stacks[start+i] = i < contents.size() ? contents.get(i).copy() : ItemStack.EMPTY;
+            reindex(start+i);
+        }
+        revision++; dirty.run();
+    }
+
+    public void clearModule(int module) { importModule(module, List.of()); }
 
     /** Predicate is read-only; empty pages are skipped without copying their stacks. */
     public int findFirst(Predicate<ItemStack> predicate) {
         ensureIndex();
         lookupCalls++;
-        for (int slot = occupied.nextSetBit(0); slot >= 0; slot = occupied.nextSetBit(slot + 1)) {
+        int active = activeSlots();
+        for (int slot = occupied.nextSetBit(0); slot >= 0 && slot < active; slot = occupied.nextSetBit(slot + 1)) {
             lookupSlots++;
             if (predicate.test(stacks[slot])) return slot;
         }
@@ -112,7 +147,7 @@ public final class CarrierCargoStorage implements Container {
     }
 
     public Container page(int page) {
-        if (page < 0 || page >= CarrierPolicy.CARGO_PAGES) throw new IllegalArgumentException("Invalid cargo page");
+        if (page < 0 || page >= pages()) throw new IllegalArgumentException("Invalid cargo page");
         return new Page(page * CarrierPolicy.CARGO_SLOTS);
     }
 
@@ -135,8 +170,9 @@ public final class CarrierCargoStorage implements Container {
                     }
                 }
                 BitSet candidates = partial.get(drop.getItem());
+                int active = activeSlots();
                 for (int slot = candidates == null ? -1 : candidates.nextSetBit(0);
-                     slot >= 0 && left > 0; slot = candidates.nextSetBit(slot + 1)) {
+                     slot >= 0 && slot < active && left > 0; slot = candidates.nextSetBit(slot + 1)) {
                     if (changes.containsKey(slot)) continue;
                     examinedSlots++;
                     ItemStack current = stacks[slot];
@@ -148,7 +184,7 @@ public final class CarrierCargoStorage implements Container {
                     changes.put(slot, new Change(before, after));
                     left -= added;
                 }
-                for (int slot = empty.nextSetBit(0); slot >= 0 && left > 0; slot = empty.nextSetBit(slot + 1)) {
+                for (int slot = empty.nextSetBit(0); slot >= 0 && slot < active && left > 0; slot = empty.nextSetBit(slot + 1)) {
                     if (changes.containsKey(slot)) continue;
                     examinedSlots++;
                     int added = Math.min(left, limit(drop));
@@ -215,7 +251,7 @@ public final class CarrierCargoStorage implements Container {
         return a.getCount() == b.getCount() && (a.isEmpty() && b.isEmpty() || ItemStack.isSameItemSameComponents(a, b));
     }
     private void checkSlot(int slot) {
-        if (slot < 0 || slot >= stacks.length) throw new IndexOutOfBoundsException(slot);
+        if (slot < 0 || slot >= activeSlots()) throw new IndexOutOfBoundsException(slot);
     }
     private void ensureIndex() {
         if (!indexDirty) return;

@@ -16,4 +16,13 @@ final class MissileDetonationRuntimeTest {
 		assertTrue(budget.tryAcquire(101));
 		assertEquals(1, budget.used());
 	}
+
+	@Test void heavyBlastBudgetSerializesLargeCarrierExplosions() {
+		assertEquals(1, MissileDetonationRuntime.MAX_HEAVY_DETONATIONS_PER_LEVEL_TICK);
+		MissileDetonationRuntime.TickBudget budget = new MissileDetonationRuntime.TickBudget(
+			MissileDetonationRuntime.MAX_HEAVY_DETONATIONS_PER_LEVEL_TICK);
+		assertTrue(budget.tryAcquire(20));
+		assertFalse(budget.tryAcquire(20));
+		assertTrue(budget.tryAcquire(21));
+	}
 }

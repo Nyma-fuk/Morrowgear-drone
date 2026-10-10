@@ -1,0 +1,40 @@
+{
+  "passed": true,
+  "dimensionsBlocks": [
+    5,
+    3,
+    2.4
+  ],
+  "master": {
+    "bounds": [
+      -2.4800000190734863,
+      -1.4399999380111694,
+      0.0,
+      2.4800000190734863,
+      1.4399999380111694,
+      2.539090156555176
+    ],
+    "mirrorError": 3.3717478231665154e-07,
+    "blend": "docs\\design\\carrier-missile-container-v2\\carrier-missile-container-v2.blend",
+    "icon": "src\\main\\resources\\assets\\morrowgear_drone\\textures\\item\\carrier_missile_module.png"
+  },
+  "full": {
+    "name": "carrier_missile_container",
+    "triangles": 2752,
+    "vertices": 8256,
+    "mesh": "src\\main\\resources\\assets\\morrowgear_drone\\models\\runtime\\carrier_missile_container.mgm",
+    "texture": "src\\main\\resources\\assets\\morrowgear_drone\\textures\\runtime\\carrier_missile_container.png"
+  },
+  "far": {
+    "name": "carrier_missile_container_far",
+    "triangles": 1600,
+    "vertices": 4800,
+    "mesh": "src\\main\\resources\\assets\\morrowgear_drone\\models\\runtime\\carrier_missile_container_far.mgm",
+    "texture": "src\\main\\resources\\assets\\morrowgear_drone\\textures\\runtime\\carrier_missile_container_far.png"
+  },
+  "budgets": {
+    "fullTriangles": 3300,
+    "farTriangles": 1900,
+    "lodDistanceBlocks": 48
+  }
+}

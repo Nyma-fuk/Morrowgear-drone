@@ -9,7 +9,14 @@ import java.util.UUID;
 /** Server-independent limits and the approved V31 exterior coordinate contract. */
 public final class CarrierPolicy {
     public static final int CARGO_SLOTS = 54;
-    public static final int CARGO_PAGES = 64, STORAGE_SLOTS = CARGO_SLOTS * CARGO_PAGES;
+    public static final int BASE_CARGO_PAGES = 64;
+    public static final int CARGO_MODULE_SLOTS = 8;
+    /** One module adds half of the original 3,456-slot hold: 32 pages / 1,728 slots. */
+    public static final int CARGO_PAGES_PER_MODULE = BASE_CARGO_PAGES / 2;
+    public static final int MAX_CARGO_PAGES = BASE_CARGO_PAGES + CARGO_MODULE_SLOTS * CARGO_PAGES_PER_MODULE;
+    public static final int BASE_STORAGE_SLOTS = CARGO_SLOTS * BASE_CARGO_PAGES;
+    public static final int STORAGE_SLOTS_PER_MODULE = CARGO_SLOTS * CARGO_PAGES_PER_MODULE;
+    public static final int MAX_STORAGE_SLOTS = CARGO_SLOTS * MAX_CARGO_PAGES;
     public static final int MAX_CABINS = 4096;
     public static final int BAY_SLOTS = 4;
     public static final int MAX_ACTIVE_CHUNK_LEASES = 4;
@@ -26,6 +33,10 @@ public final class CarrierPolicy {
     /** 16 sequential emitters (8 ticks each), then 64 ticks of core maturation. */
     public static final int MINING_CHARGE_TICKS = 192;
     public static final int COMBAT_TICKS = SCAN_TICKS + COMBAT_CHARGE_TICKS + COMBAT_FIRE_TICKS + COMBAT_COOLDOWN_TICKS;
+    public static final int MISSILE_COMBAT_COOLDOWN_TICKS = 10;
+    public static final int MISSILE_COMBAT_TICKS = SCAN_TICKS
+        + jp.morrowgear.drone.CarrierHeavyMissilePolicy.sequenceDuration(CarrierMissileModulePolicy.MAX_SALVO)
+        + MISSILE_COMBAT_COOLDOWN_TICKS;
     public static final int COMBAT_RADIUS = 96, COMBAT_TARGETS = 16, COMBAT_PULSE_TICKS = 10;
     /** Renderer and server share this radius for the single broad combat cone. */
     public static final double COMBAT_IMPACT_RADIUS = 8;
@@ -41,6 +52,15 @@ public final class CarrierPolicy {
     }, UUID::toString);
 
     private CarrierPolicy() {}
+
+    public static int cargoPages(int modules) {
+        return BASE_CARGO_PAGES + Math.clamp(modules, 0, CARGO_MODULE_SLOTS) * CARGO_PAGES_PER_MODULE;
+    }
+
+    public static int cargoSlots(int modules) { return cargoPages(modules) * CARGO_SLOTS; }
+    public static int cargoModulesFromPages(int pages) {
+        return Math.clamp((pages - BASE_CARGO_PAGES) / CARGO_PAGES_PER_MODULE, 0, CARGO_MODULE_SLOTS);
+    }
 
     private static final java.util.Map<Integer, int[]> EXCAVATION_COLUMNS = new java.util.HashMap<>();
 
@@ -135,23 +155,60 @@ public final class CarrierPolicy {
 	}
 
     public enum Mode { IDLE, MINING, COMBAT }
+    public enum CombatWeapon { LASER, MISSILE }
     public enum WorkPhase { IDLE, CHARGE, FIRE, COOLDOWN, SCAN }
     public static WorkPhase combatPhase(int remaining) {
-        if (remaining <= 0 || remaining > COMBAT_TICKS) return WorkPhase.IDLE;
-        int elapsed = COMBAT_TICKS - remaining - SCAN_TICKS;
+        return combatPhase(remaining, CombatWeapon.LASER);
+    }
+    public static WorkPhase combatPhase(int remaining, CombatWeapon weapon) {
+        int duration = combatDuration(weapon);
+        if (remaining <= 0 || remaining > duration) return WorkPhase.IDLE;
+        int elapsed = duration - remaining;
+        if (weapon == CombatWeapon.MISSILE) {
+            if (elapsed < SCAN_TICKS) return WorkPhase.SCAN;
+            int launchTicks = jp.morrowgear.drone.CarrierHeavyMissilePolicy.sequenceDuration(
+                CarrierMissileModulePolicy.MAX_SALVO);
+            return elapsed < SCAN_TICKS + launchTicks ? WorkPhase.FIRE : WorkPhase.COOLDOWN;
+        }
+        elapsed -= SCAN_TICKS;
         if (elapsed < 0) return WorkPhase.SCAN;
         return elapsed < COMBAT_CHARGE_TICKS ? WorkPhase.CHARGE
             : elapsed < COMBAT_CHARGE_TICKS + COMBAT_FIRE_TICKS ? WorkPhase.FIRE : WorkPhase.COOLDOWN;
     }
     public static int phaseDuration(WorkPhase phase) {
+        return phaseDuration(phase, CombatWeapon.LASER);
+    }
+    public static int phaseDuration(WorkPhase phase, CombatWeapon weapon) {
+        if (weapon == CombatWeapon.MISSILE) return switch (phase) {
+            case SCAN -> SCAN_TICKS;
+            case FIRE -> jp.morrowgear.drone.CarrierHeavyMissilePolicy.sequenceDuration(
+                CarrierMissileModulePolicy.MAX_SALVO);
+            case COOLDOWN -> MISSILE_COMBAT_COOLDOWN_TICKS;
+            default -> 0;
+        };
         return switch (phase) { case SCAN -> SCAN_TICKS; case CHARGE -> COMBAT_CHARGE_TICKS; case FIRE -> COMBAT_FIRE_TICKS;
             case COOLDOWN -> COMBAT_COOLDOWN_TICKS; default -> 0; };
     }
     public static int phaseTick(int remaining) {
-        int elapsed = COMBAT_TICKS - remaining - SCAN_TICKS;
-        return switch (combatPhase(remaining)) { case SCAN -> elapsed + SCAN_TICKS; case CHARGE -> elapsed;
+        return phaseTick(remaining, CombatWeapon.LASER);
+    }
+    public static int phaseTick(int remaining, CombatWeapon weapon) {
+        int duration = combatDuration(weapon);
+        int elapsed = duration - remaining;
+        if (weapon == CombatWeapon.MISSILE) return switch (combatPhase(remaining, weapon)) {
+            case SCAN -> elapsed;
+            case FIRE -> elapsed - SCAN_TICKS;
+            case COOLDOWN -> elapsed - SCAN_TICKS
+                - jp.morrowgear.drone.CarrierHeavyMissilePolicy.sequenceDuration(CarrierMissileModulePolicy.MAX_SALVO);
+            default -> 0;
+        };
+        elapsed -= SCAN_TICKS;
+        return switch (combatPhase(remaining, weapon)) { case SCAN -> elapsed + SCAN_TICKS; case CHARGE -> elapsed;
             case FIRE -> elapsed - COMBAT_CHARGE_TICKS;
             case COOLDOWN -> elapsed - COMBAT_CHARGE_TICKS - COMBAT_FIRE_TICKS; default -> 0; };
+    }
+    public static int combatDuration(CombatWeapon weapon) {
+        return weapon == CombatWeapon.MISSILE ? MISSILE_COMBAT_TICKS : COMBAT_TICKS;
     }
     public enum Stop { READY, PREVIEW, RUNNING, EMERGENCY, RELOAD, OWNER_ABSENT, FULL,
         PROTECTED, UNLOADED, OBSTRUCTED, NO_POWER, COMPLETE, DESTROYED, EXPIRED, FRIENDLY_IN_AREA, LEASE_LIMIT, NO_SAFE_EXIT, LIQUID, TARGET_LIMIT,

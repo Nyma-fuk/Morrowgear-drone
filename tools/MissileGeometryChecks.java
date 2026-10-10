@@ -23,6 +23,7 @@ public final class MissileGeometryChecks {
     public static final class OverlayTexture { public static final int NO_OVERLAY = 0; }
     public static final class State {
         public Vec3 velocity;
+        public boolean heavy;
         public final int lightCoords = 0x700050;
         State(Vec3 velocity) { this.velocity = velocity; }
     }

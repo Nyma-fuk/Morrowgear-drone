@@ -124,6 +124,19 @@ final class SolarServiceRegistry {
 		return index < 0 ? -1 : index + 1;
 	}
 
+	static synchronized List<RelayNode> relayNodes(UUID ownerId, String dimension, long tick) {
+		prune(tick);
+		return STATIONS.values().stream()
+			.filter(station -> station.ownerId().equals(ownerId))
+			.filter(station -> station.dimension().equals(dimension))
+			.filter(station -> station.energyPercent() >= SolarServicePolicy.MINIMUM_STATION_ENERGY)
+			.sorted(Comparator.comparing(station -> station.id().toString()))
+			.limit(DataLinkRelayPolicy.MAX_RELAY_NODES)
+			.map(station -> new RelayNode(station.id(), station.x(), station.y(), station.z(),
+				station.energyPercent()))
+			.toList();
+	}
+
 	static synchronized void clearForTests() {
 		STATIONS.clear();
 		RESERVATIONS.clear();
@@ -152,6 +165,7 @@ final class SolarServiceRegistry {
 
 	private record Station(UUID id, UUID ownerId, String dimension, double x, double y, double z,
 		int energyPercent, long heartbeatTick) {}
+	record RelayNode(UUID id, double x, double y, double z, int energyPercent) {}
 
 	private record Reservation(UUID stationId, int slot, long renewedTick) {}
 	private record WaitRequest(UUID stationId, int priority, long renewedTick) {}

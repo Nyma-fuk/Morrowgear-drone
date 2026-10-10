@@ -55,8 +55,8 @@ class CarrierAcceptancePolicyTest {
             columnCounts[x + z * WIDTH]++;
             if (mine(x, y, z)) mineable++; else bedrock++;
         }
-        assertEquals(16_384, mineable);
-        assertEquals(256, bedrock);
+        assertEquals(16_640, mineable);
+        assertEquals(0, bedrock);
         for (int count : columnCounts) assertEquals(65, count);
         assertFalse(fixture(x(FIXTURE_BLOCKS), y(FIXTURE_BLOCKS), z(FIXTURE_BLOCKS)));
     }
@@ -81,26 +81,25 @@ class CarrierAcceptancePolicyTest {
         assertTrue(positions.contains("0:0:16"));
     }
 
-    @Test void fixtureBoundsRejectAdjacentColumnsAndBedrockIsNotMineable() {
+    @Test void fixtureBoundsRejectAdjacentColumnsAndBedrockLayerIsMineable() {
         for (int outside : new int[] {-1, 16, Integer.MIN_VALUE, Integer.MAX_VALUE}) {
             assertFalse(fixture(outside, 1, 0));
             assertFalse(fixture(0, 1, outside));
         }
         assertFalse(fixture(0, -1, 0));
         assertFalse(fixture(0, 65, 0));
-        assertFalse(mine(0, 0, 0));
+        assertTrue(mine(0, 0, 0));
         assertTrue(mine(15, 64, 15));
     }
 
     @Test void mineLedgerIndexCoversEveryMineableCoordinateExactlyOnce() {
         var indices = new HashSet<Integer>();
-        for (int y = 1; y <= LAYERS; y++) for (int z = 0; z < WIDTH; z++) for (int x = 0; x < WIDTH; x++)
+        for (int y = 0; y <= LAYERS; y++) for (int z = 0; z < WIDTH; z++) for (int x = 0; x < WIDTH; x++)
             assertTrue(indices.add(mineIndex(x, y, z)));
         assertEquals(MINE_BLOCKS, indices.size());
-        assertEquals(0, mineIndex(0, 1, 0));
+        assertEquals(0, mineIndex(0, 0, 0));
         assertEquals(MINE_BLOCKS - 1, mineIndex(15, 64, 15));
-        assertEquals(256, mineWordCount());
-        assertThrows(IllegalArgumentException.class, () -> mineIndex(0, 0, 0));
+        assertEquals(260, mineWordCount());
         assertThrows(IllegalArgumentException.class, () -> mineIndex(16, 1, 0));
     }
 

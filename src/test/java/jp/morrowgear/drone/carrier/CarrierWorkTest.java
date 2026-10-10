@@ -50,7 +50,7 @@ class CarrierWorkTest {
         assertEquals(0, ship.workPhaseTick());
     }
 
-    @Test void unequalBedrockHeightsCannotCastObliqueShadowsOnAdjacentColumns() {
+    @Test void bedrockAndEveryBlockBelowItAreExcavatedWithoutCastingObliqueShadows() {
         var progress = progress(-1, -1, -4, 6);
         var terrain = Terrain.strata(progress.operation());
         terrain.blocks.put(new BlockPos(-8, 4, -8), Blocks.BEDROCK.defaultBlockState());
@@ -59,7 +59,6 @@ class CarrierWorkTest {
             var pos = requested(progress);
             var state = terrain.getBlockState(pos);
             if (progress.sealed() || state.isAir()) { progress = progress.advance(); continue; }
-            if (state.is(Blocks.BEDROCK)) { progress = progress.seal(); continue; }
             var target = CarrierWork.miningTarget(progress,
                 terrain.ray(CarrierWork.miningOrigin(progress, 10.9), pos));
             assertEquals(pos, target);
@@ -67,9 +66,9 @@ class CarrierWorkTest {
             progress = CarrierWork.afterRemoval(progress, target);
             removed++;
         }
-        assertEquals(2560 - 8, removed);
-        assertTrue(terrain.getBlockState(new BlockPos(-8, 4, -8)).is(Blocks.BEDROCK));
-        assertTrue(terrain.getBlockState(new BlockPos(-8, 3, -8)).is(Blocks.STONE));
+        assertEquals(progress.operation().volume(), removed);
+        assertTrue(terrain.getBlockState(new BlockPos(-8, 4, -8)).isAir());
+        assertTrue(terrain.getBlockState(new BlockPos(-8, 3, -8)).isAir());
         assertTrue(terrain.getBlockState(new BlockPos(-9, -3, -8)).isAir());
     }
 
@@ -127,7 +126,7 @@ class CarrierWorkTest {
         assertTrue(terrain.getBlockState(requested).isAir());
     }
 
-    @Test void visibleFrontierReachesBedrockForWholeChunkFromCentreAndEdgesIncludingNegativeCoordinates() {
+    @Test void visibleFrontierExcavatesThroughBedrockForWholeChunkFromCentreAndEdgesIncludingNegativeCoordinates() {
         for (int chunk : new int[] {0, -2}) for (double offset : new double[] {8, .1, 15.9}) {
             var progress = progress(chunk, chunk, -4, 6);
             var op = progress.operation();
@@ -140,22 +139,20 @@ class CarrierWorkTest {
                 var target = requested(progress);
                 var state = terrain.getBlockState(target);
                 if (progress.sealed() || state.isAir()) { progress = progress.advance(); continue; }
-                if (state.is(Blocks.BEDROCK)) { progress = progress.seal(); continue; }
                 var visible = CarrierWork.miningTarget(progress, terrain.ray(CarrierWork.miningOrigin(progress, origin.y), target));
                 assertNotNull(visible, () -> "Unexpected obstruction for " + target + " from " + origin);
                 assertTrue(op.contains(visible.getX(), visible.getY(), visible.getZ()));
                 assertEquals(target.getY(), visible.getY());
-                assertTrue(terrain.getBlockState(visible).is(Blocks.STONE));
+                assertFalse(terrain.getBlockState(visible).isAir());
                 assertNotNull(terrain.blocks.remove(visible), "Never remove a block twice");
                 progress = CarrierWork.afterRemoval(progress, visible);
                 assertEquals(op, progress.operation());
                 removed++;
             }
-            assertEquals((op.maxY() - op.minY()) * 256, removed);
-            assertEquals(256, progress.sealedColumns().size());
+            assertEquals(op.volume(), removed);
+            assertEquals(0, progress.sealedColumns().size());
             assertEquals(op.volume(), progress.cursor());
-            assertEquals(256, terrain.blocks.size());
-            assertTrue(terrain.blocks.values().stream().allMatch(state -> state.is(Blocks.BEDROCK)));
+            assertTrue(terrain.blocks.isEmpty());
         }
     }
 
@@ -178,7 +175,7 @@ class CarrierWorkTest {
         assertEquals(0, progress.cursor());
     }
 
-    @Test void fullWorldHeightScanSkipsAirThenMinesEveryBlockAboveAll256BedrockColumns() {
+    @Test void fullWorldHeightScanSkipsAirThenMinesEveryBlockIncludingAll256BedrockColumns() {
         var progress = progress(0, 0, -64, 319);
         var op = progress.operation();
         var terrain = new Terrain();
@@ -195,7 +192,6 @@ class CarrierWorkTest {
             BlockPos requested = requested(progress);
             var state = terrain.getBlockState(requested);
             if (progress.sealed() || state.isAir()) { progress = progress.advance(); continue; }
-            if (state.is(Blocks.BEDROCK)) { progress = progress.seal(); continue; }
             BlockPos target = CarrierWork.miningTarget(progress, terrain.ray(CarrierWork.miningOrigin(progress, origin.y), requested));
             assertNotNull(target, requested::toString);
             assertTrue(op.contains(target.getX(), target.getY(), target.getZ()));
@@ -203,14 +199,14 @@ class CarrierWorkTest {
             progress = CarrierWork.afterRemoval(progress, target);
             removed++;
         }
-        assertEquals(16_384, removed);
+        assertEquals(16_640, removed);
         assertEquals(98_304, progress.cursor());
-        assertEquals(256, progress.sealedColumns().size());
-        assertEquals(257, terrain.blocks.size());
+        assertEquals(0, progress.sealedColumns().size());
+        assertEquals(1, terrain.blocks.size());
         assertTrue(terrain.getBlockState(outside).is(Blocks.GOLD_BLOCK));
     }
 
-    @Test void fluidBearingColumnsDrainAndCompleteWithoutRemovingBedrockOrLeavingFluid() {
+    @Test void fluidBearingColumnsDrainAndCompleteThroughBedrockWithoutLeavingFluid() {
         var progress = progress(0, 0, -4, 8);
         var op = progress.operation();
         var terrain = Terrain.strata(op);
@@ -227,18 +223,17 @@ class CarrierWorkTest {
             BlockPos requested = requested(progress);
             BlockState state = terrain.getBlockState(requested);
             if (progress.sealed() || state.isAir()) { progress = progress.advance(); continue; }
-            if (state.is(Blocks.BEDROCK)) { progress = progress.seal(); continue; }
             BlockPos target = CarrierWork.miningTarget(progress, terrain.ray(CarrierWork.miningOrigin(progress, origin.y), requested));
             assertNotNull(target, requested::toString);
             state = terrain.getBlockState(target);
-            assertNull(CarrierProtection.materialStop(state, true, false));
+            assertNotEquals(CarrierProtection.PlasmaResponse.RESIST,
+                CarrierProtection.carrierMiningResponse(state));
             if (CarrierProtection.drainableFluid(state)) removedFluids++;
             assertNotNull(terrain.blocks.remove(target));
             progress = CarrierWork.afterRemoval(progress, target);
         }
         assertEquals(expectedFluids, removedFluids);
-        assertEquals(256, terrain.blocks.size());
-        assertTrue(terrain.blocks.values().stream().allMatch(state -> state.is(Blocks.BEDROCK)));
+        assertTrue(terrain.blocks.isEmpty());
         assertTrue(terrain.blocks.values().stream().allMatch(state -> state.getFluidState().isEmpty()));
     }
 
@@ -274,25 +269,24 @@ class CarrierWorkTest {
         terrain.blocks.put(new BlockPos(-13, 1, 5), Blocks.TALL_GRASS.defaultBlockState());
         terrain.blocks.put(new BlockPos(-13, 2, 5), Blocks.TALL_GRASS.defaultBlockState()
             .setValue(net.minecraft.world.level.block.DoublePlantBlock.HALF, net.minecraft.world.level.block.state.properties.DoubleBlockHalf.UPPER));
-        int expected = terrain.blocks.size() - 256, removed = 0, steps = 0;
+        int expected = terrain.blocks.size(), removed = 0, steps = 0;
         Vec3 origin = new Vec3(-8, 14.9, 8);
         while (!progress.complete()) {
             assertTrue(steps++ < op.volume() * 2);
             BlockPos requested = requested(progress);
             var state = terrain.getBlockState(requested);
             if (progress.sealed() || state.isAir()) { progress = progress.advance(); continue; }
-            if (state.is(Blocks.BEDROCK)) { progress = progress.seal(); continue; }
             BlockPos target = CarrierWork.miningTarget(progress, terrain.ray(CarrierWork.miningOrigin(progress, origin.y), requested));
             assertNotNull(target, requested::toString);
-            assertNull(CarrierProtection.materialStop(terrain.getBlockState(target), true, false), target::toString);
+            assertNotEquals(CarrierProtection.PlasmaResponse.RESIST,
+                CarrierProtection.carrierMiningResponse(terrain.getBlockState(target)), target::toString);
             assertNotNull(terrain.blocks.remove(target));
             progress = CarrierWork.afterRemoval(progress, target);
             removed++;
         }
         assertEquals(expected, removed);
-        assertEquals(256, terrain.blocks.size());
-        assertEquals(256, progress.sealedColumns().size());
-        assertTrue(terrain.blocks.values().stream().allMatch(state -> state.is(Blocks.BEDROCK)));
+        assertTrue(terrain.blocks.isEmpty());
+        assertEquals(0, progress.sealedColumns().size());
     }
 
     private static CarrierPolicy.Progress progress(int chunkX, int chunkZ, int minY, int maxY) {

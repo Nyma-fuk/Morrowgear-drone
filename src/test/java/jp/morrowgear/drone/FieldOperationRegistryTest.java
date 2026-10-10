@@ -18,6 +18,18 @@ final class FieldOperationRegistryTest {
 	}
 
 	@Test
+	void forestryQueueClaimsTheHighestTargetFirst() {
+		var operation = new FieldOperationRegistry.Operation(FieldOperationType.FORESTRY,
+			new BlockPos(0, 64, 0), 8, 0L);
+		operation.addForestryTarget(new BlockPos(0, 64, 0), true);
+		operation.addForestryTarget(new BlockPos(0, 72, 0), true);
+		operation.addForestryTarget(new BlockPos(1, 72, 0), false);
+		assertEquals(new BlockPos(1, 72, 0), operation.claimTarget(1L));
+		assertEquals(new BlockPos(0, 72, 0), operation.claimTarget(1L));
+		assertEquals(new BlockPos(0, 64, 0), operation.claimTarget(1L));
+	}
+
+	@Test
 	void sharesOneOperationAcrossRolesAndTracksWork() {
 		UUID owner = UUID.randomUUID();
 		BlockPos anchor = new BlockPos(10, 40, -5);
@@ -71,6 +83,24 @@ final class FieldOperationRegistryTest {
 		operation.addTarget(anchor, 0);
 		operation.addTarget(anchor.below(), 1);
 		assertEquals(anchor, operation.claimTarget(2L));
+	}
+
+	@Test
+	void surveyStartsAtTheRequestedSurfaceAndExpandsVertically() {
+		BlockPos anchor = new BlockPos(10, 64, 10);
+		FieldOperationRegistry.Operation excavation = FieldOperationRegistry.acquire(
+			"overworld", UUID.randomUUID(), "DIG-SCAN-ORDER", FieldOperationType.EXCAVATE,
+			anchor, 2, 1L);
+		assertEquals(anchor.getY(), excavation.nextScanPos(2L).getY());
+
+		FieldOperationRegistry.Operation forestry = FieldOperationRegistry.acquire(
+			"overworld", UUID.randomUUID(), "FOREST-SCAN-ORDER", FieldOperationType.FORESTRY,
+			anchor, 6, 1L);
+		int layerSize = 13 * 13;
+		BlockPos position = null;
+		for (int index = 0; index < layerSize + 1; index++) position = forestry.nextScanPos(2L);
+		assertNotNull(position);
+		assertEquals(anchor.getY() + 1, position.getY());
 	}
 
 	@Test

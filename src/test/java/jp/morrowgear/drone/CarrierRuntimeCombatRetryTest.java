@@ -170,18 +170,18 @@ class CarrierRuntimeCombatRetryTest {
         assertFalse(CarrierRuntimeVerification.absentTargetRetry(ordinary, ordinary, TARGET, removedAlive));
     }
 
-    @Test void retryCargoRequiresExactlyEighteenPlainCobblestoneAndLeavesItemsUntouched() {
+    @Test void retryCargoRequiresExactlyNinePlainAblativeResidueAndLeavesItemsUntouched() {
         var cargo = new SimpleContainer(4);
-        cargo.setItem(0, new ItemStack(Items.COBBLESTONE, 18));
+        cargo.setItem(0, new ItemStack(Items.COBBLED_DEEPSLATE, 9));
         ItemStack original = cargo.getItem(0).copy();
         assertTrue(CarrierRuntimeVerification.baselineCargo(cargo));
         assertTrue(ItemStack.matches(original, cargo.getItem(0)));
         cargo.setItem(1, new ItemStack(Items.DIAMOND));
         assertFalse(CarrierRuntimeVerification.baselineCargo(cargo));
         cargo.setItem(1, ItemStack.EMPTY);
-        cargo.getItem(0).setCount(17);
+        cargo.getItem(0).setCount(8);
         assertFalse(CarrierRuntimeVerification.baselineCargo(cargo));
-        cargo.getItem(0).setCount(18);
+        cargo.getItem(0).setCount(9);
         cargo.getItem(0).set(DataComponents.CUSTOM_NAME, Component.literal("player cargo"));
         assertFalse(CarrierRuntimeVerification.baselineCargo(cargo));
     }

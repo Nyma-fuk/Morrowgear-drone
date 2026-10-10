@@ -21,7 +21,7 @@ class CarrierSuppliesTest {
         BuiltInRegistries.DATA_COMPONENT_INITIALIZERS.build(registries).forEach(initializer -> initializer.apply());
     }
 
-    @Test void fiveTypedInputsDoNotConsumeCargoSlotsOrAcceptOtherSupplyKinds() {
+    @Test void sixTypedInputsDoNotConsumeCargoSlotsOrAcceptOtherSupplyKinds() {
         String[] ids = {"morrowgear_drone:power_cell", "morrowgear_drone:laser_cell",
             "morrowgear_drone:autocannon_magazine", "morrowgear_drone:micro_missile_pack", "minecraft:iron_ingot"};
         for (int slot = 0; slot < 5; slot++) for (int kind = 0; kind < 5; kind++)
@@ -34,9 +34,10 @@ class CarrierSuppliesTest {
         }
         assertTrue(CarrierSupplies.accepts(CarrierSupplies.REPAIR, "minecraft:copper_ingot"));
         assertTrue(CarrierSupplies.accepts(CarrierSupplies.REPAIR, "morrowgear_drone:morrow_alloy"));
+        assertFalse(CarrierSupplies.accepts(CarrierSupplies.CARGO_MODULE, "morrowgear_drone:carrier_cargo_module"));
         assertEquals(54, CarrierMenu.SUPPLY_START);
-        assertEquals(59, CarrierMenu.PLAYER_START);
-        assertEquals(95, CarrierMenu.PLAYER_START + 36);
+        assertEquals(60, CarrierMenu.PLAYER_START);
+        assertEquals(96, CarrierMenu.PLAYER_START + 36);
         assertEquals(3456, ship().cargo.getContainerSize());
     }
 

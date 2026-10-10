@@ -136,6 +136,40 @@ final class DroneNavigator {
 			.orElseGet(() -> drone.position().add(0, 1.2, 0));
 	}
 
+	/**
+	 * Fixed-budget ingress planner for a suspended-load rendezvous. It deliberately
+	 * samples a small fan instead of starting a full path search every server tick.
+	 */
+	static Vec3 cargoLiftDetour(ServerLevel level, DroneEntity drone, Vec3 target, int attempt) {
+		Vec3 forward = target.subtract(drone.position()).multiply(1, 0, 1);
+		if (forward.lengthSqr() < .001) forward = drone.getLookAngle().multiply(1, 0, 1);
+		if (forward.lengthSqr() < .001) forward = new Vec3(0, 0, 1);
+		forward = forward.normalize();
+		Vec3 right = new Vec3(-forward.z, 0, forward.x);
+		double side = 4.5 + Math.min(2, Math.max(0, attempt)) * 2.0;
+		double lift = 3.5 + Math.min(2, Math.max(0, attempt)) * 2.5;
+		List<Vec3> candidates = List.of(
+			drone.position().add(0, lift, 0),
+			drone.position().add(right.scale(side)).add(0, lift, 0),
+			drone.position().add(right.scale(-side)).add(0, lift, 0),
+			drone.position().add(forward.scale(-side)).add(0, lift, 0),
+			drone.position().add(right.scale(side)),
+			drone.position().add(right.scale(-side)),
+			drone.position().add(forward.scale(-side)),
+			new Vec3(target.x + right.x * side, target.y + lift, target.z + right.z * side),
+			new Vec3(target.x - right.x * side, target.y + lift, target.z - right.z * side));
+		Vec3 best = null;
+		double bestScore = Double.POSITIVE_INFINITY;
+		for (Vec3 candidate : candidates) {
+			if (!corridorClear(level, drone, drone.position(), candidate)) continue;
+			boolean exitsToTarget = corridorClear(level, drone, candidate, target);
+			double score = drone.position().distanceTo(candidate) * .24 + candidate.distanceTo(target)
+				- (exitsToTarget ? 12.0 : 0.0);
+			if (score < bestScore) { best = candidate; bestScore = score; }
+		}
+		return best;
+	}
+
 	static StrategicDetour strategicDetour(ServerLevel level, DroneEntity drone, Vec3 target,
 		int preferredSide) {
 		Vec3 forward = target.subtract(drone.position()).multiply(1, 0, 1);

@@ -20,14 +20,18 @@ before(() => {
   fs.writeFileSync(profile, 'package jp.morrowgear.drone.client;\nimport java.util.List;\n' + state.slice(start));
   const basisStart = renderer.indexOf('Vec3 direction = state.velocity');
   const basisEnd = renderer.indexOf('float flash =', basisStart);
+  const scaleStart = renderer.indexOf('double lengthScale=', basisEnd);
+  const scaleEnd = renderer.indexOf('poseStack.pushPose()', scaleStart);
   const bodyStart = renderer.indexOf('(pose, out) -> {', basisEnd) + '(pose, out) -> {'.length;
   const bodyEnd = renderer.indexOf('\n\t\t});', bodyStart);
   const methodsStart = renderer.indexOf('private static void cap(');
-  assert.ok(basisStart > 0 && basisEnd > basisStart && bodyStart > basisEnd && bodyEnd > bodyStart && methodsStart > bodyEnd);
+  assert.ok(basisStart > 0 && basisEnd > basisStart && scaleStart > basisEnd && scaleEnd > scaleStart
+    && bodyStart > scaleEnd && bodyEnd > bodyStart && methodsStart > bodyEnd);
   const capture = path.join(dir, 'CapturedMissileGeometry.java');
   fs.writeFileSync(capture, 'package jp.morrowgear.drone.client;\nimport static jp.morrowgear.drone.client.MissileGeometryChecks.*;\n'
     + 'final class CapturedMissileGeometry {\nstatic void shell(State state, PoseStack.Pose pose, VertexConsumer out) {\n'
-    + renderer.slice(basisStart, basisEnd) + renderer.slice(bodyStart, bodyEnd) + '\n}\n' + renderer.slice(methodsStart));
+    + renderer.slice(basisStart, basisEnd) + renderer.slice(scaleStart, scaleEnd)
+    + renderer.slice(bodyStart, bodyEnd) + '\n}\n' + renderer.slice(methodsStart));
   run('javac', ['-encoding', 'UTF-8', '-d', dir, profile, capture, 'tools/MissileCapsuleChecks.java', 'tools/MissileGeometryChecks.java']);
 });
 for (const name of ['proportions','stepped_shell','embedded_band','surface_geometry','short_exhaust','cold_eject','smoke_budget','smoke_fade'])
@@ -52,7 +56,10 @@ test('only the band and short motor are emissive, with no history, pointed nose 
   assert.match(emission, /MissileCapsuleShape.exhaustVisible\(state.motorIgnited, state.impacted\)/);
   assert.match(renderer, /state.motorIgnited = entity.motorIgnited\(\)/);
   assert.doesNotMatch(renderer, /emitBeam|for \(int fin|0\.012|-1\.65/);
-  assert.match(renderer, /a.z\(\), b.z\(\), a.radius\(\), b.radius\(\)/);
+  assert.match(renderer, /a.z\(\)\*lengthScale, b.z\(\)\*lengthScale/);
+  assert.match(renderer, /a.radius\(\)\*radiusScale, b.radius\(\)\*radiusScale/);
+  assert.match(renderer, /lengthScale=state.heavy\?3\.55:1\.0/);
+  assert.match(renderer, /radiusScale=state.heavy\?1\.45:1\.0/);
   assert.match(renderer, /MissileTrailHistory.MAX_POINTS/g);
   assert.match(renderer, /entity.attachedRenderPosition\(partialTick\)/);
 });

@@ -111,6 +111,8 @@ final class CarrierWork {
         int broken = 0;
         ItemStack tool = new ItemStack(Items.NETHERITE_PICKAXE);
         var capture = new CaptureBatch();
+        CarrierSavedData saved = CarrierSavedData.get(level.getServer());
+        String dimension = level.dimension().identifier().toString();
         try {
         for (int scanned = 0; scanned < CarrierPolicy.SCAN_PER_TICK && broken < CarrierPolicy.BREAK_PER_TICK
             && System.nanoTime() < deadline; scanned++) {
@@ -121,7 +123,6 @@ final class CarrierWork {
             BlockPos pos = new BlockPos(op.x(progress.cursor()), op.y(progress.cursor()), op.z(progress.cursor()));
             var state = level.getBlockState(pos);
             if (progress.sealed() || state.isAir()) { ship.progress = progress.advance(); ship.dirty.run(); continue; }
-            if (state.is(Blocks.BEDROCK)) { ship.progress = progress.seal(); ship.dirty.run(); continue; }
             // The cursor is strictly top-down. A higher motion-blocking block means something was
             // inserted after that column was scanned; stop instead of tunnelling underneath it.
             int visibleTop = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING,
@@ -130,39 +131,53 @@ final class CarrierWork {
                 ship.stop(CarrierPolicy.Stop.OBSTRUCTED); return;
             }
             boolean drainingFluid = CarrierProtection.drainableFluid(state);
-            boolean permitted = CarrierProtection.permitted(owner, level, pos, state);
-            if (!miningSnapshot(ship, progress)) return;
-            if (!permitted) { ship.stop(CarrierPolicy.Stop.PROTECTED); return; }
             if (!carrier.hasOperationalOwner(owner)) { ship.stop(CarrierPolicy.Stop.OWNER_ABSENT); return; }
-            if (!sameUnclaimedBlock(owner, level, pos, state)) { ship.stop(CarrierPolicy.Stop.PROTECTED); return; }
-            if (ship.pending == null || !ship.pending.pos().equals(pos) || !ship.pending.state().equals(state)) {
+            if (!sameLoadedBlock(level, pos, state)) { ship.stop(CarrierPolicy.Stop.OBSTRUCTED); return; }
+            CarrierProtection.PlasmaResponse plasma = CarrierProtection.carrierMiningResponse(state);
+            boolean recoverDrops = CarrierProtection.recoversDrops(plasma, drainingFluid);
+            CarrierCargoStorage.Plan cargoPlan = null;
+            if (recoverDrops && (ship.pending == null || !ship.pending.pos().equals(pos) || !ship.pending.state().equals(state))) {
                 List<ItemStack> drops = Block.getDrops(state, level, pos, null, owner, tool);
                 if (!miningSnapshot(ship, progress)) return;
-                if (drops.size() > 256) { ship.stop(CarrierPolicy.Stop.PROTECTED); return; }
-                ship.pending = new CarrierShip.Pending(pos, state, drops);
+                // A pathological modded loot table must not turn into an indestructible shield.
+                // Oversized residue is plasma-vaporized instead of being materialized in memory.
+                if (drops.size() > 256) recoverDrops = false;
+                else {
+                    ship.pending = new CarrierShip.Pending(pos, state, drops);
+                    ship.dirty.run();
+                }
+            }
+            CarrierShip.Pending pending = recoverDrops ? ship.pending : null;
+            if (recoverDrops) {
+                var plan = ship.cargo.plan(pending.drops());
+                if (plan.isEmpty()) { ship.pauseWork(CarrierPolicy.Stop.FULL); return; }
+                cargoPlan = plan.get();
+                if (ship.stop == CarrierPolicy.Stop.FULL) ship.resumeWork();
+            } else if (ship.pending != null && ship.pending.pos().equals(pos)) {
+                // A reload may reclassify a previously pending recoverable block as fully vaporized.
+                ship.pending = null;
                 ship.dirty.run();
             }
-            var pending = ship.pending;
-            var plan = ship.cargo.plan(pending.drops());
-            if (plan.isEmpty()) { ship.stop(CarrierPolicy.Stop.FULL); return; }
+            if (!recoverDrops && ship.stop == CarrierPolicy.Stop.FULL) ship.resumeWork();
             boolean sustained = CarrierPowerPolicy.sustainedMiningSlot(broken);
             if (!sustained && !CarrierPowerPolicy.workAvailable(ship, CarrierPowerPolicy.MINING_BURST_ENERGY_PER_BLOCK)) break;
             if (!carrier.hasOperationalOwner(owner)) { ship.stop(CarrierPolicy.Stop.OWNER_ABSENT); return; }
-            if (!sameUnclaimedBlock(owner, level, pos, state)) { ship.stop(CarrierPolicy.Stop.PROTECTED); return; }
-            if (!ship.cargo.canCommit(plan.get())) { ship.stop(CarrierPolicy.Stop.FULL); return; }
+            if (!sameLoadedBlock(level, pos, state)) { ship.stop(CarrierPolicy.Stop.OBSTRUCTED); return; }
+            if (recoverDrops && !ship.cargo.canCommit(cargoPlan)) { ship.pauseWork(CarrierPolicy.Stop.FULL); return; }
             // One server-thread transaction, not a disk-atomic transaction across chunk and saved data.
             // Suppress neighbour/shape updates so plants, leaves and falling terrain cannot break outside this transaction.
             if (!level.setBlock(pos, Blocks.AIR.defaultBlockState(), REMOVE_FLAGS)) {
                 ship.stop(CarrierPolicy.Stop.OBSTRUCTED); return;
             }
-            ship.cargo.commit(plan.get());
-            if (!drainingFluid) capture.add(pos, pending.drops());
+            saved.clearPlayerBuilt(dimension, pos.asLong());
+            if (recoverDrops) ship.cargo.commit(cargoPlan);
+            capture.add(pos, recoverDrops ? pending.drops() : List.of(), plasma);
             if (!sustained) CarrierPowerPolicy.consumeWork(ship, CarrierPowerPolicy.MINING_BURST_ENERGY_PER_BLOCK);
-            if (ship.pending == pending) ship.pending = null;
+            if (recoverDrops && ship.pending == pending) ship.pending = null;
             if (miningSnapshot(ship, progress)) ship.progress = afterRemoval(progress, pos);
             ship.dirty.run();
             broken++;
-            if (!drainingFluid) state.spawnAfterBreak(level, pos, tool, true);
+            if (recoverDrops) state.spawnAfterBreak(level, pos, tool, true);
             PlayerBlockBreakEvents.AFTER.invoker().afterBlockBreak(level, owner, pos, state, null);
         }
         } finally {
@@ -176,21 +191,32 @@ final class CarrierWork {
         private long items;
         private BlockPos lastPos;
         private List<ItemStack> lastDrops = List.of();
-        void add(BlockPos pos, List<ItemStack> drops) {
+        private CarrierProtection.PlasmaResponse response = CarrierProtection.PlasmaResponse.VAPORIZE;
+        void add(BlockPos pos, List<ItemStack> drops, CarrierProtection.PlasmaResponse material) {
             blocks++;
             items += drops.stream().mapToLong(ItemStack::getCount).sum();
             lastPos = pos.immutable();
             lastDrops = drops;
+            if (material.ordinal() > response.ordinal()) response = material;
         }
         void flush(CarrierEntity carrier) {
-            if (blocks > 0) carrier.recordCaptureBatch(lastPos, lastDrops, blocks, items);
+            if (blocks > 0) carrier.recordCaptureBatch(lastPos, lastDrops, blocks, items, response);
         }
     }
 
     private static void tickCombat(CarrierEntity carrier, CarrierShip ship, ServerLevel level, ServerPlayer owner,
                                     CarrierPolicy.Operation op) {
+        if (ship.combatWeapon == CarrierPolicy.CombatWeapon.MISSILE) {
+            tickMissileCombat(carrier, ship, level, owner, op);
+            return;
+        }
+        tickLaserCombat(carrier, ship, level, owner, op);
+    }
+
+    private static void tickLaserCombat(CarrierEntity carrier, CarrierShip ship, ServerLevel level, ServerPlayer owner,
+                                         CarrierPolicy.Operation op) {
         if (!carrier.hasOperationalOwner(owner)) { ship.stop(CarrierPolicy.Stop.OWNER_ABSENT); return; }
-        var phase = CarrierPolicy.combatPhase(ship.combatRemaining);
+        var phase = CarrierPolicy.combatPhase(ship.combatRemaining, CarrierPolicy.CombatWeapon.LASER);
         if (phase == CarrierPolicy.WorkPhase.COOLDOWN) {
             ship.combatPrimaryTarget = null;
             ship.combatBeamTargets = List.of();
@@ -205,7 +231,8 @@ final class CarrierWork {
         var visible = living.stream().filter(e -> safeCombatAim(carrier, level, owner, op, e) != null)
             .sorted(java.util.Comparator.comparing(LivingEntity::getUUID)).toList();
         if (phase == CarrierPolicy.WorkPhase.SCAN) {
-            if (CarrierPolicy.phaseTick(ship.combatRemaining) == 0) ship.combatScanAims = List.of();
+            if (CarrierPolicy.phaseTick(ship.combatRemaining, CarrierPolicy.CombatWeapon.LASER) == 0)
+                ship.combatScanAims = List.of();
             ship.combatPrimaryTarget = null;
             ship.combatBeamTargets = visible.stream().limit(CarrierPolicy.COMBAT_TARGETS)
                 .map(LivingEntity::getUUID).toList();
@@ -217,7 +244,8 @@ final class CarrierWork {
             ship.combatBeamTargets = List.of();
             if (primary == null) carrier.clearBeams();
             else carrier.recordBeams(CarrierCombatPolicy.converge(ship.combatScanAims, primary.getEyePosition(),
-                CarrierPolicy.phaseTick(ship.combatRemaining), CarrierPolicy.COMBAT_CHARGE_TICKS));
+                CarrierPolicy.phaseTick(ship.combatRemaining, CarrierPolicy.CombatWeapon.LASER),
+                CarrierPolicy.COMBAT_CHARGE_TICKS));
             if (!workPower(carrier, ship, CarrierCombatPolicy.CHARGE_ENERGY)) return;
             CarrierPowerPolicy.consumeWork(ship, CarrierCombatPolicy.CHARGE_ENERGY);
         } else if (phase == CarrierPolicy.WorkPhase.FIRE) {
@@ -253,7 +281,8 @@ final class CarrierWork {
                 if (friendlyInImpact || friendlyInBeam) {
                     ship.combatBeamTargets = List.of();
                     carrier.clearBeams();
-                } else if (CarrierPolicy.phaseTick(ship.combatRemaining) % CarrierPolicy.COMBAT_PULSE_TICKS == 0) {
+                } else if (CarrierPolicy.phaseTick(ship.combatRemaining, CarrierPolicy.CombatWeapon.LASER)
+                    % CarrierPolicy.COMBAT_PULSE_TICKS == 0) {
                     var indices = CarrierCombatPolicy.rotation(areaTargets.size(), ship.combatCursor);
                     ship.combatCursor = areaTargets.isEmpty() ? 0
                         : (Math.floorMod(ship.combatCursor, areaTargets.size()) + indices.size()) % areaTargets.size();
@@ -313,6 +342,71 @@ final class CarrierWork {
             }
         }
         if (continues(ship, op, CarrierPolicy.Mode.COMBAT) && --ship.combatRemaining <= 0) ship.stop(CarrierPolicy.Stop.COMPLETE);
+    }
+
+    private static void tickMissileCombat(CarrierEntity carrier, CarrierShip ship, ServerLevel level,
+                                          ServerPlayer owner, CarrierPolicy.Operation op) {
+        if (!carrier.hasOperationalOwner(owner)) { ship.stop(CarrierPolicy.Stop.OWNER_ABSENT); return; }
+        Vec3 from = carrier.beamOrigin();
+        var living = new java.util.ArrayList<LivingEntity>();
+        level.getEntities(net.minecraft.world.level.entity.EntityTypeTest.forClass(LivingEntity.class),
+            CarrierCombatPolicy.missileSearchBounds(op.chunkX() * 16 + 8, op.chunkZ() * 16 + 8,
+                level.getMinY(), level.getMaxY()),
+            LivingEntity::isAlive, living, CarrierMissileModulePolicy.MAX_SCAN_CONTACTS);
+        var phase = CarrierPolicy.combatPhase(ship.combatRemaining, CarrierPolicy.CombatWeapon.MISSILE);
+        if (phase == CarrierPolicy.WorkPhase.SCAN) {
+            var candidates = living.stream().filter(target -> hostile(target, owner)
+                    && CarrierMissileModulePolicy.targetable(true, true, 0, target.blockPosition().getY())
+                    && CarrierCombatPolicy.missileInRange(target.getEyePosition(), op.chunkX() * 16 + 8,
+                        op.chunkZ() * 16 + 8))
+                .sorted(java.util.Comparator.<LivingEntity>comparingDouble(target ->
+                    -(target.getMaxHealth() + target.getArmorValue() * 3.0)).thenComparing(LivingEntity::getUUID))
+                .limit(Math.min(CarrierMissileModulePolicy.MAX_PARALLEL_LOCKS, carrier.carrierMissiles())).toList();
+            ship.combatPrimaryTarget = null;
+            ship.combatBeamTargets = candidates.stream().map(LivingEntity::getUUID).toList();
+            ship.combatScanAims = candidates.stream().map(LivingEntity::getEyePosition).toList();
+            carrier.recordBeams(ship.combatScanAims);
+        } else {
+            ship.combatScanAims = List.of();
+            ship.combatBeamTargets = ship.missileLockedTargets;
+            carrier.clearBeams();
+            if (phase == CarrierPolicy.WorkPhase.FIRE
+                && CarrierPolicy.phaseTick(ship.combatRemaining, CarrierPolicy.CombatWeapon.MISSILE) == 0)
+                launchHeavySalvo(carrier, ship, owner, op, living);
+            if (ship.missileSalvoGeneration != null && ship.missileSalvoGeneration.equals(op.generation())
+                && !carrier.missileSequenceActive()) {
+                ship.stop(CarrierPolicy.Stop.COMPLETE);
+                return;
+            }
+        }
+        if (continues(ship, op, CarrierPolicy.Mode.COMBAT) && --ship.combatRemaining <= 0)
+            ship.stop(CarrierPolicy.Stop.COMPLETE);
+    }
+
+    private static void launchHeavySalvo(CarrierEntity carrier,CarrierShip ship,ServerPlayer owner,
+                                         CarrierPolicy.Operation op,List<LivingEntity> contacts){
+        if(ship.missileSalvoGeneration!=null&&ship.missileSalvoGeneration.equals(op.generation()))return;
+        ship.missileSalvoGeneration=op.generation();
+        int ammunition=Math.min(carrier.carrierMissiles(),CarrierMissileModulePolicy.MAX_SALVO);
+        if(ammunition<=0){ship.missileLockedTargets=List.of();ship.dirty.run();return;}
+        var targets=contacts.stream().filter(target->hostile(target,owner)
+                &&CarrierMissileModulePolicy.targetable(true,true,0,target.blockPosition().getY())
+                &&CarrierCombatPolicy.missileInRange(target.getEyePosition(),op.chunkX()*16+8,
+                    op.chunkZ()*16+8))
+            .sorted(java.util.Comparator.<LivingEntity>comparingDouble(target->
+                -(target.getMaxHealth()+target.getArmorValue()*3.0)).thenComparing(LivingEntity::getUUID)).limit(
+                    CarrierMissileModulePolicy.MAX_PARALLEL_LOCKS).toList();
+        var desired=targets.stream().map(target->CarrierMissileModulePolicy.assignedMissiles(
+            target.getMaxHealth()+target.getArmorValue()*3.0,
+            target.getHealth()/Math.max(1,target.getMaxHealth()),target.getY()<op.surfaceY()-4)).toList();
+        var locked=new java.util.ArrayList<java.util.UUID>(); int launched=0;
+        for(int targetIndex:CarrierMissileModulePolicy.salvoAssignments(desired,ammunition)){
+            LivingEntity target=targets.get(targetIndex);
+            if(!carrier.launchHeavyMissile(owner,target,launched))break;
+            launched++;
+            if(!locked.contains(target.getUUID()))locked.add(target.getUUID());
+        }
+        ship.missileLockedTargets=List.copyOf(locked); ship.dirty.run();
     }
 
     private static LivingEntity primaryTarget(CarrierEntity carrier, CarrierShip ship, List<LivingEntity> visible) {
@@ -395,11 +489,9 @@ final class CarrierWork {
         return continues(ship, progress.operation(), CarrierPolicy.Mode.MINING) && ship.progress == progress;
     }
 
-    private static boolean sameUnclaimedBlock(ServerPlayer owner, ServerLevel level, BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
+    private static boolean sameLoadedBlock(ServerLevel level, BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
         return level.getChunkSource().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4) != null
-            && owner.mayBuild() && !owner.isSpectator() && level.mayInteract(owner, pos) && owner.mayInteract(level, pos)
-            && state.equals(level.getBlockState(pos)) && level.getBlockEntity(pos) == null
-            && !CarrierSavedData.get(level.getServer()).playerBuilt(level.dimension().identifier().toString(), pos.asLong());
+            && level.getWorldBorder().isWithinBounds(pos) && state.equals(level.getBlockState(pos));
     }
 
     static Vec3 miningOrigin(CarrierPolicy.Progress progress, double altitude) {

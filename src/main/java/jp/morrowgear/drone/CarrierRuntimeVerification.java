@@ -11,7 +11,14 @@ import jp.morrowgear.drone.carrier.CarrierAnchor;
 import jp.morrowgear.drone.carrier.CarrierCommandPayload;
 import jp.morrowgear.drone.carrier.CarrierCommands;
 import jp.morrowgear.drone.carrier.CarrierCombatPolicy;
+import jp.morrowgear.drone.carrier.CarrierContainerTransferPolicy;
+import jp.morrowgear.drone.carrier.CarrierContainerFootprint;
 import jp.morrowgear.drone.carrier.CarrierEntity;
+import jp.morrowgear.drone.carrier.CarrierCargoContainerBlockEntity;
+import jp.morrowgear.drone.carrier.CarrierCargoVisualPolicy;
+import jp.morrowgear.drone.carrier.CarrierExpansionItemData;
+import jp.morrowgear.drone.carrier.CarrierExpansionPolicy;
+import jp.morrowgear.drone.carrier.CarrierMissileContainerBlockEntity;
 import jp.morrowgear.drone.carrier.CarrierInterior;
 import jp.morrowgear.drone.carrier.CarrierMenu;
 import jp.morrowgear.drone.carrier.CarrierModule;
@@ -29,6 +36,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.UuidArgument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -45,6 +53,7 @@ import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -61,7 +70,10 @@ public final class CarrierRuntimeVerification {
     private static final UUID NONE = new UUID(0, 0);
     // Explicitly authorized legacy retry: this old run predates persisted death observations.
     private static final UUID LEGACY_RETRY_RUN = UUID.fromString("3ff18a61-9ebf-4319-9b01-0c1fbcf37b04");
-    private static final int MAX_TICKS = 2400;
+    // Mining, combat, two physical container round-trips and four service bays all
+    // run in one bounded scenario. Each phase retains its tighter local timeout.
+    private static final int MAX_TICKS = 4400;
+    private static final int CONTAINER_TRANSFER_LIMIT = 700;
     private static final int FIXTURE_FLAGS = Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE | Block.UPDATE_SUPPRESS_DROPS;
     private static boolean registered;
     private static UUID boot = UUID.randomUUID();
@@ -94,11 +106,13 @@ public final class CarrierRuntimeVerification {
             try { run.tick(); }
             catch (RuntimeException failure) { run.fail(failure.toString()); }
         });
-        // Ordinary claim-protection path: even an extra scan in the final mining tick cannot break terrain.
+        // The verifier still exposes an ordinary claim hook. Strategic carrier mining deliberately
+        // bypasses vetoes inside its bounded operation; other break paths continue to honor it.
         PlayerBlockBreakEvents.BEFORE.register((world, player, pos, state, blockEntity) -> {
             Run run = active;
             if (run == null || run.level != world || !player.getUUID().equals(run.proof.owner)) return true;
-            return run.phase == Phase.MINING && run.mine.contains(pos) && state.is(Blocks.STONE);
+            return run.phase == Phase.MINING && (state.is(Blocks.LIGHT) || run.mine.contains(pos)
+                && (state.is(Blocks.STONE) || state.is(Blocks.DEEPSLATE)));
         });
     }
 
@@ -175,6 +189,8 @@ public final class CarrierRuntimeVerification {
         require(active == null && (proof.stage.equals("EMPTY") || proof.stage.equals("CLEANED")),
             "existing fixture: use status/stop; never spawn a second carrier");
         ServerLevel level = player.level();
+        clearStaleContainerFixtures(level,proof,player);
+        clearStaleVerifierEntities(level);
         require(level == level.getServer().overworld(), "start in the exterior overworld");
         require(CarrierModule.ENTITY != null && CarrierModule.MENU != null, "carrier module is not registered");
         var live = CarrierSavedData.get(level.getServer()).ships().entrySet().stream().filter(e -> !e.getValue().destroyed).toList();
@@ -208,8 +224,11 @@ public final class CarrierRuntimeVerification {
         int belly = ground + 18;
         require(belly + 12 < level.getMaxY(), "insufficient vertical deployment space");
         BlockPos arena = new BlockPos(x - 8, ground + 3, z - 8);
-        for (BlockPos pos : BlockPos.betweenClosed(arena, arena.offset(15, 14, 15)))
-            require(level.getBlockState(pos).isAir(), "fixture column is not empty: " + pos);
+        for (BlockPos pos : BlockPos.betweenClosed(arena, arena.offset(15, 14, 15))) {
+            if(level.getBlockState(pos).is(Blocks.LIGHT))level.removeBlock(pos,false);
+            require(level.getBlockState(pos).isAir(), "fixture column is not empty: " + pos
+                +" state="+level.getBlockState(pos)+" / arena="+arena+" / priorArena="+proof.arena);
+        }
         require(level.getEntitiesOfClass(LivingEntity.class, new AABB(arena.getX(), level.getMinY(), arena.getZ(),
             arena.getX() + 16, belly + 12, arena.getZ() + 16), LivingEntity::isAlive).isEmpty(),
             "fixture column contains a living entity; player must stand outside chunk " + (x >> 4) + "," + (z >> 4));
@@ -237,15 +256,55 @@ public final class CarrierRuntimeVerification {
         ship.supplies.setChanged();
         for (int y = 0; y < 2; y++) for (int dx = 7; dx <= 9; dx++) for (int dz = 7; dz <= 9; dz++) {
             BlockPos pos = arena.offset(dx, y, dz);
-            active.place(level, pos, Blocks.STONE.defaultBlockState());
+            // The upper stone layer must be fully vaporized. The deepslate layer is explicitly
+            // ablative and must survive as recoverable residue, proving both material paths.
+            active.place(level, pos, y == 0 ? Blocks.DEEPSLATE.defaultBlockState() : Blocks.STONE.defaultBlockState());
             active.mine.add(pos);
         }
         CarrierMenu.open(player, proof.ship);
         active.pass(existing == null ? "DEPLOYMENT" : "EXISTING_DEPLOYMENT", existing == null
-            ? "normal owned exterior deployment; bounded fixture=18 stone"
+            ? "normal owned exterior deployment; bounded fixture=9 vaporized stone + 9 ablative deepslate"
             : "one manually deployed owned exterior reused; it will never be deleted by cleanup");
         proof.mark("RUNNING", "FUEL: waiting for ordinary supply-input charging");
         return 1;
+    }
+
+    /** Failed runs may retain evidence; a fresh dedicated-world run removes only verifier-tagged entities. */
+    private static void clearStaleVerifierEntities(ServerLevel level) {
+        var stale = new java.util.ArrayList<Entity>();
+        int inspected = 0;
+        for (ServerLevel world : level.getServer().getAllLevels()) for (Entity entity : world.getAllEntities()) {
+            require(++inspected <= 4096, "bounded stale verifier cleanup exceeded");
+            boolean tagged = entity.entityTags().stream().anyMatch(tag -> tag.startsWith("MG-CARRIER-VERIFY-"));
+            if (!tagged) continue;
+            if (entity instanceof CarrierEntity) {
+                entity.entityTags().stream().filter(tag -> tag.startsWith("MG-CARRIER-VERIFY-"))
+                    .toList().forEach(entity::removeTag);
+            } else if (!(entity instanceof ServerPlayer)) stale.add(entity);
+        }
+        stale.forEach(Entity::discard);
+    }
+
+    /** A failed crane test may leave its reserved physical block after the tagged carrier is removed. */
+    private static void clearStaleContainerFixtures(ServerLevel level,Proof proof,ServerPlayer player) {
+        if(!proof.stage.equals("CLEANED"))return;
+        // Older verifier revisions removed only the anchor. Remove only orphaned proxy cells over
+        // the bounded historical test neighborhood; valid player containers remain untouched.
+        for(BlockPos cursor:BlockPos.betweenClosed(proof.arena.offset(-48,-4,-48),proof.arena.offset(63,20,63))){
+            BlockState state=level.getBlockState(cursor);
+            if(state.is(CarrierModule.CONTAINER_PART_BLOCK)
+                &&CarrierContainerFootprint.resolveAnchor(level,cursor)==null)level.removeBlock(cursor,false);
+        }
+        BlockPos min=proof.arena.offset(-CarrierContainerFootprint.MAX_X,0,-CarrierContainerFootprint.MAX_Z);
+        BlockPos max=proof.arena.offset(15+CarrierContainerFootprint.MAX_X,
+            CarrierContainerFootprint.MAX_Y,15+CarrierContainerFootprint.MAX_Z);
+        for(BlockPos cursor:BlockPos.betweenClosed(min,max)){
+            BlockState state=level.getBlockState(cursor);
+            if(state.is(CarrierModule.CARGO_CONTAINER_BLOCK)||state.is(CarrierModule.MISSILE_CONTAINER_BLOCK))
+                CarrierContainerFootprint.removeContainer(level,cursor.immutable());
+            else if(state.is(CarrierModule.CONTAINER_PART_BLOCK))
+                level.removeBlock(cursor,false);
+        }
     }
 
     static boolean retryableCombat(String stage, String message, int recordedDrones) {
@@ -254,15 +313,15 @@ public final class CarrierRuntimeVerification {
 
     static boolean baselineCargo(Container cargo) {
         int total = 0;
-        ItemStack cobblestone = new ItemStack(Items.COBBLESTONE);
+        ItemStack residue = new ItemStack(Items.COBBLED_DEEPSLATE);
         for (int slot = 0; slot < cargo.getContainerSize(); slot++) {
             ItemStack stack = cargo.getItem(slot);
             if (stack.isEmpty()) continue;
-            if (!ItemStack.isSameItemSameComponents(stack, cobblestone)) return false;
+            if (!ItemStack.isSameItemSameComponents(stack, residue)) return false;
             total += stack.getCount();
-            if (total > 18) return false;
+            if (total > 9) return false;
         }
-        return total == 18;
+        return total == 9;
     }
 
     static boolean absentTargetRetry(UUID run, UUID confirmedRun, UUID target, CombatEvidence evidence) {
@@ -294,7 +353,7 @@ public final class CarrierRuntimeVerification {
             "retry cannot add or replace another carrier");
         require(ship.mode == CarrierPolicy.Mode.IDLE && ship.destination == null && ship.preview == null
             && ship.pending == null && ship.bay.snapshot().isEmpty(), "active work, unknown pending cargo or bay lease; retry refused");
-        require(baselineCargo(ship.cargo), "retry requires only the existing 18 ordinary cobblestone; cargo is never reset");
+        require(baselineCargo(ship.cargo), "retry requires only the existing 9 ablative deepslate residue; cargo is never reset");
         require(ship.progress != null && ship.progress.operation().dimension().equals(proof.origin.dimension())
             && ship.progress.operation().chunkX() == (proof.arena.getX() >> 4)
             && ship.progress.operation().chunkZ() == (proof.arena.getZ() >> 4), "recorded mining arena changed");
@@ -307,10 +366,12 @@ public final class CarrierRuntimeVerification {
         require(proof.fixtures.size() == 18, "unexpected fixture manifest; no automatic restoration");
         Set<BlockPos> seen = new HashSet<>();
         for (Fixture fixture : proof.fixtures) {
-            require(fixture.state().is(Blocks.STONE) && validFixture(level.getServer(), proof, fixture)
+            require((fixture.state().is(Blocks.STONE) || fixture.state().is(Blocks.DEEPSLATE))
+                && validFixture(level.getServer(), proof, fixture)
                 && fixture.at().dimension().equals(proof.origin.dimension()) && seen.add(fixture.at().pos()), "fixture manifest changed");
             BlockPos pos = fixture.at().pos();
-            require(level.getBlockState(pos).equals(pos.getY() == proof.arena.getY() ? Blocks.STONE.defaultBlockState() : Blocks.AIR.defaultBlockState())
+            require(level.getBlockState(pos).equals(pos.getY() == proof.arena.getY()
+                    ? Blocks.DEEPSLATE.defaultBlockState() : Blocks.AIR.defaultBlockState())
                 && level.getBlockEntity(pos) == null && !CarrierSavedData.get(level.getServer()).playerBuilt(proof.origin.dimension(), pos.asLong()),
                 "fixture changed or player-replaced: " + pos);
         }
@@ -425,7 +486,8 @@ public final class CarrierRuntimeVerification {
             + " pos=" + entity.blockPosition() + " eye=" + entity.getEyePosition();
     }
 
-    private enum Phase { FUEL, POSITIONING, ARM_MINING, MINING, ARM_COMBAT, COMBAT, BAYS }
+    private enum Phase { FUEL, POSITIONING, ARM_MINING, MINING, ARM_COMBAT, COMBAT,
+        CONTAINER_LOAD, CONTAINER_UNLOAD, MISSILE_LOAD, ARM_MISSILE, MISSILE_FIRE, MISSILE_UNLOAD, BAYS }
 
     private static final class Run {
         final MinecraftServer server;
@@ -444,6 +506,11 @@ public final class CarrierRuntimeVerification {
         long phaseTick;
         boolean combatPreview;
         UUID combatGeneration = NONE;
+        UUID containerId = NONE;
+        BlockPos containerLoad, containerUnload;
+        boolean containerCommanded;
+        UUID missileTarget = NONE;
+        float missileTargetHealth;
 
         Run(ServerLevel level, Proof proof) {
             this.level = level; this.server = level.getServer(); this.proof = proof;
@@ -497,15 +564,20 @@ public final class CarrierRuntimeVerification {
                     require(elapsed < 400, "18-block mining timed out: " + ship.stop);
                     long removed = mine.stream().filter(p -> level.getBlockState(p).isAir()).count();
                     if (removed < 18) {
-                        require(ship.mode == CarrierPolicy.Mode.MINING, "mining stopped before fixture completion: " + ship.stop);
+                        require(ship.mode == CarrierPolicy.Mode.MINING, "mining stopped before fixture completion: "
+                            + ship.stop + " / " + miningFixtureDiagnostics(player));
                         return;
                     }
-                    require(count(ship.cargo, Items.COBBLESTONE) == 18, "mined blocks and actual cargo do not conserve 18 cobblestone");
+                    require(count(ship.cargo, Items.COBBLESTONE) == 0,
+                        "fully vaporized stone incorrectly produced recoverable cargo");
+                    require(count(ship.cargo, Items.COBBLED_DEEPSLATE) == 9,
+                        "ablative deepslate did not conserve exactly 9 recoverable residue");
                     send(player, CarrierCommandPayload.Action.STOP, NONE);
                     require(ship.mode == CarrierPolicy.Mode.IDLE, "normal stop command refused");
-                    pass("MINING_LOOT", "18/18 blocks removed and stored; STOP, not full-height completion");
+                    pass("MINING_PLASMA_MATERIALS",
+                        "18/18 removed; 9 stone vaporized, 9 deepslate residue stored; STOP, not full-height completion");
                     for (int dx = 7; dx <= 9; dx++) for (int dz = 7; dz <= 9; dz++)
-                        place(level, proof.arena.offset(dx, 0, dz), Blocks.STONE.defaultBlockState());
+                        place(level, proof.arena.offset(dx, 0, dz), Blocks.DEEPSLATE.defaultBlockState());
                     for (BlockPos pos : terrain()) combatTerrain.add(level.getBlockState(pos));
                     spawnCombatTarget();
                     next(Phase.ARM_COMBAT);
@@ -561,6 +633,123 @@ public final class CarrierRuntimeVerification {
                     proof.target = NONE; proof.setDirty();
                     pass("COMBAT_NON_TERRAIN", "observed damage=" + proof.combat.damage() + "; successful fire energy=" + proof.combat.spent()
                         + "; observed killed=" + proof.combat.killed() + "; normal full cycle and 768 block states unchanged");
+                    prepareCargoContainer(player);
+                    next(Phase.CONTAINER_LOAD);
+                }
+                case CONTAINER_LOAD -> {
+                    require(elapsed < CONTAINER_TRANSFER_LIMIT, "physical cargo-container loading timed out: "+ship.stop
+                        +" / phase="+carrier.transferPhase()+" / alignment="+carrier.transferAlignmentError()
+                        +" / carrier="+carrier.position()+" / container="+containerLoad);
+                    if(!containerCommanded){
+                        require("ACCEPTED".equals(carrier.requestContainerLoad(player,containerLoad)),
+                            "physical cargo-container load command was refused");
+                        containerCommanded=true; return;
+                    }
+                    if(carrier.transferActive()){requireCraneAlignment(carrier);return;}
+                    require(level.getBlockEntity(containerLoad)==null,"loaded ground container still exists");
+                    require(carrier.expansionModules(CarrierExpansionPolicy.Type.CARGO)==1,"cargo hardpoint did not receive exactly one module");
+                    require(count(ship.cargo,Items.DIAMOND)==1,"loaded container contents did not enter carrier storage");
+                    int hardpoint=carrier.attachedExpansions().stream().filter(a->a.id().equals(containerId))
+                        .mapToInt(jp.morrowgear.drone.carrier.CarrierExpansionBay.Attached::hardpoint).findFirst().orElse(-1);
+                    require(hardpoint>=0,"loaded container identity was not retained");
+                    require("ACCEPTED".equals(carrier.requestContainerUnload(player,hardpoint,containerUnload)),
+                        "physical cargo-container unload command was refused");
+                    containerUnload=carrier.transferContainerPos();
+                    next(Phase.CONTAINER_UNLOAD); containerCommanded=true;
+                }
+                case CONTAINER_UNLOAD -> {
+                    require(elapsed < CONTAINER_TRANSFER_LIMIT,"physical cargo-container unloading timed out: "+ship.stop
+                        +" / phase="+carrier.transferPhase()+" / alignment="+carrier.transferAlignmentError());
+                    if(carrier.transferActive()){requireCraneAlignment(carrier);return;}
+                    require(level.getBlockEntity(containerUnload) instanceof CarrierCargoContainerBlockEntity,
+                        "unloaded cargo container block entity missing");
+                    CarrierCargoContainerBlockEntity placed=(CarrierCargoContainerBlockEntity)level.getBlockEntity(containerUnload);
+                    require(placed.moduleId().equals(containerId),"unloaded cargo container identity changed");
+                    require(count(placed,Items.DIAMOND)==1,"unloaded cargo container lost its contents");
+                    require(carrier.expansionModules(CarrierExpansionPolicy.Type.CARGO)==0,"unloaded hardpoint remained occupied");
+                    require(count(ship.cargo,Items.DIAMOND)==0,"unloaded module contents remained duplicated in carrier storage");
+                    CarrierContainerFootprint.removeContainer(level,containerUnload);
+                    pass("CARGO_CONTAINER_ROUND_TRIP","placed, winch-loaded, hardpoint-attached and unloaded with identity/content conservation");
+                    prepareMissileContainer(player);
+                    next(Phase.MISSILE_LOAD);
+                }
+                case MISSILE_LOAD -> {
+                    require(elapsed<CONTAINER_TRANSFER_LIMIT,"physical missile-container loading timed out: "+ship.stop);
+                    if(!containerCommanded){
+                        require("ACCEPTED".equals(carrier.requestContainerLoad(player,containerLoad)),
+                            "physical missile-container load command was refused");
+                        containerCommanded=true; return;
+                    }
+                    if(carrier.transferActive()){requireCraneAlignment(carrier);return;}
+                    require(level.getBlockEntity(containerLoad)==null,"loaded missile container still exists");
+                    require(carrier.expansionModules(CarrierExpansionPolicy.Type.MISSILE_BATTERY)==1,
+                        "missile hardpoint did not receive exactly one module");
+                    int hardpoint=carrier.attachedExpansions().stream().filter(a->a.id().equals(containerId))
+                        .mapToInt(jp.morrowgear.drone.carrier.CarrierExpansionBay.Attached::hardpoint).findFirst().orElse(-1);
+                    require(hardpoint>=0,"loaded missile-container identity was not retained");
+                    require(CarrierCargoVisualPolicy.ordnanceCapable(hardpoint),
+                        "missile container was attached outside an armored ordnance trunk");
+                    require(carrier.carrierMissiles()==2,"loaded missile cells were not retained");
+                    Mob target=spawnHeavyMissileTarget();
+                    missileTarget=target.getUUID(); missileTargetHealth=target.getHealth();
+                    sendAt(player,CarrierCommandPayload.Action.PREVIEW_MISSILE_COMBAT,NONE,carrier.blockPosition());
+                    require(ship.preview!=null&&ship.previewMode==CarrierPolicy.Mode.COMBAT
+                        &&ship.combatWeapon==CarrierPolicy.CombatWeapon.MISSILE,
+                        "normal missile-only combat preview refused");
+                    next(Phase.ARM_MISSILE); containerCommanded=false;
+                }
+                case ARM_MISSILE -> {
+                    if(elapsed<6)return;
+                    require(ship.preview!=null,"missile-only combat preview was lost");
+                    send(player,CarrierCommandPayload.Action.ACTIVATE,ship.preview.generation());
+                    require(ship.mode==CarrierPolicy.Mode.COMBAT
+                        &&ship.combatWeapon==CarrierPolicy.CombatWeapon.MISSILE,
+                        "normal missile-only combat activation refused");
+                    require(carrier.carrierMissiles()==2,"missile cells changed before the physical launch sequence");
+                    next(Phase.MISSILE_FIRE);
+                }
+                case MISSILE_FIRE -> {
+                    Entity missileTargetEntity=level.getEntity(missileTarget);
+                    var activeHeavyMissiles=level.getEntitiesOfClass(MorrowgearMissileEntity.class,
+                        new AABB(carrier.blockPosition()).inflate(384),m->m.heavy()&&m.ownedBy(player.getUUID()));
+                    require(elapsed<CarrierHeavyMissilePolicy.MAX_FLIGHT_TICKS+80,
+                        "carrier heavy missile did not resolve within its bounded launch and flight window"
+                            +" / rounds="+carrier.carrierMissiles()+" / sequence="+carrier.missileSequenceActive()
+                            +" / mode="+ship.mode+" / stop="+ship.stop
+                            +" / target="+(missileTargetEntity instanceof LivingEntity living?living.getHealth():"missing")
+                            +" / active="+activeHeavyMissiles.stream().map(m->m.flightPhase()+"@"+m.blockPosition()).toList());
+                    if(carrier.carrierMissiles()==2)return;
+                    require(carrier.carrierMissiles()==1,"heavy missile did not consume exactly one physical cell at ejection");
+                    Entity entity=missileTargetEntity;
+                    boolean damaged=entity==null||(entity instanceof LivingEntity living&&living.getHealth()<missileTargetHealth);
+                    boolean activeMissile=!activeHeavyMissiles.isEmpty();
+                    if(!damaged||activeMissile||carrier.missileSequenceActive()
+                        ||ship.mode!=CarrierPolicy.Mode.IDLE)return;
+                    if(entity!=null)entity.discard();
+                    int hardpoint=carrier.attachedExpansions().stream().filter(a->a.id().equals(containerId))
+                        .mapToInt(jp.morrowgear.drone.carrier.CarrierExpansionBay.Attached::hardpoint).findFirst().orElse(-1);
+                    require(hardpoint>=0,"fired missile container identity was lost");
+                    require("ACCEPTED".equals(carrier.requestContainerUnload(player,hardpoint,containerUnload)),
+                        "physical missile-container unload command was refused");
+                    containerUnload=carrier.transferContainerPos();
+                    next(Phase.MISSILE_UNLOAD); containerCommanded=true;
+                }
+                case MISSILE_UNLOAD -> {
+                    require(elapsed<CONTAINER_TRANSFER_LIMIT,"physical missile-container unloading timed out: "+ship.stop
+                        +" / phase="+carrier.transferPhase()+" / alignment="+carrier.transferAlignmentError()
+                        +" / carrier="+carrier.position()+" / container="+containerUnload
+                        +" / destination="+ship.destination+" / energy="+ship.energy
+                        +" / detail="+carrier.transferDetail()+" / transferTick="+carrier.transferTick());
+                    if(carrier.transferActive()){requireCraneAlignment(carrier);return;}
+                    require(level.getBlockEntity(containerUnload) instanceof CarrierMissileContainerBlockEntity,
+                        "unloaded missile container block entity missing");
+                    CarrierMissileContainerBlockEntity placed=(CarrierMissileContainerBlockEntity)level.getBlockEntity(containerUnload);
+                    require(placed.moduleId().equals(containerId),"unloaded missile container identity changed");
+                    require(placed.missiles()==1,"unloaded missile container did not preserve the remaining physical round");
+                    require(carrier.expansionModules(CarrierExpansionPolicy.Type.MISSILE_BATTERY)==0,
+                        "unloaded missile hardpoint remained occupied");
+                    CarrierContainerFootprint.removeContainer(level,containerUnload);
+                    pass("MISSILE_CONTAINER_ROUND_TRIP","two rounds loaded, one launched/damaged its target, one unloaded with identity conservation");
                     spawnAndReserve(player);
                     next(Phase.BAYS);
                 }
@@ -591,7 +780,8 @@ public final class CarrierRuntimeVerification {
                         drone.setMode(DroneMode.STANDBY);
                     }
                     if (resumed.size() < 4 || !ship.bay.snapshot().isEmpty()) return;
-                    require(count(ship.cargo, Items.COBBLESTONE) == 18, "bay service consumed unrelated mining cargo");
+                    require(count(ship.cargo, Items.COBBLED_DEEPSLATE) == 9,
+                        "bay service consumed unrelated ablative mining residue");
                     pass("FOUR_BAYS", "4 physical arrivals, resource service, unchanged identities and physical task resume; loot retained");
                     proof.mark("READY", "runtime checks passed; fixture retained for UI and persistence_prepare at the boarding pad");
                     say(player, "READY / runtime checks complete / ship=" + proof.ship + " / boarding=" + carrier.boardingProjection());
@@ -601,7 +791,84 @@ public final class CarrierRuntimeVerification {
             if (active != null && elapsed % 100 == 0) proof.mark("RUNNING", phase + " elapsed=" + elapsed);
         }
 
+        void prepareCargoContainer(ServerPlayer player){
+            containerLoad=proof.arena.offset(2,0,2); containerUnload=proof.arena.offset(13,0,2);
+            require(level.getBlockState(containerLoad).isAir()&&level.getBlockState(containerUnload).isAir(),
+                "container round-trip sites are occupied");
+            containerId=UUID.randomUUID();
+            ItemStack module=new ItemStack(CarrierModule.CARGO_MODULE_ITEM);
+            CarrierExpansionItemData.write(module,new CarrierExpansionItemData.Identity(containerId,proof.owner,
+                CarrierExpansionPolicy.Type.CARGO));
+            NonNullList<ItemStack> contents=NonNullList.withSize(CarrierPolicy.STORAGE_SLOTS_PER_MODULE,ItemStack.EMPTY);
+            contents.set(0,new ItemStack(Items.DIAMOND));
+            module.set(DataComponents.CONTAINER,ItemContainerContents.fromItems(contents));
+            require(level.setBlock(containerLoad,CarrierModule.CARGO_CONTAINER_BLOCK.defaultBlockState(),FIXTURE_FLAGS),
+                "cargo container placement failed");
+            require(level.getBlockEntity(containerLoad) instanceof CarrierCargoContainerBlockEntity,
+                "cargo container block entity creation failed");
+            CarrierCargoContainerBlockEntity placed=(CarrierCargoContainerBlockEntity)level.getBlockEntity(containerLoad);
+            placed.initialize(player,module);
+            containerCommanded=false;
+        }
+
+        void prepareMissileContainer(ServerPlayer player){
+            containerId=UUID.randomUUID();
+            ItemStack module=new ItemStack(CarrierModule.MISSILE_MODULE_ITEM);
+            CarrierExpansionItemData.write(module,new CarrierExpansionItemData.Identity(containerId,proof.owner,
+                CarrierExpansionPolicy.Type.MISSILE_BATTERY));
+            NonNullList<ItemStack> contents=NonNullList.withSize(CarrierMissileContainerBlockEntity.UI_SIZE,ItemStack.EMPTY);
+            contents.set(0,new ItemStack(CarrierModule.BUNKER_MISSILE_ITEM));
+            contents.set(1,new ItemStack(CarrierModule.BUNKER_MISSILE_ITEM));
+            module.set(DataComponents.CONTAINER,ItemContainerContents.fromItems(contents));
+            require(level.setBlock(containerLoad,CarrierModule.MISSILE_CONTAINER_BLOCK.defaultBlockState(),FIXTURE_FLAGS),
+                "missile container placement failed");
+            require(level.getBlockEntity(containerLoad) instanceof CarrierMissileContainerBlockEntity,
+                "missile container block entity creation failed");
+            ((CarrierMissileContainerBlockEntity)level.getBlockEntity(containerLoad)).initialize(player,module);
+            containerCommanded=false;
+        }
+
+        Mob spawnHeavyMissileTarget(){
+            Mob target=EntityTypes.HUSK.create(level,EntitySpawnReason.TRIGGERED);
+            require(target!=null&&target.getAttribute(Attributes.MAX_HEALTH)!=null,"heavy missile target creation failed");
+            target.addTag(proof.tag()); target.setPersistenceRequired(); target.setNoAi(true);
+            target.setNoGravity(true); target.setSilent(true);
+            target.getAttribute(Attributes.MAX_HEALTH).setBaseValue(30); target.setHealth(20);
+            target.setPos(Vec3.atCenterOf(proof.arena.offset(8,3,8)));
+            require(level.addFreshEntity(target),"heavy missile target spawn refused");
+            return target;
+        }
+
         Iterable<BlockPos> terrain() { return BlockPos.betweenClosed(proof.arena, proof.arena.offset(15, 2, 15)); }
+
+        String miningFixtureDiagnostics(ServerPlayer player) {
+            long remaining = mine.stream().filter(pos -> !level.getBlockState(pos).isAir()).count();
+            String cursor = "none";
+            CarrierShip ship = carrier.ship();
+            if (ship != null && ship.progress != null && !ship.progress.complete()) {
+                var progress = ship.progress;
+                var operation = progress.operation();
+                BlockPos pos = new BlockPos(operation.x(progress.cursor()), operation.y(progress.cursor()),
+                    operation.z(progress.cursor()));
+                BlockState state = level.getBlockState(pos);
+                cursor = pos.toShortString() + ":" + state + ":natural="
+                    + state.is(CarrierProtection.NATURAL) + ":plasma="
+                    + CarrierProtection.carrierMiningResponse(state) + ":playerBuilt="
+                    + CarrierSavedData.get(server).playerBuilt(level.dimension().identifier().toString(), pos.asLong());
+            }
+            for (BlockPos pos : mine.stream().sorted(java.util.Comparator.comparingLong(BlockPos::asLong)).toList()) {
+                BlockState state = level.getBlockState(pos);
+                if (state.isAir()) continue;
+                boolean recorded = CarrierSavedData.get(server).playerBuilt(
+                    level.dimension().identifier().toString(), pos.asLong());
+                return "remaining=" + remaining + " / cursor=" + cursor + " / first=" + pos.toShortString() + " / state=" + state
+                    + " / natural=" + state.is(CarrierProtection.NATURAL)
+                    + " / plasma=" + CarrierProtection.carrierMiningResponse(state)
+                    + " / playerBuilt=" + recorded
+                    + " / strategicBreak=true";
+            }
+            return "remaining=" + remaining + " / no remaining fixture block";
+        }
 
         void spawnCombatTarget() {
             Mob target = EntityTypes.HUSK.create(level, EntitySpawnReason.TRIGGERED);
@@ -664,9 +931,17 @@ public final class CarrierRuntimeVerification {
         }
 
         void send(ServerPlayer player, CarrierCommandPayload.Action action, UUID generation) {
+            sendAt(player, action, generation, proof.arena);
+        }
+
+        void sendAt(ServerPlayer player, CarrierCommandPayload.Action action, UUID generation, BlockPos position) {
+            // A client can close the screen while the accepted autonomous operation keeps running.
+            // Reopen through the same public menu path before the next explicit operator command.
+            if(!(player.containerMenu instanceof CarrierMenu)&&CarrierMenu.accessible(player,proof.ship))
+                CarrierMenu.open(player,proof.ship);
             require(player.containerMenu instanceof CarrierMenu menu && menu.shipId.equals(proof.ship), "normal carrier menu context was closed or replaced");
             CarrierCommands.handle(new CarrierCommandPayload(player.containerMenu.containerId, proof.ship, action,
-                generation, proof.arena.getX(), proof.arena.getY(), proof.arena.getZ(), NONE), player);
+                generation, position.getX(), position.getY(), position.getZ(), NONE), player);
         }
 
         void next(Phase next) { phase = next; phaseTick = level.getGameTime(); }
@@ -858,7 +1133,8 @@ public final class CarrierRuntimeVerification {
 
     private static boolean validFixture(MinecraftServer server, Proof proof, Fixture fixture) {
         BlockPos pos = fixture.at().pos();
-        if (fixture.state().is(Blocks.STONE)) return fixture.at().dimension().equals(proof.origin.dimension())
+        if (fixture.state().is(Blocks.STONE) || fixture.state().is(Blocks.DEEPSLATE))
+            return fixture.at().dimension().equals(proof.origin.dimension())
             && pos.getX() >= proof.arena.getX() + 7 && pos.getX() <= proof.arena.getX() + 9
             && pos.getZ() >= proof.arena.getZ() + 7 && pos.getZ() <= proof.arena.getZ() + 9
             && pos.getY() >= proof.arena.getY() && pos.getY() <= proof.arena.getY() + 1;
@@ -890,6 +1166,14 @@ public final class CarrierRuntimeVerification {
             if (!ItemStack.matches(a, b)) return false;
         }
         return true;
+    }
+    private static void requireCraneAlignment(CarrierEntity carrier) {
+        switch(carrier.transferPhase()) {
+            case RESERVED,APPROACH,ALIGN,COMPLETE,HOLD,ABORTED -> { return; }
+            default -> require(carrier.transferAlignmentError()
+                <=CarrierContainerTransferPolicy.CONTAINER_ALIGNMENT_TOLERANCE+1e-6,
+                "carrier hardpoint was not vertically aligned over its container: "+carrier.transferAlignmentError());
+        }
     }
     private static void require(boolean condition, String message) { if (!condition) throw new IllegalStateException(message); }
     private static void say(ServerPlayer player, String message) {

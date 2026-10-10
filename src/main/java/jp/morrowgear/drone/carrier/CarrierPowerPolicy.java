@@ -66,7 +66,7 @@ public final class CarrierPowerPolicy {
         return brokenThisTick >= 0 && brokenThisTick < SUSTAINED_MINING_BLOCKS_PER_TICK;
     }
 
-    /** Solid-block upper budget; air and sealed bedrock columns complete sooner. */
+    /** Solid-block upper budget; air cells complete sooner, while bedrock is excavated normally. */
     public static int miningTickBudget(CarrierPolicy.Operation operation) {
         int preparation = CarrierPolicy.SCAN_TICKS + CarrierPolicy.MINING_CHARGE_TICKS;
         return preparation + (operation.volume() + SUSTAINED_MINING_BLOCKS_PER_TICK - 1)

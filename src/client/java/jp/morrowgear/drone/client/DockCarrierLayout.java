@@ -7,4 +7,7 @@ final class DockCarrierLayout {
     static int dockInventoryX(int width) { return Math.max(0, (dockDetailsX(width) - 182) / 2); }
     static int dockInventoryY(int height) { return Math.max(0, (height - 166) / 2); }
     static int supplyTabWidth(int width, int x) { return Math.max(20, Math.min(120, (width - x - 14) / 3)); }
+    static int supplyTabWidth(int width, int x, int count) {
+        return Math.max(20, Math.min(120, (width - x - 6 - Math.max(0, count - 1) * 4) / Math.max(1, count)));
+    }
 }

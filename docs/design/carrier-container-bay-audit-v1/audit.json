@@ -1,0 +1,83 @@
+{
+  "modelChanged": false,
+  "runtimeHullBottom": 0.2,
+  "runtimeBayCollarTop": -0.18,
+  "detachedGapBlocks": 0.38,
+  "containerOriginY": -1.92,
+  "containerTopFromValidatedMesh": 0.6190901565551759,
+  "hardpointSamples": [
+    {
+      "slot": 0,
+      "x": -11.4,
+      "z": -8.4,
+      "hit": true,
+      "object": "CURRENT_CARRIER_Continuous_low_armored_flying_hull",
+      "localHullUnderside": 4.799999237060547,
+      "collarGap": 4.979999237060547
+    },
+    {
+      "slot": 1,
+      "x": -11.4,
+      "z": -2.8,
+      "hit": true,
+      "object": "CURRENT_CARRIER_Bay_0_internal_floor",
+      "localHullUnderside": 2.0200014114379883,
+      "collarGap": 2.2000014114379884
+    },
+    {
+      "slot": 2,
+      "x": -11.4,
+      "z": 2.8,
+      "hit": true,
+      "object": "CURRENT_CARRIER_Continuous_low_armored_flying_hull",
+      "localHullUnderside": 2.4894676208496094,
+      "collarGap": 2.6694676208496095
+    },
+    {
+      "slot": 3,
+      "x": -11.4,
+      "z": 8.4,
+      "hit": true,
+      "object": "CURRENT_CARRIER_Continuous_low_armored_flying_hull",
+      "localHullUnderside": 2.486361503601074,
+      "collarGap": 2.6663615036010744
+    },
+    {
+      "slot": 4,
+      "x": 11.4,
+      "z": -8.4,
+      "hit": true,
+      "object": "CURRENT_CARRIER_Continuous_low_armored_flying_hull",
+      "localHullUnderside": 4.80000114440918,
+      "collarGap": 4.980001144409179
+    },
+    {
+      "slot": 5,
+      "x": 11.4,
+      "z": -2.8,
+      "hit": true,
+      "object": "CURRENT_CARRIER_Bay_0_internal_floor",
+      "localHullUnderside": 2.0200014114379883,
+      "collarGap": 2.2000014114379884
+    },
+    {
+      "slot": 6,
+      "x": 11.4,
+      "z": 2.8,
+      "hit": true,
+      "object": "CURRENT_CARRIER_Continuous_low_armored_flying_hull",
+      "localHullUnderside": 2.4899492263793945,
+      "collarGap": 2.6699492263793947
+    },
+    {
+      "slot": 7,
+      "x": 11.4,
+      "z": 8.4,
+      "hit": true,
+      "object": "CURRENT_CARRIER_Continuous_low_armored_flying_hull",
+      "localHullUnderside": 2.4864282608032227,
+      "collarGap": 2.666428260803223
+    }
+  ],
+  "finding": "All eight runtime bay collars are detached 2.20 to 4.98 blocks below their local hull surfaces; the attached container also fails to reach those local surfaces."
+}

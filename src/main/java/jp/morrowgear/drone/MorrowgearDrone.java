@@ -105,6 +105,11 @@ public final class MorrowgearDrone implements ModInitializer {
 		EntityType.Builder.<ChargingRelayEntity>of(ChargingRelayEntity::new, MobCategory.MISC)
 			.sized(0.9f, 0.38f).clientTrackingRange(16).updateInterval(1)
 	);
+	public static final EntityType<CargoLiftLoadEntity> CARGO_LIFT_LOAD = registerEntity(
+		"cargo_lift_load",
+		EntityType.Builder.<CargoLiftLoadEntity>of(CargoLiftLoadEntity::new, MobCategory.MISC)
+			.sized(5.0f, 2.4f).clientTrackingRange(20).updateInterval(1)
+	);
 
 	public static final Item CONTROLLER = registerItem("controller", Item::new, new Item.Properties().stacksTo(1));
 	public static final Item SCOUT_MODULE = registerItem("scout_module", Item::new, new Item.Properties().stacksTo(16));
@@ -153,6 +158,24 @@ public final class MorrowgearDrone implements ModInitializer {
 	public static final SoundEvent CARRIER_MINING_CORE_SOUND = registerSound("carrier_mining_core", 192.0f);
 	public static final SoundEvent CARRIER_MINING_RELEASE_SOUND = registerSound("carrier_mining_release", 192.0f);
 	public static final SoundEvent CARRIER_MINING_IMPACT_SOUND = registerSound("carrier_mining_impact", 224.0f);
+	public static final SoundEvent CARRIER_CARGO_HATCH_UNLOCK_SOUND = registerSound("carrier_cargo_hatch_unlock", 144.0f);
+	public static final SoundEvent CARRIER_CARGO_HATCH_MOVE_SOUND = registerSound("carrier_cargo_hatch_move", 128.0f);
+	public static final SoundEvent CARRIER_WINCH_START_SOUND = registerSound("carrier_winch_start", 128.0f);
+	public static final SoundEvent CARRIER_WINCH_HOIST_SOUND = registerSound("carrier_winch_hoist", 128.0f);
+	public static final SoundEvent CARRIER_WINCH_LOWER_SOUND = registerSound("carrier_winch_lower", 128.0f);
+	public static final SoundEvent CARRIER_WINCH_BRAKE_SOUND = registerSound("carrier_winch_brake", 144.0f);
+	public static final SoundEvent CARRIER_CABLE_TENSION_SOUND = registerSound("carrier_cable_tension", 144.0f);
+	public static final SoundEvent CARRIER_CONTAINER_RAIL_SOUND = registerSound("carrier_container_rail", 144.0f);
+	public static final SoundEvent CARRIER_CONTAINER_LATCH_SOUND = registerSound("carrier_container_latch", 160.0f);
+	public static final SoundEvent CARRIER_CARGO_HATCH_SEAL_SOUND = registerSound("carrier_cargo_hatch_seal", 144.0f);
+	public static final SoundEvent CARRIER_CONTAINER_GROUND_SOUND = registerSound("carrier_container_ground", 160.0f);
+	public static final SoundEvent CARRIER_CONTAINER_HYDRAULIC_SOUND = registerSound("carrier_container_hydraulic", 128.0f);
+	public static final SoundEvent CARRIER_MISSILE_HATCH_SOUND = registerSound("carrier_missile_hatch", 176.0f);
+	public static final SoundEvent CARRIER_MISSILE_EJECT_SOUND = registerSound("carrier_missile_eject", 192.0f);
+	public static final SoundEvent CARRIER_MISSILE_IGNITION_SOUND = registerSound("carrier_missile_ignition", 224.0f);
+	public static final SoundEvent CARRIER_MISSILE_MOTOR_SOUND = registerSound("carrier_missile_motor", 224.0f);
+	public static final SoundEvent CARRIER_MISSILE_PENETRATION_SOUND = registerSound("carrier_missile_penetration", 192.0f);
+	public static final SoundEvent CARRIER_MISSILE_EXPLOSION_SOUND = registerSound("carrier_missile_explosion", 256.0f);
 	public static final SoundEvent MISSILE_LAUNCH_SOUND = registerSound("missile_launch", 64.0f);
 	public static final SoundEvent MISSILE_IGNITION_SOUND = registerSound("missile_ignition", 64.0f);
 	public static final SoundEvent MISSILE_MOTOR_SOUND = registerSound("missile_motor", 64.0f);
@@ -209,6 +232,7 @@ public final class MorrowgearDrone implements ModInitializer {
 		jp.morrowgear.drone.carrier.CarrierModule.register();
 		CarrierRuntimeVerification.register();
 		OperationCommunicationsServer.register();
+		CargoLiftNetwork.register();
 		SupplyNetworkTransport.register();
 		CarrierDroneServiceAdapter.install();
 		MissileAudioController.register();
@@ -250,6 +274,7 @@ public final class MorrowgearDrone implements ModInitializer {
 		PayloadTypeRegistry.clientboundPlay().register(PowerLostBeaconPayload.TYPE, PowerLostBeaconPayload.CODEC);
 		RecoverySnapshotNetwork.register();
 		TacticalContactNetwork.register();
+		FleetLinkNetwork.register();
 		PayloadTypeRegistry.serverboundPlay().register(SupplyNetworkConfigPayload.TYPE, SupplyNetworkConfigPayload.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(SupplyNetworkConfigPayload.TYPE, (payload, context) ->
 			context.server().execute(() -> payload.apply(context.player())));
@@ -276,6 +301,9 @@ public final class MorrowgearDrone implements ModInitializer {
 			if (!(entity instanceof DroneEntity drone)) { transaction.rejected("機体が受信範囲に存在しません"); return; }
 			transaction.identify(drone, action);
 			if (!drone.isOwnedBy(player)) { transaction.rejected("他ユーザーの機体は操作できません"); return; }
+			if (!DataLinkRelayNetwork.canReach(player, drone.position())) {
+				transaction.rejected("データリンク圏外 / ソーラー中継局を配置してください"); return;
+			}
 			if (!allowOperatorCommand(player, drone)) { transaction.rejected(drone.operatorFlightCommandRejection()); return; }
 			if (action.startsWith("capacity_upgrade:")) {
 				if (forced) { transaction.rejected("容量変更は強制介入の対象外です"); return; }
@@ -338,13 +366,16 @@ public final class MorrowgearDrone implements ModInitializer {
 				String[] data = action.split(":");
 				try {
 					if (data.length != 6) return;
-					BlockPos anchor = new BlockPos(Integer.parseInt(data[1]), Integer.parseInt(data[2]), Integer.parseInt(data[3]));
+					BlockPos requestedAnchor = new BlockPos(Integer.parseInt(data[1]), Integer.parseInt(data[2]), Integer.parseInt(data[3]));
 					int radius = Integer.parseInt(data[4]);
 					String orderId = data[5];
 					if (!MissionAssignmentPolicy.allows(drone.role(), MissionAssignmentPolicy.MissionKind.SECURITY_PATROL)
-						|| anchor.distSqr(player.blockPosition()) > 512 * 512
+						|| !DataLinkRelayNetwork.canReach(player, Vec3.atCenterOf(requestedAnchor))
 						|| !DroneCommandPolicy.validSecurityRadius(radius)
 						|| !DroneCommandPolicy.validMission(orderId, 1, 0)) return;
+					int surfaceY = player.level().getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+						requestedAnchor.getX(), requestedAnchor.getZ());
+					BlockPos anchor = new BlockPos(requestedAnchor.getX(), surfaceY, requestedAnchor.getZ());
 					if (forced && !applyForcedOperatorCommand(player, drone)) return;
 					drone.assignSecurityPatrol(anchor, radius, orderId);
 					transaction.accepted(drone, action);
@@ -365,7 +396,7 @@ public final class MorrowgearDrone implements ModInitializer {
 					String orderId = data[6];
 					if (type == FieldOperationType.NONE
 						|| !MissionAssignmentPolicy.allows(drone.role(), MissionAssignmentPolicy.MissionKind.FIELD_OPERATION)
-						|| requestedAnchor.distSqr(player.blockPosition()) > 512 * 512
+						|| !DataLinkRelayNetwork.canReach(player, Vec3.atCenterOf(requestedAnchor))
 						|| !DroneCommandPolicy.validFieldRadius(type, radius)
 						|| !DroneCommandPolicy.validMission(orderId, 1, 0)) return;
 					ServerLevel level = player.level();
@@ -394,7 +425,7 @@ public final class MorrowgearDrone implements ModInitializer {
 				try {
 					int x = Integer.parseInt(coordinates[0]);
 					int z = Integer.parseInt(coordinates[1]);
-					if (Math.abs(x - player.getBlockX()) > 512 || Math.abs(z - player.getBlockZ()) > 512) return;
+					if (!DataLinkRelayNetwork.canReach(player, new Vec3(x + 0.5, player.getY(), z + 0.5))) return;
 					ServerLevel level = player.level();
 					int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
 					String missionId = coordinates.length > 2 ? coordinates[2] : drone.getUUID().toString();
@@ -474,10 +505,9 @@ public final class MorrowgearDrone implements ModInitializer {
 					if (!DroneCommandPolicy.validMission(missionId, expected, index)
 						|| route.isEmpty() || route.size() > PatrolRoutePolicy.MAX_POINTS
 						|| startIndex < 0 || startIndex >= route.size()
-						|| Math.abs(originX - player.getBlockX()) > 512
-						|| Math.abs(originZ - player.getBlockZ()) > 512
-						|| route.stream().anyMatch(point -> Math.abs(point.getX() - player.getBlockX()) > 512
-							|| Math.abs(point.getZ() - player.getBlockZ()) > 512)) return;
+						|| !DataLinkRelayNetwork.canReach(player, new Vec3(originX + 0.5, player.getY(), originZ + 0.5))
+						|| route.stream().anyMatch(point -> !DataLinkRelayNetwork.canReach(player,
+							new Vec3(point.getX() + 0.5, player.getY(), point.getZ() + 0.5)))) return;
 					if (forced && !applyForcedOperatorCommand(player, drone)) return;
 					drone.clearSecurityPatrol();
 					if (MissionCommandPolicy.preemptsCargoRoute(action)) drone.pauseCargoRoute();
@@ -568,8 +598,8 @@ public final class MorrowgearDrone implements ModInitializer {
 	private static void dispatchFleetOperation(ServerPlayer player, FleetOperationPayload payload) {
 		FieldOperationType type = FieldOperationType.byId(payload.operationType());
 		if (type == FieldOperationType.NONE || !DroneCommandPolicy.validFieldRadius(type, payload.radius())
-			|| Math.abs(payload.x() - player.getBlockX()) > 512
-			|| Math.abs(payload.z() - player.getBlockZ()) > 512) {
+			|| !DataLinkRelayNetwork.canReach(player,
+				new Vec3(payload.x() + 0.5, player.getY(), payload.z() + 0.5))) {
 			OperatorCommandTransactions.rejectGenerated(player, payload.commandId(), null,
 				"fleet:" + payload.operationType(), "作業種別、範囲、または地点が不正です");
 			return;
@@ -582,7 +612,10 @@ public final class MorrowgearDrone implements ModInitializer {
 			case NONE -> surfaceY;
 		};
 		BlockPos anchor = new BlockPos(payload.x(), anchorY, payload.z());
-		var admission = OperatorCommandAdmission.select(ownedDrones(level, player, 512),
+		var relayCoverage = DataLinkRelayNetwork.coverage(player);
+		var admission = OperatorCommandAdmission.select(ownedDrones(level, player, 512).stream()
+			.filter(drone -> relayCoverage.link(new DataLinkRelayPolicy.Point(
+				drone.getX(), drone.getY(), drone.getZ())).connected()).toList(),
 			DroneEntity::acceptsOperatorFlightCommand);
 		notifyOperatorRejections(player, admission.rejected());
 		List<DroneEntity> fleet = admission.accepted();

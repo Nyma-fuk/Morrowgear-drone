@@ -11,6 +11,7 @@ import jp.morrowgear.drone.MorrowgearDrone;
 import jp.morrowgear.drone.carrier.CarrierEntity;
 import jp.morrowgear.drone.carrier.CarrierMiningEffectPolicy;
 import jp.morrowgear.drone.carrier.CarrierPolicy;
+import jp.morrowgear.drone.carrier.CarrierContainerTransferPolicy;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.Minecraft;
@@ -80,7 +81,11 @@ public final class CarrierAudioController {
         private final Loop cruise;
         private final Loop fire;
         private final Loop miningCore;
+        private final Loop winchHoist;
+        private final Loop winchLower;
         private CarrierPolicy.WorkPhase previous = CarrierPolicy.WorkPhase.IDLE;
+        private CarrierContainerTransferPolicy.Phase previousTransfer = CarrierContainerTransferPolicy.Phase.COMPLETE;
+        private boolean observedTransfer;
         private int previousPhaseTick = -1;
         private int sequence = -1;
 
@@ -89,6 +94,8 @@ public final class CarrierAudioController {
             cruise = new Loop(carrier, MorrowgearDrone.CARRIER_FLIGHT_CRUISE_SOUND);
             fire = new Loop(carrier, MorrowgearDrone.CARRIER_LASER_FIRE_SOUND);
             miningCore = new Loop(carrier, MorrowgearDrone.CARRIER_MINING_CORE_SOUND);
+            winchHoist = new Loop(carrier, MorrowgearDrone.CARRIER_WINCH_HOIST_SOUND);
+            winchLower = new Loop(carrier, MorrowgearDrone.CARRIER_WINCH_LOWER_SOUND);
         }
 
         private void update(Minecraft client, CarrierEntity carrier, long now) {
@@ -129,6 +136,7 @@ public final class CarrierAudioController {
             }
             if (!mining && CarrierAudioPolicy.cooldownStarted(previous, phase))
                 play(client, carrier.beamPath().origin(), MorrowgearDrone.CARRIER_LASER_COOLDOWN_SOUND, .48f, .9f, 58);
+            updateCargoTransfer(client,carrier,now);
             previous = phase;
             previousPhaseTick = carrier.phaseTick();
             sequence = carrier.beamSequence();
@@ -139,6 +147,46 @@ public final class CarrierAudioController {
             cruise.stop(client);
             fire.stop(client);
             miningCore.stop(client);
+            winchHoist.stop(client);
+            winchLower.stop(client);
+        }
+
+        private void updateCargoTransfer(Minecraft client,CarrierEntity carrier,long now){
+            if(!carrier.transferActive()){
+                winchHoist.stop(client); winchLower.stop(client);
+                previousTransfer=CarrierContainerTransferPolicy.Phase.COMPLETE; observedTransfer=false;
+                return;
+            }
+            var phase=carrier.transferPhase();
+            if(phase==CarrierContainerTransferPolicy.Phase.HOIST)
+                winchHoist.update(client,.42f,.88f,now);
+            else winchHoist.stop(client);
+            if(phase==CarrierContainerTransferPolicy.Phase.DEPLOY)
+                winchLower.update(client,.40f,.82f,now);
+            else winchLower.stop(client);
+            if(observedTransfer&&phase!=previousTransfer){
+                var mount=jp.morrowgear.drone.carrier.CarrierCargoVisualPolicy.hardpoint(
+                    carrier.transferHardpoint()<0?0:carrier.transferHardpoint());
+                Vec3 source=carrier.toWorld(new Vec3(mount.x(),mount.y(),mount.z()));
+                switch(phase){
+                    case HATCH_OPEN -> { play(client,source,MorrowgearDrone.CARRIER_CARGO_HATCH_UNLOCK_SOUND,.62f,.88f,24);
+                        play(client,source,MorrowgearDrone.CARRIER_CARGO_HATCH_MOVE_SOUND,.48f,.86f,34); }
+                    case WINCH_DEPLOY -> play(client,source,MorrowgearDrone.CARRIER_WINCH_START_SOUND,.48f,.9f,28);
+                    case CONNECT -> play(client,source,MorrowgearDrone.CARRIER_WINCH_BRAKE_SOUND,.46f,.92f,18);
+                    case TENSION -> play(client,source,MorrowgearDrone.CARRIER_CABLE_TENSION_SOUND,.58f,.9f,24);
+                    case ATTACH -> { play(client,source,MorrowgearDrone.CARRIER_CONTAINER_RAIL_SOUND,.58f,.84f,30);
+                        play(client,source,MorrowgearDrone.CARRIER_CONTAINER_LATCH_SOUND,.68f,.88f,26); }
+                    case PURGE -> play(client,source,MorrowgearDrone.CARRIER_CONTAINER_LATCH_SOUND,.54f,.78f,24);
+                    case GROUND_CONTACT -> { Vec3 ground=Vec3.atBottomCenterOf(carrier.transferContainerPos());
+                        play(client,ground,MorrowgearDrone.CARRIER_CONTAINER_GROUND_SOUND,.72f,.82f,34);
+                        play(client,ground,MorrowgearDrone.CARRIER_CONTAINER_HYDRAULIC_SOUND,.58f,.86f,42); }
+                    case RELEASE,WINCH_RETRACT -> play(client,source,MorrowgearDrone.CARRIER_WINCH_BRAKE_SOUND,.44f,.96f,18);
+                    case HATCH_CLOSE -> { play(client,source,MorrowgearDrone.CARRIER_CARGO_HATCH_MOVE_SOUND,.46f,.8f,34);
+                        play(client,source,MorrowgearDrone.CARRIER_CARGO_HATCH_SEAL_SOUND,.62f,.9f,26); }
+                    default -> {}
+                }
+            }
+            observedTransfer=true; previousTransfer=phase;
         }
     }
 

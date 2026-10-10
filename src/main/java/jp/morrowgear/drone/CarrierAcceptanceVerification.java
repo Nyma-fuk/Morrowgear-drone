@@ -225,7 +225,7 @@ public final class CarrierAcceptanceVerification {
         data.boot = boot; data.resume = "";
         Run run = new Run(player, data);
         run.begin("PREFLIGHT");
-        say(player, "PLAN / 16384 mineable + 256 bedrock; 256 columns; 10 real cabin barrels; original 1 carrier + 4 drones reused"
+        say(player, "PLAN / 16640 destructible blocks including 256 bedrock; 256 columns; 10 real cabin barrels; original 1 carrier + 4 drones reused"
             + " / AIR-only at " + arena + " / baseline READY unchanged / run=" + data.plan().run());
         return 1;
     }
@@ -277,7 +277,7 @@ public final class CarrierAcceptanceVerification {
             require(!ship.destroyed && level.getEntity(data.plan().ship()) == carrier && carrier.controls(player), "carrier became unavailable");
             require(player.containerMenu.getCarried().isEmpty(), "player cursor occupied; pause to avoid overwriting items");
             if (server.getTickCount() % 40 == 0) checkDrones(false);
-            if (server.getTickCount() % 200 == 0) say(player, "RUN " + data.stage + " / blocks=" + data.count("broken") + "/16384"
+            if (server.getTickCount() % 200 == 0) say(player, "RUN " + data.stage + " / blocks=" + data.count("broken") + "/" + MINE_BLOCKS
                 + " / drops=" + data.count("captured") + " / cursor=" + (ship.progress == null ? 0 : ship.progress.cursor())
                 + " / status=" + ship.stop + " / phase=" + carrier.workPhase() + ":" + carrier.phaseTick() + "/" + carrier.phaseDuration());
             switch (data.stage) {
@@ -401,7 +401,7 @@ public final class CarrierAcceptanceVerification {
                 data.add("barrels", 1);
                 CarrierProtection.recordPlayerBuild(player.level(), at.pos());
             }
-            pass("FIXTURE", "16384 real mineable blocks + 256 bedrock, 10 AIR-only cabin barrels; no existing blocks overwritten");
+            pass("FIXTURE", "16640 real destructible blocks including 256 bedrock, 10 AIR-only cabin barrels; no existing blocks overwritten");
             data.cursor = 0; next("FILL");
         }
         void fill(ServerPlayer player) {
@@ -515,9 +515,9 @@ public final class CarrierAcceptanceVerification {
             require(elapsed() < 6000, "deep mining progress timeout: " + ship.stop);
             if (ship.mode == CarrierPolicy.Mode.MINING) return;
             require(ship.stop == CarrierPolicy.Stop.COMPLETE && ship.progress != null && ship.progress.complete()
-                && ship.pending == null && ship.progress.sealedColumns().size() == 256, "not full operation completion: " + ship.stop);
-            require(data.count("broken") == MINE_BLOCKS, "real AFTER count is not 16384: " + data.count("broken"));
-            require(data.recordedBreaks() == MINE_BLOCKS, "unique captured fixture positions are not 16384: " + data.recordedBreaks());
+                && ship.pending == null && ship.progress.sealedColumns().isEmpty(), "not full operation completion: " + ship.stop);
+            require(data.count("broken") == MINE_BLOCKS, "real AFTER count is not " + MINE_BLOCKS + ": " + data.count("broken"));
+            require(data.recordedBreaks() == MINE_BLOCKS, "unique captured fixture positions are not " + MINE_BLOCKS + ": " + data.recordedBreaks());
             pass("M08_POWER", "reactor sustained the same mining generation without cell-assisted restart");
             data.cursor = 0; shellIndex = 0; next("VERIFY_MINE");
         }
@@ -537,14 +537,14 @@ public final class CarrierAcceptanceVerification {
                 int dx = p.getX() - a.getX(), dy = p.getY() - a.getY(), dz = p.getZ() - a.getZ();
                 BlockState actual = level.getBlockState(p);
                 if (fixture(dx, dy, dz)) {
-                    require(dy == 0 ? actual.is(Blocks.BEDROCK) : actual.isAir(), "unmined column/bedrock changed: " + p);
-                    if (dy > 0) require(data.breakRecorded(CarrierAcceptancePolicy.mineIndex(dx, dy, dz)), "missing unique break evidence: " + p);
+                    require(actual.isAir(), "unmined fixture block remains: " + p);
+                    require(data.breakRecorded(CarrierAcceptancePolicy.mineIndex(dx, dy, dz)), "missing unique break evidence: " + p);
                 }
                 else require(actual.equals(data.shell.get(shellIndex++)), "outside fixture changed: " + p);
             }
             if (data.cursor < BOX_VOLUME) return;
             verifyConservation(player, false);
-            pass("M01-M03", "256/256 bedrock columns; 16384 actual breaks; all surrounding shell states unchanged; actual committed vanilla drops=" + data.count("captured"));
+            pass("M01-M03", MINE_BLOCKS + " actual breaks including 256 bedrock cells; all surrounding shell states unchanged; actual committed vanilla drops=" + data.count("captured"));
             data.mark("MINED", "all drops stored; extract uses normal menu.clicked -> real player -> real barrels; visual checks remain separate");
             active = null;
         }

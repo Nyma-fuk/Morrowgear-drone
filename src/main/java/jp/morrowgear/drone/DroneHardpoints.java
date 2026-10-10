@@ -5,6 +5,7 @@ import net.minecraft.world.phys.Vec3;
 /** V22 master coordinates: +Z nose, +Y up; rotations match the rendered hull. */
 public final class DroneHardpoints {
     public static final Vec3 LASER = new Vec3(0, .105, .40503);
+    public static final Vec3 FIELD_TOOL = new Vec3(0, .225, 1.035);
     public static final Vec3 GUN_LEFT = new Vec3(-.2427, .298, .937);
     public static final Vec3 GUN_RIGHT = new Vec3(.2427, .298, .937);
     public static final Vec3 EXHAUST_LEFT = new Vec3(-.19, .402, -1.02);

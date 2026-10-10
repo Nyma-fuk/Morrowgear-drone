@@ -40,11 +40,15 @@ class DockCarrierHmiContractTest {
 
     @Test void allCarrierDestinationsAndCommandsRemainAvailable() throws Exception {
         String carrier = client("CarrierScreen");
-        for (String tab : new String[]{"OVERVIEW", "MINING", "ATTACK", "MOVE", "CARGO", "SUPPLY", "CABIN", "DIAGNOSTICS"})
+        for (String tab : new String[]{"OVERVIEW", "MINING", "LASER", "MISSILE", "MOVE", "CARGO", "SUPPLY", "CABIN", "DIAGNOSTICS"})
             assertTrue(carrier.contains(tab + "(\""), tab);
         for (String action : new String[]{"STOP", "ACTIVATE", "MOVE", "RESUME_PREVIEW", "PREVIEW_COMBAT", "PREVIEW_MINING",
             "REFUEL", "CHARGE_WEAPON", "CARGO_PAGE", "RESERVE_BAY", "RELEASE_BAY", "BOARD", "EXIT",
-            "RECOVER_CABIN", "ALLOW_GUEST", "REVOKE_GUEST"}) assertTrue(carrier.contains("Action." + action), action);
+            "RECOVER_CABIN", "ALLOW_GUEST", "REVOKE_GUEST", "PREVIEW_MISSILE_COMBAT", "MOVE_MISSILE_COMBAT"})
+            assertTrue(carrier.contains("Action." + action), action);
+        assertTrue(carrier.contains("地上コンテナ"));
+        assertTrue(carrier.contains("搭載済み"));
+        assertTrue(carrier.contains("安全地点へ降ろす"));
         assertTrue(carrier.contains("!mapTab()"));
         assertTrue(carrier.contains("confirmation.canStart(now())"));
         assertFalse(carrier.contains("ONLINE"));
@@ -74,7 +78,7 @@ class DockCarrierHmiContractTest {
     @Test void supplyPagesDoNotReserveSpaceForHiddenCargoSlots() throws Exception {
         String carrier = client("CarrierScreen");
         assertTrue(carrier.contains("return page == 0 && !small() ? 200 : 6;"));
-        assertTrue(carrier.contains("DockCarrierLayout.supplyTabWidth(width, x)"));
+        assertTrue(carrier.contains("DockCarrierLayout.supplyTabWidth(width, x, 4)"));
         assertTrue(carrier.contains("powerX(1), powerY(1), powerWidth()"));
     }
 }

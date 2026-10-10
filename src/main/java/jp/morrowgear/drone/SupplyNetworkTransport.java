@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import jp.morrowgear.drone.carrier.CarrierCargoContainerBlockEntity;
 import jp.morrowgear.drone.network.SupplyNetworkStatusPayload;
 import jp.morrowgear.drone.network.SupplyNetworkStatusRequest;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -70,7 +71,7 @@ public final class SupplyNetworkTransport {
                 continue;
             }
             var block = level.getBlockEntity(pos);
-            if (block instanceof Container container && supported(block))
+            if (block instanceof Container container && supported(block, player.getUUID()))
                 nodes.put(packed, node(origin, pos, container, block.getBlockState().getBlock().getName().getString(), true));
         }
 
@@ -80,7 +81,7 @@ public final class SupplyNetworkTransport {
         for (int chunkX = minChunkX; chunkX <= maxChunkX; chunkX++) for (int chunkZ = minChunkZ; chunkZ <= maxChunkZ; chunkZ++) {
             if (!level.hasChunk(chunkX, chunkZ)) continue;
             for (var block : level.getChunk(chunkX, chunkZ).getBlockEntities().values()) {
-                if (!(block instanceof Container container) || !supported(block)) continue;
+                if (!(block instanceof Container container) || !supported(block, player.getUUID())) continue;
                 BlockPos pos = block.getBlockPos();
                 int dy = pos.getY() - origin.getY();
                 long dx = pos.getX() - origin.getX(), dz = pos.getZ() - origin.getZ();
@@ -98,8 +99,9 @@ public final class SupplyNetworkTransport {
             .limit(SupplyNetworkPolicy.MAX_DISCOVERED_NODES).toList();
     }
 
-    private static boolean supported(net.minecraft.world.level.block.entity.BlockEntity block) {
-        return block instanceof ChestBlockEntity || block instanceof BarrelBlockEntity || block instanceof ShulkerBoxBlockEntity;
+    private static boolean supported(net.minecraft.world.level.block.entity.BlockEntity block, UUID owner) {
+        return block instanceof ChestBlockEntity || block instanceof BarrelBlockEntity || block instanceof ShulkerBoxBlockEntity
+            || block instanceof CarrierCargoContainerBlockEntity cargo && cargo.logisticsAccessible(owner);
     }
 
     private static SupplyNetworkStatusPayload.LogisticsNode node(BlockPos origin, BlockPos pos, Container container,
@@ -110,6 +112,7 @@ public final class SupplyNetworkTransport {
     }
 
     private static String contents(Container container) {
+        if (container instanceof CarrierCargoContainerBlockEntity cargo) return cargo.indexedContentsSummary();
         Map<String, Integer> totals = new LinkedHashMap<>();
         int total = 0;
         for (int slot = 0; slot < Math.min(container.getContainerSize(), SupplyNetworkPolicy.MAX_SOURCE_SLOTS); slot++) {

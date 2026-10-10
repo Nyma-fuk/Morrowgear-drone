@@ -9,6 +9,14 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 final class SolarServiceRegistryTest {
+	@Test
+	void relayNodesRemainOwnerAndDimensionScoped() {
+		UUID owner = UUID.randomUUID(), other = UUID.randomUUID();
+		SolarServiceRegistry.heartbeat(UUID.randomUUID(), owner, "overworld", 10, 80, 0, 80, 1L);
+		SolarServiceRegistry.heartbeat(UUID.randomUUID(), other, "overworld", 20, 80, 0, 80, 1L);
+		SolarServiceRegistry.heartbeat(UUID.randomUUID(), owner, "the_nether", 30, 80, 0, 80, 1L);
+		assertEquals(1, SolarServiceRegistry.relayNodes(owner, "overworld", 2L).size());
+	}
 	private final UUID owner = UUID.randomUUID();
 	private final UUID station = UUID.randomUUID();
 

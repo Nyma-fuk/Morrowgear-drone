@@ -24,6 +24,20 @@ final class FieldMissionStatusPolicyTest {
 	}
 
 	@Test
+	void engineerCannotCompleteWhileSurveyOrSharedWorkRemains() {
+		assertEquals(FieldOperationState.ENGINEER_LOCAL_SURVEY,
+			FieldMissionStatusPolicy.engineer(false, false, false, false));
+		assertEquals(FieldOperationState.ENGINEER_WAITING_INTEL,
+			FieldMissionStatusPolicy.engineer(false, true, false, false));
+		assertEquals(FieldOperationState.ENGINEER_RECOVERY_OVERWATCH,
+			FieldMissionStatusPolicy.engineer(true, false, false, false));
+		assertEquals(FieldOperationState.ENGINEER_RECOVERY_OVERWATCH,
+			FieldMissionStatusPolicy.engineer(true, false, true, true));
+		assertEquals(FieldOperationState.COMPLETE,
+			FieldMissionStatusPolicy.engineer(true, false, true, false));
+	}
+
+	@Test
 	void cargoHoldsUntilWorkCreatesSomethingToCollect() {
 		assertEquals(FieldOperationState.CARGO_HOLD,
 			FieldMissionStatusPolicy.cargo(false, false, false, false, 0));

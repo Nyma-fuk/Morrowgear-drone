@@ -10,6 +10,7 @@ class RemoteOperationPolicyTest {
 	@Test
 	void operationTicketReachesEntityTickingLevel() {
 		assertEquals(2, RemoteOperationPolicy.ENTITY_TICKING_TICKET_RADIUS);
+		assertEquals(2, RemoteOperationPolicy.DATA_LINK_TICKET_RADIUS);
 	}
 
 	@Test
@@ -30,5 +31,13 @@ class RemoteOperationPolicyTest {
 			false, false, false, DroneMode.STANDBY));
 		assertFalse(RemoteOperationPolicy.keepsChunkActive(true, false, false, false,
 			false, false, false, DroneMode.STANDBY));
+	}
+
+	@Test
+	void relayLinkedIdleAircraftUseTheBoundedDataLinkLease() {
+		assertTrue(RemoteOperationPolicy.keepsDataLinkChunkActive(true, 1));
+		assertTrue(RemoteOperationPolicy.keepsDataLinkChunkActive(true, 16));
+		assertFalse(RemoteOperationPolicy.keepsDataLinkChunkActive(true, 0));
+		assertFalse(RemoteOperationPolicy.keepsDataLinkChunkActive(false, 1));
 	}
 }

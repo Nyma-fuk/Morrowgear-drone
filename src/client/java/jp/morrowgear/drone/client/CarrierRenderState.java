@@ -5,6 +5,9 @@ import net.minecraft.world.phys.Vec3;
 import java.util.List;
 import jp.morrowgear.drone.carrier.CarrierPolicy;
 import jp.morrowgear.drone.carrier.CarrierMiningEffectPolicy;
+import jp.morrowgear.drone.carrier.CarrierProtection;
+import jp.morrowgear.drone.carrier.CarrierContainerTransferPolicy;
+import jp.morrowgear.drone.carrier.CarrierExpansionPolicy;
 
 public final class CarrierRenderState extends EntityRenderState {
     public float heading;
@@ -23,6 +26,21 @@ public final class CarrierRenderState extends EntityRenderState {
     public Vec3 miningTarget;
     public Vec3 capturePosition;
     public double captureProgress;
+    public CarrierProtection.PlasmaResponse plasmaResponse = CarrierProtection.PlasmaResponse.VAPORIZE;
+    public int cargoModules;
+    public int cargoHardpoints;
+    public int missileHardpoints;
+    public int missileLaunchTicks;
+    public int missileSalvoSize;
+    public int missilesFired;
+    public int missileSourceMask;
+    public boolean transferActive;
+    public CarrierContainerTransferPolicy.Phase transferPhase = CarrierContainerTransferPolicy.Phase.COMPLETE;
+    public CarrierContainerTransferPolicy.Direction transferDirection = CarrierContainerTransferPolicy.Direction.LOAD;
+    public CarrierExpansionPolicy.Type transferType = CarrierExpansionPolicy.Type.CARGO;
+    public int transferHardpoint = -1;
+    public double transferProgress;
+    public Vec3 transferGround;
     public Vec3 boardingPad;
     public boolean combat;
     public boolean mining;

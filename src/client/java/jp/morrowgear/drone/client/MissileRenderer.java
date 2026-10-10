@@ -50,6 +50,7 @@ final class MissileRenderer extends EntityRenderer<MorrowgearMissileEntity, Miss
 		state.impacted = entity.impacted();
 		state.motorIgnited = entity.motorIgnited();
 		state.ejecting = entity.flightPhase() == MorrowgearMissileEntity.FlightPhase.EJECT;
+		state.heavy = entity.heavy();
 		List<MissileTrailHistory.Point> history = entity.visualTrail();
 		state.trail = List.copyOf(history.subList(Math.max(0, history.size() - MissileTrailHistory.MAX_POINTS), history.size()));
 		state.trailTime = entity.level().getGameTime() + partialTick;
@@ -68,31 +69,39 @@ final class MissileRenderer extends EntityRenderer<MorrowgearMissileEntity, Miss
 		if (side.lengthSqr() < 0.0001) side = new Vec3(1, 0, 0);
 		Vec3 axisX = side.normalize(), axisY = direction.cross(axisX).normalize();
 		float flash = (float)Math.pow(0.5 + 0.5 * Math.cos(state.ageInTicks * Math.PI / 3.2), 3);
+		double lengthScale=state.heavy?3.55:1.0;
+		double radiusScale=state.heavy?1.45:1.0;
+		poseStack.pushPose();
 		collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WHITE_TEXTURE), (pose, out) -> {
 			for (int i = 0; i + 1 < MissileCapsuleShape.HULL.size(); i++) {
 				var a = MissileCapsuleShape.HULL.get(i);
 				var b = MissileCapsuleShape.HULL.get(i + 1);
-				tube(pose, out, direction, axisX, axisY, a.z(), b.z(), a.radius(), b.radius(), a.color(), 255, state.lightCoords);
+				tube(pose, out, direction, axisX, axisY, a.z()*lengthScale, b.z()*lengthScale,
+					a.radius()*radiusScale, b.radius()*radiusScale, a.color(), 255, state.lightCoords);
 			}
-			cap(pose, out, direction, axisX, axisY, MissileCapsuleShape.REAR, 0.10, false, 0x20282D, state.lightCoords);
-			cap(pose, out, direction, axisX, axisY, MissileCapsuleShape.FRONT, 0.11, true, 0xBAC5CB, state.lightCoords);
+			cap(pose, out, direction, axisX, axisY, MissileCapsuleShape.REAR*lengthScale,
+				0.10*radiusScale, false, 0x20282D, state.lightCoords);
+			cap(pose, out, direction, axisX, axisY, MissileCapsuleShape.FRONT*lengthScale,
+				0.11*radiusScale, true, 0xBAC5CB, state.lightCoords);
 		});
 		collector.submitCustomGeometry(poseStack, RenderTypes.entityTranslucentEmissive(WHITE_TEXTURE),
 			(pose, consumer) -> {
-				tube(pose, consumer, direction, axisX, axisY, MissileCapsuleShape.GLOW_FROM, MissileCapsuleShape.GLOW_TO,
-					MissileCapsuleShape.GLOW_RADIUS, MissileCapsuleShape.GLOW_RADIUS, 0xFF382A, 192 + Math.round(32 * flash), 0xF000F0);
+				tube(pose, consumer, direction, axisX, axisY, MissileCapsuleShape.GLOW_FROM*lengthScale,
+					MissileCapsuleShape.GLOW_TO*lengthScale,MissileCapsuleShape.GLOW_RADIUS*radiusScale,
+					MissileCapsuleShape.GLOW_RADIUS*radiusScale,0xFF382A,192+Math.round(32*flash),0xF000F0);
 				if (MissileCapsuleShape.exhaustVisible(state.motorIgnited, state.impacted)) {
-					tube(pose, consumer, direction, axisX, axisY, MissileCapsuleShape.EXHAUST_END, MissileCapsuleShape.REAR,
-						0.025, 0.09, 0xFF842E, 135, 0xF000F0);
-					tube(pose, consumer, direction, axisX, axisY, MissileCapsuleShape.EXHAUST_CORE_END, MissileCapsuleShape.REAR,
-						0.018, 0.047, 0xFFE9A6, 230, 0xF000F0);
+					tube(pose, consumer, direction, axisX, axisY, MissileCapsuleShape.EXHAUST_END*lengthScale,
+						MissileCapsuleShape.REAR*lengthScale,0.025*radiusScale,0.09*radiusScale,0xFF842E,135,0xF000F0);
+					tube(pose, consumer, direction, axisX, axisY, MissileCapsuleShape.EXHAUST_CORE_END*lengthScale,
+						MissileCapsuleShape.REAR*lengthScale,0.018*radiusScale,0.047*radiusScale,0xFFE9A6,230,0xF000F0);
 				}
 			});
+		poseStack.popPose();
 		boolean cold = MissileCapsuleShape.ejectVisible(state.ejecting, state.motorIgnited, state.impacted, state.ageInTicks);
 		if (!state.trail.isEmpty() || cold) collector.submitCustomGeometry(poseStack, RenderTypes.entityTranslucent(WHITE_TEXTURE),
 			(pose, consumer) -> {
 				smoke(pose, consumer, state, camera.pos);
-				if (cold) coldEject(pose, consumer, state, direction, camera.pos);
+				if (cold) coldEject(pose, consumer, state, direction, camera.pos,lengthScale,radiusScale);
 			});
 	}
 
@@ -105,17 +114,18 @@ final class MissileRenderer extends EntityRenderer<MorrowgearMissileEntity, Miss
 			int alpha = MissileCapsuleShape.smokeAlpha(age);
 			if (alpha == 0) continue;
 			Vec3 center = point.position().add(0, MissileCapsuleShape.smokeRise(age), 0).subtract(origin);
-			double radius = MissileCapsuleShape.smokeRadius(age);
+			double radius = MissileCapsuleShape.smokeRadius(age)*(state.heavy?1.65:1);
 			puff(pose, out, center, camera.subtract(origin), radius, 0x949BA0, alpha, state.lightCoords);
 		}
 	}
 
-	private static void coldEject(PoseStack.Pose pose, VertexConsumer out, MissileRenderState state, Vec3 direction, Vec3 camera) {
+	private static void coldEject(PoseStack.Pose pose, VertexConsumer out, MissileRenderState state, Vec3 direction,
+		Vec3 camera,double lengthScale,double radiusScale) {
 		double progress = state.ageInTicks / 3.0;
 		Vec3 cameraOffset = camera.subtract(new Vec3(state.x, state.y, state.z));
 		for (int i = 0; i < MissileCapsuleShape.COLD_EJECT_PUFFS; i++) {
-			Vec3 center = direction.scale(MissileCapsuleShape.REAR - 0.08 - i * 0.10 - progress * 0.15);
-			puff(pose, out, center, cameraOffset, 0.07 + progress * 0.08 + i * 0.018,
+			Vec3 center = direction.scale((MissileCapsuleShape.REAR - 0.08 - i * 0.10 - progress * 0.15)*lengthScale);
+			puff(pose, out, center, cameraOffset, (0.07 + progress * 0.08 + i * 0.018)*radiusScale,
 				0xD7DCDD, (int)Math.round(85 * (1 - progress) * (i == 0 ? 1 : 0.65)), state.lightCoords);
 		}
 	}

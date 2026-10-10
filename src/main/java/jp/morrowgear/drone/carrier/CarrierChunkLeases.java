@@ -27,8 +27,12 @@ final class CarrierChunkLeases {
         var data = CarrierSavedData.get(server);
         for (var player : server.getPlayerList().getPlayers()) {
             UUID cabin = CarrierInterior.currentShip(player);
-            for (var entry : data.ships().entrySet())
-                if (wantsLease(entry.getKey(), entry.getValue(), player.getUUID(), cabin, player.isAlive())) wanted.add(entry.getKey());
+            for (var entry : data.ships().entrySet()) {
+                CarrierEntity exterior = CarrierModule.find(server, entry.getKey());
+                boolean containerTransfer = exterior != null && exterior.transferActive();
+                if (wantsLease(entry.getKey(), entry.getValue(), player.getUUID(), cabin,
+                    player.isAlive(), containerTransfer)) wanted.add(entry.getKey());
+            }
         }
         FAILED.retainAll(wanted);
         for (UUID id : Set.copyOf(ACTIVE.keySet())) if (!wanted.contains(id)) release(id);
@@ -44,12 +48,17 @@ final class CarrierChunkLeases {
             ServerLevel level = anchor.level(server);
             if (level == null || CarrierInterior.inside(level)) continue;
             ChunkPos chunk = new ChunkPos(anchor.x() >> 4, anchor.z() >> 4);
-            Set<ChunkPos> chunks = new HashSet<>();
-            chunks.add(chunk);
+            ChunkPos aheadChunk = null;
             if (exterior != null && ship.destination != null && !ship.navigationPaused) {
                 var ahead = CarrierNavigation.ahead(exterior.position(), CarrierNavigation.destination(ship.destination));
-                chunks.add(new ChunkPos(ahead.getX() >> 4, ahead.getZ() >> 4));
+                aheadChunk = new ChunkPos(ahead.getX() >> 4, ahead.getZ() >> 4);
             }
+            ChunkPos transferChunk = null;
+            if (exterior != null && exterior.transferActive()) {
+                var transferPos = exterior.transferContainerPos();
+                transferChunk = new ChunkPos(transferPos.getX() >> 4, transferPos.getZ() >> 4);
+            }
+            Set<ChunkPos> chunks = leaseChunks(chunk, aheadChunk, transferChunk);
             Lease old = ACTIVE.get(id);
             if (exterior == null && old != null && server.getTickCount() - old.firstTick > 200) {
                 release(id); FAILED.add(id); ship.stop(CarrierPolicy.Stop.UNLOADED); continue;
@@ -61,10 +70,21 @@ final class CarrierChunkLeases {
         }
     }
     static boolean wantsLease(UUID id, CarrierShip ship, UUID player, UUID cabin, boolean alive) {
+        return wantsLease(id, ship, player, cabin, alive, false);
+    }
+    static boolean wantsLease(UUID id, CarrierShip ship, UUID player, UUID cabin, boolean alive,
+                              boolean containerTransfer) {
         return alive && ship != null && !ship.destroyed && ship.owner.equals(player)
-            && (id.equals(cabin) || ship.mode != CarrierPolicy.Mode.IDLE
+            && (containerTransfer || id.equals(cabin) || ship.mode != CarrierPolicy.Mode.IDLE
                 || ship.destination != null && !ship.navigationPaused
                 || ship.arrivalOperation != CarrierPolicy.Mode.IDLE || ship.preview != null);
+    }
+    static Set<ChunkPos> leaseChunks(ChunkPos current, ChunkPos ahead, ChunkPos transfer) {
+        Set<ChunkPos> chunks = new HashSet<>();
+        chunks.add(current);
+        if (ahead != null) chunks.add(ahead);
+        if (transfer != null) chunks.add(transfer);
+        return Set.copyOf(chunks);
     }
     private static void release(UUID id) {
         Lease lease = ACTIVE.remove(id);

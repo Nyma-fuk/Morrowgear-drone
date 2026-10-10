@@ -36,7 +36,8 @@ import net.minecraft.world.inventory.Slot;
 /** Owner-scoped carrier console. Menu registration is supplied by the parent client entrypoint. */
 public final class CarrierScreen extends DockCarrierHmiScreen<CarrierMenu> {
     private enum Tab {
-        OVERVIEW("概要", "gauge"), MINING("採掘", "pickaxe"), ATTACK("攻撃", "target"), MOVE("移動", "navigation"),
+        OVERVIEW("概要", "gauge"), MINING("採掘", "pickaxe"), LASER("レーザー", "zap"),
+        MISSILE("ミサイル", "crosshair"), MOVE("移動", "navigation"),
         CARGO("貨物", "package"), SUPPLY("補給", "battery-charging"), CABIN("船内", "home"), DIAGNOSTICS("診断", "sliders-horizontal");
         final String label, icon;
         Tab(String label, String icon) { this.label = label; this.icon = icon; }
@@ -48,7 +49,7 @@ public final class CarrierScreen extends DockCarrierHmiScreen<CarrierMenu> {
     private CarrierViewPayload lastView;
     private Tab tab = Tab.OVERVIEW;
     private int page, listPage, altitude;
-    private boolean choosingTab, diagnostics, playerPage, moveControls, supplyCandidatesVisible;
+    private boolean choosingTab, diagnostics, playerPage, moveControls, supplyCandidatesVisible, installedContainerList;
     private double centerX, centerZ, zoom = 2.5;
     private long nextCommandAt;
     private String notice = "", widgetKey = "";
@@ -74,8 +75,15 @@ public final class CarrierScreen extends DockCarrierHmiScreen<CarrierMenu> {
     private static long now() { return System.nanoTime() / 1_000_000; }
     private CarrierViewPayload view() { return menu.view(); }
     private boolean small() { return width < 600 || height < 300; }
-    private boolean mapTab() { return tab == Tab.MINING || tab == Tab.ATTACK || tab == Tab.MOVE; }
-    private Tab navigationTab() { return diagnostics ? Tab.DIAGNOSTICS : tab == Tab.CARGO && page > 0 ? Tab.SUPPLY : tab; }
+    private boolean combatTab() { return tab == Tab.LASER || tab == Tab.MISSILE; }
+    private boolean missileTab() { return tab == Tab.MISSILE; }
+    private boolean missileOperation() {
+        return view().mode() == CarrierPolicy.Mode.COMBAT.ordinal()
+            ? view().navigation().combatWeapon() == CarrierPolicy.CombatWeapon.MISSILE.ordinal() : missileTab();
+    }
+    private boolean mapTab() { return tab == Tab.MINING || combatTab() || tab == Tab.MOVE; }
+    private Tab navigationTab() { return diagnostics ? Tab.DIAGNOSTICS
+        : tab == Tab.CARGO && (page == 1 || page == 3) ? Tab.SUPPLY : tab; }
     private boolean compactCargo() { return inventoryVisible() && height < 314; }
     @Override protected boolean inventoryVisible() { return CarrierUiPolicy.inventoryVisible(tab == Tab.CARGO, page == 0 && !choosingTab && !diagnostics, height); }
     @Override protected boolean inventoryEditable() { return inventoryVisible() && view().owner() && !cargoPending(); }
@@ -90,7 +98,7 @@ public final class CarrierScreen extends DockCarrierHmiScreen<CarrierMenu> {
         return tab == Tab.MOVE && !confirmation.selected() && view().navigation().navigationPaused()
             && view().navigation().destination().isPresent();
     }
-    private int requestedMode() { return tab == Tab.ATTACK ? CarrierPolicy.Mode.COMBAT.ordinal() : CarrierPolicy.Mode.MINING.ordinal(); }
+    private int requestedMode() { return combatTab() ? CarrierPolicy.Mode.COMBAT.ordinal() : CarrierPolicy.Mode.MINING.ordinal(); }
     private boolean atSelection() {
         CarrierAnchor at = view().navigation().exterior();
         return confirmation.selected() && Math.floorDiv(at.x(), 16) == confirmation.chunkX() && Math.floorDiv(at.z(), 16) == confirmation.chunkZ();
@@ -107,8 +115,12 @@ public final class CarrierScreen extends DockCarrierHmiScreen<CarrierMenu> {
         CarrierViewPayload v = view();
         if (v == lastView) return;
         if (!v.ship().equals(menu.shipId) || v.menu() != menu.containerId && v != openingView) return;
+        String previousTransfer=lastView==null?"":lastView.navigation().transfer().detail();
         lastView = v;
         if (notice.equals("結果を確認中") || notice.equals("移動を確認中") || notice.equals("停止を確認中")) notice = "";
+        String currentTransfer=v.navigation().transfer().detail();
+        if(!currentTransfer.equals(previousTransfer)&&!currentTransfer.equals("READY"))
+            notice=transferDetail(currentTransfer);
         confirmation.accept(new CarrierUiPolicy.Snapshot(v.ship(), v.owner(), v.destroyed(), v.mode(), v.moving(),
             v.generation(), v.dimension(), v.chunkX(), v.chunkZ(), v.minY(), v.maxY(), v.previewMode(), v.previewTicks(),
             menu.containerId, v.navigation().effects().sampleTick(), new CarrierUiPolicy.Navigation(
@@ -137,7 +149,11 @@ public final class CarrierScreen extends DockCarrierHmiScreen<CarrierMenu> {
             + ":" + confirmation.busy() + ":" + confirmation.reopenRequired()
             + ":" + confirmation.moveResult()
             + ":" + confirmation.fresh(now())
-            + ":" + (tab == Tab.CARGO && page == 2 ? view().navigation().bays().hashCode() : tab == Tab.CABIN ? view().guests().hashCode() : 0);
+            + ":" + view().navigation().transfer().hashCode()
+            + ":" + installedContainerList
+            + ":" + (tab == Tab.CARGO && page == 3 ? view().navigation().bays().hashCode() : tab == Tab.CABIN ? view().guests().hashCode() : 0)
+            + ":" + (tab == Tab.CARGO && page == 2 ? view().navigation().containers().hashCode()
+                + view().navigation().expansions().hashCode() : 0);
     }
     private void changeTab(Tab next) {
         if (cargoPending()) return;
@@ -149,7 +165,9 @@ public final class CarrierScreen extends DockCarrierHmiScreen<CarrierMenu> {
     private void changePage(int next) {
         if (cargoPending()) return;
         if (!menu.getCarried().isEmpty()) { notice = "持っているアイテムを枠へ戻してください"; return; }
-        cancelSlotGesture(); page = next; listPage = 0; build();
+        cancelSlotGesture(); page = next; listPage = 0;
+        if (next != 2) installedContainerList = false;
+        build();
     }
     private void back() {
         if (diagnostics) { changeTab(Tab.OVERVIEW); }
@@ -166,7 +184,7 @@ public final class CarrierScreen extends DockCarrierHmiScreen<CarrierMenu> {
         int nx = compactCargo() ? 182 : 6, nw = compactCargo() ? width - 188 : 58;
         button("戻る", "chevron-left", nx, 4, nw, this::back);
         if (compactCargo()) {
-            button("補給・小型機", "battery-charging", 182, 30, width - 188, () -> changePage(1));
+            button("補給・荷役", "battery-charging", 182, 30, width - 188, () -> changePage(1));
             button("他の操作", "list-checks", 182, 56, width - 188, this::toggleTabs);
             if (height < 230) button(playerPage ? "貨物を見る" : "持ち物を見る", "package", 182, 120, width - 188, () -> {
                 if (!menu.getCarried().isEmpty() || cargoPending()) { notice = "持っているアイテムを枠へ戻してください"; return; }
@@ -206,19 +224,24 @@ public final class CarrierScreen extends DockCarrierHmiScreen<CarrierMenu> {
         if (confirming()) {
             int cy = small() ? height - 60 : 171;
             boolean expired = confirmation.phase() == Phase.EXPIRED_CONFIRM;
-            if (!expired) consent = control(Checkbox.builder(Component.literal(tab == Tab.ATTACK ? "攻撃範囲を確認しました" : "破壊する範囲に同意します"), font)
+            if (!expired) consent = control(Checkbox.builder(Component.literal(combatTab()
+                    ? (missileTab() ? "ミサイルのロック範囲を確認しました" : "レーザー照射範囲を確認しました")
+                    : "破壊する範囲に同意します"), font)
                     .pos(sideX(), cy).maxWidth(sideWidth()).selected(confirmation.consent())
                     .onValueChange((box, value) -> { confirmation.consent(value); refreshControls(); }).build());
-            primary = button(expired ? tab == Tab.ATTACK ? "攻撃範囲を再確認" : "採掘範囲を再確認"
+            primary = button(expired ? combatTab() ? "攻撃範囲を再確認" : "採掘範囲を再確認"
                 : confirmation.phase() == Phase.QUEUED_START ? "開始を待っています"
-                : tab == Tab.ATTACK ? "この範囲の敵を攻撃" : "この範囲の採掘を開始", "play",
+                : missileTab() ? "この範囲へ重ミサイルを発射"
+                : tab == Tab.LASER ? "この範囲へ高出力レーザーを照射"
+                : "この範囲の採掘を開始", "play",
                 x, height - 24, w, expired ? this::revalidate : this::activate);
         } else {
             String label = confirmation.busy() ? requestNotice() : working() ? status()
                 : canResumeMove() ? "保存した目的地への移動を再開" : !confirmation.selected() ? "地図で区画を選ぶ"
                 : tab == Tab.MOVE ? "母艦をここへ移動"
-                : !atSelection() ? (tab == Tab.ATTACK ? "攻撃位置へ移動して範囲確認" : "採掘位置へ移動して範囲確認")
-                : tab == Tab.ATTACK ? "攻撃範囲を確認" : "採掘範囲を確認";
+                : !atSelection() ? (combatTab() ? "攻撃位置へ移動して範囲確認" : "採掘位置へ移動して範囲確認")
+                : missileTab() ? "ミサイルのロック範囲を確認"
+                : tab == Tab.LASER ? "レーザー照射範囲を確認" : "採掘範囲を確認";
             primary = button(label, working() ? "square" : tab == Tab.MOVE || !atSelection() ? "navigation" : "chevron-right",
                 x, height - 24, w, this::primaryAction);
             if (!small() && !working() && view().total() > 0 && tab == Tab.MINING)
@@ -289,7 +312,7 @@ public final class CarrierScreen extends DockCarrierHmiScreen<CarrierMenu> {
         if (tab == Tab.MOVE || !atSelection()) {
             operationAfterMove = tab == Tab.MOVE ? null : tab;
             confirmation.queueMove(new CarrierUiPolicy.Destination(view().navigation().exterior().dimension(), x, altitude, z),
-                tab == Tab.ATTACK ? CarrierPolicy.Mode.COMBAT.ordinal()
+                combatTab() ? CarrierPolicy.Mode.COMBAT.ordinal()
                     : tab == Tab.MINING ? CarrierPolicy.Mode.MINING.ordinal() : CarrierPolicy.Mode.IDLE.ordinal(), now());
             notice = "";
         } else if (confirmation.queuePreview(requestedMode(), false, now())) notice = "";
@@ -301,9 +324,11 @@ public final class CarrierScreen extends DockCarrierHmiScreen<CarrierMenu> {
             || confirmation.phase() != Phase.SELECT || !ready()) return;
         Tab operation = operationAfterMove;
         operationAfterMove = null;
-        int mode = operation == Tab.ATTACK ? CarrierPolicy.Mode.COMBAT.ordinal() : CarrierPolicy.Mode.MINING.ordinal();
+        int mode = operation == Tab.LASER || operation == Tab.MISSILE
+            ? CarrierPolicy.Mode.COMBAT.ordinal() : CarrierPolicy.Mode.MINING.ordinal();
         if (confirmation.queuePreview(mode, false, now())) {
-            notice = operation == Tab.ATTACK ? "到着 / 攻撃範囲を確認中" : "到着 / 採掘範囲を確認中";
+            notice = operation == Tab.MISSILE ? "到着 / ミサイルのロック範囲を確認中"
+                : operation == Tab.LASER ? "到着 / レーザー照射範囲を確認中" : "到着 / 採掘範囲を確認中";
             build();
         }
     }
@@ -331,8 +356,10 @@ public final class CarrierScreen extends DockCarrierHmiScreen<CarrierMenu> {
             case START -> Action.ACTIVATE;
             case RESUME -> Action.RESUME_PREVIEW;
             case MOVE -> command.mode() == CarrierPolicy.Mode.MINING.ordinal() ? Action.MOVE_MINING
-                : command.mode() == CarrierPolicy.Mode.COMBAT.ordinal() ? Action.MOVE_COMBAT : Action.MOVE;
-            case PREVIEW -> command.mode() == CarrierPolicy.Mode.COMBAT.ordinal() ? Action.PREVIEW_COMBAT : Action.PREVIEW_MINING;
+                : command.mode() == CarrierPolicy.Mode.COMBAT.ordinal()
+                    ? missileTab() ? Action.MOVE_MISSILE_COMBAT : Action.MOVE_COMBAT : Action.MOVE;
+            case PREVIEW -> command.mode() == CarrierPolicy.Mode.COMBAT.ordinal()
+                ? missileTab() ? Action.PREVIEW_MISSILE_COMBAT : Action.PREVIEW_COMBAT : Action.PREVIEW_MINING;
         };
         UUID generation = command.kind() == CarrierUiPolicy.CommandKind.START ? command.generation() : CarrierCommandPayload.NONE;
         var destination = command.destination();
@@ -392,16 +419,19 @@ public final class CarrierScreen extends DockCarrierHmiScreen<CarrierMenu> {
         }
         if (compactCargo()) return;
         int x = cargoContentX(), y = small() ? 30 : 55;
-        int tabWidth = DockCarrierLayout.supplyTabWidth(width, x);
+        int tabWidth = DockCarrierLayout.supplyTabWidth(width, x, 4);
         button("貨物", "package", x, y, tabWidth, () -> changePage(0));
         button("母艦補給", "battery-charging", x + tabWidth + 4, y, tabWidth, () -> changePage(1));
-        button("小型機補給", "dock", x + 2 * (tabWidth + 4), y, tabWidth, () -> changePage(2));
+        button("コンテナ荷役", "package-plus", x + 2 * (tabWidth + 4), y, tabWidth, () -> changePage(2));
+        button("小型機補給", "dock", x + 3 * (tabWidth + 4), y, tabWidth, () -> changePage(3));
         if (page == 1) {
             button("機動蓄電セルを投入", "battery-charging", powerX(0) + powerWidth() + 6, powerY(0) + 6, 22,
                 () -> simple(Action.REFUEL, CarrierCommandPayload.NONE)).active = view().owner();
             button("兵装電力セルを投入", "zap", powerX(1) + powerWidth() + 6, powerY(1) + 6, 22,
                 () -> simple(Action.CHARGE_WEAPON, CarrierCommandPayload.NONE)).active = view().owner();
         } else if (page == 2) {
+            buildContainerHandling(x, y);
+        } else if (page == 3) {
             List<DroneEntity> candidates = ownedDrones();
             List<UUID> ids = new ArrayList<>(view().drones());
             for (var candidate : view().candidates()) if (!ids.contains(candidate.drone())) ids.add(candidate.drone());
@@ -422,6 +452,71 @@ public final class CarrierScreen extends DockCarrierHmiScreen<CarrierMenu> {
             }
             pagination(x, height - 62, count, ids.size());
         }
+    }
+    private void buildContainerHandling(int x, int y) {
+        int segmentY = y + 30;
+        int segmentWidth = Math.max(90, Math.min(180, (width - x - 10) / 2));
+        button("地上コンテナ", "upload", x, segmentY, segmentWidth, () -> {
+            installedContainerList = false; listPage = 0; build();
+        });
+        button("搭載済み", "download", x + segmentWidth + 4, segmentY, segmentWidth, () -> {
+            installedContainerList = true; listPage = 0; build();
+        });
+        var transfer = view().navigation().transfer();
+        int statusY = segmentY + 27;
+        if (transfer.active()) {
+            Button cancel = button("荷役を安全中止", "x", Math.max(x, width - 174), statusY, 168,
+                () -> simple(Action.CANCEL_CONTAINER_TRANSFER, CarrierCommandPayload.NONE));
+            cancel.active = view().owner() && transfer.cancellable();
+            cancel.setTooltip(Tooltip.create(Component.literal(transfer.cancellable()
+                ? "接続確定前の荷役を安全に取り消します" : "接続確定後のため完了まで中止できません")));
+        }
+        int rowY = statusY + 25;
+        int rows = Math.max(1, (height - rowY - 58) / 26);
+        if (!installedContainerList) {
+            var containers = view().navigation().containers();
+            listPage = Math.min(listPage, Math.max(0, (containers.size() - 1) / rows));
+            for (int i = listPage * rows; i < Math.min(containers.size(), (listPage + 1) * rows); i++) {
+                var candidate = containers.get(i);
+                var pos = candidate.position();
+                String kind = candidate.type() == jp.morrowgear.drone.carrier.CarrierExpansionPolicy.Type.CARGO.ordinal()
+                    ? "貨物コンテナ" : "ミサイルコンテナ";
+                String state = candidate.reserved() ? "予約済み" : "搭載";
+                Button load = button(kind + "  " + candidate.distance() + "m  "
+                    + pos.getX() + ", " + pos.getY() + ", " + pos.getZ() + "  /  " + state,
+                    "package-plus", x, rowY + (i % rows) * 26, width - x - 6, () -> loadCandidate(candidate));
+                load.active = view().owner() && !view().moving() && !transfer.active() && !candidate.reserved();
+                load.setTooltip(Tooltip.create(Component.literal(candidate.reserved()
+                    ? "別の荷役がこのコンテナを予約しています"
+                    : "母艦がこのコンテナの搭載スロット上空へ移動し、四点ウィンチで搭載します")));
+            }
+            pagination(x, height - 62, rows, containers.size());
+        } else {
+            var expansions = view().navigation().expansions();
+            listPage = Math.min(listPage, Math.max(0, (expansions.size() - 1) / rows));
+            for (int i = listPage * rows; i < Math.min(expansions.size(), (listPage + 1) * rows); i++) {
+                var expansion = expansions.get(i);
+                String kind = expansion.type() == jp.morrowgear.drone.carrier.CarrierExpansionPolicy.Type.CARGO.ordinal()
+                    ? "貨物コンテナ" : "ミサイルコンテナ  " + expansion.rounds() + "/"
+                        + jp.morrowgear.drone.carrier.CarrierMissileMagazinePolicy.CAPACITY + "発";
+                String bay = jp.morrowgear.drone.carrier.CarrierCargoVisualPolicy.ordnanceCapable(expansion.hardpoint())
+                    ? "兵装スロット" : "汎用スロット";
+                Button unload = button("HP" + (expansion.hardpoint() + 1) + "  " + bay + "  " + kind
+                    + "  /  安全地点へ降ろす", "download", x, rowY + (i % rows) * 26, width - x - 6,
+                    () -> unloadExpansion(expansion));
+                unload.active = view().owner() && !view().moving() && !transfer.active();
+                unload.setTooltip(Tooltip.create(Component.literal(
+                    "母艦右舷側の安全な地表を自動探索し、底面が接地するまでウィンチで降ろします")));
+            }
+            pagination(x, height - 62, rows, expansions.size());
+        }
+    }
+    private void loadCandidate(CarrierViewPayload.ContainerCandidate candidate){
+        var pos=candidate.position();
+        send(Action.LOAD_CONTAINER,candidate.module(),pos.getX(),pos.getY(),pos.getZ(),CarrierCommandPayload.NONE);
+    }
+    private void unloadExpansion(CarrierViewPayload.Expansion expansion){
+        send(Action.UNLOAD_CONTAINER, expansion.module(), 0, Integer.MIN_VALUE, 0, CarrierCommandPayload.NONE);
     }
     private int cargoContentX() { return page == 0 && !small() ? 200 : 6; }
     private int powerX(int index) { return 6 + (!small() ? index * (width / 2) : 0); }
@@ -504,7 +599,7 @@ public final class CarrierScreen extends DockCarrierHmiScreen<CarrierMenu> {
     }
     private void buildOverview() {
         int x = Math.max(180, width * 2 / 3), w = width - x - 8;
-        Tab[] shortcuts = {Tab.MOVE, Tab.MINING, Tab.CARGO, Tab.SUPPLY};
+        Tab[] shortcuts = {Tab.MOVE, Tab.MINING, Tab.LASER, Tab.MISSILE, Tab.CARGO, Tab.SUPPLY};
         for (int i = 0; i < shortcuts.length; i++) {
             Tab next = shortcuts[i];
             button(next.label, next.icon, x, (small() ? 34 : 62) + i * 24, w, () -> changeTab(next));
@@ -515,6 +610,7 @@ public final class CarrierScreen extends DockCarrierHmiScreen<CarrierMenu> {
         var v = view();
         var at = v.navigation().exterior();
         var storage = v.navigation().storage();
+        int cargoModules = CarrierPolicy.cargoModulesFromPages(storage.pages());
         List<String> summary = List.of(
             status(),
             actionAvailability(),
@@ -523,6 +619,7 @@ public final class CarrierScreen extends DockCarrierHmiScreen<CarrierMenu> {
             "機動蓄電 " + v.energy() + " / " + CarrierPolicy.MAX_ENERGY + " E",
             "兵装蓄電 " + v.weaponEnergy() + " / " + CarrierPolicy.MAX_ENERGY + " E",
             "貨物 " + storage.usedSlots() + "/" + storage.totalSlots() + "枠 / " + storage.items() + "個",
+            "拡張カーゴ " + cargoModules + "/8 / +" + cargoModules * CarrierPolicy.STORAGE_SLOTS_PER_MODULE + "枠",
             "補給ベイ " + v.bayUsed() + "/" + CarrierPolicy.BAY_SLOTS + " / 招待 " + v.guests().size() + "人");
         int row = Math.min(23, Math.max(14, (height - y - 46) / summary.size()));
         for (int i = 0; i < summary.size(); i++) {
@@ -546,7 +643,7 @@ public final class CarrierScreen extends DockCarrierHmiScreen<CarrierMenu> {
     }
     private void drawCargo(GuiGraphicsExtractor g, int mx, int my) {
         if (!compactCargo()) {
-            int tx = cargoContentX(), tw = DockCarrierLayout.supplyTabWidth(width, tx);
+            int tx = cargoContentX(), tw = DockCarrierLayout.supplyTabWidth(width, tx, 4);
             int ty = small() ? 50 : 75;
             g.fill(tx + page * (tw + 4), ty, tx + page * (tw + 4) + tw, ty + 2, CYAN);
         }
@@ -569,9 +666,9 @@ public final class CarrierScreen extends DockCarrierHmiScreen<CarrierMenu> {
                 text(g, "補給品", leftPos + 180, topPos + 128, width - leftPos - 188, CYAN);
                 text(g, "持ち物", leftPos + 180, topPos + 152, width - leftPos - 188, MUTED);
             }
-            String[] names = {"推進パワーセル", "兵装電力セル", "機関砲弾", "ミサイル", "修理材"};
-            String[] icons = {"battery-charging", "zap", "target", "crosshair", "wrench"};
-            for (int i = 54; i < Math.min(59, menu.slots.size()); i++) {
+            String[] names = {"推進パワーセル", "兵装電力セル", "機関砲弾", "ミサイル", "修理材", "旧式拡張カーゴ（自動移行）"};
+            String[] icons = {"battery-charging", "zap", "target", "crosshair", "wrench", "package-plus"};
+            for (int i = 54; i < Math.min(60, menu.slots.size()); i++) {
                 var slot = menu.slots.get(i);
                 if (!slotVisible(slot)) continue;
                 if (!slot.hasItem()) HmiArt.icon(g, icons[i - 54], leftPos + slot.x + 2, topPos + slot.y + 2, 12);
@@ -587,8 +684,27 @@ public final class CarrierScreen extends DockCarrierHmiScreen<CarrierMenu> {
                 text(g, "推進パワーセル +" + CarrierSupplies.FLIGHT_CELL_ENERGY
                     + "E / 兵装電力セル +" + CarrierSupplies.WEAPON_CELL_ENERGY + "E", 6, detailY, width - 12, TEXT);
                 text(g, "補給元: 専用枠 → 貨物 → 持ち物", 6, detailY + 12, width - 12, MUTED);
+                var missiles=view().navigation().missiles();
+                String phase=switch(jp.morrowgear.drone.CarrierHeavyMissilePolicy.LaunchPhase.values()[missiles.phase()]){
+                    case HATCH_OPEN -> "ハッチ開放"; case RIPPLE_FIRE -> "順次射出";
+                    case HATCH_CLOSE -> "ハッチ閉鎖"; default -> missiles.lockedTargets().isEmpty()?"待機":"ロック";
+                };
+                text(g,"大型ミサイル "+missiles.rounds()+"発 / "+phase+" / "+missiles.launched()+"/"+missiles.salvoSize(),
+                    6,detailY+24,width-12,missiles.salvoSize()>0?AMBER:MUTED);
             }
         } else if (page == 2) {
+            int headingY = (small() ? 30 : 55) + 58;
+            text(g, installedContainerList ? "搭載済みコンテナ / スロット単位で安全に荷下ろし"
+                : "地上コンテナ / 距離順に選択して搭載", 6, headingY, width - 12, CYAN);
+            var transfer = view().navigation().transfer();
+            if (transfer.active()) text(g, transferSummary(transfer), 6, headingY + 13, width - 188, AMBER);
+            else {
+                int count = installedContainerList ? view().navigation().expansions().size()
+                    : view().navigation().containers().size();
+                text(g, count == 0 ? installedContainerList ? "搭載中のコンテナはありません"
+                    : "搭載可能な近隣コンテナはありません" : count + "件", 6, headingY + 13, width - 12, MUTED);
+            }
+        } else if (page == 3) {
             text(g, "補給位置 " + view().bayUsed() + "/" + CarrierPolicy.BAY_SLOTS
                 + "  機関砲 " + view().navigation().gunCredit() + "発"
                 + "  ミサイル " + view().navigation().missileCredit() + "発", 6, small() ? 54 : 79,
@@ -596,6 +712,33 @@ public final class CarrierScreen extends DockCarrierHmiScreen<CarrierMenu> {
             if (!supplyCandidatesVisible)
                 text(g, "補給候補なし（半径64ブロック）", 6, small() ? 76 : 101, width - 12, MUTED);
         }
+    }
+
+    private static String transferSummary(CarrierViewPayload.ContainerTransfer transfer){
+        String direction=transfer.direction()==jp.morrowgear.drone.carrier.CarrierContainerTransferPolicy.Direction.LOAD.ordinal()
+            ?"搭載":"荷下ろし";
+        var phase=jp.morrowgear.drone.carrier.CarrierContainerTransferPolicy.Phase.values()[transfer.phase()];
+        String step=switch(phase){
+            case APPROACH -> "対象上空へ移動"; case ALIGN -> "位置合わせ"; case HATCH_OPEN -> "ハッチ開放";
+            case WINCH_DEPLOY -> "ウィンチ降下"; case CONNECT -> "四点接続"; case TENSION -> "張力確認";
+            case HOIST -> "巻き上げ"; case ATTACH -> "機体へ固定"; case PURGE -> "固定解除";
+            case DEPLOY -> "地表へ降下"; case GROUND_CONTACT -> "接地確認"; case RELEASE -> "ワイヤー解放";
+            case WINCH_RETRACT -> "ウィンチ収納"; case HATCH_CLOSE -> "ハッチ閉鎖";
+            case HOLD -> "再計画待ち"; case ABORTED -> "安全中止"; default -> phase.name();
+        };
+        int progress=transfer.duration()<=0?0:Math.clamp(transfer.tick()*100/transfer.duration(),0,100);
+        return "荷役 "+direction+" / HP"+(transfer.hardpoint()+1)+" / "+step
+            +(transfer.duration()>1?" "+progress+"%":"")+" / "+transferDetail(transfer.detail());
+    }
+
+    private static String transferDetail(String detail){
+        return switch(detail){
+            case "LOAD_ACCEPTED" -> "搭載先を確保"; case "UNLOAD_ACCEPTED" -> "接地点を確保";
+            case "CARRIER_APPROACH_BLOCKED" -> "接近経路を再計画"; case "CARRIER_ALIGNMENT_BLOCKED" -> "位置合わせを再試行";
+            case "TRANSFER_RECOVERY_EXHAUSTED" -> "経路を確保できません"; case "TRANSFER_CANCELLED" -> "中止済み";
+            case "LOAD_COMPLETE" -> "搭載完了"; case "UNLOAD_COMPLETE" -> "荷下ろし完了";
+            default -> detail==null||detail.isBlank()?"進行中":detail.replace('_',' ');
+        };
     }
     private void drawPower(GuiGraphicsExtractor g, String label, int amount, int x, int y, int w, int color) {
         text(g, label + (confirmation.fresh(now()) ? "" : " / 最終受信"), x, y, w, TEXT);
@@ -645,19 +788,26 @@ public final class CarrierScreen extends DockCarrierHmiScreen<CarrierMenu> {
             return;
         }
         int x = sideX(), y = small() ? 54 : 74, w = sideWidth();
-        text(g, tab == Tab.ATTACK ? "敵への攻撃 / 地形は壊しません" : tab == Tab.MOVE ? "母艦の移動" : "採掘する範囲", x, y, w, TEXT);
-        text(g, tab == Tab.ATTACK && view().navigation().effects().combatRadius() > 0
+        text(g, missileTab() ? "重ミサイル攻撃 / 最大5発を脅威順に配分"
+            : tab == Tab.LASER ? "高出力レーザー攻撃 / 地形は壊しません"
+            : tab == Tab.MOVE ? "母艦の移動" : "採掘する範囲", x, y, w, TEXT);
+        text(g, combatTab() && view().navigation().effects().combatRadius() > 0
             ? "敵を探す範囲 半径 " + view().navigation().effects().combatRadius() + "ブロック"
             : confirmation.selected() ? "中心チャンク " + confirmation.chunkX() + ", " + confirmation.chunkZ() + " / 半径24の円形範囲" : "地図で区画を選択", x, y + 15, w, AMBER);
         if (confirming) {
-            text(g, tab == Tab.ATTACK ? "射線の通る敵だけを攻撃" : "母艦の下から岩盤まで掘削", x, y + 30, w, TEXT);
-            text(g, tab == Tab.ATTACK ? "標的周囲 " + (int)CarrierPolicy.COMBAT_IMPACT_RADIUS + "ブロックを照射" : "高さ Y " + view().minY() + " - " + view().maxY(), x, y + 43, w, MUTED);
+            text(g, missileTab() ? "走査した敵を脅威順にロック / 地下目標にも対応"
+                : tab == Tab.LASER ? "射線の通る敵へ広範囲レーザーを照射"
+                : "母艦の下から岩盤まで掘削", x, y + 30, w, TEXT);
+            text(g, missileTab() ? "搭載弾 " + view().navigation().missiles().rounds() + "発 / 1作戦 最大5発"
+                : tab == Tab.LASER ? "標的周囲 " + (int)CarrierPolicy.COMBAT_IMPACT_RADIUS + "ブロックを照射"
+                : "高さ Y " + view().minY() + " - " + view().maxY(), x, y + 43, w, MUTED);
         } else {
             text(g, status(), x, y + 31, w, CYAN);
             text(g, activeEstimate(), x, y + 47, w, AMBER);
             if (tab == Tab.MOVE) text(g, "移動先の高さ Y " + altitude, x, y + 62, w, MUTED);
             else if (view().total() > 0 && view().mode() == 1) text(g, "採掘 " + (long) view().cursor() * 100 / view().total() + "%", x, y + 62, w, GREEN);
-            else if (view().mode() == 2) text(g, "攻撃作戦 残り " + formatTicks(view().navigation().combatTicks()), x, y + 62, w, AMBER);
+            else if (view().mode() == 2) text(g, (missileOperation() ? "ミサイル攻撃" : "レーザー攻撃")
+                + " 残り " + formatTicks(view().navigation().combatTicks()), x, y + 62, w, AMBER);
             if (!small()) text(g, !requestNotice().isEmpty() ? requestNotice() : confirmation.expired() ? "範囲をもう一度確認してください" : notice, x, y + 78, w, AMBER);
             if (!small()) {
                 var effect = view().navigation().effects(); var storage = view().navigation().storage();
@@ -699,10 +849,14 @@ public final class CarrierScreen extends DockCarrierHmiScreen<CarrierMenu> {
         boolean mining = view().mode() == CarrierPolicy.Mode.MINING.ordinal()
             || miningStage() == CarrierMapUiPolicy.MiningStage.RELEASE;
         String[] names = mining ? new String[]{"走査", "充填", "下降", "解放"}
+            : missileOperation() ? new String[]{"走査・ロック", "順次発射", "完了"}
             : new String[]{"走査", "充填", "照射", "冷却"};
-        int active = mining ? miningStage().ordinal() - 1 : switch (view().navigation().effects().phase()) {
-            case SCAN -> 0; case CHARGE -> 1; case FIRE -> 2; case COOLDOWN -> 3; default -> -1;
-        };
+        int active = mining ? miningStage().ordinal() - 1 : missileOperation()
+            ? switch (view().navigation().effects().phase()) {
+                case SCAN -> 0; case FIRE -> 1; case COOLDOWN -> 2; default -> -1;
+            } : switch (view().navigation().effects().phase()) {
+                case SCAN -> 0; case CHARGE -> 1; case FIRE -> 2; case COOLDOWN -> 3; default -> -1;
+            };
         int y = map.bottom() - 14, part = map.width() / names.length;
         for (int i = 0; i < names.length; i++) {
             int x = map.x() + i * part;
@@ -720,7 +874,7 @@ public final class CarrierScreen extends DockCarrierHmiScreen<CarrierMenu> {
     }
     private CarrierUiPolicy.MapProjection projection(Rect map) {
         return CarrierUiPolicy.projection(map, centerX, centerZ, zoom, confirming(), confirmation.chunkX(), confirmation.chunkZ(),
-            tab == Tab.ATTACK ? view().navigation().effects().combatRadius() : 0);
+            combatTab() ? view().navigation().effects().combatRadius() : 0);
     }
     private int px(Rect r, double x) { return projection(r).x(r, x); }
     private int pz(Rect r, double z) { return projection(r).z(r, z); }
@@ -778,12 +932,18 @@ public final class CarrierScreen extends DockCarrierHmiScreen<CarrierMenu> {
             case RELEASE -> "採掘中";
             default -> "採掘中";
         };
-        if (view().mode() == 2) return switch (view().navigation().effects().phase()) {
-            case CHARGE -> "攻撃の準備中 / 充填";
-            case FIRE -> "敵へ照射中";
-            case COOLDOWN -> "攻撃後の冷却中";
-            default -> "攻撃状態を確認中";
-        };
+        if (view().mode() == 2) return missileOperation()
+            ? switch (view().navigation().effects().phase()) {
+                case SCAN -> "ミサイル標的を走査・ロック中";
+                case FIRE -> "重ミサイルを順次発射中";
+                case COOLDOWN -> "発射ハッチを閉鎖中";
+                default -> "ミサイル攻撃状態を確認中";
+            } : switch (view().navigation().effects().phase()) {
+                case CHARGE -> "レーザー照射の準備中 / 充填";
+                case FIRE -> "敵へ高出力レーザーを照射中";
+                case COOLDOWN -> "レーザー照射後の冷却中";
+                default -> "レーザー攻撃状態を確認中";
+            };
         if (view().navigation().navigationPaused() && view().stop() == CarrierPolicy.Stop.EMERGENCY.ordinal())
             return "移動は停止中 / 目的地を保存済み";
         int code = view().stop();
@@ -848,7 +1008,10 @@ public final class CarrierScreen extends DockCarrierHmiScreen<CarrierMenu> {
         }
         if (view().mode() == CarrierPolicy.Mode.COMBAT.ordinal()) {
             int phase = CarrierActionEstimatePolicy.phaseRemainingTicks(effect.phaseTick(), effect.phaseDuration());
-            String next = switch (effect.phase()) {
+            String next = missileOperation() ? switch (effect.phase()) {
+                case SCAN -> "ロック確定"; case FIRE -> "発射完了";
+                case COOLDOWN -> "ハッチ閉鎖"; default -> "次段階";
+            } : switch (effect.phase()) {
                 case SCAN -> "標的確定"; case CHARGE -> "照射開始"; case FIRE -> "照射終了";
                 case COOLDOWN -> "再実行可能"; default -> "次段階";
             };
@@ -860,8 +1023,9 @@ public final class CarrierScreen extends DockCarrierHmiScreen<CarrierMenu> {
                 return "兵装電力の回復まで " + formatTicks(ready) + " / 作戦残り "
                     + formatTicks(view().navigation().combatTicks());
             }
+            String resources = missileOperation() ? " / 残弾 " + view().navigation().missiles().rounds() + "発" : "";
             return next + "まで " + formatTicks(phase) + " / 作戦残り "
-                + formatTicks(view().navigation().combatTicks());
+                + formatTicks(view().navigation().combatTicks()) + resources;
         }
         return "移動・採掘・攻撃: 実行可能";
     }

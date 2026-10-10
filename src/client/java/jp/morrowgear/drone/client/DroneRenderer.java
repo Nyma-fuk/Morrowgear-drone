@@ -62,7 +62,8 @@ public final class DroneRenderer extends EntityRenderer<DroneEntity, DroneRender
 		boolean working = entity.engineerState() == jp.morrowgear.drone.EngineerState.REPAIRING
 			|| entity.fieldOperationState() == jp.morrowgear.drone.FieldOperationState.WORKING
 			|| entity.fieldOperationState() == jp.morrowgear.drone.FieldOperationState.PLANTING
-			|| entity.salvageState().ordinal() >= jp.morrowgear.drone.SalvageState.HOOK.ordinal();
+			|| entity.salvageState().ordinal() >= jp.morrowgear.drone.SalvageState.HOOK.ordinal()
+			|| entity.cargoLiftAssigned();
 		boolean equipment = FlightPresentation.deployEquipment(entity.role(), entity.combatWeapon(),
 			entity.combatState(), state.docked, state.powerLost, working);
 		state.entityId = entity.getUUID();
@@ -73,9 +74,22 @@ public final class DroneRenderer extends EntityRenderer<DroneEntity, DroneRender
 		state.combatShotAge = entity.combatShotAge();
 		state.combatStateAge = Math.max(0L, entity.level().getGameTime() - entity.combatStateTick());
 		state.salvageState = entity.salvageState();
+		state.fieldType = entity.fieldOperationType();
+		state.fieldState = entity.fieldOperationState();
+		state.fieldRadius = entity.fieldRadius();
+		state.fieldAnchorOffset = entity.hasFieldOperation()
+			? Vec3.atCenterOf(entity.fieldAnchor()).subtract(entity.position()) : null;
+		net.minecraft.core.BlockPos fieldTarget = entity.fieldWorkTargetForRender();
+		state.fieldWorkTargetOffset = fieldTarget == null ? null
+			: Vec3.atCenterOf(fieldTarget).subtract(entity.position());
 		net.minecraft.world.entity.Entity salvageTarget = entity.level().getEntity(entity.salvageTargetEntityId());
 		state.salvageTargetOffset = salvageTarget == null ? null
 			: salvageTarget.position().add(0, salvageTarget.getBbHeight(), 0).subtract(entity.position());
+		net.minecraft.world.entity.Entity cargoLift = entity.level().getEntity(entity.cargoLiftLoadEntityId());
+		jp.morrowgear.drone.CargoLiftPolicy.Corner liftCorner = entity.cargoLiftCorner();
+		state.cargoLiftAnchorOffset = cargoLift instanceof jp.morrowgear.drone.CargoLiftLoadEntity load
+			&& liftCorner != null && load.carried()
+			? load.cableAnchor(liftCorner).subtract(entity.position()) : null;
 		net.minecraft.world.entity.Entity combatTarget = entity.level().getEntity(entity.combatTargetId());
 		state.combatTargetOffset = combatTarget == null ? null
 			: (state.combatState == jp.morrowgear.drone.CombatState.GUN_RUN
@@ -127,6 +141,8 @@ public final class DroneRenderer extends EntityRenderer<DroneEntity, DroneRender
 			CombatEffectRenderer.render(state, poseStack, collector,
 				camera.pos.subtract(new Vec3(state.x, state.y, state.z)));
 			ScoutScanRenderer.render(state, poseStack, collector,
+				camera.pos.subtract(new Vec3(state.x, state.y, state.z)));
+			FieldWorkEffectRenderer.render(state, poseStack, collector,
 				camera.pos.subtract(new Vec3(state.x, state.y, state.z)));
 		}
 		SalvageEffectRenderer.render(state, poseStack, collector);

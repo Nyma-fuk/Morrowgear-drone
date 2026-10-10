@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.UUID;
 import jp.morrowgear.drone.block.DockCenterBlock;
 import jp.morrowgear.drone.block.DockPartBlock;
+import jp.morrowgear.drone.carrier.CarrierEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
@@ -40,6 +41,7 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
@@ -57,6 +59,10 @@ public final class MorrowgearMissileEntity extends Entity {
 		SynchedEntityData.defineId(MorrowgearMissileEntity.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Integer> FLIGHT_PHASE =
 		SynchedEntityData.defineId(MorrowgearMissileEntity.class, EntityDataSerializers.INT);
+	private static final EntityDataAccessor<Boolean> HEAVY =
+		SynchedEntityData.defineId(MorrowgearMissileEntity.class, EntityDataSerializers.BOOLEAN);
+	private static final EntityDataAccessor<String> OWNER =
+		SynchedEntityData.defineId(MorrowgearMissileEntity.class, EntityDataSerializers.STRING);
 	private static final EntityDataAccessor<Integer> ATTACHED_HOST =
 		SynchedEntityData.defineId(MorrowgearMissileEntity.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Vector3fc> ATTACHED_OFFSET =
@@ -76,6 +82,7 @@ public final class MorrowgearMissileEntity extends Entity {
 	private MicroMissilePolicy.Attachment attachment;
 	private final InterpolationHandler interpolation = new InterpolationHandler(this, 2);
 	private MissileTrailHistory visualTrail;
+	private int penetrationBlocks;
 
 	public MorrowgearMissileEntity(EntityType<? extends MorrowgearMissileEntity> type, Level level) {
 		super(type, level);
@@ -87,6 +94,7 @@ public final class MorrowgearMissileEntity extends Entity {
 		if (missile == null) return false;
 		missile.launcherId = launcher.getUUID();
 		missile.ownerId = launcher.ownerId();
+		missile.entityData.set(OWNER,missile.ownerId.toString());
 		missile.targetUuid = target.getUUID();
 		missile.launchProfile = new MicroMissilePolicy.LaunchProfile(shot, launcher.getYRot());
 		missile.entityData.set(TARGET, target.getId());
@@ -108,9 +116,28 @@ public final class MorrowgearMissileEntity extends Entity {
 		return true;
 	}
 
+	public static boolean launchCarrier(ServerLevel level, CarrierEntity launcher, ServerPlayer owner,
+		LivingEntity target, int hardpoint, int cell) {
+		MorrowgearMissileEntity missile = MorrowgearDrone.MISSILE.create(level, EntitySpawnReason.TRIGGERED);
+		if (missile == null) return false;
+		missile.launcherId=launcher.getUUID(); missile.ownerId=owner.getUUID(); missile.targetUuid=target.getUUID();
+		missile.entityData.set(OWNER,missile.ownerId.toString());
+		missile.entityData.set(HEAVY,true); missile.entityData.set(TARGET,target.getId());
+		missile.lastAim=target.position().add(0,target.getBbHeight()*.5,0);
+		missile.ownerTeam=owner.getTeam()==null?"":owner.getTeam().getName();
+		var tube=CarrierHeavyMissilePolicy.launchTube(hardpoint,cell);
+		Vec3 origin=launcher.toWorld(new Vec3(tube.x(),tube.y(),tube.z()));
+		missile.setPos(origin); missile.setXRot(-90); missile.xRotO=-90;
+		missile.setYRot(launcher.getYRot()); missile.yRotO=launcher.getYRot();
+		missile.setDeltaMovement(0,.52,0); missile.explosionPower=CarrierHeavyMissilePolicy.EXPLOSION_POWER;
+		return level.addFreshEntity(missile);
+	}
+
 	public int targetId() { return entityData.get(TARGET); }
+	public boolean ownedBy(UUID owner) { return owner != null && owner.toString().equals(entityData.get(OWNER)); }
 	public boolean impacted() { return entityData.get(IMPACTED); }
 	public boolean motorIgnited() { return entityData.get(MOTOR_IGNITED); }
+	public boolean heavy() { return entityData.get(HEAVY); }
 	public FlightPhase flightPhase() { return FlightPhase.values()[Mth.clamp(entityData.get(FLIGHT_PHASE), 0, 4)]; }
 	public java.util.List<MissileTrailHistory.Point> visualTrail() {
 		return visualTrail == null ? java.util.List.of() : visualTrail.points();
@@ -139,6 +166,8 @@ public final class MorrowgearMissileEntity extends Entity {
 		builder.define(IMPACTED, false);
 		builder.define(MOTOR_IGNITED, false);
 		builder.define(FLIGHT_PHASE, 0);
+		builder.define(HEAVY, false);
+		builder.define(OWNER, "");
 		builder.define(ATTACHED_HOST, -1);
 		builder.define(ATTACHED_OFFSET, new Vector3f());
 	}
@@ -159,9 +188,11 @@ public final class MorrowgearMissileEntity extends Entity {
 			followAttachment(level);
 			setDeltaMovement(Vec3.ZERO);
 			fuseTicks = MicroMissilePolicy.nextFuse(fuseTicks);
-			if (fuseTicks == 0 && MissileDetonationRuntime.tryAcquire(level)) detonate(level);
+			if (fuseTicks == 0 && (heavy() ? MissileDetonationRuntime.tryAcquireHeavy(level)
+				: MissileDetonationRuntime.tryAcquire(level))) detonate(level);
 			return;
 		}
+		if(heavy()) { tickHeavy(level); return; }
 		if (++flightTicks > MicroMissilePolicy.MAX_FLIGHT_TICKS) {
 			discard();
 			return;
@@ -219,6 +250,83 @@ public final class MorrowgearMissileEntity extends Entity {
 			setPos(position().add(velocity.scale(Math.max(0, nearest - 1.0e-5))));
 			impact(level, struck);
 		} else setPos(position().add(velocity));
+	}
+
+	private void tickHeavy(ServerLevel level) {
+		if(++flightTicks>CarrierHeavyMissilePolicy.maxFlightTicks(level.getHeight())){discard();return;}
+		Entity found=targetUuid==null?null:level.getEntity(targetUuid);
+		LivingEntity target=found instanceof LivingEntity living&&living.isAlive()&&canDamage(level,living)?living:null;
+		if(target!=null){lastAim=target.position().add(0,target.getBbHeight()*.5,0);entityData.set(TARGET,target.getId());}
+		else entityData.set(TARGET,-1);
+		if(lastAim==null){discard();return;}
+		Vec3 velocity;
+		if(flightTicks<=CarrierHeavyMissilePolicy.EJECT_TICKS){
+			entityData.set(FLIGHT_PHASE,FlightPhase.EJECT.ordinal()); velocity=new Vec3(0,.52,0);
+			if(flightTicks==1)level.playSound(null,getX(),getY(),getZ(),MorrowgearDrone.CARRIER_MISSILE_EJECT_SOUND,
+				SoundSource.PLAYERS,.9f,.94f);
+		}else if(flightTicks<=CarrierHeavyMissilePolicy.IGNITION_TICKS){
+			entityData.set(FLIGHT_PHASE,FlightPhase.BOOST.ordinal()); velocity=new Vec3(0,1.05,0);
+			if(flightTicks==CarrierHeavyMissilePolicy.EJECT_TICKS+1){entityData.set(MOTOR_IGNITED,true);
+				level.playSound(null,getX(),getY(),getZ(),MorrowgearDrone.CARRIER_MISSILE_IGNITION_SOUND,
+					SoundSource.PLAYERS,1,.94f);}
+		}else if(flightTicks<=CarrierHeavyMissilePolicy.CLIMB_TICKS){
+			entityData.set(FLIGHT_PHASE,FlightPhase.BOOST.ordinal());
+			velocity=CarrierHeavyMissilePolicy.climbVelocity(position(),lastAim,flightTicks);
+		}else{
+			entityData.set(FLIGHT_PHASE,FlightPhase.GUIDED.ordinal());
+			Vec3 aim=lastAim.subtract(position());
+			velocity=CarrierHeavyMissilePolicy.guidedVelocity(getDeltaMovement(),aim,flightTicks);
+		}
+		setDeltaMovement(velocity); orient(velocity);
+		Vec3 next=position().add(velocity); AABB sweep=getBoundingBox().expandTowards(velocity).inflate(.3);
+		if(!loaded(level,sweep.inflate(1))||!level.getWorldBorder().isWithinBounds(sweep)){discard();return;}
+		BlockHitResult hit=level.clip(new net.minecraft.world.level.ClipContext(position(),next,
+			net.minecraft.world.level.ClipContext.Block.COLLIDER,net.minecraft.world.level.ClipContext.Fluid.ANY,this));
+		double path=Math.max(1.0e-8,velocity.length());
+		double blockFraction=hit.getType()==net.minecraft.world.phys.HitResult.Type.MISS?Double.POSITIVE_INFINITY
+			:position().distanceTo(hit.getLocation())/path;
+		double targetFraction=target==null?Double.POSITIVE_INFINITY:MicroMissilePolicy.sweepFraction(position(),next,
+			target.getBoundingBox(),new Vec3(getBbWidth()*.5,getBbHeight()*.5,getBbWidth()*.5));
+		if(target!=null&&targetFraction<blockFraction&&targetFraction<=1.0){
+			target.invulnerableTime=0; target.hurtServer(level,level.damageSources().explosion(this,level.getEntity(launcherId)),
+				CarrierHeavyMissilePolicy.DIRECT_DAMAGE); setPos(position().add(velocity.scale(Math.max(0,targetFraction))));
+			heavyImpact(level); return;
+		}
+		if(hit.getType()!=net.minecraft.world.phys.HitResult.Type.MISS){
+			BlockPos pos=hit.getBlockPos(); BlockState state=level.getBlockState(pos);
+			if(mayBreakBlock(level,pos,state)){
+				heavyPenetrationEffect(level,hit.getLocation(),penetrationBlocks==0);
+				level.setBlock(pos,Blocks.AIR.defaultBlockState(),Block.UPDATE_CLIENTS|Block.UPDATE_KNOWN_SHAPE);
+				penetrationBlocks++; setPos(hit.getLocation().add(velocity.normalize().scale(.55)));
+				if(penetrationBlocks%4==1)level.playSound(null,getX(),getY(),getZ(),MorrowgearDrone.CARRIER_MISSILE_PENETRATION_SOUND,
+					SoundSource.PLAYERS,.72f,.88f+level.getRandom().nextFloat()*.08f);
+				return;
+			}
+			setPos(hit.getLocation()); heavyImpact(level); return;
+		}
+		setPos(next);
+	}
+
+	private void heavyPenetrationEffect(ServerLevel level,Vec3 contact,boolean firstContact){
+		if(firstContact)level.sendParticles(ParticleTypes.EXPLOSION_EMITTER,contact.x,contact.y,contact.z,
+			1,0,0,0,0);
+		else level.sendParticles(ParticleTypes.EXPLOSION,contact.x,contact.y,contact.z,
+			1,.08,.08,.08,0);
+		level.sendParticles(ParticleTypes.POOF,contact.x,contact.y,contact.z,
+			firstContact?18:6,.35,.28,.35,firstContact?.12:.05);
+		level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE,contact.x,contact.y,contact.z,
+			firstContact?12:4,.22,.18,.22,.035);
+	}
+
+	private void orient(Vec3 facing){
+		if(facing.horizontalDistanceSqr()>1e-8)setYRot((float)(Mth.atan2(facing.z,facing.x)*180/Math.PI)-90);
+		setXRot((float)(-Mth.atan2(facing.y,facing.horizontalDistance())*180/Math.PI));
+	}
+
+	private void heavyImpact(ServerLevel level){
+		fuseTicks=CarrierHeavyMissilePolicy.FUSE_TICKS; entityData.set(IMPACTED,true);
+		entityData.set(FLIGHT_PHASE,FlightPhase.IMPACT.ordinal()); setDeltaMovement(Vec3.ZERO);
+		level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE,getX(),getY(),getZ(),10,.24,.18,.24,.025);
 	}
 
 	private void impact(ServerLevel level, Entity struck) {
@@ -299,7 +407,9 @@ public final class MorrowgearMissileEntity extends Entity {
 		DamageSource source = level.damageSources().explosion(this, launcher);
 		ExplosionDamageCalculator calculator = new ExplosionDamageCalculator() {
 			@Override public float getEntityDamageAmount(Explosion explosion, Entity entity, float exposure) {
-				return MicroMissilePolicy.entityDamage(super.getEntityDamageAmount(explosion, entity, exposure));
+				float damage=super.getEntityDamageAmount(explosion, entity, exposure);
+				return heavy()?CarrierHeavyMissilePolicy.explosionEntityDamage(damage)
+					:MicroMissilePolicy.entityDamage(damage);
 			}
 			@Override public boolean shouldDamageEntity(Explosion explosion, Entity entity) {
 				return canDamage(level, entity);
@@ -327,7 +437,7 @@ public final class MorrowgearMissileEntity extends Entity {
 		try {
 			level.explode(this, source, calculator, getX(), getY(), getZ(), explosionPower, false,
 				Level.ExplosionInteraction.MOB, ParticleTypes.EXPLOSION, ParticleTypes.EXPLOSION_EMITTER,
-				WeightedList.of(), Holder.direct(MorrowgearDrone.MISSILE_EXPLOSION_SOUND));
+				WeightedList.of(), Holder.direct(heavy()?MorrowgearDrone.CARRIER_MISSILE_EXPLOSION_SOUND:MorrowgearDrone.MISSILE_EXPLOSION_SOUND));
 			MissileAudioController.detonated(level, getUUID(), position(), 1);
 		} finally {
 			cooldowns.forEach((victim, before) -> victim.invulnerableTime =
@@ -354,6 +464,7 @@ public final class MorrowgearMissileEntity extends Entity {
 		new MicroMissilePolicy.SavedState(launcherId, ownerId, targetUuid, ownerTeam, lastAim,
 			flightTicks, fuseTicks, explosionPower, terminalGuidance, passedTarget).write(output);
 		launchProfile.write(output);
+		output.putBoolean("CarrierHeavy",heavy()); output.putInt("CarrierPenetration",penetrationBlocks);
 		if (attachment != null && fuseTicks >= 0) attachment.write(output);
 	}
 
@@ -362,15 +473,28 @@ public final class MorrowgearMissileEntity extends Entity {
 		MicroMissilePolicy.SavedState saved = MicroMissilePolicy.SavedState.read(input);
 		launcherId = saved.launcher();
 		ownerId = saved.owner();
+		entityData.set(OWNER,ownerId==null?"":ownerId.toString());
 		targetUuid = saved.target();
 		ownerTeam = saved.ownerTeam();
 		lastAim = saved.lastAim();
 		flightTicks = saved.flightTicks();
 		launchProfile = MicroMissilePolicy.LaunchProfile.read(input);
-		entityData.set(MOTOR_IGNITED, MicroMissilePolicy.motorIgnited(flightTicks));
+		entityData.set(HEAVY,input.getBooleanOr("CarrierHeavy",false));
+		penetrationBlocks=input.getIntOr("CarrierPenetration",0);
 		fuseTicks = saved.fuseTicks();
-		entityData.set(FLIGHT_PHASE, MicroMissilePolicy.flightPhase(flightTicks, fuseTicks >= 0));
-		explosionPower = saved.explosionPower();
+		if(heavy()){
+			entityData.set(MOTOR_IGNITED,flightTicks>CarrierHeavyMissilePolicy.EJECT_TICKS&&fuseTicks<0);
+			entityData.set(FLIGHT_PHASE,fuseTicks>=0?FlightPhase.IMPACT.ordinal()
+				:flightTicks<=CarrierHeavyMissilePolicy.EJECT_TICKS?FlightPhase.EJECT.ordinal()
+				:flightTicks<=CarrierHeavyMissilePolicy.CLIMB_TICKS?FlightPhase.BOOST.ordinal():FlightPhase.GUIDED.ordinal());
+		}else{
+			entityData.set(MOTOR_IGNITED, MicroMissilePolicy.motorIgnited(flightTicks));
+			entityData.set(FLIGHT_PHASE, MicroMissilePolicy.flightPhase(flightTicks, fuseTicks >= 0));
+		}
+		float storedPower=input.getFloatOr("ExplosionPower",heavy()?CarrierHeavyMissilePolicy.EXPLOSION_POWER
+			:MicroMissilePolicy.MIN_EXPLOSION_POWER);
+		explosionPower = heavy()?Mth.clamp(storedPower,CarrierHeavyMissilePolicy.EXPLOSION_POWER,
+			CarrierHeavyMissilePolicy.EXPLOSION_POWER):saved.explosionPower();
 		terminalGuidance = saved.terminal();
 		passedTarget = saved.passedTarget();
 		attachment = fuseTicks >= 0 ? MicroMissilePolicy.Attachment.read(input) : null;

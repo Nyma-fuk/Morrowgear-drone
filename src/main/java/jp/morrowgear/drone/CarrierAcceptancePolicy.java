@@ -8,7 +8,7 @@ import java.util.Set;
 /** Bounded fixture geometry, independent of world generation and carrier work speed. */
 final class CarrierAcceptancePolicy {
     static final int WIDTH = 16, LAYERS = 64, COLUMNS = WIDTH * WIDTH;
-    static final int MINE_BLOCKS = COLUMNS * LAYERS, FIXTURE_BLOCKS = MINE_BLOCKS + COLUMNS;
+    static final int MINE_BLOCKS = COLUMNS * (LAYERS + 1), FIXTURE_BLOCKS = MINE_BLOCKS;
     static final int WORLD_BUDGET = 256, CLICK_BUDGET = 16, TRAVEL_DISTANCE = 544;
     static final int BOX_WIDTH = 18, BOX_HEIGHT = LAYERS + 3;
     static final int BOX_VOLUME = BOX_WIDTH * BOX_WIDTH * BOX_HEIGHT;
@@ -67,13 +67,13 @@ final class CarrierAcceptancePolicy {
     static int y(int index) { return index / COLUMNS; }
     static int mineIndex(int x, int y, int z) {
         if (!mine(x, y, z)) throw new IllegalArgumentException("not a mineable fixture position");
-        return (y - 1) * COLUMNS + z * WIDTH + x;
+        return y * COLUMNS + z * WIDTH + x;
     }
     static int mineWordCount() { return (MINE_BLOCKS + Long.SIZE - 1) / Long.SIZE; }
     static boolean fixture(int x, int y, int z) {
         return x >= 0 && x < WIDTH && z >= 0 && z < WIDTH && y >= 0 && y <= LAYERS;
     }
-    static boolean mine(int x, int y, int z) { return fixture(x, y, z) && y > 0; }
+    static boolean mine(int x, int y, int z) { return fixture(x, y, z); }
     static int material(int layer) {
         if (layer < 0 || layer > LAYERS) throw new IllegalArgumentException("fixture layer");
         if (layer == 0) return 0;

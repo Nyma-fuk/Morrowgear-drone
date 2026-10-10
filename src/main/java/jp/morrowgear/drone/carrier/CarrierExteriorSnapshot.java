@@ -17,6 +17,8 @@ final class CarrierExteriorSnapshot {
     static final int TERRAIN_SPACING = 4;
     static final int CANDIDATE_RADIUS = 64;
     static final int MAX_CANDIDATES = 32;
+    static final int CONTAINER_RADIUS = 256;
+    static final int MAX_CONTAINERS = 8;
     static final int TERRAIN_CACHE_TICKS = 40;
     private static final Map<CarrierEntity, CachedTerrain> TERRAIN_CACHE = new WeakHashMap<>();
 
@@ -60,6 +62,33 @@ final class CarrierExteriorSnapshot {
                 drone -> drone.isAlive() && drone.isOwnedBy(owner) && drone.distanceToSqr(carrier) <= radiusSquared)
             .stream().sorted(Comparator.comparing(DroneEntity::unitId)).limit(MAX_CANDIDATES)
             .map(drone -> new CarrierViewPayload.DroneCandidate(drone.getUUID(), drone.unitId())).toList();
+    }
+
+    /** Ledger-backed, loaded-only candidates. This never scans blocks or forces chunks to load. */
+    static List<CarrierViewPayload.ContainerCandidate> containers(CarrierEntity carrier, UUID owner) {
+        if (carrier == null || !(carrier.level() instanceof ServerLevel level)) return List.of();
+        String dimension = level.dimension().identifier().toString();
+        double radiusSquared = (double) CONTAINER_RADIUS * CONTAINER_RADIUS;
+        return CarrierExpansionLedger.get(level.getServer()).entries().values().stream()
+            .map(CarrierExpansionLedger.Entry::module)
+            .filter(module -> module.owner().equals(owner)
+                && module.location() == CarrierExpansionPolicy.Location.PLACED
+                && dimension.equals(module.dimension()))
+            .map(module -> Map.entry(module, BlockPos.of(module.position())))
+            .filter(entry -> entry.getValue().distToCenterSqr(carrier.getX(), carrier.getY(), carrier.getZ()) <= radiusSquared)
+            .filter(entry -> level.hasChunkAt(entry.getValue()))
+            .filter(entry -> level.getBlockEntity(entry.getValue()) instanceof CarrierExpansionContainer container
+                && container.moduleId().equals(entry.getKey().id()) && container.ownerId().equals(owner))
+            .sorted(Comparator.comparingDouble(entry -> entry.getValue()
+                .distToCenterSqr(carrier.getX(), carrier.getY(), carrier.getZ())))
+            .limit(MAX_CONTAINERS)
+            .map(entry -> {
+                CarrierExpansionContainer container = (CarrierExpansionContainer) level.getBlockEntity(entry.getValue());
+                int distance = (int) Math.round(Math.sqrt(entry.getValue()
+                    .distToCenterSqr(carrier.getX(), carrier.getY(), carrier.getZ())));
+                return new CarrierViewPayload.ContainerCandidate(entry.getKey().id(), entry.getKey().type().ordinal(),
+                    entry.getValue(), distance, container.transferReserved());
+            }).toList();
     }
 
     private record CachedTerrain(long tick, int centerX, int centerZ, CarrierViewPayload.Terrain terrain) {}

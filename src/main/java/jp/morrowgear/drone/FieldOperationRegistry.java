@@ -65,6 +65,7 @@ final class FieldOperationRegistry {
 		private final int sizeY;
 		private final int sizeZ;
 		private final int scanTotal;
+		private final int[] scanYOrder;
 		private final Set<Long> discovered = new LinkedHashSet<>();
 		private final Set<Long> deferredScan = new LinkedHashSet<>();
 		private final PriorityQueue<WorkTarget> work = new PriorityQueue<>(Comparator
@@ -117,6 +118,7 @@ final class FieldOperationRegistry {
 				sizeY = 6;
 			}
 			scanTotal = sizeX * sizeY * sizeZ;
+			scanYOrder = surfaceFirstYOrder(minY, sizeY, anchor.getY());
 			lastAccessTick = now;
 		}
 
@@ -156,8 +158,19 @@ final class FieldOperationRegistry {
 			int x = index % sizeX;
 			int yz = index / sizeX;
 			int z = yz % sizeZ;
-			int y = yz / sizeZ;
-			return new BlockPos(minX + x, minY + y, minZ + z);
+			int y = scanYOrder[yz / sizeZ];
+			return new BlockPos(minX + x, y, minZ + z);
+		}
+
+		private static int[] surfaceFirstYOrder(int minY, int sizeY, int anchorY) {
+			Integer[] layers = new Integer[sizeY];
+			for (int index = 0; index < sizeY; index++) layers[index] = minY + index;
+			java.util.Arrays.sort(layers, Comparator
+				.comparingInt((Integer y) -> Math.abs(y - anchorY))
+				.thenComparing(Comparator.reverseOrder()));
+			int[] ordered = new int[sizeY];
+			for (int index = 0; index < sizeY; index++) ordered[index] = layers[index];
+			return ordered;
 		}
 
 		synchronized void retryScanPos(BlockPos pos, long now) {
@@ -175,6 +188,10 @@ final class FieldOperationRegistry {
 			if (!discovered.add(packed)) return;
 			targetPriorities.put(packed, priority);
 			work.add(new WorkTarget(packed, priority, targetDistance(pos)));
+		}
+
+		synchronized void addForestryTarget(BlockPos pos, boolean structuralLog) {
+			addTarget(pos, ForestryOperationPolicy.priority(pos.getY(), structuralLog));
 		}
 
 		synchronized BlockPos claimTarget(long now) {
@@ -208,6 +225,10 @@ final class FieldOperationRegistry {
 			work.removeIf(target -> target.packed() == packed);
 			targetPriorities.put(packed, priority);
 			work.add(new WorkTarget(packed, priority, targetDistance(pos)));
+		}
+
+		synchronized void promoteForestryTarget(BlockPos pos, boolean structuralLog, long now) {
+			promoteTarget(pos, ForestryOperationPolicy.priority(pos.getY(), structuralLog), now);
 		}
 
 		private long targetDistance(BlockPos pos) {

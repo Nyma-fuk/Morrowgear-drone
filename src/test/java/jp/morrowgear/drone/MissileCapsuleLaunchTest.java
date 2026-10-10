@@ -165,7 +165,8 @@ final class MissileCapsuleLaunchTest {
 		assertTrue(missile.contains("launchProfile.write(output)"));
 		assertTrue(missile.contains("MicroMissilePolicy.LaunchProfile.read(input)"));
 		assertTrue(missile.contains("MicroMissilePolicy.sweepFraction(from, to, box, halfSize)"));
-		assertTrue(missile.contains("MicroMissilePolicy.entityDamage(super.getEntityDamageAmount("));
+		assertTrue(missile.contains("heavy()?CarrierHeavyMissilePolicy.explosionEntityDamage(damage)"));
+		assertTrue(missile.contains(":MicroMissilePolicy.entityDamage(damage)"));
 		assertTrue(missile.contains("if (fuseTicks >= 0) return false"));
 		assertTrue(missile.contains("attachment.write(output)"));
 	}

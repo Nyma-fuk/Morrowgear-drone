@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": ["AMA", "MSM", "AMA"],
+  "key": {
+    "A": "morrowgear_drone:morrow_alloy",
+    "M": "morrowgear_drone:missile_module",
+    "S": "morrowgear_drone:micro_missile_pack"
+  },
+  "result": {"id": "morrowgear_drone:carrier_missile_module", "count": 1}
+}

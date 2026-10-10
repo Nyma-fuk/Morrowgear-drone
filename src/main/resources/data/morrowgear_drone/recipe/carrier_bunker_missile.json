@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    " BI",
+    "TRI",
+    " BI"
+  ],
+  "key": {
+    "B": "minecraft:blaze_powder",
+    "I": "minecraft:iron_ingot",
+    "R": "minecraft:redstone",
+    "T": "minecraft:tnt"
+  },
+  "result": {
+    "id": "morrowgear_drone:carrier_bunker_missile",
+    "count": 2
+  }
+}

@@ -53,4 +53,19 @@ class CarrierWorkContinuationTest {
         assertTrue(ship.combatBeamTargets.isEmpty());
         assertFalse(CarrierWork.continues(ship, op, CarrierPolicy.Mode.COMBAT));
     }
+
+
+    @Test void fullCargoPausesWithoutDiscardingMiningDepthOrVisualPhase() {
+        var ship = ship();
+        var progress = ship.progress;
+        ship.miningScanGeneration = progress.operation().generation();
+        ship.miningScanTicks = CarrierPolicy.SCAN_TICKS + CarrierPolicy.MINING_CHARGE_TICKS;
+        ship.pauseWork(CarrierPolicy.Stop.FULL);
+        assertEquals(CarrierPolicy.Mode.MINING, ship.mode);
+        assertSame(progress, ship.progress);
+        assertEquals(CarrierPolicy.WorkPhase.FIRE, ship.workPhase());
+        assertTrue(CarrierWork.continues(ship, progress.operation(), CarrierPolicy.Mode.MINING));
+        ship.resumeWork();
+        assertEquals(CarrierPolicy.Stop.RUNNING, ship.stop);
+    }
 }

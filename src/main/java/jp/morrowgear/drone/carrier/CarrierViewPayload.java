@@ -58,12 +58,12 @@ public record CarrierViewPayload(int menu, UUID ship, boolean owner, boolean des
         }
     }
     public record Storage(int page, int pages, int usedSlots, int totalSlots, long items) {
-        public static final Storage EMPTY = new Storage(0, CarrierPolicy.CARGO_PAGES, 0, CarrierPolicy.STORAGE_SLOTS, 0);
+        public static final Storage EMPTY = new Storage(0, CarrierPolicy.BASE_CARGO_PAGES, 0, CarrierPolicy.BASE_STORAGE_SLOTS, 0);
         public static final Codec<Storage> CODEC = RecordCodecBuilder.create(i -> i.group(
-            Codec.intRange(0, CarrierPolicy.CARGO_PAGES - 1).fieldOf("page").forGetter(Storage::page),
-            Codec.intRange(1, CarrierPolicy.CARGO_PAGES).fieldOf("pages").forGetter(Storage::pages),
-            Codec.intRange(0, CarrierPolicy.STORAGE_SLOTS).fieldOf("used").forGetter(Storage::usedSlots),
-            Codec.intRange(0, CarrierPolicy.STORAGE_SLOTS).fieldOf("slots").forGetter(Storage::totalSlots),
+            Codec.intRange(0, CarrierPolicy.MAX_CARGO_PAGES - 1).fieldOf("page").forGetter(Storage::page),
+            Codec.intRange(1, CarrierPolicy.MAX_CARGO_PAGES).fieldOf("pages").forGetter(Storage::pages),
+            Codec.intRange(0, CarrierPolicy.MAX_STORAGE_SLOTS).fieldOf("used").forGetter(Storage::usedSlots),
+            Codec.intRange(0, CarrierPolicy.MAX_STORAGE_SLOTS).fieldOf("slots").forGetter(Storage::totalSlots),
             Codec.LONG.validate(value -> value >= 0 ? com.mojang.serialization.DataResult.success(value)
                 : com.mojang.serialization.DataResult.error(() -> "Negative stored item count")).fieldOf("items").forGetter(Storage::items)
         ).apply(i, Storage::new));
@@ -111,25 +111,132 @@ public record CarrierViewPayload(int menu, UUID ship, boolean owner, boolean des
             Codec.intRange(0, CarrierServiceBay.Phase.values().length - 1).optionalFieldOf("phase", CarrierServiceBay.Phase.APPROACH.ordinal()).forGetter(Bay::phase)
         ).apply(i, Bay::new));
     }
+    public record Expansion(UUID module, int type, int hardpoint, int rounds) {
+        public Expansion(UUID module,int type,int hardpoint){this(module,type,hardpoint,0);}
+        public static final Codec<Expansion> CODEC = RecordCodecBuilder.create(i -> i.group(
+            CarrierPolicy.UUID_CODEC.fieldOf("module").forGetter(Expansion::module),
+            Codec.intRange(0, CarrierExpansionPolicy.Type.values().length-1).fieldOf("type").forGetter(Expansion::type),
+            Codec.intRange(0, CarrierExpansionPolicy.HARDPOINTS-1).fieldOf("hardpoint").forGetter(Expansion::hardpoint),
+            Codec.intRange(0,CarrierMissileMagazinePolicy.CAPACITY).optionalFieldOf("rounds",0).forGetter(Expansion::rounds)
+        ).apply(i,Expansion::new));
+    }
+    public record ContainerCandidate(UUID module, int type, BlockPos position, int distance, boolean reserved) {
+        public static final Codec<ContainerCandidate> CODEC = RecordCodecBuilder.create(i -> i.group(
+            CarrierPolicy.UUID_CODEC.fieldOf("module").forGetter(ContainerCandidate::module),
+            Codec.intRange(0, CarrierExpansionPolicy.Type.values().length - 1).fieldOf("type").forGetter(ContainerCandidate::type),
+            BlockPos.CODEC.fieldOf("position").forGetter(ContainerCandidate::position),
+            Codec.intRange(0, CarrierExteriorSnapshot.CONTAINER_RADIUS).fieldOf("distance").forGetter(ContainerCandidate::distance),
+            Codec.BOOL.fieldOf("reserved").forGetter(ContainerCandidate::reserved)
+        ).apply(i, ContainerCandidate::new));
+
+        public ContainerCandidate {
+            position = position == null ? BlockPos.ZERO : position.immutable();
+        }
+    }
+    public record MissileStatus(int rounds,int salvoSize,int launched,int phase,List<UUID> lockedTargets) {
+        public static final MissileStatus EMPTY=new MissileStatus(0,0,0,
+            jp.morrowgear.drone.CarrierHeavyMissilePolicy.LaunchPhase.IDLE.ordinal(),List.of());
+        public MissileStatus { lockedTargets=List.copyOf(lockedTargets); }
+        public static final Codec<MissileStatus> CODEC=RecordCodecBuilder.create(i->i.group(
+            Codec.intRange(0,CarrierExpansionPolicy.HARDPOINTS*CarrierMissileMagazinePolicy.CAPACITY)
+                .fieldOf("rounds").forGetter(MissileStatus::rounds),
+            Codec.intRange(0,CarrierMissileModulePolicy.MAX_SALVO).fieldOf("salvo").forGetter(MissileStatus::salvoSize),
+            Codec.intRange(0,CarrierMissileModulePolicy.MAX_SALVO).fieldOf("launched").forGetter(MissileStatus::launched),
+            Codec.intRange(0,jp.morrowgear.drone.CarrierHeavyMissilePolicy.LaunchPhase.values().length-1)
+                .fieldOf("phase").forGetter(MissileStatus::phase),
+            CarrierPolicy.UUID_CODEC.listOf(0,CarrierMissileModulePolicy.MAX_PARALLEL_LOCKS)
+                .fieldOf("locks").forGetter(MissileStatus::lockedTargets)
+        ).apply(i,MissileStatus::new));
+    }
+    public record ContainerTransfer(boolean active,int direction,int phase,int hardpoint,int type,
+                                    BlockPos position,int tick,int duration,boolean cancellable,String detail) {
+        public static final ContainerTransfer EMPTY=new ContainerTransfer(false,0,
+            CarrierContainerTransferPolicy.Phase.COMPLETE.ordinal(),-1,0,BlockPos.ZERO,0,0,false,"READY");
+        public ContainerTransfer {
+            position=position==null?BlockPos.ZERO:position.immutable();
+            detail=detail==null?"":detail;
+            if(detail.length()>64)detail=detail.substring(0,64);
+        }
+        public static final Codec<ContainerTransfer> CODEC=RecordCodecBuilder.create(i->i.group(
+            Codec.BOOL.fieldOf("active").forGetter(ContainerTransfer::active),
+            Codec.intRange(0,1).fieldOf("direction").forGetter(ContainerTransfer::direction),
+            Codec.intRange(0,CarrierContainerTransferPolicy.Phase.values().length-1).fieldOf("phase").forGetter(ContainerTransfer::phase),
+            Codec.intRange(-1,CarrierExpansionPolicy.HARDPOINTS-1).fieldOf("hardpoint").forGetter(ContainerTransfer::hardpoint),
+            Codec.intRange(0,CarrierExpansionPolicy.Type.values().length-1).fieldOf("type").forGetter(ContainerTransfer::type),
+            BlockPos.CODEC.fieldOf("position").forGetter(ContainerTransfer::position),
+            Codec.intRange(0,Integer.MAX_VALUE).fieldOf("tick").forGetter(ContainerTransfer::tick),
+            Codec.intRange(0,Integer.MAX_VALUE).fieldOf("duration").forGetter(ContainerTransfer::duration),
+            Codec.BOOL.fieldOf("cancellable").forGetter(ContainerTransfer::cancellable),
+            Codec.STRING.fieldOf("detail").forGetter(ContainerTransfer::detail)
+        ).apply(i,ContainerTransfer::new));
+        static ContainerTransfer of(CarrierEntity entity) {
+            if(entity==null)return EMPTY;
+            return new ContainerTransfer(entity.transferActive(),entity.transferDirection().ordinal(),
+                entity.transferPhase().ordinal(),entity.transferHardpoint(),entity.transferType().ordinal(),
+                entity.transferContainerPos(),entity.transferTick(),entity.transferPhaseDuration(),
+                entity.transferCancellable(),entity.transferDetail());
+        }
+    }
     public record Navigation(CarrierAnchor exterior, Optional<CarrierAnchor> destination, int combatTicks,
                               List<Bay> bays, int gunCredit, int missileCredit, Storage storage, Effects effects,
-                              boolean navigationPaused, int loadWaitTicks, int commandRevision) {
+                              boolean navigationPaused, int loadWaitTicks, int commandRevision, List<Expansion> expansions,
+                              MissileStatus missiles,ContainerTransfer transfer,List<ContainerCandidate> containers,
+                              int combatWeapon) {
         public Navigation(CarrierAnchor exterior, Optional<CarrierAnchor> destination, int combatTicks) {
             this(exterior, destination, combatTicks, List.of(), 0, 0);
         }
         public Navigation(CarrierAnchor exterior, Optional<CarrierAnchor> destination, int combatTicks,
                            List<Bay> bays, int gunCredit, int missileCredit) {
-            this(exterior, destination, combatTicks, bays, gunCredit, missileCredit, Storage.EMPTY, Effects.EMPTY, false, 0, 0);
+            this(exterior, destination, combatTicks, bays, gunCredit, missileCredit, Storage.EMPTY, Effects.EMPTY,
+                false, 0, 0, List.of(),MissileStatus.EMPTY,ContainerTransfer.EMPTY,List.of());
         }
         public Navigation(CarrierAnchor exterior, Optional<CarrierAnchor> destination, int combatTicks,
                           List<Bay> bays, int gunCredit, int missileCredit, Storage storage, Effects effects,
                           boolean navigationPaused, int loadWaitTicks) {
             this(exterior, destination, combatTicks, bays, gunCredit, missileCredit, storage, effects,
-                navigationPaused, loadWaitTicks, 0);
+                navigationPaused, loadWaitTicks, 0, List.of(),MissileStatus.EMPTY,ContainerTransfer.EMPTY,List.of());
         }
-        public Navigation { bays = List.copyOf(bays); }
+        public Navigation(CarrierAnchor exterior, Optional<CarrierAnchor> destination, int combatTicks,
+                          List<Bay> bays, int gunCredit, int missileCredit, Storage storage, Effects effects,
+                          boolean navigationPaused, int loadWaitTicks, int commandRevision, List<Expansion> expansions) {
+            this(exterior,destination,combatTicks,bays,gunCredit,missileCredit,storage,effects,navigationPaused,
+                loadWaitTicks,commandRevision,expansions,MissileStatus.EMPTY,ContainerTransfer.EMPTY,List.of());
+        }
+        public Navigation(CarrierAnchor exterior, Optional<CarrierAnchor> destination, int combatTicks,
+                          List<Bay> bays, int gunCredit, int missileCredit, Storage storage, Effects effects,
+                          boolean navigationPaused, int loadWaitTicks, int commandRevision, List<Expansion> expansions,
+                          MissileStatus missiles) {
+            this(exterior,destination,combatTicks,bays,gunCredit,missileCredit,storage,effects,navigationPaused,
+                loadWaitTicks,commandRevision,expansions,missiles,ContainerTransfer.EMPTY,List.of());
+        }
+        public Navigation(CarrierAnchor exterior, Optional<CarrierAnchor> destination, int combatTicks,
+                          List<Bay> bays, int gunCredit, int missileCredit, Storage storage, Effects effects,
+                          boolean navigationPaused, int loadWaitTicks, int commandRevision, List<Expansion> expansions,
+                          MissileStatus missiles, ContainerTransfer transfer) {
+            this(exterior,destination,combatTicks,bays,gunCredit,missileCredit,storage,effects,navigationPaused,
+                loadWaitTicks,commandRevision,expansions,missiles,transfer,List.of());
+        }
+        public Navigation(CarrierAnchor exterior, Optional<CarrierAnchor> destination, int combatTicks,
+                          List<Bay> bays, int gunCredit, int missileCredit, Storage storage, Effects effects,
+                          boolean navigationPaused, int loadWaitTicks, int commandRevision, List<Expansion> expansions,
+                          MissileStatus missiles, ContainerTransfer transfer, List<ContainerCandidate> containers) {
+            this(exterior,destination,combatTicks,bays,gunCredit,missileCredit,storage,effects,navigationPaused,
+                loadWaitTicks,commandRevision,expansions,missiles,transfer,containers,
+                CarrierPolicy.CombatWeapon.LASER.ordinal());
+        }
+        public Navigation { bays = List.copyOf(bays); expansions = List.copyOf(expansions);
+            missiles=missiles==null?MissileStatus.EMPTY:missiles;
+            transfer=transfer==null?ContainerTransfer.EMPTY:transfer;
+            containers=containers==null?List.of():List.copyOf(containers);
+            if (combatWeapon < 0 || combatWeapon >= CarrierPolicy.CombatWeapon.values().length)
+                combatWeapon = CarrierPolicy.CombatWeapon.LASER.ordinal(); }
         public Navigation withStorage(Storage value) {
-            return new Navigation(exterior, destination, combatTicks, bays, gunCredit, missileCredit, value, effects, navigationPaused, loadWaitTicks, commandRevision);
+            return new Navigation(exterior, destination, combatTicks, bays, gunCredit, missileCredit, value, effects,
+                navigationPaused, loadWaitTicks, commandRevision, expansions,missiles,transfer,containers,combatWeapon);
+        }
+        public Navigation withContainers(List<ContainerCandidate> value) {
+            return new Navigation(exterior, destination, combatTicks, bays, gunCredit, missileCredit, storage, effects,
+                navigationPaused, loadWaitTicks, commandRevision, expansions,missiles,transfer,value,combatWeapon);
         }
         public static final Codec<Navigation> CODEC = RecordCodecBuilder.create(i -> i.group(
             CarrierAnchor.CODEC.fieldOf("exterior").forGetter(Navigation::exterior),
@@ -143,6 +250,13 @@ public record CarrierViewPayload(int menu, UUID ship, boolean owner, boolean des
             Codec.BOOL.optionalFieldOf("paused", false).forGetter(Navigation::navigationPaused),
             Codec.intRange(0, CarrierNavigation.LOAD_WAIT_TICKS).optionalFieldOf("wait", 0).forGetter(Navigation::loadWaitTicks),
             Codec.intRange(0, Integer.MAX_VALUE).optionalFieldOf("command_revision", 0).forGetter(Navigation::commandRevision)
+            ,Expansion.CODEC.listOf(0,CarrierExpansionPolicy.HARDPOINTS).optionalFieldOf("expansions",List.of()).forGetter(Navigation::expansions)
+            ,MissileStatus.CODEC.optionalFieldOf("missiles",MissileStatus.EMPTY).forGetter(Navigation::missiles)
+            ,ContainerTransfer.CODEC.optionalFieldOf("transfer",ContainerTransfer.EMPTY).forGetter(Navigation::transfer)
+            ,ContainerCandidate.CODEC.listOf(0,CarrierExteriorSnapshot.MAX_CONTAINERS)
+                .optionalFieldOf("containers",List.of()).forGetter(Navigation::containers)
+            ,Codec.intRange(0,CarrierPolicy.CombatWeapon.values().length-1).optionalFieldOf("combat_weapon",0)
+                .forGetter(Navigation::combatWeapon)
         ).apply(i, Navigation::new));
     }
     public static final Type<CarrierViewPayload> TYPE = new Type<>(CarrierModule.id("carrier_view"));
@@ -218,6 +332,11 @@ public record CarrierViewPayload(int menu, UUID ship, boolean owner, boolean des
             minY, maxY, cursor, total, energy, weaponEnergy, bayUsed, previewTicks, guests, drones, moving, previewMode,
             navigation, terrain, value);
     }
+    public CarrierViewPayload withContainers(List<ContainerCandidate> value) {
+        return new CarrierViewPayload(menu, ship, owner, destroyed, mode, stop, generation, dimension, chunkX, chunkZ,
+            minY, maxY, cursor, total, energy, weaponEnergy, bayUsed, previewTicks, guests, drones, moving, previewMode,
+            navigation.withContainers(value), terrain, candidates);
+    }
     public CarrierViewPayload withMenu(int value) {
         return new CarrierViewPayload(value, ship, owner, destroyed, mode, stop, generation, dimension, chunkX, chunkZ,
             minY, maxY, cursor, total, energy, weaponEnergy, bayUsed, previewTicks, guests, drones, moving, previewMode,
@@ -270,8 +389,13 @@ public record CarrierViewPayload(int menu, UUID ship, boolean owner, boolean des
             ship.destination != null && !ship.navigationPaused, ship.previewMode.ordinal(),
             new Navigation(exterior == null ? ship.exterior : CarrierAnchor.at(exterior), Optional.ofNullable(ship.destination),
                 ship.combatRemaining, bays, ship.bayStock.gun(), ship.bayStock.missiles(),
-                new Storage(cargoPage, CarrierPolicy.CARGO_PAGES, ship.cargo.usedSlots(), CarrierPolicy.STORAGE_SLOTS, ship.cargo.itemCount()),
-                Effects.of(exterior, ship), ship.navigationPaused, ship.navigationWaitTicks, ship.commandRevision));
+                new Storage(cargoPage, ship.cargo.pages(), ship.cargo.usedSlots(), ship.cargo.activeSlots(), ship.cargo.itemCount()),
+                Effects.of(exterior, ship), ship.navigationPaused, ship.navigationWaitTicks, ship.commandRevision,
+                exterior == null ? List.of() : exterior.attachedExpansions().stream().map(value ->
+                    new Expansion(value.id(),value.type().ordinal(),value.hardpoint(),exterior.carrierMissiles(value.hardpoint()))).toList(),
+                exterior==null?MissileStatus.EMPTY:new MissileStatus(exterior.carrierMissiles(),exterior.missileSalvoSize(),
+                    exterior.missilesFired(),exterior.missileLaunchPhase().ordinal(),ship.missileLockedTargets),
+                ContainerTransfer.of(exterior),List.of(),ship.combatWeapon.ordinal()));
     }
     @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
 }

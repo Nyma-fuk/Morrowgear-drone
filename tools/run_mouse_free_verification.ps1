@@ -1,8 +1,8 @@
 param(
-    [ValidateSet('all', 'navigation', 'field', 'combat', 'combat_cas', 'adaptive_combat', 'base_laser', 'firing_routes', 'regression',
+    [ValidateSet('all', 'navigation', 'field', 'snowfield_mining', 'combat', 'combat_cas', 'adaptive_combat', 'base_laser', 'firing_routes', 'regression',
         'ui', 'ui_capture', 'salvage', 'salvage_service', 'salvage_vertical', 'salvage_clearance',
         'salvage_protected', 'salvage_late_engineer', 'solar_service', 'dock_exhaustion',
-        'dock_allocation', 'carrier')]
+        'dock_allocation', 'cargo_lift', 'carrier')]
     [string]$Scenario = 'regression',
     [string]$JavaHome = $env:JAVA_HOME,
     [ValidateRange(960, 3840)][int]$Width = 1280,
@@ -41,6 +41,7 @@ if ($Scenario -eq 'all') {
         'solar_service',
         'dock_exhaustion',
         'dock_allocation',
+        'cargo_lift',
         'carrier'
     )
     $timer = [System.Diagnostics.Stopwatch]::StartNew()

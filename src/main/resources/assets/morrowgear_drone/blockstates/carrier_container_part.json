@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "morrowgear_drone:block/carrier_container_part"
+      }
+    }
+  ]
+}
