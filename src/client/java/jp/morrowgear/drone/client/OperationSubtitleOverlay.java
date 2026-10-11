@@ -16,9 +16,10 @@ final class OperationSubtitleOverlay implements HudElement {
             int maxWidth = Math.max(80, Math.min(380, width - 32));
             var lines = client.font.split(Component.translatable(event.messageKey(), event.source(), event.count()), maxWidth - 16);
             int count = Math.min(2, lines.size());
-            int x = (width - maxWidth) / 2, y = Math.max(40, height - 112);
-            g.fill(x, y, x + maxWidth, y + count * 10 + 10, 0xD014181B);
-            g.fill(x, y, x + 2, y + count * 10 + 10, HmiArt.AMBER);
+            int boxHeight = count * 10 + 10;
+            int x = (width - maxWidth) / 2, y = MorrowgearDroneClient.operationSubtitleY(client, boxHeight);
+            g.fill(x, y, x + maxWidth, y + boxHeight, 0xD014181B);
+            g.fill(x, y, x + 2, y + boxHeight, HmiArt.AMBER);
             for (int i = 0; i < count; i++) g.text(client.font, lines.get(i), x + 8, y + 5 + i * 10, HmiArt.TEXT);
         });
     }

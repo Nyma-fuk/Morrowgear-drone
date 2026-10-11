@@ -48,6 +48,20 @@ public final class MorrowgearAutomation {
     public static boolean passed() { return state == State.PASSED; }
     public static String detail() { return detail; }
 
+    /**
+     * Integrated-server completion can be observed through a separate class-loader state on
+     * the render thread. The report is the cross-boundary completion signal in that case.
+     */
+    public static boolean completionReportExists() {
+        if (REPORT.isBlank()) return false;
+        Path target = Path.of(REPORT).toAbsolutePath().normalize();
+        try {
+            return Files.isRegularFile(target) && Files.size(target) > 0L;
+        } catch (IOException ignored) {
+            return false;
+        }
+    }
+
     /** Used by the client-side HMI driver after it has exercised real Screen instances. */
     public static void completeClientScenario(boolean passed, String message) {
         if (!SCENARIO.equals("ui") && !SCENARIO.equals("ui_capture")

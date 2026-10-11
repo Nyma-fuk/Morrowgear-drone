@@ -23,7 +23,7 @@ final class DroneAudioClientContractTest {
 		assertTrue(code.contains("CANNONS.clear()"));
 		assertTrue(code.contains("MOTORS.clear()"));
 		assertTrue(code.contains("!audible(entity)"));
-		assertTrue(code.contains("drone.combatShotTick()"));
+		assertTrue(code.contains("drone.gunShotTick()"));
 	}
 
 	@Test void serverDoesNotDuplicateRotaryLoopOrReuseLaunchForIgnition() throws IOException {

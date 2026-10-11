@@ -7,6 +7,7 @@ import jp.morrowgear.drone.DockSupplyPolicy;
 import jp.morrowgear.drone.DockSupplyPolicy.SupplyKind;
 import jp.morrowgear.drone.DroneEntity;
 import jp.morrowgear.drone.MorrowgearDrone;
+import jp.morrowgear.drone.SupplyNetworkRuntime;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -69,6 +70,8 @@ public final class DockBlockEntity extends BaseContainerBlockEntity {
 		this.ownerName = player.getScoreboardName();
 		this.facing = facing == null || facing.getAxis().isVertical() ? Direction.NORTH : facing;
 		setChanged();
+		if (level instanceof net.minecraft.server.level.ServerLevel serverLevel)
+			SupplyNetworkRuntime.ensureDock(serverLevel, this);
 		if (level != null) level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
 	}
 

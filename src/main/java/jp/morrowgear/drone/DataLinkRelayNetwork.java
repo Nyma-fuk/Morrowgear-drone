@@ -1,6 +1,5 @@
 package jp.morrowgear.drone;
 
-import java.util.List;
 import java.util.WeakHashMap;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
@@ -15,11 +14,7 @@ final class DataLinkRelayNetwork {
 		CachedCoverage cached = CACHE.get(player);
 		if (cached != null && cached.tick() == tick && cached.dimension().equals(dimension)
 			&& cached.origin().distanceToSqr(player.position()) < 0.01) return cached.coverage();
-		List<DataLinkRelayPolicy.Node> nodes = SolarServiceRegistry
-			.relayNodes(player.getUUID(), dimension, tick).stream()
-			.map(node -> new DataLinkRelayPolicy.Node(node.id(), point(node.x(), node.y(), node.z()),
-				node.energyPercent()))
-			.toList();
+		var nodes = FieldRelayRuntime.relayNodes(player);
 		DataLinkRelayPolicy.Coverage coverage = DataLinkRelayPolicy.coverage(point(player.position()), nodes);
 		CACHE.put(player, new CachedCoverage(tick, dimension, player.position(), coverage));
 		return coverage;
@@ -30,7 +25,9 @@ final class DataLinkRelayNetwork {
 	}
 
 	static boolean canReach(ServerPlayer player, Vec3 target) {
-		return link(player, target).connected();
+		boolean connected = link(player, target).connected();
+		if (!connected) FieldRelayRuntime.requestCoverage(player, target, 350);
+		return connected;
 	}
 
 	private static DataLinkRelayPolicy.Point point(Vec3 position) {

@@ -42,12 +42,14 @@ class OperatorCommandAdmissionTest {
         String source = Files.readString(Path.of("src/main/java/jp/morrowgear/drone/MorrowgearDrone.java"));
         String fleet = source.substring(source.indexOf("private static void dispatchFleetOperation"));
         assertTrue(fleet.indexOf("admission.accepted()") < fleet.indexOf("AutonomousTaskForcePolicy.plan("));
-        String wing = source.substring(source.indexOf("private static void moveToWing"));
+		String wing = source.substring(source.indexOf("private static boolean moveToWing"));
         assertTrue(wing.indexOf("allowOperatorCommands(player, affected)") < wing.indexOf("drone.assignGroup(targetGroup)"));
-        assertTrue(source.contains("if (!allowOperatorCommands(player, displaced)) return;"));
-        for (String name : List.of("changeRoleModule", "changeSecurityLoadout", "upgradeCapacity", "storeDrone")) {
-            var pattern = java.util.regex.Pattern.compile("(?:public |private )?static void " + name + "\\([^)]*\\) \\{\\s*if \\(!allowOperatorCommand\\(player, drone\\)\\) return;");
+		assertTrue(source.contains("if (!allowOperatorCommands(player, displaced)) return false;"));
+		for (String name : List.of("changeRoleModule", "changeSecurityLoadout", "upgradeCapacity")) {
+			var pattern = java.util.regex.Pattern.compile("(?:public |private )?static boolean " + name
+				+ "\\([^)]*\\) \\{\\s*if \\(!allowOperatorCommand\\(player, drone\\)\\) return false;");
             assertTrue(pattern.matcher(source).find(), name);
         }
+		assertTrue(source.contains("static void storeDrone(ServerPlayer player, DroneEntity drone) {\n\t\tif (!allowOperatorCommand(player, drone)) return;"));
     }
 }

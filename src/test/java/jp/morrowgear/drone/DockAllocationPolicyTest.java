@@ -43,6 +43,14 @@ final class DockAllocationPolicyTest {
 		assertFalse(DockAllocationPolicy.mayYield(true, false, false, false, 100, grace - 1));
 	}
 
+	@Test void dockYieldRotationIsRateLimitedAcrossTheFleet() {
+		long interval = DockAllocationPolicy.YIELD_INTERVAL_TICKS;
+		assertTrue(DockAllocationPolicy.yieldTurnAvailable(100, -1));
+		assertFalse(DockAllocationPolicy.yieldTurnAvailable(100 + interval - 1, 100));
+		assertTrue(DockAllocationPolicy.yieldTurnAvailable(100 + interval, 100));
+		assertFalse(DockAllocationPolicy.yieldTurnAvailable(99, 100));
+	}
+
 	@Test void holdingPatternScalesInWideEightAircraftLayers() {
 		assertEquals(14.0, DockAllocationPolicy.holdingSlot(1).radius());
 		assertEquals(14.0, DockAllocationPolicy.holdingSlot(8).radius());

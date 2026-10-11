@@ -18,8 +18,8 @@ final class CombatNavigationIntegrationTest {
 			source.indexOf("boolean safetyRecovery =", source.indexOf("boolean laserOrbit =")));
 		assertTrue(flight.contains("boolean combatRouteRequired = dedicatedCombatFlight"));
 		assertTrue(flight.contains("(!dedicatedCombatFlight || combatRouteRequired)"));
-		assertTrue(flight.contains("laserIngress || routedFlight"));
-		assertTrue(flight.contains("if (routedFlight)"));
+		assertTrue(flight.contains("laserIngress || routedFlight || laserIndividualFiringRoute"));
+		assertTrue(flight.contains("routedFlight || autocannonIndividualFiringRoute"));
 		assertTrue(flight.contains("FlightDynamics.steerRoute"));
 	}
 

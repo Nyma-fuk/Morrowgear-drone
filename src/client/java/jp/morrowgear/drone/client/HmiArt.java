@@ -4,6 +4,7 @@ import java.util.function.ToIntFunction;
 import jp.morrowgear.drone.DroneRole;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.resources.Identifier;
 
 final class HmiArt {
 	static final int BACKGROUND = 0xFF121514, PANEL = 0xFF1A1E1C, RAISED = 0xFF29362F;
@@ -43,7 +44,11 @@ final class HmiArt {
 			x, y, 0, 0, size, size, 512, 512, 512, 512);
 	}
 	static void item(GuiGraphicsExtractor g, String name, int x, int y, int size) {
-		g.blit(RenderPipelines.GUI_TEXTURED, RuntimeMesh.id("textures/item/" + name + ".png"),
-			x, y, 0, 0, size, size, 128, 128, 128, 128);
+		Identifier texture = name.equals("operation_marker")
+			? Identifier.withDefaultNamespace("textures/item/ender_eye.png")
+			: RuntimeMesh.id("textures/item/" + name + ".png");
+		int textureSize = name.equals("operation_marker") ? 16 : 128;
+		g.blit(RenderPipelines.GUI_TEXTURED, texture,
+			x, y, 0, 0, size, size, textureSize, textureSize, textureSize, textureSize);
 	}
 }

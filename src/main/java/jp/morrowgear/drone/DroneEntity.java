@@ -7,6 +7,7 @@ import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.Iterator;
 
@@ -159,6 +160,10 @@ public final class DroneEntity extends PathfinderMob {
 	private static final EntityDataAccessor<Integer> COMBAT_COUNT = SynchedEntityData.defineId(DroneEntity.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Long> COMBAT_STATE_TICK = SynchedEntityData.defineId(DroneEntity.class, EntityDataSerializers.LONG);
 	private static final EntityDataAccessor<Long> COMBAT_SHOT_TICK = SynchedEntityData.defineId(DroneEntity.class, EntityDataSerializers.LONG);
+	private static final EntityDataAccessor<Long> GUN_SHOT_TICK = SynchedEntityData.defineId(DroneEntity.class, EntityDataSerializers.LONG);
+	private static final EntityDataAccessor<Float> GUN_AIM_X = SynchedEntityData.defineId(DroneEntity.class, EntityDataSerializers.FLOAT);
+	private static final EntityDataAccessor<Float> GUN_AIM_Y = SynchedEntityData.defineId(DroneEntity.class, EntityDataSerializers.FLOAT);
+	private static final EntityDataAccessor<Float> GUN_AIM_Z = SynchedEntityData.defineId(DroneEntity.class, EntityDataSerializers.FLOAT);
 	private static final EntityDataAccessor<Integer> GUN_AMMO = SynchedEntityData.defineId(DroneEntity.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> MISSILES = SynchedEntityData.defineId(DroneEntity.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> LASER_HEAT = SynchedEntityData.defineId(DroneEntity.class, EntityDataSerializers.INT);
@@ -236,7 +241,7 @@ public final class DroneEntity extends PathfinderMob {
 			drone.taskStack.discard(task -> task.kind() == DroneTaskStack.Kind.CARGO && task.missionId().equals(assignment));
 			drone.releaseCargoAccess();
 			drone.entityData.set(CARGO_PAUSED, true);
-			drone.entityData.set(CARGO_STATE, CargoState.UNASSIGNED.id());
+			drone.entityData.set(CARGO_STATE, CargoMissionPolicy.onNetworkHold(retainCargo).id());
 			if (ownsMission && !drone.serviceReturn && !drone.solarServiceAssigned() && !drone.isPowerLost()
 				&& !drone.combatActive() && !drone.emergencyInterceptActive() && drone.recoveryLevel() <= 0
 				&& drone.salvageState() == SalvageState.IDLE) {
@@ -301,6 +306,8 @@ public final class DroneEntity extends PathfinderMob {
 	private int dockIngressIndex;
 	private long dockRequestTick = -1L;
 	private boolean manualDockReturn;
+	private boolean fieldMeshAuthorized;
+	private Vec3 fieldMeshAnchor;
 	private long dockedSinceTick = -1L;
 	private long dockHoldingAnchor = Long.MIN_VALUE;
 	private MissionDataLink.Snapshot missionIntel = MissionDataLink.Snapshot.empty();
@@ -373,6 +380,12 @@ public final class DroneEntity extends PathfinderMob {
 	private CombatWeapon combatRouteSuppressedWeapon = CombatWeapon.NONE;
 	private long combatRouteSuppressedUntil = -1L;
 	private int combatResumeMode = -1;
+	private UUID strikeBeaconId;
+	private int strikeBeaconSlot = -1;
+	private int strikeBeaconCount;
+	private boolean strikeBeaconBarrage;
+	private boolean strikeLaserCooling;
+	private long strikeShotSequence;
 	private DroneOperationalState loggedOperationalState;
 	private boolean powerLostBeaconReported;
 	private boolean powerLossTaskCaptured;
@@ -509,6 +522,10 @@ public final class DroneEntity extends PathfinderMob {
 		builder.define(COMBAT_COUNT, 1);
 		builder.define(COMBAT_STATE_TICK, -1L);
 		builder.define(COMBAT_SHOT_TICK, -1000L);
+		builder.define(GUN_SHOT_TICK, -1000L);
+		builder.define(GUN_AIM_X, 0.0f);
+		builder.define(GUN_AIM_Y, 0.0f);
+		builder.define(GUN_AIM_Z, 0.0f);
 		builder.define(GUN_AMMO, CombatPolicy.GUN_CAPACITY);
 		builder.define(CAPACITY_TIER, 0);
 		builder.define(MISSILES, CombatPolicy.MISSILE_CAPACITY);
@@ -586,10 +603,11 @@ public final class DroneEntity extends PathfinderMob {
 	}
 
 	public void assignRole(DroneRole role) {
-		if (role != role() && rejectSalvageFlightCommand()) return;
+		if (role != role() && rejectProtectedFlightCommand()) return;
 		if (role != role()) preemptSupplyAssignment();
 		DroneRole next = role == null ? DroneRole.FIELD : role;
 		if (role() != next) {
+			revokeFieldMeshAuthorization();
 			discardClearanceAssist();
 			releaseCargoAccess();
 			entityData.set(CARGO_STATE, CargoState.UNASSIGNED.id());
@@ -1023,6 +1041,7 @@ public final class DroneEntity extends PathfinderMob {
 	}
 
 	public void setDockedForCommission() {
+		revokeFieldMeshAuthorization();
 		entityData.set(DOCKED, true);
 		entityData.set(DOCK_STAGE, 2);
 		setDeltaMovement(Vec3.ZERO);
@@ -1075,6 +1094,7 @@ public final class DroneEntity extends PathfinderMob {
 		rechargeReclaimSlot = -1;
 		reliefMissionInheritedFrom = "";
 		entityData.set(COMBAT_SHOT_TICK, -1000L);
+		entityData.set(GUN_SHOT_TICK, -1000L);
 		entityData.set(COMBAT_AIM_X, (float)getX());
 		entityData.set(COMBAT_AIM_Y, (float)getY());
 		entityData.set(COMBAT_AIM_Z, (float)getZ());
@@ -1282,6 +1302,75 @@ public final class DroneEntity extends PathfinderMob {
 	boolean supplyNetworkAssignedForVerification() { return supplyNetworkToken != null; }
 	public boolean serviceReturnActive() { return serviceReturn || carrierService != null; }
 	boolean weaponRechargeActive() { return serviceReturn; }
+	public boolean fieldMeshAuthorized() { return fieldMeshAuthorized; }
+	public void setFieldMeshAuthorized(boolean authorized) {
+		setFieldMeshAuthorized(authorized, null);
+	}
+	void setFieldMeshAuthorized(boolean authorized, Vec3 deploymentAnchor) {
+		if (authorized && role() != DroneRole.FIELD) return;
+		fieldMeshAuthorized = authorized;
+		fieldMeshAnchor = authorized ? deploymentAnchor : null;
+		notifyFieldMeshAuthorizationChanged();
+		if (authorized) {
+			// An explicit mesh deployment is the new mission authority. Old route/service
+			// snapshots must not reappear after charging and overwrite the deployment.
+			taskStack.clear();
+			serviceResumeMode = DroneMode.STANDBY.id();
+			clearFieldOperation();
+			clearSecurityPatrol();
+			clearPatrolRoute();
+			clearMissionAssignment();
+			manualDockReturn = false;
+			if (!serviceReturn && !solarServiceAssigned()) {
+				entityData.set(MODE, DroneMode.STANDBY.id());
+				dockRequestTick = -1L;
+				entityData.set(DOCK_HOLDING, false);
+				entityData.set(DOCK_QUEUE_POSITION, 0);
+			}
+			entityData.set(DATA_LINK_STATUS, serviceReturn
+				? "FIELD MESH / SERVICE / REJOIN QUEUED"
+				: solarServiceAssigned() ? "FIELD MESH / SOLAR SERVICE / REJOIN QUEUED"
+				: "FIELD MESH / DEPLOY / ASSIGNING");
+		} else {
+			entityData.set(DATA_LINK_STATUS, hasDock()
+				? "FIELD MESH / WITHDRAW / DOCK QUEUED"
+				: "FIELD MESH / WITHDRAW / WAITING FOR DOCK");
+		}
+	}
+	Vec3 fieldMeshAnchor() { return fieldMeshAnchor; }
+	void adoptFieldMeshAnchor(Vec3 anchor) {
+		if (fieldMeshAuthorized && anchor != null) fieldMeshAnchor = anchor;
+	}
+	private void revokeFieldMeshAuthorization() {
+		if (!fieldMeshAuthorized && fieldMeshAnchor == null) return;
+		fieldMeshAuthorized = false;
+		fieldMeshAnchor = null;
+		notifyFieldMeshAuthorizationChanged();
+	}
+	private void notifyFieldMeshAuthorizationChanged() {
+		if (!(level() instanceof ServerLevel server)) return;
+		ServerPlayer owner = server.getServer().getPlayerList().getPlayer(ownerId());
+		if (owner != null && owner.level() == server) FieldRelayRuntime.authorizationChanged(owner);
+	}
+	private void invalidateFieldMeshPlan() {
+		if (!(level() instanceof ServerLevel server)) return;
+		ServerPlayer owner = server.getServer().getPlayerList().getPlayer(ownerId());
+		if (owner != null && owner.level() == server) FieldRelayRuntime.invalidate(owner);
+	}
+	boolean fieldRelayAvailableForMesh() {
+		return fieldRelayControlsMeshFlight() && recoveryLevel() <= 0;
+	}
+
+	boolean fieldRelayControlsMeshFlight() {
+		return fieldMeshAuthorized && role() == DroneRole.FIELD
+			&& isAlive() && !isPowerLost() && batteryPercent() >= 35
+			&& !serviceReturnActive() && !manualDockReturn && !solarServiceAssigned()
+			&& !dockHolding()
+			&& !cargoLiftAssigned() && salvageState() == SalvageState.IDLE && salvageTargetId == null
+			&& !hasFieldOperation() && engineerState() == EngineerState.IDLE
+			&& cargoState() == CargoState.UNASSIGNED && !strikeBeaconActive()
+			&& !combatActive() && !emergencyInterceptActive();
+	}
 
 	public CombatState combatState() { return CombatState.byId(entityData.get(COMBAT_STATE)); }
 	public CombatWeapon combatWeapon() { return CombatWeapon.byId(entityData.get(COMBAT_WEAPON)); }
@@ -1299,6 +1388,8 @@ public final class DroneEntity extends PathfinderMob {
 	public long combatStateTick() { return entityData.get(COMBAT_STATE_TICK); }
 	public long combatShotTick() { return entityData.get(COMBAT_SHOT_TICK); }
 	public int combatShotAge() { return CombatEffectClock.shotAge(level().getGameTime(), entityData.get(COMBAT_SHOT_TICK)); }
+	public long gunShotTick() { return entityData.get(GUN_SHOT_TICK); }
+	public int gunShotAge() { return CombatEffectClock.shotAge(level().getGameTime(), entityData.get(GUN_SHOT_TICK)); }
 	public int gunAmmo() { return Math.max(0, entityData.get(GUN_AMMO)); }
 	public int missiles() { return Math.max(0, entityData.get(MISSILES)); }
 	public int laserHeat() { return Math.max(0, Math.min(1000, entityData.get(LASER_HEAT))); }
@@ -1316,9 +1407,14 @@ public final class DroneEntity extends PathfinderMob {
 		return new Vec3(entityData.get(COMBAT_AIM_X), entityData.get(COMBAT_AIM_Y),
 			entityData.get(COMBAT_AIM_Z)).subtract(position());
 	}
+	public Vec3 gunVisualAim() {
+		return new Vec3(entityData.get(GUN_AIM_X), entityData.get(GUN_AIM_Y),
+			entityData.get(GUN_AIM_Z)).subtract(position());
+	}
 
 	public boolean hasValidCombatVisualAim() {
-		return combatTargetId() >= 0 && entityData.get(COMBAT_AIM_TARGET) == combatTargetId();
+		return entityData.get(COMBAT_AIM_TARGET) == -2
+			|| combatTargetId() >= 0 && entityData.get(COMBAT_AIM_TARGET) == combatTargetId();
 	}
 	public String combatStatusLabel() {
 		if (combatState().rejoining()) return combatState().label() + " / " + groupId();
@@ -1350,7 +1446,7 @@ public final class DroneEntity extends PathfinderMob {
 
 	public void assignPatrolRoute(List<BlockPos> points, String missionId, int expected, int index,
 		BlockPos origin, long assignedTick, int startIndex) {
-		if (rejectSalvageFlightCommand()) return;
+		if (rejectProtectedFlightCommand()) return;
 		if (points == null || points.isEmpty() || points.size() > PatrolRoutePolicy.MAX_POINTS) return;
 		preemptSupplyAssignment();
 		clearFieldOperation();
@@ -1377,6 +1473,7 @@ public final class DroneEntity extends PathfinderMob {
 	public void assignSecurityPatrol(BlockPos anchor, int radius, String orderId) {
 		if (!MissionAssignmentPolicy.allows(role(), MissionAssignmentPolicy.MissionKind.SECURITY_PATROL)
 			|| anchor == null || orderId == null || orderId.isBlank()) return;
+		if (rejectProtectedFlightCommand()) return;
 		preemptSupplyAssignment();
 		clearFieldOperation();
 		launchStationaryMission();
@@ -1402,6 +1499,7 @@ public final class DroneEntity extends PathfinderMob {
 		if (!MissionAssignmentPolicy.allows(role(), MissionAssignmentPolicy.MissionKind.FIELD_OPERATION)
 			|| type == null || type == FieldOperationType.NONE || anchor == null
 			|| orderId == null || orderId.isBlank()) return;
+		if (rejectProtectedFlightCommand()) return;
 		discardClearanceAssist();
 		preemptSupplyAssignment();
 		clearFieldOperation();
@@ -1472,6 +1570,7 @@ public final class DroneEntity extends PathfinderMob {
 
 	public void assignCargoSource(BlockPos pos) {
 		if (!MissionAssignmentPolicy.allows(role(), MissionAssignmentPolicy.MissionKind.CARGO_ROUTE) || pos == null) return;
+		if (rejectProtectedFlightCommand()) return;
 		preemptSupplyAssignment();
 		releaseCargoAccess();
 		entityData.set(CARGO_PAUSED, false);
@@ -1481,6 +1580,7 @@ public final class DroneEntity extends PathfinderMob {
 
 	public void assignCargoTarget(BlockPos pos) {
 		if (!MissionAssignmentPolicy.allows(role(), MissionAssignmentPolicy.MissionKind.CARGO_ROUTE) || pos == null) return;
+		if (rejectProtectedFlightCommand()) return;
 		preemptSupplyAssignment();
 		releaseCargoAccess();
 		entityData.set(CARGO_PAUSED, false);
@@ -1505,18 +1605,25 @@ public final class DroneEntity extends PathfinderMob {
 	private void startCargoRouteIfReady() {
 		if (role() != DroneRole.CARGO || cargoPaused() || !hasCargoSource() || !hasCargoTarget()
 			|| cargoSource().equals(cargoTarget())) return;
-		entityData.set(CARGO_STATE, CargoState.TO_SOURCE.id());
+		CargoState next = CargoMissionPolicy.start(!cargo.isEmpty());
+		entityData.set(CARGO_STATE, next.id());
 		entityData.set(CARGO_QUEUE_POSITION, 0);
 		cargoRetryTick = -1L;
-		assignWaypoint(cargoFlightWaypoint(cargoSource()), unitId() + "-cargo", 1, 0, blockPosition(), level().getGameTime());
+		BlockPos endpoint = next.usesSource() ? cargoSource() : cargoTarget();
+		assignWaypoint(cargoFlightWaypoint(endpoint), unitId() + "-cargo", 1, 0,
+			blockPosition(), level().getGameTime());
 	}
 
 	public void pauseCargoRoute() {
 		if (role() != DroneRole.CARGO) return;
+		if (supplyLoadCommitted()) {
+			entityData.set(DATA_LINK_STATUS, "COMMAND REJECTED / SUPPLY LOAD SAFETY");
+			return;
+		}
 		preemptSupplyAssignment();
 		releaseCargoAccess();
 		entityData.set(CARGO_PAUSED, true);
-		entityData.set(CARGO_STATE, CargoState.UNASSIGNED.id());
+		entityData.set(CARGO_STATE, CargoMissionPolicy.onNetworkHold(!cargo.isEmpty()).id());
 		entityData.set(CARGO_QUEUE_POSITION, 0);
 	}
 
@@ -1668,6 +1775,7 @@ public final class DroneEntity extends PathfinderMob {
 	}
 
 	public void assignGroup(String group) {
+		if (group != null && !group.equals(groupId()) && rejectProtectedFlightCommand()) return;
 		if (group != null && !group.equals(groupId())) preemptSupplyAssignment();
 		if (group != null && group.matches("[A-Z0-9_-]{1,24}")) entityData.set(GROUP, group);
 	}
@@ -1779,7 +1887,7 @@ public final class DroneEntity extends PathfinderMob {
 					drone.serviceReturn, drone.isPowerLost(), drone.batteryPercent(),
 					drone.dockedSinceTick < 0 ? 0 : level.getGameTime() - drone.dockedSinceTick))
 				.min(Comparator.comparingLong(drone -> drone.dockedSinceTick)).orElse(null);
-			if (yielding != null) {
+			if (yielding != null && DockAllocationRuntime.claimYieldTurn(level, owner)) {
 				BlockPos yielded = yielding.dockPos();
 				yielding.dockHoldingAnchor = yielded.asLong();
 				yielding.releaseDockReservation();
@@ -1820,14 +1928,39 @@ public final class DroneEntity extends PathfinderMob {
 	}
 
 	public void requestManualDockReturn() {
-		if (rejectSalvageFlightCommand()) return;
-		// Only an explicit operator order preempts combat; automatic service keeps its resume stack.
+		if (rejectProtectedFlightCommand()) return;
+		requestManualDockReturn("DOCK RETURN / OPERATOR");
+	}
+
+	public void requestFieldMeshWithdrawal() {
+		if (rejectProtectedFlightCommand()) return;
+		revokeFieldMeshAuthorization();
+		requestManualDockReturn("FIELD MESH / WITHDRAW / RTB");
+	}
+
+	private void requestManualDockReturn(String status) {
+		// Explicit return is terminal. Automatic service may resume a mission, but an
+		// operator return/mesh withdrawal must never resurrect an older queued task.
+		revokeFieldMeshAuthorization();
 		emergencyLaunchedFromDock = false;
 		clearCombatState();
 		clearEmergencyInterception();
 		if (solarServiceAssigned()) clearSolarService(false);
+		taskStack.clear();
+		serviceResumeMode = DroneMode.STANDBY.id();
+		queuedServiceReason = DroneServicePolicy.Need.NONE;
 		manualDockReturn = true;
-		setMode(DroneMode.DOCK);
+		setModeInternal(DroneMode.DOCK);
+		entityData.set(DATA_LINK_STATUS, hasDock() ? status : status + " / DOCK QUEUED");
+	}
+
+	/** Newly placed aircraft commission into the shared Dock pool and never self-enrol in the FIELD mesh. */
+	public void prepareForCommissioningReturn() {
+		revokeFieldMeshAuthorization();
+		requestManualDockReturn();
+		entityData.set(DATA_LINK_STATUS, hasDock()
+			? "COMMISSIONING / DOCK RETURN"
+			: "COMMISSIONING / DOCK QUEUED");
 	}
 
 	/** Empty autonomous logistics aircraft return to the shared Dock pool once all current demand is satisfied. */
@@ -1844,17 +1977,24 @@ public final class DroneEntity extends PathfinderMob {
 	}
 
 	public void setMode(DroneMode mode) {
-		if (rejectSalvageFlightCommand()) return;
+		if (rejectProtectedFlightCommand()) return;
+		revokeFieldMeshAuthorization();
 		setModeInternal(mode);
 	}
 
 	/** Operator commands must be checked before acknowledgement or consuming role modules. */
-	public boolean acceptsOperatorFlightCommand() { return !salvageTowCommitted() && cargoLiftMissionId == null; }
+	public boolean acceptsOperatorFlightCommand() {
+		return DroneCommandPolicy.acceptsOperatorFlightCommand(salvageTowCommitted(),
+			cargoLiftMissionId != null, supplyLoadCommitted());
+	}
+
+	private boolean supplyLoadCommitted() {
+		return supplyNetworkToken != null && cargo.stream().anyMatch(stack -> !stack.isEmpty());
+	}
 
 	/** Explicit operator override. Physical tow/load custody remains non-preemptible. */
 	public boolean forceOperatorOverride() {
-		if (!acceptsOperatorFlightCommand() || isPowerLost()
-			|| supplyNetworkToken != null && cargo.stream().anyMatch(stack -> !stack.isEmpty())) {
+		if (!acceptsOperatorFlightCommand() || isPowerLost()) {
 			entityData.set(DATA_LINK_STATUS, isPowerLost() ? "COMMAND REJECTED / POWER LOST"
 				: cargoLiftMissionId != null ? "COMMAND REJECTED / CONTAINER LIFT SAFETY"
 				: salvageTowCommitted() ? "COMMAND REJECTED / SALVAGE LOAD SAFETY"
@@ -1899,7 +2039,9 @@ public final class DroneEntity extends PathfinderMob {
 	}
 
 	public String operatorFlightCommandRejection() {
-		return acceptsOperatorFlightCommand() ? "" : cargoLiftMissionId != null
+		return acceptsOperatorFlightCommand() ? "" : supplyLoadCommitted()
+			? "補給物資を搬送中です。搬入完了後に指示してください"
+			: cargoLiftMissionId != null
 			? "4機共同でコンテナを搬送中です。安全着地または共同輸送画面から中止してください"
 			: "回収物の搬送・整備中です。完了後に指示してください";
 	}
@@ -1913,9 +2055,11 @@ public final class DroneEntity extends PathfinderMob {
 		return "現在状態では介入できません";
 	}
 
-	private boolean rejectSalvageFlightCommand() {
+	private boolean rejectProtectedFlightCommand() {
 		if (acceptsOperatorFlightCommand()) return false;
-		entityData.set(DATA_LINK_STATUS, "COMMAND REJECTED / SALVAGE LOAD SAFETY");
+		entityData.set(DATA_LINK_STATUS, supplyLoadCommitted()
+			? "COMMAND REJECTED / SUPPLY LOAD SAFETY"
+			: "COMMAND REJECTED / SALVAGE LOAD SAFETY");
 		return true;
 	}
 
@@ -1929,10 +2073,14 @@ public final class DroneEntity extends PathfinderMob {
 		if (mode != DroneMode.WAYPOINT) clearMissionAssignment();
 		if (mode != DroneMode.WAYPOINT) entityData.set(FORMATION_CATCH_UP, false);
 		if (serviceReturn) {
-			serviceResumeMode = mode.id();
-			taskStack.queue(currentTaskSnapshot(mode));
+			if (!manualDockReturn) {
+				serviceResumeMode = mode.id();
+				taskStack.queue(currentTaskSnapshot(mode));
+			}
 			entityData.set(MODE, DroneMode.DOCK.id());
-			entityData.set(DATA_LINK_STATUS, serviceReason.status() + " / NEXT " + mode.name());
+			entityData.set(DATA_LINK_STATUS, manualDockReturn
+				? "DOCK RETURN / OPERATOR / SERVICE ON CONTACT"
+				: serviceReason.status() + " / NEXT " + mode.name());
 			return;
 		}
 		if (combatState().controlsFlight()) combatResumeMode = mode.id();
@@ -1955,7 +2103,7 @@ public final class DroneEntity extends PathfinderMob {
 
 	public void assignFollowFormation(String missionId, int expected, int index, String leaderUnitId,
 		BlockPos origin, long assignedTick) {
-		if (rejectSalvageFlightCommand()) return;
+		if (rejectProtectedFlightCommand()) return;
 		clearFieldOperation();
 		clearSecurityPatrol();
 		clearPatrolRoute();
@@ -1980,7 +2128,7 @@ public final class DroneEntity extends PathfinderMob {
 	}
 
 	public void assignWaypoint(BlockPos pos, String missionId, int expected, int index, BlockPos origin, long assignedTick) {
-		if (rejectSalvageFlightCommand()) return;
+		if (!(unitId() + "-cargo").equals(missionId) && rejectProtectedFlightCommand()) return;
 		assignWaypointInternal(pos, missionId, expected, index, origin, assignedTick);
 	}
 
@@ -1997,7 +2145,7 @@ public final class DroneEntity extends PathfinderMob {
 	}
 
 	public void assignTrackingTarget(LivingEntity target, String missionId, int expected, int index, BlockPos origin, long assignedTick) {
-		if (rejectSalvageFlightCommand()) return;
+		if (rejectProtectedFlightCommand()) return;
 		preemptSupplyAssignment();
 		clearFieldOperation();
 		clearSecurityPatrol();
@@ -2359,6 +2507,262 @@ public final class DroneEntity extends PathfinderMob {
 		setYBodyRot(yaw);
 	}
 
+	boolean canAcceptStrikeBeacon(ServerPlayer owner, StrikeBeaconEntity beacon) {
+		return beacon != null && strikeBeaconId == null && securityLoadout().armed() && !solarServiceAssigned()
+			&& salvageState == SalvageState.IDLE && cargoLiftMissionId == null
+			&& StrikeBeaconPolicy.recruitable(role(), isOwnedBy(owner), isAlive(), isPowerLost(),
+				serviceReturn, combatActive(), emergencyInterceptActive(), isDocked(), mode(),
+				batteryPercent(), weaponPowerPercent(), gunAmmo(), missiles());
+	}
+
+	boolean strikeBeaconCoordinatorEligible(ServerPlayer owner, StrikeBeaconEntity reference,
+		Set<UUID> planningBeaconIds) {
+		if (strikeBeaconId == null) return canAcceptStrikeBeacon(owner, reference);
+		return planningBeaconIds.contains(strikeBeaconId) && isOwnedBy(owner) && isAlive()
+			&& !isPowerLost() && !serviceReturn && !solarServiceAssigned()
+			&& salvageState == SalvageState.IDLE && cargoLiftMissionId == null
+			&& batteryPercent() > StrikeBeaconPolicy.MIN_RETURN_FLIGHT_POWER
+			&& !StrikeBeaconPolicy.resourcesExhausted(weaponPowerPercent(), gunAmmo(), missiles());
+	}
+
+	boolean assignOrTransferStrikeBeacon(StrikeBeaconEntity beacon, Set<UUID> planningBeaconIds) {
+		if (beacon == null) return false;
+		if (strikeBeaconId == null) return assignStrikeBeacon(beacon);
+		if (strikeBeaconId.equals(beacon.getUUID())) return true;
+		if (!planningBeaconIds.contains(strikeBeaconId) || strikeBeaconBarrage) return false;
+		strikeBeaconId = beacon.getUUID();
+		strikeBeaconSlot = 0;
+		strikeBeaconCount = 1;
+		strikeBeaconBarrage = false;
+		strikeLaserCooling = false;
+		strikeShotSequence = 0;
+		clearCombatState();
+		resetNavigationPlan();
+		entityData.set(DATA_LINK_STATUS, "STRIKE BEACON / REALLOCATED");
+		return true;
+	}
+
+	boolean assignStrikeBeacon(StrikeBeaconEntity beacon) {
+		if (!(level() instanceof ServerLevel level) || beacon == null || strikeBeaconId != null) return false;
+		ServerPlayer owner = level.getServer().getPlayerList().getPlayer(ownerId());
+		if (!canAcceptStrikeBeacon(owner, beacon)) return false;
+		suspendStrikeResumeTask(currentTaskSnapshot(mode(), false, false));
+		strikeBeaconId = beacon.getUUID();
+		strikeBeaconSlot = 0;
+		strikeBeaconCount = 1;
+		strikeBeaconBarrage = false;
+		strikeLaserCooling = false;
+		strikeShotSequence = 0;
+		clearCombatState();
+		clearEmergencyInterception();
+		entityData.set(DOCKED, false);
+		entityData.set(DOCK_STAGE, 0);
+		entityData.set(DOCK_HOLDING, false);
+		resetNavigationPlan();
+		entityData.set(DATA_LINK_STATUS, "STRIKE BEACON / GLOBAL DATA LINK / MUSTER");
+		return true;
+	}
+
+	void updateStrikeBeaconSlot(UUID beaconId, int slot, int count) {
+		if (!java.util.Objects.equals(strikeBeaconId, beaconId)) return;
+		strikeBeaconSlot = Math.max(0, slot);
+		strikeBeaconCount = Math.max(1, count);
+	}
+
+	int strikeBeaconSlot() { return Math.max(0, strikeBeaconSlot); }
+	boolean strikeBeaconAssigned(UUID beaconId) {
+		return beaconId != null && beaconId.equals(strikeBeaconId);
+	}
+
+	void beginStrikeBeaconBarrage(UUID beaconId) {
+		if (!strikeBeaconAssigned(beaconId)) return;
+		strikeBeaconBarrage = true;
+		entityData.set(COMBAT_SLOT, strikeBeaconSlot());
+		entityData.set(COMBAT_COUNT, Math.max(1, strikeBeaconCount));
+		entityData.set(COMBAT_WEAPON, CombatWeapon.LASER.id());
+		entityData.set(COMBAT_CHARGE, 0);
+		setCombatState(CombatState.LASER_CHARGE);
+		entityData.set(DATA_LINK_STATUS, "STRIKE BEACON / ALL-WEAPONS RELEASE");
+	}
+
+	private boolean tickStrikeBeaconMission(ServerLevel level, ServerPlayer owner) {
+		Entity resolved = level.getEntity(strikeBeaconId);
+		if (!(resolved instanceof StrikeBeaconEntity beacon) || !beacon.isAlive()
+			|| !ownerId().equals(beacon.ownerId())) {
+			releaseStrikeBeacon(strikeBeaconId, "BEACON LOST");
+			return false;
+		}
+		if (batteryPercent() <= StrikeBeaconPolicy.MIN_RETURN_FLIGHT_POWER) {
+			releaseStrikeBeacon(strikeBeaconId, "BEACON RELEASE / FLIGHT RESERVE");
+			return false;
+		}
+		entityData.set(DOCKED, false);
+		Vec3 slot = strikeBeaconMusterPoint(level, beacon, level.getGameTime());
+		Vec3 nextSlot = strikeBeaconMusterPoint(level, beacon, level.getGameTime() + 1);
+		flyStrikeBeaconMuster(level, owner, slot, nextSlot.subtract(slot));
+		if (!strikeBeaconBarrage) {
+			entityData.set(DATA_LINK_STATUS, "STRIKE BEACON / MUSTER "
+				+ (strikeBeaconSlot() + 1) + "/" + Math.max(1, strikeBeaconCount));
+			return true;
+		}
+		if (position().distanceToSqr(slot) > 12.0 * 12.0) {
+			entityData.set(DATA_LINK_STATUS, "STRIKE BEACON / FIRING POSITION");
+			return true;
+		}
+		tickStrikeBeaconWeapons(level, beacon);
+		if (StrikeBeaconPolicy.resourcesExhausted(weaponPowerPercent(), gunAmmo(), missiles())) {
+			releaseStrikeBeacon(strikeBeaconId, "BEACON STRIKE COMPLETE");
+			return false;
+		}
+		return true;
+	}
+
+	private Vec3 strikeBeaconMusterPoint(ServerLevel level, StrikeBeaconEntity beacon, long tick) {
+		Vec3 anchor = beacon.position();
+		Vec3 slot = StrikeBeaconPolicy.musterPoint(anchor, strikeBeaconSlot(),
+			Math.max(1, strikeBeaconCount), tick);
+		if (MissionFlightPlan.isUnderground(level, anchor)) return slot;
+		int surface = level.getHeight(Heightmap.Types.MOTION_BLOCKING,
+			Mth.floor(slot.x), Mth.floor(slot.z));
+		return new Vec3(slot.x, Math.max(slot.y, surface + AirframeEnvelope.COMBAT_CLEARANCE), slot.z);
+	}
+
+	private void flyStrikeBeaconMuster(ServerLevel level, ServerPlayer owner, Vec3 slot,
+		Vec3 slotVelocity) {
+		boolean underground = MissionFlightPlan.isUnderground(level, slot);
+		Vec3 transit = MissionFlightPlan.transitTarget(level, position(), slot, underground,
+			StrikeBeaconPolicy.MUSTER_ROUTE_CLEARANCE_BOOST);
+		transit = StrikeBeaconPolicy.climbBeforeCruise(position(), transit);
+		Vec3 target = DroneNavigator.liftOutOfFluid(level, transit);
+		if (!DroneNavigator.corridorClear(level, this, position(), target)) {
+			target = navigationTarget(level, target, NavigationEnvironment.assess(level, owner));
+		} else {
+			routedFlight = false;
+			strategicFlight = false;
+		}
+		double slotDistance = position().distanceTo(slot);
+		double guidanceDistance = position().distanceTo(target);
+		double speedLimit = StrikeBeaconPolicy.musterFlightSpeed(slotDistance);
+		Vec3 current = getDeltaMovement();
+		boolean orbitCapture = slotDistance <= 12.0
+			&& DroneNavigator.corridorClear(level, this, position(), slot);
+		Vec3 requested = orbitCapture
+			? FlightDynamics.steerMovingOrbit(current, position(), slot, slotVelocity, speedLimit)
+			: routedFlight
+				? FlightDynamics.steerRoute(current, position(), target, Vec3.ZERO,
+					speedLimit, Math.max(slotDistance, guidanceDistance))
+				: FlightDynamics.steerCombatTransition(current, position(), target,
+					speedLimit, 0.58);
+		boolean safetyRecovery = FlightDynamics.requiresSafetyRecovery(horizontalCollision,
+			verticalCollision, onGround(), isInWater() || isInLava(), false);
+		if (safetyRecovery) requested = FlightDynamics.steerUrgent(current, position(), target,
+			Vec3.ZERO, speedLimit);
+		setDeltaMovement(smoothFlightMotion(level, current, requested, safetyRecovery, false));
+		float yaw = FlightDynamics.motion(this).heading(getYRot(),
+			FlightAttitude.movementYaw(getDeltaMovement().multiply(1, 0, 1), getYRot()),
+			getDeltaMovement(), level.getGameTime());
+		setYRot(yaw);
+		setYHeadRot(yaw);
+		setYBodyRot(yaw);
+	}
+
+	private void tickStrikeBeaconWeapons(ServerLevel level, StrikeBeaconEntity beacon) {
+		long now = level.getGameTime();
+		long barrageTick = beacon.barrageElapsedTicks(now);
+		Vec3 requested = StrikeBeaconPolicy.strikePoint(beacon.position(), strikeBeaconSlot(), strikeShotSequence);
+		BlockHitResult ground = level.clip(new ClipContext(requested.add(0, 18, 0), requested.add(0, -24, 0),
+			ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
+		Vec3 impact = ground.getType() == HitResult.Type.BLOCK ? ground.getLocation() : requested;
+
+		if (missiles() > 0 && StrikeBeaconPolicy.missileSalvoTick(barrageTick)
+			&& MorrowgearMissileEntity.launchStrike(level, this, impact, (int)strikeShotSequence)) {
+			entityData.set(MISSILES, missiles() - 1);
+			strikeShotSequence++;
+		}
+		if (gunAmmo() > 0 && StrikeBeaconPolicy.gunSalvoTick(barrageTick)) {
+			Vec3 from = combatMuzzlePosition();
+			HitResult obstruction = level.clip(new ClipContext(from, impact, ClipContext.Block.COLLIDER,
+				ClipContext.Fluid.NONE, this));
+			Vec3 gunImpact = obstruction.getType() == HitResult.Type.BLOCK ? obstruction.getLocation() : impact;
+			entityData.set(GUN_AMMO, gunAmmo() - 1);
+			recordAutocannonShot(gunImpact, -2);
+			applyAutocannonImpact(level, gunImpact, null);
+			strikeShotSequence++;
+		}
+		if (weaponPowerPercent() <= 0) return;
+		if (strikeLaserCooling) {
+			entityData.set(LASER_HEAT, Math.max(0, laserHeat() - 12));
+			entityData.set(COMBAT_WEAPON, CombatWeapon.LASER.id());
+			setCombatState(CombatState.LASER_COOL_ORBIT);
+			if (laserHeat() <= CombatPolicy.LASER_RESTART_HEAT) strikeLaserCooling = false;
+			return;
+		}
+		if (laserHeat() >= CombatPolicy.LASER_SWITCH_HEAT) {
+			strikeLaserCooling = true;
+			return;
+		}
+		int charge = Math.min(1000, combatCharge() + 55);
+		entityData.set(COMBAT_WEAPON, CombatWeapon.LASER.id());
+		entityData.set(COMBAT_CHARGE, charge);
+		if (charge < 1000) {
+			setCombatState(CombatState.LASER_CHARGE);
+			return;
+		}
+		setCombatState(CombatState.LASER_FIRE);
+		setStrikeVisualAim(impact);
+		entityData.set(COMBAT_SHOT_TICK, now);
+		entityData.set(LASER_HEAT, Math.min(1000, laserHeat() + CombatPolicy.LASER_FIRE_HEAT_PER_TICK));
+		entityData.set(WEAPON_POWER, Math.max(0,
+			entityData.get(WEAPON_POWER) - CombatPolicy.LASER_FIRE_POWER_PER_TICK));
+		if (tickCount % 4 == 0) applyStrikeLaserImpact(level, impact);
+	}
+
+	private void setStrikeVisualAim(Vec3 aim) {
+		entityData.set(COMBAT_AIM_X, (float)aim.x);
+		entityData.set(COMBAT_AIM_Y, (float)aim.y);
+		entityData.set(COMBAT_AIM_Z, (float)aim.z);
+		entityData.set(COMBAT_AIM_TARGET, -2);
+	}
+
+	private void applyStrikeLaserImpact(ServerLevel level, Vec3 impact) {
+		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, impact.x, impact.y, impact.z,
+			12, 0.34, 0.20, 0.34, 0.04);
+		AABB area = new AABB(impact, impact).inflate(1.45);
+		for (LivingEntity victim : strikeVictims(level, area)) {
+			MorrowgearCombatDamage.apply(level, victim, level.damageSources().mobAttack(this),
+				CombatPolicy.laserPulseDamage(Math.max(1, strikeBeaconCount)));
+		}
+		BlockPos block = BlockPos.containing(impact.add(0, -0.05, 0));
+		BlockState state = level.getBlockState(block);
+		if (!state.isAir() && state.getDestroySpeed(level, block) >= 0 && level.getBlockEntity(block) == null)
+			level.destroyBlock(block, true, this);
+	}
+
+	void releaseStrikeBeacon(UUID beaconId, String reason) {
+		if (strikeBeaconId == null || beaconId != null && !strikeBeaconId.equals(beaconId)) return;
+		strikeBeaconId = null;
+		strikeBeaconSlot = -1;
+		strikeBeaconCount = 0;
+		strikeBeaconBarrage = false;
+		strikeLaserCooling = false;
+		clearCombatState();
+		resetNavigationPlan();
+		if (!(level() instanceof ServerLevel level)) return;
+		DroneTaskStack.Task task = resumeStrikeTask(level);
+		if (task.kind() == DroneTaskStack.Kind.COMBAT && resumeCombatTask(level, task)) return;
+		if (task.kind() == DroneTaskStack.Kind.IDLE || task.mode() == DroneMode.STANDBY) {
+			applySafeMissionFallback(level, reason, true);
+			return;
+		}
+		entityData.set(MODE, task.mode().id());
+		entityData.set(DATA_LINK_STATUS, reason + " / " + task.kind().name() + " RESUME");
+	}
+
+	public boolean strikeBeaconActive() { return strikeBeaconId != null; }
+	public void cancelStrikeBeaconForOperator() {
+		if (strikeBeaconId != null) releaseStrikeBeacon(strikeBeaconId, "BEACON OVERRIDDEN / OPERATOR");
+	}
+
 	private static boolean carrierTerrainLoaded(ServerLevel level, BlockPos center) {
 		for (int x = -2; x <= 2; x++) for (int z = -2; z <= 2; z++)
 			if (!level.hasChunk((center.getX() >> 4) + x, (center.getZ() >> 4) + z)) return false;
@@ -2368,6 +2772,7 @@ public final class DroneEntity extends PathfinderMob {
 	@Override
 	protected void customServerAiStep(ServerLevel level) {
 		super.customServerAiStep(level);
+		reconcileCargoCustodyState();
 		guardSupplyAssignment(level);
 		SupplyNetworkRuntime.tickFromDrone(level, this, SUPPLY_CARGO_HOOKS);
 		setNoGravity(true);
@@ -2392,7 +2797,8 @@ public final class DroneEntity extends PathfinderMob {
 			int relayHops = ownerInDimension ? DataLinkRelayNetwork.link(owner, position()).hops() : -1;
 			if (isPowerLost() || carrierService != null && ownerSupportsExterior
 				|| RemoteOperationPolicy.keepsChunkActive(ownerSupportsExterior,
-				isDocked(), serviceReturn, combatState().controlsFlight(), hasActiveFieldOperation(),
+					isDocked(), serviceReturn, combatState().controlsFlight() || strikeBeaconId != null,
+					hasActiveFieldOperation(),
 				hasSecurityPatrol(), hasPatrolRoute(), mode())) {
 				OperationChunkLeaseRuntime.refresh(level, chunkPosition());
 			} else if (RemoteOperationPolicy.keepsDataLinkChunkActive(ownerInDimension, relayHops)) {
@@ -2444,12 +2850,23 @@ public final class DroneEntity extends PathfinderMob {
 		// Service demand is still calculated above, so low reserve moves the shared mission into
 		// emergency descent instead of silently diverting one corner aircraft to a Dock.
 		if (tickCargoLiftAssignment(level)) return;
+		// A strike beacon is a bounded, high-priority interrupt. It owns flight and weapons
+		// without rewriting the retained Wing/route assignment underneath it.
+		if (strikeBeaconId != null) {
+			if (serviceReturn || solarServiceAssigned()) releaseStrikeBeacon(strikeBeaconId,
+				"BEACON RELEASE / SERVICE REQUIRED");
+			else if (tickStrikeBeaconMission(level, owner)) return;
+		}
 
 		if (mode() == DroneMode.DOCK && hasDock() && level.hasChunkAt(dockPos())
 			&& !(level.getBlockState(dockPos()).getBlock() instanceof jp.morrowgear.drone.block.DockCenterBlock)) {
 			clearDock();
 		}
 		if (role() == DroneRole.FIELD) tickFieldEmergencyRecovery(formation);
+		if (role() == DroneRole.FIELD && tickFieldRelayMesh(level, owner)) {
+			logOperationalTransition(level);
+			return;
+		}
 		salvageWaitingForPartner = false;
 		if (role() == DroneRole.SALVAGE) tickSalvageMission(level, owner);
 		if (!serviceReturn && !solarServiceAssigned()) {
@@ -2539,11 +2956,16 @@ public final class DroneEntity extends PathfinderMob {
 			|| combatState() == CombatState.LASER_FIRE
 			|| combatState() == CombatState.LASER_COOL_ORBIT;
 		LivingEntity laserCombatTarget = laserOrbit ? combatTarget(level) : null;
+		boolean laserIndividualFiringRoute = laserCombatTarget != null
+			&& combatFiringRouteActive(CombatWeapon.LASER, laserCombatTarget);
 		boolean laserIngress = laserCombatTarget != null && CombatPolicy.laserIngressRequired(position(),
 			laserCombatTarget.position().add(0, laserCombatTarget.getBbHeight() * 0.5, 0),
 			combatAirspaceSlot(level));
 		boolean casFlight = combatWeapon() == CombatWeapon.AUTOCANNON
 			&& (combatState() == CombatState.FLARE_ENTRY || combatState() == CombatState.GUN_RUN);
+		LivingEntity autocannonCombatTarget = casFlight ? combatTarget(level) : null;
+		boolean autocannonIndividualFiringRoute = autocannonCombatTarget != null
+			&& combatFiringRouteActive(CombatWeapon.AUTOCANNON, autocannonCombatTarget);
 		boolean missileFlight = combatWeapon() == CombatWeapon.MISSILE
 			&& combatState() == CombatState.MISSILE_APPROACH;
 		boolean attackTransitionFlight = combatState() == CombatState.FLARE_ENTRY && !casFlight
@@ -2633,7 +3055,7 @@ public final class DroneEntity extends PathfinderMob {
 			setDeltaMovement(FlightDynamics.steer(previousVelocity, position(), target,
 				Vec3.ZERO, Math.min(speedLimit, 0.14), false));
 		} else if (laserOrbit) {
-			if (laserIngress || routedFlight) {
+			if (laserIngress || routedFlight || laserIndividualFiringRoute) {
 				setDeltaMovement(FlightDynamics.steerRoute(getDeltaMovement(), position(), target,
 					Vec3.ZERO, speedLimit, remainingDistance));
 			} else {
@@ -2651,7 +3073,7 @@ public final class DroneEntity extends PathfinderMob {
 				orbitVelocity, speedLimit));
 			}
 		} else if (casFlight) {
-			if (routedFlight) {
+			if (routedFlight || autocannonIndividualFiringRoute) {
 				setDeltaMovement(FlightDynamics.steerRoute(getDeltaMovement(), position(), target,
 					Vec3.ZERO, speedLimit, remainingDistance));
 			} else if (casBreakawayActive) {
@@ -2721,6 +3143,76 @@ public final class DroneEntity extends PathfinderMob {
 			if (serviceReturn) entityData.set(MODE, DroneMode.STANDBY.id());
 			else setModeInternal(DroneMode.STANDBY);
 		}
+	}
+
+	private boolean tickFieldRelayMesh(ServerLevel level, ServerPlayer owner) {
+		if (!fieldMeshAuthorized || role() != DroneRole.FIELD) return false;
+		if (!fieldRelayControlsMeshFlight()) {
+			if (!fieldMeshMayHoldPending()) return false;
+			return holdFieldMeshPending(level, owner, batteryPercent() < 35
+				? "FIELD MESH / SERVICE PENDING / HOLD"
+				: "FIELD MESH / LINK PENDING / HOLD");
+		}
+		FieldRelayRuntime.Assignment assignment = FieldRelayRuntime.assignment(owner, this);
+		if (assignment == null) return holdFieldMeshPending(level, owner,
+			"FIELD MESH / RESERVE / HOLD");
+		if (isDocked()) launchStationaryMission();
+		OperationChunkLeaseRuntime.refreshDataLink(level, chunkPosition());
+		Vec3 slot = assignment.target();
+		boolean loitering = FieldRelayFlightPolicy.loiterReady(position(), slot);
+		Vec3 requested = loitering
+			? FieldRelayFlightPolicy.loiterTarget(slot, getUUID(), level.getGameTime())
+			: FieldRelayFlightPolicy.guidance(slot);
+		NavigationEnvironment.Snapshot environment = NavigationEnvironment.assess(level, owner);
+		// FIELD deployment owns its slot, but it must share the ordinary navigation
+		// recovery loop. Skipping this call on a nominally clear leg left collision
+		// and stalled-flight state unsampled, so a relay could alternate between a
+		// direct push and a blocked stop forever beside terrain.
+		Vec3 target = navigationTarget(level, requested, environment);
+		boolean directMeshLeg = !routedFlight && target.distanceToSqr(requested) <= 0.01;
+		double distance = position().distanceTo(slot);
+		double speed = loitering ? FieldRelayFlightPolicy.CAPTURE_SPEED : FieldRelayFlightPolicy.speed(distance);
+		Vec3 velocity = loitering && directMeshLeg
+			? FlightDynamics.steerMovingOrbit(getDeltaMovement(), position(), target,
+				FieldRelayFlightPolicy.loiterVelocity(slot, getUUID(), level.getGameTime()), speed)
+			: routedFlight
+			? FlightDynamics.steerRoute(getDeltaMovement(), position(), target, Vec3.ZERO, speed, distance)
+			: FlightDynamics.steer(getDeltaMovement(), position(), target, Vec3.ZERO, speed, false);
+		boolean safetyRecovery = FlightDynamics.requiresSafetyRecovery(horizontalCollision,
+			verticalCollision, onGround(), isInWater() || isInLava(), false);
+		if (safetyRecovery) velocity = FlightDynamics.steerUrgent(getDeltaMovement(), position(),
+			target, Vec3.ZERO, speed);
+		setDeltaMovement(smoothFlightMotion(level, getDeltaMovement(), velocity, safetyRecovery, false));
+		stabilizeHeading(owner);
+		if (tickCount % 10 == 0) {
+			boolean established = FieldRelayFlightPolicy.established(position(), slot);
+			String duty = assignment.duty() == FieldRelayMeshPolicy.Duty.MESH_RESERVE
+				? "RESERVE" : assignment.duty().name();
+			String phase = recoveryLevel() > 0 ? "AVOID " + recoveryLevel()
+				: established ? "HOLD" : "DEPLOY";
+			entityData.set(DATA_LINK_STATUS, "FIELD MESH / " + duty + " / "
+				+ phase + (assignment.demandId().isBlank()
+					? "" : " / " + assignment.demandId()));
+		}
+		return true;
+	}
+
+	private boolean fieldMeshMayHoldPending() {
+		return isAlive() && !isPowerLost() && !serviceReturnActive() && !manualDockReturn
+			&& !solarServiceAssigned() && !dockHolding()
+			&& !cargoLiftAssigned() && salvageState() == SalvageState.IDLE && salvageTargetId == null
+			&& !hasFieldOperation() && engineerState() == EngineerState.IDLE
+			&& cargoState() == CargoState.UNASSIGNED && !strikeBeaconActive()
+			&& !combatActive() && !emergencyInterceptActive();
+	}
+
+	private boolean holdFieldMeshPending(ServerLevel level, ServerPlayer owner, String status) {
+		if (isDocked()) setDeltaMovement(Vec3.ZERO);
+		else setDeltaMovement(smoothFlightMotion(level, getDeltaMovement(),
+			FlightDynamics.brake(getDeltaMovement()), false, false));
+		stabilizeHeading(owner);
+		if (tickCount % 10 == 0) entityData.set(DATA_LINK_STATUS, status);
+		return true;
 	}
 
 	private Vec3 smoothFlightMotion(ServerLevel level, Vec3 current, Vec3 requested,
@@ -2889,11 +3381,27 @@ public final class DroneEntity extends PathfinderMob {
 		DroneOperationalState current = operationalState();
 		if (current == loggedOperationalState) return;
 		MorrowgearDrone.LOGGER.info("Morrowgear state tick={} unit={} {} -> {} mode={} combat={} "
-			+ "field={} cargo={} engineer={} battery={}% weapon={}% heat={} ammo={} missiles={} recovery={}",
+			+ "field={} cargo={} engineer={} mesh={} link={} battery={}% weapon={}% heat={} ammo={} missiles={} recovery={}",
 			level.getGameTime(), unitId(), loggedOperationalState == null ? "SPAWN" : loggedOperationalState,
 			current, mode(), combatState(), fieldOperationState(), cargoState(), engineerState(),
-			batteryPercent(), weaponPowerPercent(), laserHeat(), gunAmmo(), missiles(), recoveryLevel());
+			fieldMeshAuthorized, dataLinkStatus(), batteryPercent(), weaponPowerPercent(), laserHeat(),
+			gunAmmo(), missiles(), recoveryLevel());
 		loggedOperationalState = current;
+	}
+
+	private void suspendStrikeResumeTask(DroneTaskStack.Task task) {
+		taskStack.suspend(task);
+	}
+
+	private DroneTaskStack.Task resumeStrikeTask(ServerLevel level) {
+		return taskStack.resume(candidate -> resolveTaskForResume(level, candidate))
+			.orElseGet(() -> currentTaskSnapshot(mode(), false, false));
+	}
+
+	private List<LivingEntity> strikeVictims(ServerLevel level, AABB area) {
+		return level.getEntitiesOfClass(LivingEntity.class, area,
+			entity -> entity.isAlive() && !(entity instanceof DroneEntity)
+				&& !entity.getUUID().equals(ownerId()));
 	}
 
 	private boolean tickFlightPower(ServerLevel level, ServerPlayer owner) {
@@ -3238,7 +3746,10 @@ public final class DroneEntity extends PathfinderMob {
 			return false;
 		}
 		entityData.set(ENGINEER_STATE, EngineerState.APPROACH.id());
-		if (tickCount % 20 != 0) return true;
+		// Clearance is a bounded rescue operation. Working every quarter second keeps
+		// a full tow-envelope opening practical without performing the column scan on
+		// every server tick.
+		if (tickCount % 5 != 0) return true;
 		BlockPos block = SalvageClearance.obstruction(level, load);
 		clearanceWorkPos = block;
 		if (block == null) { carrier.salvageObstruction = null; finishClearanceAssist(level); return false; }
@@ -4245,6 +4756,15 @@ public final class DroneEntity extends PathfinderMob {
 		return missionId().equals(unitId() + "-cargo");
 	}
 
+	private void reconcileCargoCustodyState() {
+		if (role() != DroneRole.CARGO || cargo.isEmpty() || cargoState() != CargoState.UNASSIGNED
+			|| supplyNetworkToken == null && !hasCargoSource() && !hasCargoTarget()) return;
+		entityData.set(CARGO_PAUSED, true);
+		entityData.set(CARGO_STATE, CargoState.WAIT_TARGET.id());
+		entityData.set(CARGO_QUEUE_POSITION, 0);
+		entityData.set(DATA_LINK_STATUS, "CARGO / LOAD SECURED / ROUTE REVIEW");
+	}
+
 	private void preemptSupplyAssignment() {
 		cancelMissileAttack();
 		preemptCarrierService();
@@ -4708,17 +5228,36 @@ public final class DroneEntity extends PathfinderMob {
 				DockServicePolicy.WEAPON_CHARGE_PER_TICK, weaponCapacity() - entityData.get(WEAPON_POWER)));
 			if (supplied > 0) entityData.set(WEAPON_POWER, entityData.get(WEAPON_POWER) + supplied);
 		}
-		if (!serviceReturn) entityData.set(DATA_LINK_STATUS,
-			"DOCK / FLT " + batteryPercent() + "% WPN " + weaponPowerPercent() + "% / "
-			+ (serviceDock.hasPowerSupply() ? "POWER ONLINE" : "ADD FUEL")
-			+ (role() == DroneRole.SECURITY && weaponPowerPercent() < 100 && !serviceDock.hasWeaponPowerSupply() ? " / ADD LASER CELL" : "")
-			+ (role() == DroneRole.SECURITY && gunAmmo() < gunCapacity() && !serviceDock.hasAutocannonAmmunition() ? " / ADD MAGAZINE" : "")
-			+ (role() == DroneRole.SECURITY && missiles() < missileCapacity() && !serviceDock.hasMissileAmmunition() ? " / ADD MISSILE PACK" : ""));
+		if (!serviceReturn) {
+			if (fieldMeshAuthorized && role() == DroneRole.FIELD) {
+				entityData.set(DATA_LINK_STATUS, "FIELD MESH / DOCK SERVICE / FLT "
+					+ batteryPercent() + "% / " + (batteryPercent() < 35
+						? serviceDock.hasPowerSupply() ? "CHARGING TO 35%" : "WAITING FOR POWER"
+						: "DEPLOY READY"));
+			} else entityData.set(DATA_LINK_STATUS,
+				"DOCK / FLT " + batteryPercent() + "% WPN " + weaponPowerPercent() + "% / "
+				+ (serviceDock.hasPowerSupply() ? "POWER ONLINE" : "ADD FUEL")
+				+ (role() == DroneRole.SECURITY && weaponPowerPercent() < 100 && !serviceDock.hasWeaponPowerSupply() ? " / ADD LASER CELL" : "")
+				+ (role() == DroneRole.SECURITY && gunAmmo() < gunCapacity() && !serviceDock.hasAutocannonAmmunition() ? " / ADD MAGAZINE" : "")
+				+ (role() == DroneRole.SECURITY && missiles() < missileCapacity() && !serviceDock.hasMissileAmmunition() ? " / ADD MISSILE PACK" : ""));
+		}
 	}
 
 	private void updateCombat(ServerLevel level, ServerPlayer owner, List<DroneEntity> fleet) {
 		if (manualDockReturn && !isDocked()) return;
-		if (isDocked()) manualDockReturn = false;
+		if (manualDockReturn && isDocked()) {
+			// Contact charging continues through tickDockSupplies, but this explicit order
+			// has no automatic resume edge. A later player or emergency command may launch it.
+			serviceReturn = false;
+			serviceReason = DroneServicePolicy.Need.NONE;
+			queuedServiceReason = DroneServicePolicy.Need.NONE;
+			taskStack.clear();
+			manualDockReturn = false;
+			clearCombatState();
+			entityData.set(MODE, DroneMode.STANDBY.id());
+			entityData.set(DATA_LINK_STATUS, "DOCKED / OPERATOR RETURN COMPLETE");
+			return;
+		}
 		if (isDocked()) {
 			DockBlockEntity serviceDock = level.getBlockEntity(dockPos()) instanceof DockBlockEntity dock ? dock : null;
 			clearCombatState();
@@ -4826,8 +5365,8 @@ public final class DroneEntity extends PathfinderMob {
 					emergencyInterceptCount = theaterAssignment.count();
 					emergencyInterceptUntil = level.getGameTime() + 100L;
 				}
-				entityData.set(DATA_LINK_STATUS, role() != DroneRole.SECURITY
-					? "SERVICE COMPLETE / MISSION RESUME"
+				if (!fieldMeshAuthorized || role() != DroneRole.FIELD) entityData.set(DATA_LINK_STATUS,
+					role() != DroneRole.SECURITY ? "SERVICE COMPLETE / MISSION RESUME"
 					: resourceLimitedSortie ? "RESOURCE LIMITED SORTIE / SUPPLY EXHAUSTED"
 					: reliefHolding ? "REARMED / RELIEF HOLDS / MISSION RESUME"
 					: reclaimCombat && theaterEmergency ? "EMERGENCY SORTIE / " + theaterAssignment.clusterId()
@@ -5393,9 +5932,12 @@ public final class DroneEntity extends PathfinderMob {
 		CasElement element = autocannonElement(level);
 		boolean verifyCas = MorrowgearAutomation.requested() && groupId().equals("VERIFY-CAS-LINE");
 		boolean independentRoute = combatFiringRouteActive(CombatWeapon.AUTOCANNON, target);
-		if (!CombatPolicy.autocannonFireTick(tickCount)
-			|| !independentRoute
-				&& !CombatPolicy.casGunWindow(element.elapsed(), element.index(), element.airspace())) return;
+		// The clocked formation phase is useful for spacing the element, but it is not
+		// authoritative for firing. Collision avoidance, terrain routing, or target
+		// motion can leave the physical aircraft behind that phase. The geometric
+		// slot, strict planned forward cone, and actual forward hemisphere below are
+		// the safe firing window and let a delayed aircraft recover on its next pass.
+		if (!CombatPolicy.autocannonFireTick(tickCount)) return;
 		if (verifyCas) casVerifyFireWindows++;
 		if (distanceToSqr(target) > 42.0 * 42.0) return;
 		if (verifyCas) casVerifyInRange++;
@@ -5458,12 +6000,21 @@ public final class DroneEntity extends PathfinderMob {
 		LivingEntity directVictim = entityImpact != null && entityImpact.getEntity() instanceof LivingEntity living
 			? living : null;
 		Vec3 impact = entityImpact == null ? blockImpact : entityImpact.getLocation();
-		entityData.set(COMBAT_SHOT_TICK, level().getGameTime());
+		recordAutocannonShot(impact, target.getId());
+		applyAutocannonImpact(level, impact, directVictim);
+	}
+
+	private void recordAutocannonShot(Vec3 impact, int aimTarget) {
+		long now = level().getGameTime();
+		entityData.set(COMBAT_SHOT_TICK, now);
 		entityData.set(COMBAT_AIM_X, (float)impact.x);
 		entityData.set(COMBAT_AIM_Y, (float)impact.y);
 		entityData.set(COMBAT_AIM_Z, (float)impact.z);
-		entityData.set(COMBAT_AIM_TARGET, target.getId());
-		applyAutocannonImpact(level, impact, directVictim);
+		entityData.set(COMBAT_AIM_TARGET, aimTarget);
+		entityData.set(GUN_SHOT_TICK, now);
+		entityData.set(GUN_AIM_X, (float)impact.x);
+		entityData.set(GUN_AIM_Y, (float)impact.y);
+		entityData.set(GUN_AIM_Z, (float)impact.z);
 	}
 
 	void resetCasDiagnosticsForVerification() {
@@ -5478,12 +6029,16 @@ public final class DroneEntity extends PathfinderMob {
 	}
 
 	String casDiagnosticForVerification() {
+		double routeError = combatFiringRoutePoint == null ? -1.0
+			: position().distanceTo(combatFiringRoutePoint);
 		return "windows=" + casVerifyFireWindows + " range=" + casVerifyInRange
 			+ " permitted=" + casVerifyPermitted + " planned=" + casVerifyPlannedForward
 			+ " actual=" + casVerifyActualForward + " impact=" + casVerifyImpactAccepted
 			+ " bestPlannedDot=" + casVerifyBestPlannedDot + " bestActualDot=" + casVerifyBestActualDot
 			+ " state=" + combatState() + " weapon=" + combatWeapon()
-			+ " speed=" + getDeltaMovement().length();
+			+ " speed=" + getDeltaMovement().length()
+			+ " routeActive=" + combatFiringRouteActiveForVerification()
+			+ " routeError=" + routeError;
 	}
 
 	private void applyAutocannonImpact(ServerLevel level, Vec3 impact, LivingEntity directVictim) {
@@ -5856,7 +6411,21 @@ public final class DroneEntity extends PathfinderMob {
 			if (!WeaponFiringRoutePolicy.missileEnvelope(point, targetCenter)) return false;
 			if (!lineClear(level, point.add(0, 0.6, 0), point.add(0, 6.0, 0))) return false;
 		}
-		return lineClear(level, point, targetCenter);
+		if (!lineClear(level, point, targetCenter)) return false;
+		if (weapon == CombatWeapon.LASER) {
+			// The emitter is offset from the entity origin. A center ray can fit beside
+			// a cave or shaft edge while the real rotating hardpoint remains occluded,
+			// leaving a fully charged aircraft hovering forever. Reserve enough clear
+			// aperture for every possible yaw of the gimballed lower lens.
+			double radius = Math.hypot(DroneHardpoints.LASER.x, DroneHardpoints.LASER.z) + 0.08;
+			for (Vec3 offset : new Vec3[] {
+				new Vec3(radius, DroneHardpoints.LASER.y, 0),
+				new Vec3(-radius, DroneHardpoints.LASER.y, 0),
+				new Vec3(0, DroneHardpoints.LASER.y, radius),
+				new Vec3(0, DroneHardpoints.LASER.y, -radius)
+			}) if (!lineClear(level, point.add(offset), targetCenter)) return false;
+		}
+		return true;
 	}
 
 	private boolean combatFiringRouteActive(CombatWeapon weapon, LivingEntity target) {
@@ -6142,7 +6711,11 @@ public final class DroneEntity extends PathfinderMob {
 			+ " slotError=" + String.format(java.util.Locale.ROOT, "%.2f", position().distanceTo(slot))
 			+ " relY=" + String.format(java.util.Locale.ROOT, "%.2f", slot.y - center.y)
 			+ " lane=" + element.airspace().index()
-			+ " line=" + lineClear(level, laserOutletPosition(), center);
+			+ " line=" + lineClear(level, laserOutletPosition(), center)
+			+ " route=" + (combatFiringRoutePoint == null ? "none"
+				: verificationVector(combatFiringRoutePoint))
+			+ " routeError=" + (combatFiringRoutePoint == null ? "none"
+				: String.format(java.util.Locale.ROOT, "%.2f", position().distanceTo(combatFiringRoutePoint)));
 	}
 
 	private CombatPolicy.AirspaceSlot combatAirspaceSlot(ServerLevel level) {
@@ -6174,10 +6747,13 @@ public final class DroneEntity extends PathfinderMob {
 			return;
 		}
 		if (!serviceReturn) {
+			if (fieldMeshAuthorized) invalidateFieldMeshPlan();
 			// Preserve the operational mission below the transient combat task. If a relief
 			// holds the front, the combat snapshot is discarded and this mission resumes.
-			taskStack.suspend(currentTaskSnapshot(mode(), false));
-			taskStack.suspend(currentTaskSnapshot());
+			if (!fieldMeshAuthorized) {
+				taskStack.suspend(currentTaskSnapshot(mode(), false));
+				taskStack.suspend(currentTaskSnapshot());
+			}
 			serviceResumeMode = mode().id();
 			rechargeReclaimTargetId = combatTargetId() >= 0 ? combatTargetId() : emergencyTargetId;
 			Entity reclaimTarget = rechargeReclaimTargetId < 0 ? null : level().getEntity(rechargeReclaimTargetId);
@@ -6271,6 +6847,7 @@ public final class DroneEntity extends PathfinderMob {
 	}
 
 	private void resumeServiceTask(ServerLevel level, boolean resumeCombat) {
+		if (resumeAuthorizedFieldMesh(level, "SERVICE COMPLETE")) return;
 		DroneTaskStack.Task task = taskStack.resume(candidate ->
 			!resumeCombat && candidate.kind() == DroneTaskStack.Kind.COMBAT
 				? java.util.Optional.empty() : resolveTaskForResume(level, candidate))
@@ -6301,6 +6878,17 @@ public final class DroneEntity extends PathfinderMob {
 		}
 		entityData.set(MODE, task.mode().id());
 		entityData.set(DATA_LINK_STATUS, "SERVICE COMPLETE / " + task.kind().name() + " RESUME");
+	}
+
+	private boolean resumeAuthorizedFieldMesh(ServerLevel level, String reason) {
+		if (!fieldMeshAuthorized || role() != DroneRole.FIELD || isPowerLost()) return false;
+		ServerPlayer owner = level.getServer().getPlayerList().getPlayer(ownerId());
+		if (owner != null && owner.level() == level) FieldRelayRuntime.invalidate(owner);
+		getNavigation().stop();
+		resetNavigationPlan();
+		entityData.set(MODE, DroneMode.STANDBY.id());
+		entityData.set(DATA_LINK_STATUS, reason + " / FIELD MESH REJOIN QUEUED");
+		return true;
 	}
 
 	private java.util.Optional<DroneTaskStack.Task> resolveTaskForResume(ServerLevel level,
@@ -6387,7 +6975,7 @@ public final class DroneEntity extends PathfinderMob {
 			return java.util.Optional.of(task);
 		releaseCargoAccess();
 		entityData.set(CARGO_PAUSED, true);
-		entityData.set(CARGO_STATE, CargoState.UNASSIGNED.id());
+		entityData.set(CARGO_STATE, CargoMissionPolicy.onNetworkHold(!cargo.isEmpty()).id());
 		entityData.set(CARGO_QUEUE_POSITION, 0);
 		entityData.set(DATA_LINK_STATUS, targetMissing
 			? "CARGO TARGET LOST / LOAD SECURED" : "CARGO SOURCE LOST / ROUTE SUSPENDED");
@@ -6431,12 +7019,9 @@ public final class DroneEntity extends PathfinderMob {
 	private Vec3 combatAttackAxis(ServerPlayer owner, LivingEntity target, Vec3 center) {
 		Vec3 reference = hasSecurityPatrol()
 			? Vec3.atCenterOf(securityAnchor()) : owner == null ? position() : owner.position();
-		Vec3 axis = center.subtract(reference).multiply(1, 0, 1);
-		if (axis.lengthSqr() < 1.0) {
-			int seed = target == null ? combatTargetId() : target.getId();
-			double angle = Math.floorMod(seed * 47, 360) * Mth.DEG_TO_RAD;
-			axis = new Vec3(Math.sin(angle), 0, Math.cos(angle));
-		}
+		int seed = target == null ? combatTargetId() : target.getId();
+		Vec3 axis = CombatPolicy.casAttackAxis(center.subtract(reference),
+			center.subtract(position()), seed);
 		if (combatWeapon() != CombatWeapon.AUTOCANNON || target == null) return axis;
 		return CombatManeuverRegistry.axis(level().dimension().toString(), ownerId(), target.getId(),
 			combatManeuverKey(), axis, level().getGameTime());
@@ -6636,14 +7221,20 @@ public final class DroneEntity extends PathfinderMob {
 		if (stationId == null) return;
 		if (!solarTaskSuspended) {
 			if (clearanceCarrierId != null) finishClearanceAssist(level);
-			solarResumeTask = currentTaskSnapshot();
-			taskStack.suspend(solarResumeTask);
+			if (fieldMeshAuthorized) {
+				solarResumeTask = null;
+				FieldRelayRuntime.invalidate(owner);
+			} else {
+				solarResumeTask = currentTaskSnapshot();
+				taskStack.suspend(solarResumeTask);
+			}
 			solarTaskSuspended = true;
 		}
 		int slot = SolarServiceRegistry.request(stationId, getUUID(), batteryPercent(), level.getGameTime());
 		solarServiceStationId = plan.solarDockId();
 		if (solarServiceStationId == null) solarServiceStationId = stationId;
 		solarServiceSlot = slot;
+		if (fieldMeshAuthorized) FieldRelayRuntime.invalidate(owner);
 		resetSolarOrbit(level.getGameTime());
 		entityData.set(DATA_LINK_STATUS, slot >= 0 ? "SOLAR DIVERT / SLOT " + (slot + 1)
 			: "SOLAR HOLD / QUEUE " + Math.max(1,
@@ -6738,6 +7329,7 @@ public final class DroneEntity extends PathfinderMob {
 		solarServiceStationId = null;
 		solarServiceSlot = -1;
 		resetSolarOrbit(-1L);
+		if (fieldMeshAuthorized) invalidateFieldMeshPlan();
 		if (solarTaskSuspended && resumeMission && level() instanceof ServerLevel serverLevel)
 			resumeAfterSolarService(serverLevel);
 		solarTaskSuspended = false;
@@ -6746,6 +7338,8 @@ public final class DroneEntity extends PathfinderMob {
 	}
 
 	private void resumeAfterSolarService(ServerLevel level) {
+		if (solarResumeTask != null) taskStack.discard(task -> task.sameAssignment(solarResumeTask));
+		if (resumeAuthorizedFieldMesh(level, "SOLAR LINK END")) return;
 		DroneTaskStack.Task saved = solarResumeTask == null ? null
 			: resolveTaskForResume(level, solarResumeTask).orElse(null);
 		// The generic resolver turns a lost tracked entity into a route to its last
@@ -6754,7 +7348,6 @@ public final class DroneEntity extends PathfinderMob {
 		if (solarResumeTask != null && solarResumeTask.kind() == DroneTaskStack.Kind.TRACKING
 			&& (saved == null || saved.kind() != DroneTaskStack.Kind.TRACKING)) saved = null;
 		if (saved != null && saved.kind() == DroneTaskStack.Kind.IDLE) saved = null;
-		if (solarResumeTask != null) taskStack.discard(task -> task.sameAssignment(solarResumeTask));
 		DroneEntity wing = saved == null ? solarWingMission(level) : null;
 		ServerPlayer owner = level.getServer().getPlayerList().getPlayer(ownerId());
 		boolean ownerAvailable = owner != null && owner.level() == level;
@@ -7296,7 +7889,7 @@ public final class DroneEntity extends PathfinderMob {
 	private boolean temporarilyDetachedFromWingFlight() {
 		return WingLeadershipPolicy.temporarilyDetached(serviceReturn, solarServiceAssigned(),
 			isPowerLost(), carrierService != null, emergencyInterceptActive(),
-			combatState().controlsFlight());
+			combatState().controlsFlight() || strikeBeaconId != null);
 	}
 
 	private void maintainMissionLeadership(ServerLevel level) {
@@ -8142,6 +8735,12 @@ public final class DroneEntity extends PathfinderMob {
 		output.putInt("DockQueuePosition", entityData.get(DOCK_QUEUE_POSITION));
 		output.putLong("DockRequestTick", dockRequestTick);
 		output.putBoolean("ManualDockReturn", manualDockReturn);
+		output.putBoolean("FieldMeshAuthorized", fieldMeshAuthorized);
+		if (fieldMeshAnchor != null) {
+			output.putDouble("FieldMeshAnchorX", fieldMeshAnchor.x);
+			output.putDouble("FieldMeshAnchorY", fieldMeshAnchor.y);
+			output.putDouble("FieldMeshAnchorZ", fieldMeshAnchor.z);
+		}
 		output.putLong("DockedSinceTick", dockedSinceTick);
 		output.putLong("DockHoldingAnchor", dockHoldingAnchor);
 		output.putString("Group", groupId());
@@ -8189,6 +8788,12 @@ public final class DroneEntity extends PathfinderMob {
 		output.putInt("CombatCount", combatCount());
 		output.putLong("CombatStateTick", combatStateTick());
 		output.putInt("CombatResumeMode", combatResumeMode);
+		if (strikeBeaconId != null) output.putString("StrikeBeacon", strikeBeaconId.toString());
+		output.putInt("StrikeBeaconSlot", strikeBeaconSlot);
+		output.putInt("StrikeBeaconCount", strikeBeaconCount);
+		output.putBoolean("StrikeBeaconBarrage", strikeBeaconBarrage);
+		output.putBoolean("StrikeLaserCooling", strikeLaserCooling);
+		output.putLong("StrikeShotSequence", strikeShotSequence);
 		if (operatorCombatTargetId != null)
 			output.putString("OperatorCombatTarget", operatorCombatTargetId.toString());
 		output.putInt("GunAmmo", gunAmmo());
@@ -8289,6 +8894,17 @@ public final class DroneEntity extends PathfinderMob {
 		entityData.set(DOCK_QUEUE_POSITION, Math.max(0, input.getIntOr("DockQueuePosition", 0)));
 		dockRequestTick = input.getLongOr("DockRequestTick", -1L);
 		manualDockReturn = input.getBooleanOr("ManualDockReturn", false);
+		// Legacy saves did not persist mesh consent. Preserve only an already-airborne FIELD assignment;
+		// newly placed and docked aircraft always require an explicit operator deployment command.
+		boolean legacyActiveMesh = role() == DroneRole.FIELD && !isDocked()
+			&& mode() != DroneMode.DOCK && !manualDockReturn;
+		fieldMeshAuthorized = input.getBooleanOr("FieldMeshAuthorized", legacyActiveMesh);
+		double meshAnchorX = input.getDoubleOr("FieldMeshAnchorX", Double.NaN);
+		double meshAnchorY = input.getDoubleOr("FieldMeshAnchorY", Double.NaN);
+		double meshAnchorZ = input.getDoubleOr("FieldMeshAnchorZ", Double.NaN);
+		fieldMeshAnchor = fieldMeshAuthorized && Double.isFinite(meshAnchorX)
+			&& Double.isFinite(meshAnchorY) && Double.isFinite(meshAnchorZ)
+			? new Vec3(meshAnchorX, meshAnchorY, meshAnchorZ) : null;
 		dockedSinceTick = input.getLongOr("DockedSinceTick", -1L);
 		dockHoldingAnchor = input.getLongOr("DockHoldingAnchor", Long.MIN_VALUE);
 		entityData.set(GROUP, DroneStatePolicy.group(input.getStringOr("Group", "ALPHA")));
@@ -8366,12 +8982,22 @@ public final class DroneEntity extends PathfinderMob {
 		combatResumeMode = input.getIntOr("CombatResumeMode",
 			combatState() == CombatState.IDLE ? -1 : entityData.get(MODE));
 		try {
+			String savedBeacon = input.getStringOr("StrikeBeacon", "");
+			strikeBeaconId = savedBeacon.isBlank() ? null : UUID.fromString(savedBeacon);
+		} catch (IllegalArgumentException ignored) { strikeBeaconId = null; }
+		strikeBeaconSlot = strikeBeaconId == null ? -1 : Math.max(0, input.getIntOr("StrikeBeaconSlot", 0));
+		strikeBeaconCount = strikeBeaconId == null ? 0 : Math.max(1, input.getIntOr("StrikeBeaconCount", 1));
+		strikeBeaconBarrage = strikeBeaconId != null && input.getBooleanOr("StrikeBeaconBarrage", false);
+		strikeLaserCooling = strikeBeaconId != null && input.getBooleanOr("StrikeLaserCooling", false);
+		strikeShotSequence = Math.max(0L, input.getLongOr("StrikeShotSequence", 0L));
+		try {
 			String commandedTarget = input.getStringOr("OperatorCombatTarget", "");
 			operatorCombatTargetId = commandedTarget.isBlank() ? null : UUID.fromString(commandedTarget);
 		} catch (IllegalArgumentException ignored) {
 			operatorCombatTargetId = null;
 		}
 		entityData.set(COMBAT_SHOT_TICK, -1000L);
+		entityData.set(GUN_SHOT_TICK, -1000L);
 		// Runtime entity ids and partial locks are session-scoped. Resume through REJOIN so a reload
 		// cannot duplicate a shot or rebuild an in-flight salvo from a different contact set.
 		entityData.set(GUN_AMMO, Mth.clamp(input.getIntOr("GunAmmo", CombatPolicy.GUN_CAPACITY),

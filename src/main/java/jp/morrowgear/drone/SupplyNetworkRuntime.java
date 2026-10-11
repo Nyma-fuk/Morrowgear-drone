@@ -16,6 +16,8 @@ import jp.morrowgear.drone.SupplyNetworkRegistry.Stage;
 import jp.morrowgear.drone.SupplyNetworkRegistry.Token;
 import jp.morrowgear.drone.block.DockBlockEntity;
 import jp.morrowgear.drone.carrier.CarrierCargoContainerBlockEntity;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerBlockEntityEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -29,7 +31,19 @@ import net.minecraft.world.phys.Vec3;
 
 /** Physical transfers run only inside the existing Cargo service-arrival path. */
 public final class SupplyNetworkRuntime {
+	private static boolean registered;
+	private static final java.util.Map<String, java.lang.ref.WeakReference<DockBlockEntity>> PENDING_DOCKS
+		= new java.util.LinkedHashMap<>();
 	private SupplyNetworkRuntime() {}
+
+	public static synchronized void register() {
+		if (registered) return;
+		registered = true;
+		ServerBlockEntityEvents.BLOCK_ENTITY_LOAD.register((blockEntity, level) -> {
+			if (blockEntity instanceof DockBlockEntity dock) ensureDock(level, dock);
+		});
+		ServerTickEvents.END_LEVEL_TICK.register(level -> tickLevel(level, DroneEntity.SUPPLY_CARGO_HOOKS));
+	}
 
 	/** Implement in DroneEntity so private task state and CARGO_ACCESS remain authoritative. */
 	public interface CargoHooks {
@@ -49,12 +63,23 @@ public final class SupplyNetworkRuntime {
 	public static void tickFromDrone(ServerLevel level, DroneEntity drone, CargoHooks hooks) {
 		SupplyNetworkSavedData data = SupplyNetworkSavedData.get(level);
 		if (drone.role() == DroneRole.CARGO) {
-			data.candidates.remove(drone.getUUID());
+			java.lang.ref.WeakReference<DroneEntity> previous = data.candidates.remove(drone.getUUID());
 			data.candidates.put(drone.getUUID(), new java.lang.ref.WeakReference<>(drone));
+			if (previous == null || previous.get() != drone) data.requestEvaluation();
 			while (data.candidates.size() > SupplyNetworkPolicy.MAX_CANDIDATES) data.candidates.remove(data.candidates.firstEntry().getKey());
+		} else if (data.candidates.remove(drone.getUUID()) != null) data.requestEvaluation();
+	}
+
+	private static void tickLevel(ServerLevel level, CargoHooks hooks) {
+		SupplyNetworkSavedData data = SupplyNetworkSavedData.get(level);
+		if (level.getGameTime() % 200L == 0L) {
+			pruneMissingDocks(level, data);
+			retryPendingDocks(level);
 		}
-		if (level.getGameTime() % 20 != 0 || data.lastTick == level.getGameTime()) return;
 		data.candidates.values().removeIf(ref -> ref.get() == null || ref.get().isRemoved() || ref.get().level() != level);
+		long tick = level.getGameTime();
+		if (!SupplyNetworkSchedulePolicy.shouldEvaluate(tick, data.lastTick, data.evaluationRequested())) return;
+		data.consumeEvaluationRequest();
 		tick(level, data.candidates.values().stream().map(java.lang.ref.WeakReference::get).filter(Objects::nonNull).toList(), hooks);
 	}
 
@@ -74,23 +99,114 @@ public final class SupplyNetworkRuntime {
 			throw new IllegalArgumentException("Supply source must be accessible and Dock must be owned");
 		SupplyNetworkSavedData data = SupplyNetworkSavedData.get(level);
 		data.registerNode(owner.getUUID(), dimension(level), source.asLong());
-		return data.registry().configure(new Route(owner.getUUID(),
-			dimension(level), source.asLong(), dock.asLong()), rules, enabled);
+		Configuration configured = data.registry().configure(new Route(owner.getUUID(),
+			dimension(level), source.asLong(), dock.asLong()), rules, true);
+		data.requestEvaluation();
+		return configured;
 	}
 
-	/** Dock-local control: the Dock only joins or leaves its owner's shared logistics network. */
+	/** Compatibility entry point. Owned Docks are always members of the shared logistics network. */
 	public static Configuration configureDock(ServerPlayer owner, BlockPos dock, boolean enabled) {
 		if (owner == null || dock == null || !(owner.level() instanceof ServerLevel level)
 			|| !level.hasChunkAt(dock) || !(level.getBlockEntity(dock) instanceof DockBlockEntity target)
 			|| !target.isOwnedBy(owner.getUUID()))
 			throw new IllegalArgumentException("Dock must be loaded and owned");
-		SupplyNetworkRegistry registry = SupplyNetworkSavedData.get(level).registry();
+		SupplyNetworkSavedData data = SupplyNetworkSavedData.get(level);
+		SupplyNetworkRegistry registry = data.registry();
+		pruneMissingDocks(level, data);
 		Configuration current = registry.configurations().stream().filter(c -> c.route().owner().equals(owner.getUUID())
 			&& c.route().dimension().equals(dimension(level)) && c.route().dock() == dock.asLong()).findFirst().orElse(null);
 		Route route = current == null
 			? new Route(owner.getUUID(), dimension(level), Route.AUTO_SOURCE, dock.asLong())
 			: current.route();
-		return registry.configure(route, current == null ? SupplyNetworkPolicy.defaults() : current.rules(), enabled);
+		Configuration configured;
+		try {
+			configured = registry.configure(route,
+				current == null ? SupplyNetworkPolicy.defaults() : current.rules(), true);
+		} catch (IllegalStateException exception) {
+			if (!"Supply route limit reached".equals(exception.getMessage())) throw exception;
+			PENDING_DOCKS.put(pendingDockKey(level, dock),
+				new java.lang.ref.WeakReference<>(target));
+			MorrowgearDrone.LOGGER.warn("Supply ledger is full; Dock {} will retry after stale-route cleanup",
+				dock);
+			return null;
+		}
+		PENDING_DOCKS.remove(pendingDockKey(level, dock));
+		data.requestEvaluation();
+		return configured;
+	}
+
+	/** Idempotent load/placement migration. It performs no world scan and keeps customized thresholds. */
+	public static Configuration ensureDock(ServerLevel level, DockBlockEntity dock) {
+		if (level == null || dock == null || dock.isRemoved() || dock.ownerId().equals(new UUID(0, 0))) return null;
+		SupplyNetworkSavedData data = SupplyNetworkSavedData.get(level);
+		SupplyNetworkRegistry registry = data.registry();
+		pruneMissingDocks(level, data);
+		String dimension = dimension(level);
+		Configuration current = registry.configurations().stream().filter(c -> c.route().owner().equals(dock.ownerId())
+			&& c.route().dimension().equals(dimension) && c.route().dock() == dock.getBlockPos().asLong()).findFirst().orElse(null);
+		if (current != null && current.enabled()) return current;
+		Route route = current == null ? new Route(dock.ownerId(), dimension, Route.AUTO_SOURCE, dock.getBlockPos().asLong())
+			: current.route();
+		Configuration configured;
+		try {
+			configured = registry.configure(route,
+				current == null ? SupplyNetworkPolicy.defaults() : current.rules(), true);
+		} catch (IllegalStateException exception) {
+			if (!"Supply route limit reached".equals(exception.getMessage())) throw exception;
+			PENDING_DOCKS.put(pendingDockKey(level, dock.getBlockPos()),
+				new java.lang.ref.WeakReference<>(dock));
+			MorrowgearDrone.LOGGER.warn("Supply ledger is full; Dock {} will retry after stale-route cleanup",
+				dock.getBlockPos());
+			return null;
+		}
+		PENDING_DOCKS.remove(pendingDockKey(level, dock.getBlockPos()));
+		data.requestEvaluation();
+		return configured;
+	}
+
+	/** Removes a Dock from the persistent route ledger before its block entity disappears. */
+	public static void removeDock(ServerLevel level, UUID owner, BlockPos dock) {
+		if (level == null || owner == null || dock == null) return;
+		SupplyNetworkSavedData data = SupplyNetworkSavedData.get(level);
+		if (!data.registry().removeDock(new Route(owner, dimension(level), Route.AUTO_SOURCE,
+			dock.asLong()))) return;
+		data.retainDeliveryHistory(data.registry().configurations());
+		data.requestEvaluation();
+	}
+
+	/** Cleans legacy entries only when their chunk is already loaded and proves the Dock is gone. */
+	private static void pruneMissingDocks(ServerLevel level, SupplyNetworkSavedData data) {
+		String dimension = dimension(level);
+		boolean changed = false;
+		for (Configuration config : List.copyOf(data.registry().configurations())) {
+			if (!config.route().dimension().equals(dimension)) continue;
+			BlockPos pos = BlockPos.of(config.route().dock());
+			var chunk = level.getChunkSource().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
+			if (chunk == null || chunk.getBlockEntity(pos) instanceof DockBlockEntity) continue;
+			changed |= data.registry().removeDock(config.route());
+		}
+		if (changed) {
+			data.retainDeliveryHistory(data.registry().configurations());
+			data.requestEvaluation();
+		}
+	}
+
+	private static void retryPendingDocks(ServerLevel level) {
+		for (var entry : List.copyOf(PENDING_DOCKS.entrySet())) {
+			DockBlockEntity dock = entry.getValue().get();
+			if (dock == null || dock.isRemoved()) {
+				PENDING_DOCKS.remove(entry.getKey());
+				continue;
+			}
+			if (dock.getLevel() != level) continue;
+			PENDING_DOCKS.remove(entry.getKey());
+			ensureDock(level, dock);
+		}
+	}
+
+	private static String pendingDockKey(ServerLevel level, BlockPos pos) {
+		return dimension(level) + ':' + pos.asLong();
 	}
 
 	public static boolean selectLogisticsNode(ServerPlayer owner, BlockPos pos) {
@@ -106,20 +222,20 @@ public final class SupplyNetworkRuntime {
 		return true;
 	}
 
-	/** Allows disabling an owned saved route even when one endpoint is unloaded or destroyed. */
+	/** Explicit map selection. Removing a node prevents new jobs but never destroys an in-flight manifest. */
+	public static boolean setLogisticsNode(ServerPlayer owner, BlockPos pos, boolean registered) {
+		if (owner == null || pos == null || !(owner.level() instanceof ServerLevel level)) return false;
+		if (registered) return selectLogisticsNode(owner, pos);
+		return SupplyNetworkSavedData.get(level).unregisterNode(owner.getUUID(), dimension(level), pos.asLong());
+	}
+
+	/** Legacy API: automatic supply is mandatory, so this now repairs the route to enabled. */
 	public static boolean disable(ServerPlayer owner, BlockPos dock) {
-		ServerLevel level = (ServerLevel)owner.level();
-		SupplyNetworkRegistry registry = SupplyNetworkSavedData.get(level).registry();
-		Configuration config = registry.configurations().stream().filter(c -> c.route().owner().equals(owner.getUUID())
-			&& c.route().dimension().equals(dimension(level)) && c.route().dock() == dock.asLong()).findFirst().orElse(null);
-		if (config == null) return false;
-		registry.configure(config.route(), config.rules(), false);
-		return true;
+		return configureDock(owner, dock, true) != null;
 	}
 
 	/** Called once per level tick with an already available, bounded loaded-drone list. */
 	public static void tick(ServerLevel level, List<DroneEntity> candidates, CargoHooks hooks) {
-		if (level.getGameTime() % 20 != 0) return;
 		SupplyNetworkSavedData data = SupplyNetworkSavedData.get(level);
 		if (data.lastTick == level.getGameTime()) return;
 		data.lastTick = level.getGameTime();
@@ -250,8 +366,10 @@ public final class SupplyNetworkRuntime {
 			}
 			if (!registry.current(job) || job.stage() == Stage.HELD) {
 				hold(registry, drone, job, hooks, job.status());
-				if (job.status() == Status.DOCK_LOST || job.status() == Status.DOCK_FULL || job.status() == Status.SOURCE_LOST)
-					tryFallback(level, registry, drone, job.token(), hooks);
+				// The fallback validator is deliberately stricter than the reason list.
+				// Let every retained load attempt recovery so configuration churn or a
+				// stale assignment cannot strand physical cargo as UNASSIGNED.
+				tryFallback(level, registry, drone, job.token(), hooks);
 				continue;
 			}
 			if (!cargoMatches(job, hooks.cargo(drone))) {
@@ -401,6 +519,7 @@ public final class SupplyNetworkRuntime {
 			return ServiceResult.HOLD;
 		}
 		if (hooks.cargo(drone).isEmpty()) {
+			SupplyNetworkSavedData.get(level).recordDelivery(job.route(), job.kind(), level.getGameTime());
 			hooks.stop(drone, job.token(), false, Status.READY);
 			// Continue a logistics sortie without an avoidable one-second parked
 			// interval.  If another demand exists, the same aircraft receives it in
@@ -413,6 +532,9 @@ public final class SupplyNetworkRuntime {
 	}
 
 	private static List<Demand> pendingDemands(ServerLevel level, SupplyNetworkRegistry registry) {
+		SupplyNetworkSavedData data = SupplyNetworkSavedData.get(level);
+		data.retainDeliveryHistory(registry.configurations());
+		long now = level.getGameTime();
 		List<Demand> demands = new ArrayList<>();
 		for (Configuration config : registry.configurations()) {
 			if (!config.enabled()) { registry.status(config.route(), Status.DISABLED); continue; }
@@ -425,11 +547,16 @@ public final class SupplyNetworkRuntime {
 				boolean refilling = registry.updateRefill(config.route(), rule.kind(), rule.minimum(), rule.target(), actual);
 				int missing = SupplyNetworkPolicy.demand(rule.minimum(), rule.target(), actual,
 					registry.incoming(config.route(), rule.kind()), refilling);
-				if (missing > 0) { demands.add(new Demand(config, rule, missing)); satisfied = false; }
+				if (missing > 0) {
+					satisfied = false;
+					if (SupplyNetworkPolicy.topOffReady(actual, rule.minimum(), now,
+						data.lastDelivery(config.route(), rule.kind()))) demands.add(new Demand(config, rule, missing));
+				}
 			}
 			if (satisfied) registry.status(config.route(), Status.READY);
 		}
 		demands.sort(Comparator.comparingInt((Demand d) -> d.rule().priority()).reversed()
+			.thenComparingLong(d -> data.lastDelivery(d.config().route(), d.rule().kind()))
 			.thenComparingLong(d -> d.config().route().dock()).thenComparing(d -> d.rule().kind()));
 		return demands;
 	}
@@ -659,7 +786,9 @@ public final class SupplyNetworkRuntime {
 		for (Configuration config : data.registry().configurations()) {
 			Status status = data.registry().status(config.route());
 			SupplyNetworkSavedData.Notice previous = data.notices.get(config.route());
-			if (!status.error()) {
+			boolean automaticSourceWithoutNodes = config.route().source() == Route.AUTO_SOURCE
+				&& data.nodes(config.route().owner(), config.route().dimension()).isEmpty();
+			if (!SupplyNetworkPolicy.operatorNoticeRequired(automaticSourceWithoutNodes, status)) {
 				if (previous != null && previous.status() != status)
 					data.notices.put(config.route(), new SupplyNetworkSavedData.Notice(status, previous.tick()));
 				continue;

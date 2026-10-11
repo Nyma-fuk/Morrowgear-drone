@@ -44,6 +44,23 @@ class CarrierCargoVisualPolicyTest {
         }
     }
 
+    @Test void transferYawPlacesTheHardpointOnTheNearestSideOfTheLoadAndRemainsStable() {
+        Vec3 current=new Vec3(0,88,0);
+        BlockPos container=new BlockPos(100,64,0);
+        for(int slot=0;slot<CarrierExpansionPolicy.HARDPOINTS;slot++){
+            float yaw=CarrierCargoVisualPolicy.nearestAlignmentYaw(current,container,slot,37);
+            Vec3 carrier=CarrierCargoVisualPolicy.alignedCarrierPosition(container,88,yaw,slot);
+            Vec3 hardpoint=CarrierCargoVisualPolicy.hardpointWorld(carrier,yaw,slot);
+            Vec3 center=Vec3.atBottomCenterOf(container);
+            var pod=CarrierCargoVisualPolicy.hardpoint(slot);
+            assertEquals(center.x,hardpoint.x,1e-8);
+            assertEquals(center.z,hardpoint.z,1e-8);
+            assertEquals(Math.hypot(center.x-current.x,center.z-current.z)-Math.hypot(pod.x(),pod.z()),
+                Math.hypot(carrier.x-current.x,carrier.z-current.z),1e-5);
+            assertEquals(yaw,CarrierCargoVisualPolicy.nearestAlignmentYaw(current,container,slot,37),1e-6);
+        }
+    }
+
     @Test void fourSlingContactsRemainInsideTheContainerTopPlate() {
         assertEquals(90,CarrierCargoVisualPolicy.CONTAINER_YAW);
         assertTrue(CarrierCargoVisualPolicy.CABLE_CORNER_X<CarrierContainerTransferPolicy.CONTAINER_LENGTH/2);

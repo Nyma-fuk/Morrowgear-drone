@@ -19,16 +19,21 @@ import jp.morrowgear.drone.SolarServiceStationEntity;
 import jp.morrowgear.drone.VisorHudPolicy;
 import jp.morrowgear.drone.VisorCombatLedger;
 import jp.morrowgear.drone.VisorCombatLayout;
+import jp.morrowgear.drone.VisorAirspaceMapPolicy;
+import jp.morrowgear.drone.network.FleetLinkPayload;
 import jp.morrowgear.drone.carrier.CarrierEntity;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -74,6 +79,14 @@ final class VisorHudOverlay implements HudElement {
 	private java.util.UUID selectedFrontTarget;
 	private final List<VisorCombatLayout.Box> occupiedLabels = new ArrayList<>();
 	private int worldLabels;
+	private Object airspaceTerrainLevel;
+	private List<AirspaceTerrainPoint> airspaceTerrain = List.of();
+	private long airspaceTerrainRefreshAt = Long.MIN_VALUE;
+	private int airspaceTerrainCenterX = Integer.MIN_VALUE;
+	private int airspaceTerrainCenterZ = Integer.MIN_VALUE;
+	private int airspaceTerrainRangeKey = -1;
+	private int renderWidth = 1;
+	private int renderHeight = 1;
 
 	void tick(Minecraft client) {
 		ensureContext(client);
@@ -91,6 +104,33 @@ final class VisorHudOverlay implements HudElement {
 	void toggleEnabled(Minecraft client) {
 		config.enabled = !config.enabled;
 		config.save();
+	}
+
+	void toggleAirspaceMap(Minecraft client) {
+		if (!visorWorn(client) || client.player == null) return;
+		config.airspaceMapEnabled = !config.airspaceMapEnabled;
+		config.save();
+		client.player.sendOverlayMessage(Component.translatable(config.airspaceMapEnabled
+			? "message.morrowgear_drone.airspace_map.on"
+			: "message.morrowgear_drone.airspace_map.off"));
+	}
+
+	void enableAirspaceMapForAutomation() {
+		config.airspaceMapEnabled = true;
+	}
+
+	int operationSubtitleY(Minecraft client, int boxHeight) {
+		int guiHeight = client.getWindow().getGuiScaledHeight();
+		int normal = Math.max(40, guiHeight - 112);
+		if (!config.airspaceMapEnabled || !visorWorn(client)) return normal;
+		float hudScale = config.hudScale(client.getWindow().getWidth(), client.getWindow().getHeight());
+		int mapWidth = Math.round(client.getWindow().getWidth() / hudScale);
+		int mapHeight = Math.round(client.getWindow().getHeight() / hudScale);
+		VisorAirspaceMapPolicy.Panel panel = VisorAirspaceMapPolicy.panel(mapWidth, mapHeight);
+		double physicalTop = panel.y() * hudScale;
+		double guiScale = Math.max(1.0, client.getWindow().getGuiScale());
+		int aboveMap = (int)Math.floor(physicalTop / guiScale) - Math.max(1, boxHeight) - 2;
+		return Math.max(24, Math.min(normal, aboveMap));
 	}
 
 	void togglePin(Minecraft client) {
@@ -133,6 +173,8 @@ final class VisorHudOverlay implements HudElement {
 		float hudScale = config.hudScale(client.getWindow().getWidth(), client.getWindow().getHeight());
 		int width = Math.round(client.getWindow().getWidth() / hudScale);
 		int height = Math.round(client.getWindow().getHeight() / hudScale);
+		renderWidth = Math.max(1, width);
+		renderHeight = Math.max(1, height);
 		float partialTick = deltaTracker.getGameTimeDeltaPartialTick(true);
 		int wingCount = memo("wings", () -> (int)roster.stream().map(this::groupKey).distinct().count());
 		int actionable = memo("actionable", () -> (int)roster.stream().filter(d -> markerPriority(d) <= 1).count());
@@ -153,6 +195,9 @@ final class VisorHudOverlay implements HudElement {
 			drawAdaptiveCombat(g, client, width, height);
 			drawInspectionContext(g, client, width, plan.compactContext());
 			drawActionRail(g, client, width, height, plan);
+			reserveOperationSubtitle(client, width, height);
+			if (config.airspaceMapEnabled) drawAirspaceMesh(g, client, width, height);
+			else drawFieldMesh(g, client, width, height);
 			drawEngagements(g, client, contacts, width, height, partialTick, plan);
 			drawCarrierMissileLocks(g, client, width, height, partialTick);
 			drawProximity(g, client, contacts, clusters, width, height, plan);
@@ -269,6 +314,472 @@ final class VisorHudOverlay implements HudElement {
 		}
 	}
 
+	private void drawFieldMesh(GuiGraphicsExtractor g, Minecraft client, int width, int height) {
+		FleetLinkPayload.Mesh mesh = FleetLinkClient.mesh(client);
+		List<FleetLinkPayload.Relay> relays = FleetLinkClient.relays(client);
+		int side = VisorCombatLayout.sideWidth(width);
+		int panelWidth = Math.max(260, Math.min(520, width - (side + 48) * 2));
+		int x = width / 2 - panelWidth / 2;
+		int y = 24;
+		int color = switch (mesh.state()) {
+			case "STABLE" -> GREEN;
+			case "SHORT" -> RED;
+			case "BUILDING" -> CYAN;
+			default -> MUTED;
+		};
+		occupiedLabels.add(new VisorCombatLayout.Box(x, y, panelWidth, 58));
+		g.fill(x, y, x + panelWidth, y + 58, config.panelAlpha(PANEL));
+		g.fill(x, y, x + 3, y + 58, color);
+		String state = switch (mesh.state()) {
+			case "STABLE" -> "安定";
+			case "BUILDING" -> "構築中";
+			case "SHORT" -> "FIELD不足 +" + mesh.shortage();
+			case "DIRECT" -> "直接通信のみ";
+			default -> "未受信";
+		};
+		drawText(g, client, fit(client, "通信メッシュ / " + state + " / "
+			+ mesh.established() + "/" + mesh.assigned() + " NODE", panelWidth - 24), x + 12, y + 7, color);
+		String extent = "基線 " + mesh.baseline() + "  予備 " + mesh.reserve() + "  動的 " + mesh.dynamic()
+			+ " / 範囲 X " + Math.round(mesh.minX()) + ".." + Math.round(mesh.maxX())
+			+ " / Z " + Math.round(mesh.minZ()) + ".." + Math.round(mesh.maxZ());
+		drawText(g, client, fit(client, extent, panelWidth - 24), x + 12, y + 31, WHITE);
+
+		Map<UUID, FleetLinkPayload.Relay> byId = new HashMap<>();
+		for (FleetLinkPayload.Relay relay : relays) byId.put(relay.id(), relay);
+		Map<UUID, String> unitNames = relayUnitNames(client);
+		for (FleetLinkPayload.Relay relay : relays) {
+			ScreenPoint actual = projectWorldPoint(client, new Vec3(relay.x(), relay.y(), relay.z()), width, height);
+			if (actual == null || actual.depth() <= 0) continue;
+			int relayColor = relay.duty().equals("DYNAMIC") ? AMBER
+				: relay.duty().equals("MESH_RESERVE") ? GREEN : CYAN;
+			if (relay.established() && relay.hops() < 255) {
+				FleetLinkPayload.Relay parent = relay.parentId() == null ? null : byId.get(relay.parentId());
+				Vec3 parentPosition = parent == null ? client.player.position()
+					: new Vec3(parent.x(), parent.y(), parent.z());
+				ScreenPoint parentPoint = projectWorldPoint(client, parentPosition, width, height);
+				if (parentPoint != null && parentPoint.depth() > 0) drawLine(g, actual.x(), actual.y(),
+					parentPoint.x(), parentPoint.y(), withAlpha(relayColor, 92));
+			} else {
+				ScreenPoint target = projectWorldPoint(client,
+					new Vec3(relay.targetX(), relay.targetY(), relay.targetZ()), width, height);
+				if (target != null && target.depth() > 0) {
+					drawDashedLine(g, actual.x(), actual.y(), target.x(), target.y(), withAlpha(AMBER, 150), 6);
+					drawDiamond(g, target.x(), target.y(), 5, withAlpha(AMBER, 170), true);
+				}
+			}
+			drawDiamond(g, actual.x(), actual.y(), relay.established() ? 6 : 4,
+				relay.established() ? relayColor : withAlpha(AMBER, 170), !relay.established());
+			boolean needsAttention = !relay.established() || relay.linkQuality() < 55;
+			if (needsAttention) {
+				String issue = !relay.established() ? "LINK PENDING" : "LINK LOW " + relay.linkQuality() + "%";
+				String tag = issue + " / " + unitNames.getOrDefault(relay.id(), relayCode(relay.id()));
+				if (claimLabel(actual.x() + 9, actual.y() - 8, textWidth(client, tag), 20))
+					drawText(g, client, tag, actual.x() + 9, actual.y() - 8, AMBER);
+			}
+		}
+	}
+
+	private void drawAirspaceMesh(GuiGraphicsExtractor g, Minecraft client, int width, int height) {
+		FleetLinkPayload.Mesh mesh = FleetLinkClient.mesh(client);
+		List<FleetLinkPayload.Relay> relays = FleetLinkClient.relays(client);
+		if (mesh.assigned() <= 0 && relays.isEmpty()) return;
+		List<FleetLinkPayload.Unit> snapshotUnits = FleetLinkClient.units(client);
+		VisorAirspaceMapPolicy.Panel panel = VisorAirspaceMapPolicy.panel(width, height);
+		int panelX = panel.x(), panelY = panel.y();
+		int panelWidth = panel.width(), panelHeight = panel.height();
+		occupiedLabels.add(new VisorCombatLayout.Box(panelX, panelY, panelWidth, panelHeight));
+		g.fill(panelX, panelY, panelX + panelWidth, panelY + panelHeight, config.panelAlpha(PANEL_SOFT));
+		g.fill(panelX, panelY, panelX + 3, panelY + panelHeight, CYAN);
+		g.outline(panelX, panelY, panelWidth, panelHeight, withAlpha(CYAN, 72));
+
+		double centerX = client.player.getX(), centerZ = client.player.getZ();
+		double range = VisorAirspaceMapPolicy.range(centerX, centerZ,
+			mesh.minX(), mesh.maxX(), mesh.minZ(), mesh.maxZ());
+		List<FleetLinkPayload.Relay> establishedRelays = relays.stream()
+			.filter(FleetLinkPayload.Relay::established).toList();
+		int established = establishedRelays.size();
+		Set<UUID> relayIds = relays.stream().map(FleetLinkPayload.Relay::id)
+			.collect(java.util.stream.Collectors.toSet());
+		List<FleetLinkPayload.Unit> trafficCandidates = snapshotUnits.stream()
+			.filter(unit -> !relayIds.contains(unit.id()))
+			.filter(unit -> Math.abs(unit.x() - centerX) <= range && Math.abs(unit.z() - centerZ) <= range)
+			.sorted(Comparator.comparingInt((FleetLinkPayload.Unit unit) -> airspaceUnitPriority(unit.role(), unit.status()))
+				.thenComparingDouble(unit -> square(unit.x() - centerX) + square(unit.z() - centerZ))).toList();
+		List<FleetLinkPayload.Unit> traffic = trafficCandidates.stream()
+			.limit(VisorAirspaceMapPolicy.MAX_AIR_TRAFFIC).toList();
+		long alerts = trafficCandidates.stream()
+			.filter(unit -> airspaceUnitPriority(unit.role(), unit.status()) <= 1).count();
+		drawText(g, client, fit(client, "3D AIRSPACE / NODE " + established + "/" + relays.size()
+			+ " / LINKED " + snapshotUnits.size() + " / 警戒 " + alerts,
+			panelWidth - 24), panelX + 12, panelY + 8, CYAN, true);
+		drawText(g, client, fit(client, "FIELD R128 / 空域 ±" + Math.round(range) + "m / M: CLOSE",
+			panelWidth - 24), panelX + 12, panelY + 30, MUTED);
+
+		int mapX = panelX + 10, mapY = panelY + 50;
+		int mapW = panelWidth - 20, mapH = panelHeight - 78;
+		refreshAirspaceTerrain(client, centerX, centerZ, range);
+		double terrainDatum = airspaceTerrainDatum(client.player.getY());
+		double centerY = terrainDatum + 32.0;
+		var frame = new VisorAirspaceMapPolicy.Frame(mapX, mapY, mapW, mapH,
+			centerX, centerY, centerZ, range);
+
+		Map<UUID, FleetLinkPayload.Relay> byId = new HashMap<>();
+		for (FleetLinkPayload.Relay relay : relays) byId.put(relay.id(), relay);
+
+		g.enableScissor(mapX, mapY, mapX + mapW, mapY + mapH);
+		drawAirspaceTerrain(g, frame);
+		if (!establishedRelays.isEmpty()) {
+			double domeCenterX = establishedRelays.stream().mapToDouble(FleetLinkPayload.Relay::x)
+				.average().orElse(centerX);
+			double domeCenterZ = establishedRelays.stream().mapToDouble(FleetLinkPayload.Relay::z)
+				.average().orElse(centerZ);
+			double nodeExtent = establishedRelays.stream().mapToDouble(relay -> Math.hypot(
+				relay.x() - domeCenterX, relay.z() - domeCenterZ)).max().orElse(0.0);
+			double domeRadius = Math.max(VisorAirspaceMapPolicy.FIELD_COVERAGE,
+				Math.min(range * 0.78, nodeExtent + VisorAirspaceMapPolicy.FIELD_COVERAGE * 0.45));
+			double domeHeight = Math.max(72.0, Math.min(144.0, domeRadius * 0.65));
+			int domeColor = mesh.shortage() > 0 ? AMBER : CYAN;
+			double domeTerrainY = VisorAirspaceMapPolicy.terrainDisplayY(
+				airspaceTerrainHeight(domeCenterX, domeCenterZ, centerX, centerZ, range), terrainDatum);
+			double domeBaseY = VisorAirspaceMapPolicy.domeBaseY(domeTerrainY);
+			drawAirspaceMeshDome(g, frame, domeCenterX, domeBaseY,
+				domeCenterZ, domeRadius, domeHeight, domeColor);
+		}
+		for (FleetLinkPayload.Relay relay : relays) {
+			var child = VisorAirspaceMapPolicy.project(frame, relay.x(), relay.y(), relay.z());
+			if (relay.established()) {
+				FleetLinkPayload.Relay parent = relay.parentId() == null ? null : byId.get(relay.parentId());
+				var root = parent == null
+					? VisorAirspaceMapPolicy.project(frame, centerX, centerY, centerZ)
+					: VisorAirspaceMapPolicy.project(frame, parent.x(), parent.y(), parent.z());
+				drawAirspaceLink(g, root.x(), root.y(), child.x(), child.y(), relayColor(relay), relay.linkQuality());
+			} else {
+				var target = VisorAirspaceMapPolicy.project(frame, relay.targetX(), relay.targetY(), relay.targetZ());
+				drawAirspaceNode(g, target.x(), target.y(), 3, withAlpha(AMBER, 180));
+			}
+		}
+
+		var controller = VisorAirspaceMapPolicy.project(frame, centerX, client.player.getY(), centerZ);
+		traffic.forEach(unit -> {
+				var point = VisorAirspaceMapPolicy.project(frame, unit.x(), unit.y(), unit.z());
+				int unitColor = airspaceUnitColor(unit.role(), unit.docked(), unit.status());
+				drawAirspaceUnit(g, point.x(), point.y(), unit.role(), unitColor);
+			});
+
+		for (FleetLinkPayload.Relay relay : relays) {
+			var point = VisorAirspaceMapPolicy.project(frame, relay.x(), relay.y(), relay.z());
+			int relayColor = relayColor(relay);
+			drawAirspaceNode(g, point.x(), point.y(), relay.established() ? 4 : 3, relayColor);
+		}
+		drawAirspaceNode(g, controller.x(), controller.y(), 5, WHITE);
+		var north = VisorAirspaceMapPolicy.project(frame, centerX, centerY, centerZ - range * 0.82);
+		var east = VisorAirspaceMapPolicy.project(frame, centerX + range * 0.82, centerY, centerZ);
+		drawText(g, client, "N", north.x() - 4, north.y() - 5, MUTED);
+		drawText(g, client, "E", east.x() - 4, east.y() - 5, MUTED);
+		g.disableScissor();
+		drawText(g, client, "◆ CTRL   ◇ MESH DOME   ◈ FIELD   △ UNIT   - LINK",
+			panelX + 12, panelY + panelHeight - 20, MUTED);
+	}
+
+	private void reserveOperationSubtitle(Minecraft client, int width, int height) {
+		OperationCommunicationsClient.subtitle().filter(event -> event.kind().important()).ifPresent(event -> {
+			int guiWidth = client.getWindow().getGuiScaledWidth();
+			int guiHeight = client.getWindow().getGuiScaledHeight();
+			int maxWidth = Math.max(80, Math.min(380, guiWidth - 32));
+			int lines = Math.min(2, client.font.split(Component.translatable(event.messageKey(),
+				event.source(), event.count()), maxWidth - 16).size());
+			double scaleX = (double)width / Math.max(1, guiWidth);
+			double scaleY = (double)height / Math.max(1, guiHeight);
+			int x = (int)Math.floor((guiWidth - maxWidth) * 0.5 * scaleX);
+			int boxHeight = lines * 10 + 10;
+			int y = (int)Math.floor(operationSubtitleY(client, boxHeight) * scaleY);
+			occupiedLabels.add(new VisorCombatLayout.Box(x, y,
+				(int)Math.ceil(maxWidth * scaleX), (int)Math.ceil(boxHeight * scaleY)));
+		});
+	}
+
+	private void refreshAirspaceTerrain(Minecraft client, double centerX, double centerZ, double range) {
+		int cx = (int)Math.floor(centerX), cz = (int)Math.floor(centerZ), rangeKey = (int)Math.round(range);
+		long tick = client.level.getGameTime();
+		if (airspaceTerrainLevel == client.level && tick < airspaceTerrainRefreshAt
+			&& Math.abs(cx - airspaceTerrainCenterX) < 16 && Math.abs(cz - airspaceTerrainCenterZ) < 16
+			&& airspaceTerrainRangeKey == rangeKey) return;
+		airspaceTerrainLevel = client.level;
+		airspaceTerrainRefreshAt = tick + VisorAirspaceMapPolicy.TERRAIN_REFRESH_TICKS;
+		airspaceTerrainCenterX = cx;
+		airspaceTerrainCenterZ = cz;
+		airspaceTerrainRangeKey = rangeKey;
+		List<AirspaceTerrainPoint> samples = new ArrayList<>(VisorAirspaceMapPolicy.TERRAIN_GRID
+			* VisorAirspaceMapPolicy.TERRAIN_GRID);
+		for (int row = 0; row < VisorAirspaceMapPolicy.TERRAIN_GRID; row++) {
+			for (int column = 0; column < VisorAirspaceMapPolicy.TERRAIN_GRID; column++) {
+				int worldX = (int)Math.round(centerX + VisorAirspaceMapPolicy.sampleOffset(column, range));
+				int worldZ = (int)Math.round(centerZ + VisorAirspaceMapPolicy.sampleOffset(row, range));
+				BlockPos columnPos = new BlockPos(worldX, 0, worldZ);
+				if (!client.level.hasChunkAt(columnPos)) {
+					samples.add(new AirspaceTerrainPoint(worldX, 0, worldZ, 0, false));
+					continue;
+				}
+				int worldY = client.level.getHeight(Heightmap.Types.WORLD_SURFACE, worldX, worldZ) - 1;
+				BlockPos surface = new BlockPos(worldX, worldY, worldZ);
+				int color = client.level.getBlockState(surface).getMapColor(client.level, surface).col;
+				samples.add(new AirspaceTerrainPoint(worldX, worldY, worldZ, color, true));
+			}
+		}
+		airspaceTerrain = List.copyOf(samples);
+	}
+
+	private void drawAirspaceTerrain(GuiGraphicsExtractor g, VisorAirspaceMapPolicy.Frame frame) {
+		int grid = VisorAirspaceMapPolicy.TERRAIN_GRID;
+		if (airspaceTerrain.size() != grid * grid) return;
+		double datum = airspaceTerrainDatum(frame.centerY() - 32.0);
+		drawAirspaceTerrainSlab(g, frame, datum);
+		for (int diagonal = 0; diagonal <= (grid - 2) * 2; diagonal++) {
+			for (int row = 0; row < grid - 1; row++) {
+				int column = diagonal - row;
+				if (column < 0 || column >= grid - 1) continue;
+				AirspaceTerrainPoint a = airspaceTerrain.get(row * grid + column);
+				AirspaceTerrainPoint b = airspaceTerrain.get(row * grid + column + 1);
+				AirspaceTerrainPoint c = airspaceTerrain.get((row + 1) * grid + column + 1);
+				AirspaceTerrainPoint d = airspaceTerrain.get((row + 1) * grid + column);
+				if (!a.loaded() || !b.loaded() || !c.loaded() || !d.loaded()) continue;
+				int raw = averageMapColor(a.color(), b.color(), c.color(), d.color());
+				double elevation = (a.y() + b.y() + c.y() + d.y()) * 0.25;
+				int color = withAlpha(airspaceTerrainColor(raw, elevation, datum), 88);
+				var pa = VisorAirspaceMapPolicy.project(frame, a.x(),
+					VisorAirspaceMapPolicy.terrainDisplayY(a.y(), datum), a.z());
+				var pb = VisorAirspaceMapPolicy.project(frame, b.x(),
+					VisorAirspaceMapPolicy.terrainDisplayY(b.y(), datum), b.z());
+				var pc = VisorAirspaceMapPolicy.project(frame, c.x(),
+					VisorAirspaceMapPolicy.terrainDisplayY(c.y(), datum), c.z());
+				var pd = VisorAirspaceMapPolicy.project(frame, d.x(),
+					VisorAirspaceMapPolicy.terrainDisplayY(d.y(), datum), d.z());
+				fillAirspaceTriangle(g, pa, pb, pc, color, frame);
+				fillAirspaceTriangle(g, pa, pc, pd, color, frame);
+			}
+		}
+	}
+
+	private void drawAirspaceTerrainSlab(GuiGraphicsExtractor g, VisorAirspaceMapPolicy.Frame frame,
+		double datum) {
+		int grid = VisorAirspaceMapPolicy.TERRAIN_GRID;
+		for (int side = 0; side < 4; side++) for (int step = 0; step < grid - 1; step++) {
+			int first = switch (side) {
+				case 0 -> step;
+				case 1 -> step * grid + grid - 1;
+				case 2 -> (grid - 1) * grid + step;
+				default -> step * grid;
+			};
+			int second = switch (side) {
+				case 0 -> step + 1;
+				case 1 -> (step + 1) * grid + grid - 1;
+				case 2 -> (grid - 1) * grid + step + 1;
+				default -> (step + 1) * grid;
+			};
+			AirspaceTerrainPoint a = airspaceTerrain.get(first), b = airspaceTerrain.get(second);
+			if (!a.loaded() || !b.loaded()) continue;
+			double displayAY = VisorAirspaceMapPolicy.terrainDisplayY(a.y(), datum);
+			double displayBY = VisorAirspaceMapPolicy.terrainDisplayY(b.y(), datum);
+			var topA = VisorAirspaceMapPolicy.project(frame, a.x(), displayAY, a.z());
+			var topB = VisorAirspaceMapPolicy.project(frame, b.x(), displayBY, b.z());
+			var lowA = VisorAirspaceMapPolicy.project(frame, a.x(),
+				displayAY - VisorAirspaceMapPolicy.TERRAIN_SLAB_DEPTH, a.z());
+			var lowB = VisorAirspaceMapPolicy.project(frame, b.x(),
+				displayBY - VisorAirspaceMapPolicy.TERRAIN_SLAB_DEPTH, b.z());
+			drawFastLine(g, lowA.x(), lowA.y(), lowB.x(), lowB.y(), 0x8B16201F);
+			drawFastLine(g, topA.x(), topA.y(), lowA.x(), lowA.y(), 0x8B22302E);
+		}
+	}
+
+	private void drawAirspaceMeshDome(GuiGraphicsExtractor g, VisorAirspaceMapPolicy.Frame frame,
+		double x, double baseY, double z, double radius, double height, int color) {
+		drawAirspaceDomeArc(g, frame, x, baseY, z, radius, height,
+			VisorAirspaceMapPolicy.DomeArc.BASE, withAlpha(color, 118));
+		drawAirspaceDomeArc(g, frame, x, baseY, z, radius, height,
+			VisorAirspaceMapPolicy.DomeArc.NORTH_SOUTH, withAlpha(color, 92));
+		drawAirspaceDomeArc(g, frame, x, baseY, z, radius, height,
+			VisorAirspaceMapPolicy.DomeArc.EAST_WEST, withAlpha(color, 92));
+		drawAirspaceDomeArc(g, frame, x, baseY, z, radius, height,
+			VisorAirspaceMapPolicy.DomeArc.DIAGONAL, withAlpha(color, 68));
+	}
+
+	private void drawAirspaceDomeArc(GuiGraphicsExtractor g, VisorAirspaceMapPolicy.Frame frame,
+		double x, double baseY, double z, double radius, double height,
+		VisorAirspaceMapPolicy.DomeArc arc, int color) {
+		VisorAirspaceMapPolicy.Point previous = null;
+		for (int step = 0; step <= VisorAirspaceMapPolicy.DOME_SEGMENTS; step++) {
+			double sweep = arc == VisorAirspaceMapPolicy.DomeArc.BASE ? Math.PI * 2.0 : Math.PI;
+			double angle = step * sweep / VisorAirspaceMapPolicy.DOME_SEGMENTS;
+			var world = VisorAirspaceMapPolicy.domePoint(x, baseY, z, radius, height, arc, angle);
+			var point = VisorAirspaceMapPolicy.project(frame, world.x(), world.y(), world.z());
+			if (previous != null) {
+				int glow = withAlpha(color, Math.max(24, (color >>> 24) / 3));
+				drawFastLine(g, previous.x(), previous.y() + 1, point.x(), point.y() + 1, glow);
+				drawFastLine(g, previous.x(), previous.y(), point.x(), point.y(), color);
+			}
+			previous = point;
+		}
+	}
+
+	private void drawAirspaceLink(GuiGraphicsExtractor g, int x1, int y1, int x2, int y2,
+		int color, int quality) {
+		int alpha = Math.max(112, Math.min(230, 96 + quality));
+		drawFastLine(g, x1, y1 + 1, x2, y2 + 1, withAlpha(color, 46));
+		drawFastLine(g, x1, y1, x2, y2, withAlpha(color, alpha));
+	}
+
+	private int airspaceTerrainHeight(double x, double z, double centerX, double centerZ, double range) {
+		Minecraft client = Minecraft.getInstance();
+		int exactX = (int)Math.floor(x), exactZ = (int)Math.floor(z);
+		BlockPos exactColumn = new BlockPos(exactX, 0, exactZ);
+		if (client.level != null && client.level.hasChunkAt(exactColumn))
+			return client.level.getHeight(Heightmap.Types.WORLD_SURFACE, exactX, exactZ) - 1;
+		int grid = VisorAirspaceMapPolicy.TERRAIN_GRID;
+		int column = (int)Math.round((x - (centerX - range)) * (grid - 1) / (range * 2.0));
+		int row = (int)Math.round((z - (centerZ - range)) * (grid - 1) / (range * 2.0));
+		column = Math.max(0, Math.min(grid - 1, column));
+		row = Math.max(0, Math.min(grid - 1, row));
+		AirspaceTerrainPoint sample = airspaceTerrain.get(row * grid + column);
+		return sample.loaded() ? sample.y() : client.player == null ? 0 : (int)Math.floor(client.player.getY());
+	}
+
+	private double airspaceTerrainDatum(double fallback) {
+		return airspaceTerrain.stream().filter(AirspaceTerrainPoint::loaded)
+			.mapToInt(AirspaceTerrainPoint::y).average().orElse(fallback);
+	}
+
+	private void fillAirspaceTriangle(GuiGraphicsExtractor g, VisorAirspaceMapPolicy.Point a,
+		VisorAirspaceMapPolicy.Point b, VisorAirspaceMapPolicy.Point c, int color,
+		VisorAirspaceMapPolicy.Frame frame) {
+		int minimumY = Math.max(frame.y(), Math.min(a.y(), Math.min(b.y(), c.y())));
+		int maximumY = Math.min(frame.y() + frame.height() - 1, Math.max(a.y(), Math.max(b.y(), c.y())));
+		double[] intersections = new double[3];
+		for (int scanY = minimumY; scanY <= maximumY; scanY += VisorAirspaceMapPolicy.TERRAIN_SCAN_STEP) {
+			double sampleY = scanY + 0.5;
+			int count = 0;
+			count = triangleEdgeIntersection(a, b, sampleY, intersections, count);
+			count = triangleEdgeIntersection(b, c, sampleY, intersections, count);
+			count = triangleEdgeIntersection(c, a, sampleY, intersections, count);
+			if (count < 2) continue;
+			double low = intersections[0], high = intersections[0];
+			for (int i = 1; i < count; i++) {
+				low = Math.min(low, intersections[i]);
+				high = Math.max(high, intersections[i]);
+			}
+			int startX = Math.max(frame.x(), (int)Math.floor(low));
+			int endX = Math.min(frame.x() + frame.width(), (int)Math.ceil(high) + 1);
+			if (endX > startX) g.fill(startX, scanY, endX,
+				Math.min(maximumY + 1, scanY + VisorAirspaceMapPolicy.TERRAIN_SCAN_STEP), color);
+		}
+	}
+
+	private int triangleEdgeIntersection(VisorAirspaceMapPolicy.Point from,
+		VisorAirspaceMapPolicy.Point to, double y, double[] output, int count) {
+		double minimum = Math.min(from.y(), to.y()), maximum = Math.max(from.y(), to.y());
+		if (maximum - minimum < 0.001 || y < minimum || y >= maximum || count >= output.length) return count;
+		double ratio = (y - from.y()) / (to.y() - from.y());
+		output[count] = from.x() + (to.x() - from.x()) * ratio;
+		return count + 1;
+	}
+
+	private int averageMapColor(int... colors) {
+		int red = 0, green = 0, blue = 0;
+		for (int color : colors) {
+			red += color >> 16 & 0xff;
+			green += color >> 8 & 0xff;
+			blue += color & 0xff;
+		}
+		int count = Math.max(1, colors.length);
+		return 0xFF000000 | red / count << 16 | green / count << 8 | blue / count;
+	}
+
+	private Map<UUID, String> relayUnitNames(Minecraft client) {
+		Map<UUID, String> names = new HashMap<>();
+		for (DroneEntity drone : roster) names.put(drone.getUUID(), shortId(drone.unitId()));
+		for (FleetLinkPayload.Unit unit : FleetLinkClient.units(client)) names.put(unit.id(), shortId(unit.unitId()));
+		return names;
+	}
+
+	private int relayColor(FleetLinkPayload.Relay relay) {
+		return relay.duty().equals("DYNAMIC") ? AMBER : relay.duty().equals("MESH_RESERVE") ? GREEN : CYAN;
+	}
+
+	private String relayCode(UUID id) {
+		return id.toString().replace("-", "").substring(0, 4).toUpperCase();
+	}
+
+	private int airspaceUnitPriority(String role, String status) {
+		if (status.contains("COMBAT") || status.contains("POWER LOST")) return 0;
+		return role.equalsIgnoreCase("field") ? 1 : 2;
+	}
+
+	private int airspaceUnitColor(String role, boolean docked, String status) {
+		if (status.contains("COMBAT") || status.contains("POWER LOST")) return RED;
+		if (docked) return MUTED;
+		if (role.equalsIgnoreCase("field")) return CYAN;
+		if (role.equalsIgnoreCase("scout")) return GREEN;
+		if (role.equalsIgnoreCase("security")) return AMBER;
+		if (role.equalsIgnoreCase("cargo")) return 0xFFE0B25E;
+		return WHITE;
+	}
+
+	private int airspaceTerrainColor(int raw, double elevation, double datum) {
+		int red = raw >> 16 & 0xff, green = raw >> 8 & 0xff, blue = raw & 0xff;
+		int shade = (int)Math.round(Math.max(-20.0, Math.min(24.0, elevation - datum)) * 0.8);
+		red = Math.max(0, Math.min(255, (red * 4 + 18) / 5 + shade));
+		green = Math.max(0, Math.min(255, (green * 4 + 28) / 5 + shade));
+		blue = Math.max(0, Math.min(255, (blue * 4 + 30) / 5 + shade));
+		return 0xFF000000 | red << 16 | green << 8 | blue;
+	}
+
+	private void drawAirspaceUnit(GuiGraphicsExtractor g, int x, int y, String role, int color) {
+		g.fill(x - 6, y - 6, x + 7, y + 7, withAlpha(PANEL, 132));
+		switch (role.toLowerCase()) {
+			case "field" -> drawAirspaceNode(g, x, y, 6, color);
+			case "scout" -> {
+				drawFastLine(g, x, y - 6, x + 6, y + 4, color);
+				drawFastLine(g, x + 6, y + 4, x - 6, y + 4, color);
+				drawFastLine(g, x - 6, y + 4, x, y - 6, color);
+			}
+			case "security" -> {
+				drawFastLine(g, x - 6, y - 3, x, y + 6, color);
+				drawFastLine(g, x, y + 6, x + 6, y - 3, color);
+			}
+			case "cargo" -> g.outline(x - 5, y - 5, 11, 11, color);
+			case "salvage" -> {
+				drawFastLine(g, x - 5, y - 5, x + 5, y + 5, color);
+				drawFastLine(g, x + 5, y - 5, x - 5, y + 5, color);
+			}
+			default -> {
+				drawFastLine(g, x - 5, y, x + 5, y, color);
+				drawFastLine(g, x, y - 5, x, y + 5, color);
+			}
+		}
+	}
+
+	private void drawAirspaceNode(GuiGraphicsExtractor g, int x, int y, int radius, int color) {
+		g.fill(x - radius - 2, y - radius - 2, x + radius + 3, y + radius + 3, withAlpha(color, 24));
+		drawFastLine(g, x, y - radius, x + radius, y, color);
+		drawFastLine(g, x + radius, y, x, y + radius, color);
+		drawFastLine(g, x, y + radius, x - radius, y, color);
+		drawFastLine(g, x - radius, y, x, y - radius, color);
+		g.fill(x - 1, y - 1, x + 2, y + 2, color);
+	}
+
+	private double square(double value) { return value * value; }
+
+	private ScreenPoint projectWorldPoint(Minecraft client, Vec3 point, int width, int height) {
+		Camera camera = client.gameRenderer.mainCamera();
+		Vec3 relative = point.subtract(camera.position());
+		var forward = camera.forwardVector();
+		double depth = relative.x * forward.x() + relative.y * forward.y() + relative.z * forward.z();
+		Vec3 ndc = client.gameRenderer.projectPointToScreen(point);
+		if (!Double.isFinite(ndc.x) || !Double.isFinite(ndc.y)) return null;
+		int x = (int)Math.round((ndc.x + 1.0) * width * 0.5);
+		int y = (int)Math.round((1.0 - ndc.y) * height * 0.5);
+		return new ScreenPoint(x, y, depth);
+	}
+
 	private boolean isPinned(DroneEntity drone) { return pinnedUuid != null && pinnedUuid.equals(drone.getUUID()); }
 	private boolean selectedRelationship(DroneEntity drone) {
 		if (pinnedUuid != null) return isPinned(drone);
@@ -283,6 +794,8 @@ final class VisorHudOverlay implements HudElement {
 			visibility.clear(); projections.clear(); tickMemo.clear();
 			roster = List.of(); solarStations = List.of(); rosterById = Map.of();
 			cacheUntil = 0; memoTick = Long.MIN_VALUE;
+			airspaceTerrainLevel = null; airspaceTerrain = List.of();
+			airspaceTerrainRefreshAt = Long.MIN_VALUE; airspaceTerrainRangeKey = -1;
 			pinnedEntityId = focusEntityId = focusCandidateId = -1;
 			focusCandidateTicks = 0; commandGroup = ""; wornLastTick = false;
 			combatLedger.clear(); observedTargets.clear(); pinnedUuid = null; selectedFrontTarget = null;
@@ -1014,6 +1527,7 @@ final class VisorHudOverlay implements HudElement {
 
 	private record VisualState(int priority, int combatState, int targetId, boolean alive,
 		boolean removed, int recovery, boolean powerLost) {}
+	private record AirspaceTerrainPoint(int x, int y, int z, int color, boolean loaded) {}
 	private record ProjectionView(int width, int height, float fov, float qx, float qy, float qz,
 		float qw, VisualState state) {}
 
@@ -1088,17 +1602,28 @@ final class VisorHudOverlay implements HudElement {
 	}
 
 	private void drawLine(GuiGraphicsExtractor g, int x1, int y1, int x2, int y2, int color) {
-		int steps = Math.max(Math.abs(x2 - x1), Math.abs(y2 - y1));
-		for (int i = 0; i <= Math.max(1, steps); i++) {
-			int x = x1 + (x2 - x1) * i / Math.max(1, steps);
-			int y = y1 + (y2 - y1) * i / Math.max(1, steps);
-			g.fill(x, y, x + 1, y + 1, color);
+		int[] clipped = VisorHudCache.clipLine(x1, y1, x2, y2, renderWidth, renderHeight, 32);
+		if (clipped != null) drawFastLine(g, clipped[0], clipped[1], clipped[2], clipped[3], color);
+	}
+
+	private void drawFastLine(GuiGraphicsExtractor g, int x1, int y1, int x2, int y2, int color) {
+		double length = Math.hypot(x2 - x1, y2 - y1);
+		if (length < 0.5) {
+			g.fill(x1, y1, x1 + 1, y1 + 1, color);
+			return;
 		}
+		g.pose().pushMatrix();
+		g.pose().translate((float)x1, (float)y1);
+		g.pose().rotate((float)Math.atan2(y2 - y1, x2 - x1));
+		g.fill(0, 0, Math.max(1, (int)Math.ceil(length)), 1, color);
+		g.pose().popMatrix();
 	}
 
 	private void drawDashedLine(GuiGraphicsExtractor g, int x1, int y1, int x2, int y2,
 		int color, int dashLength) {
-		for (VisorHudCache.Dash dash : VisorHudCache.dashes(x1, y1, x2, y2, dashLength)) {
+		int[] clipped = VisorHudCache.clipLine(x1, y1, x2, y2, renderWidth, renderHeight, 32);
+		if (clipped == null) return;
+		for (VisorHudCache.Dash dash : VisorHudCache.dashes(clipped[0], clipped[1], clipped[2], clipped[3], dashLength)) {
 			g.pose().pushMatrix();
 			g.pose().translate((float)dash.x1(), (float)dash.y1());
 			g.pose().rotate((float)Math.atan2(dash.y2() - dash.y1(), dash.x2() - dash.x1()));
@@ -1222,6 +1747,7 @@ final class VisorHudOverlay implements HudElement {
 	private record AlertLine(int color, String label, String response) {}
 	private record Engagement(LivingEntity target, TargetProjection projection,
 		List<DroneEntity> attackers) {}
+	private record ScreenPoint(int x, int y, double depth) {}
 	private record TargetProjection(Vec3 anchor, double x, double y, double depth, double distance) {
 		boolean onScreen(int width, int height) {
 			return x >= 24 && x <= width - 24 && y >= 72 && y <= height - 96;
@@ -1239,6 +1765,7 @@ final class VisorHudOverlay implements HudElement {
 
 // Kept client-local; the focused test compiles this dependency-free helper directly.
 final class VisorHudCache<V> {
+	private static final int LEFT = 1, RIGHT = 2, TOP = 4, BOTTOM = 8;
 	private final int capacity;
 	private final java.util.IdentityHashMap<Object, Sample<V>> entries = new java.util.IdentityHashMap<>();
 	VisorHudCache(int capacity) {
@@ -1270,6 +1797,44 @@ final class VisorHudCache<V> {
 			result.add(new Dash(x1 + dx * start, y1 + dy * start, x1 + dx * end, y1 + dy * end));
 		}
 		return java.util.List.copyOf(result);
+	}
+	static int[] clipLine(int x1, int y1, int x2, int y2, int width, int height, int margin) {
+		double left = -Math.max(0, margin), top = left;
+		double right = Math.max(1, width) + Math.max(0, margin);
+		double bottom = Math.max(1, height) + Math.max(0, margin);
+		double ax = x1, ay = y1, bx = x2, by = y2;
+		for (int iteration = 0; iteration < 8; iteration++) {
+			int a = outCode(ax, ay, left, top, right, bottom);
+			int b = outCode(bx, by, left, top, right, bottom);
+			if ((a | b) == 0) return new int[] {(int)Math.round(ax), (int)Math.round(ay),
+				(int)Math.round(bx), (int)Math.round(by)};
+			if ((a & b) != 0) return null;
+			int outside = a != 0 ? a : b;
+			double x, y;
+			if ((outside & TOP) != 0) {
+				if (by == ay) return null;
+				x = ax + (bx - ax) * (top - ay) / (by - ay); y = top;
+			} else if ((outside & BOTTOM) != 0) {
+				if (by == ay) return null;
+				x = ax + (bx - ax) * (bottom - ay) / (by - ay); y = bottom;
+			} else if ((outside & RIGHT) != 0) {
+				if (bx == ax) return null;
+				y = ay + (by - ay) * (right - ax) / (bx - ax); x = right;
+			} else {
+				if (bx == ax) return null;
+				y = ay + (by - ay) * (left - ax) / (bx - ax); x = left;
+			}
+			if (!Double.isFinite(x) || !Double.isFinite(y)) return null;
+			if (outside == a) { ax = x; ay = y; }
+			else { bx = x; by = y; }
+		}
+		return null;
+	}
+	private static int outCode(double x, double y, double left, double top, double right, double bottom) {
+		int code = 0;
+		if (x < left) code |= LEFT; else if (x > right) code |= RIGHT;
+		if (y < top) code |= TOP; else if (y > bottom) code |= BOTTOM;
+		return code;
 	}
 	record Point(double x, double y, double z) {
 		double distanceSquared(Point other) {

@@ -53,6 +53,7 @@ VANILLA_NAMES = {
     "compass": "コンパス",
     "spyglass": "望遠鏡",
     "shield": "盾",
+    "redstone_torch": "レッドストーントーチ",
     "daylight_detector": "日照センサー",
     "gold_ingot": "金インゴット",
     "netherite_scrap": "ネザライトの欠片",
@@ -104,6 +105,8 @@ GROUPS = [
             "dock_item",
             "solar_service_station",
             "tactical_visor",
+            "strike_beacon_launcher",
+            "strike_beacon_cartridge",
             "recovery_tool",
             "operation_marker",
         ],
@@ -163,6 +166,8 @@ STAGE = {
     "missile_module": ("ADVANCED", "中盤以降"),
     "high_density_battery_pack": ("ADVANCED", "試練の間"),
     "tactical_visor": ("ENDGAME", "古代都市 / ネザー"),
+    "strike_beacon_launcher": ("NETHER", "警備運用"),
+    "strike_beacon_cartridge": ("NETHER", "警備運用"),
     "carrier_console": ("ENDGAME", "母艦管制"),
     "carrier_unit": ("ENDGAME", "ウィザー討伐後"),
 }
@@ -182,6 +187,8 @@ USAGE = {
     "dock_item": ("基地設備", "5×5の空き地へ設置", "機体の就役、動的な帰還予約、充電、再武装、修理、モジュール交換、回収機の復旧、Cargo補給網の拠点になります。"),
     "solar_service_station": ("空中充電設備", "ブロックへ使用して上空に展開", "最大3機へ充電子機を派遣し、周回中の機体へ飛行電力を供給します。弾薬・レーザー電力・修理材は補給しないため通常Dockと使い分けます。"),
     "tactical_visor": ("装着装備", "頭スロットへ装備", "周辺機・Wing・作戦・脅威・交戦相手を状況に応じてHUD表示します。電力喪失ビーコンは距離にかかわらず回収対象として表示します。"),
+    "strike_beacon_launcher": ("攻撃指示装備", "左クリックで射出 / 右クリックで再装填", "最大3発を装填できます。ビーコンは同時に3本まで展開でき、所有者のデータリンク網へ距離上限なしで招集を発信します。複数地点では使用可能なSECURITY機を均等配分し、各地点が独立して攻撃を開始します。"),
+    "strike_beacon_cartridge": ("専用弾薬", "強襲ビーコンランチャーの再装填", "1個でビーコン1発を再装填します。ランチャーを手に持って右クリックすると、インベントリから最大3発まで装填します。"),
     "recovery_tool": ("回収工具", "所有する電力喪失機へ右クリック", "墜落した機体を状態保持したアイテムへ変換します。耐久値は192で、回収後はDockへ投入して飛行可能になるまで整備します。"),
     "operation_marker": ("作業範囲指定装備", "範囲の境界4点へ順番に使用", "4点を含むX/Y/Z直方体を採掘範囲として登録します。Engineerが掘削し、ドロップは現地へ残り、Cargoが設定済み搬入先へ回収します。スニーク使用で入力途中の点を取り消せます。"),
     "scout_module": ("役割モジュール", "Dockの役割スロット / 着艦中の交換", "SCOUT機へ変更します。周期的な全周スキャン、地形・Mob調査、脅威発見、Wingや全機へのデータリンク通報を担当します。"),
@@ -379,6 +386,8 @@ def furnace_card(recipes: dict[str, dict], names: dict[str, str]) -> str:
 
 
 def render_html(recipes: dict[str, dict], names: dict[str, str]) -> str:
+    recipe_count = len(recipes)
+    output_count = len({recipe_result(recipe)[0] for recipe in recipes.values()})
     sections = []
     for number, title, description, keys in GROUPS:
         cards = []
@@ -463,11 +472,11 @@ def render_html(recipes: dict[str, dict], names: dict[str, str]) -> str:
   </style>
 </head>
 <body>
-  <header class="topbar"><div class="brand"><span class="brand-mark"></span><div><strong>MORROWGEAR</strong><small>CRAFTING SYSTEMS / MC 26.2</small></div></div><div class="top-meta">RECIPE DEFINITIONS <b>29</b> · CRAFTABLE OUTPUTS <b>28</b></div></header>
+  <header class="topbar"><div class="brand"><span class="brand-mark"></span><div><strong>MORROWGEAR</strong><small>CRAFTING SYSTEMS / MC 26.2</small></div></div><div class="top-meta">RECIPE DEFINITIONS <b>{recipe_count}</b> · CRAFTABLE OUTPUTS <b>{output_count}</b></div></header>
   <main>
     <section class="hero">
-      <div><span class="kicker">FABRICATION REFERENCE / v0.20.5</span><h1>製造レシピ<br>ビジュアルガイド</h1><p>ゲームに収録されているレシピJSONから自動生成した一覧です。配置、必要数、完成数、熱処理時間を実データどおりに表示しています。</p></div>
-      <div class="hero-stats"><div><strong>29</strong><span>レシピ定義</span></div><div><strong>28</strong><span>製造アイテム</span></div><div><strong>5</strong><span>製造カテゴリ</span></div></div>
+      <div><span class="kicker">FABRICATION REFERENCE / v0.20.6</span><h1>製造レシピ<br>ビジュアルガイド</h1><p>ゲームに収録されているレシピJSONから自動生成した一覧です。配置、必要数、完成数、熱処理時間を実データどおりに表示しています。</p></div>
+      <div class="hero-stats"><div><strong>{recipe_count}</strong><span>レシピ定義</span></div><div><strong>{output_count}</strong><span>製造アイテム</span></div><div><strong>{len(GROUPS)}</strong><span>製造カテゴリ</span></div></div>
     </section>
     <section class="flow"><h2>推奨製造フロー</h2><div class="flow-line"><div class="flow-node"><strong>未焼結モロウ材</strong><small>鉄・銅・赤石・木炭</small></div><div class="flow-arrow">›</div><div class="flow-node"><strong>モロウ合金</strong><small>かまど / 溶鉱炉</small></div><div class="flow-arrow">›</div><div class="flow-node"><strong>基礎部品</strong><small>基板・フレーム・アクチュエーター</small></div><div class="flow-arrow">›</div><div class="flow-node final"><strong>機体と運用設備</strong><small>Drone・Dock・任務・兵装・母艦</small></div></div></section>
     {''.join(sections)}
@@ -487,7 +496,10 @@ def main() -> None:
         item_ids.add(recipe_result(recipe)[0])
     prepare_assets(item_ids)
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    (OUTPUT_DIR / "index.html").write_text(render_html(recipes, names), encoding="utf-8")
+    # Keep generated documentation stable across Windows and Unix checkouts.
+    with (OUTPUT_DIR / "index.html").open("w", encoding="utf-8", newline="\n") as output:
+        rendered = render_html(recipes, names)
+        output.write("\n".join(line.rstrip() for line in rendered.splitlines()) + "\n")
     print(f"Generated {OUTPUT_DIR / 'index.html'} from {len(recipes)} recipe definitions")
 
 

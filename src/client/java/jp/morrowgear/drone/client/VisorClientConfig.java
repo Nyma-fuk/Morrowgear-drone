@@ -47,6 +47,7 @@ public final class VisorClientConfig {
 	public boolean emergencySummaryEnabled() { return true; }
 
 	boolean enabled = true;
+	boolean airspaceMapEnabled = true;
 	int proximityRange = 48;
 
 	static VisorClientConfig load() {
@@ -57,6 +58,7 @@ public final class VisorClientConfig {
 		try (InputStream input = Files.newInputStream(FILE)) {
 			values.load(input);
 			config.enabled = Boolean.parseBoolean(values.getProperty("enabled", "true"));
+			config.airspaceMapEnabled = Boolean.parseBoolean(values.getProperty("airspaceMapEnabled", "true"));
 			config.proximityRange = normalizeRange(Integer.parseInt(values.getProperty("proximityRange", "48")));
 			config.presentation = parsePresentation(values);
 		} catch (IOException | NumberFormatException ignored) {
@@ -88,6 +90,7 @@ public final class VisorClientConfig {
 	boolean persist(Path file, Presentation next) {
 		Properties values = new Properties();
 		values.setProperty("enabled", Boolean.toString(enabled));
+		values.setProperty("airspaceMapEnabled", Boolean.toString(airspaceMapEnabled));
 		values.setProperty("proximityRange", Integer.toString(proximityRange));
 		values.setProperty("density", next.density().name());
 		values.setProperty("backgroundPercent", Integer.toString(next.backgroundPercent()));

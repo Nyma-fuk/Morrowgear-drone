@@ -42,7 +42,9 @@ final class DynamicDockReturnContractTest {
 		assertTrue(manual.contains("clearCombatState()"));
 		assertTrue(manual.contains("clearSolarService(false)"));
 		assertTrue(manual.contains("manualDockReturn = true"));
-		assertTrue(manual.contains("setMode(DroneMode.DOCK)"));
+		assertTrue(manual.contains("setModeInternal(DroneMode.DOCK)"));
+		assertTrue(manual.contains("taskStack.clear()"));
+		assertTrue(manual.contains("serviceResumeMode = DroneMode.STANDBY.id()"));
 		String mode = entitySection("private void setModeInternal(", "public void assignFollowFormation(");
 		assertTrue(mode.contains("if (mode != DroneMode.DOCK) manualDockReturn = false"));
 		assertTrue(mode.contains("taskStack.queue(currentTaskSnapshot(mode))"));

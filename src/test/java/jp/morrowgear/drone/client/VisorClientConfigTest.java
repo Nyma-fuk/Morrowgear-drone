@@ -11,6 +11,7 @@ class VisorClientConfigTest {
     @TempDir Path directory;
     @Test void defaultsPreserveExistingHudExactly() {
         var config = new VisorClientConfig();
+		assertTrue(config.airspaceMapEnabled);
         assertEquals(1f, config.hudScale(1920, 1080));
         assertEquals(0xD91A1E1C, config.panelAlpha(0xD91A1E1C));
         assertEquals(0xBD121514, config.panelAlpha(0xBD121514));
@@ -37,7 +38,7 @@ class VisorClientConfigTest {
     }
     @Test void draftDoesNotChangeSharedValuesAndPersistencePreservesExistingSettings() throws Exception {
         var config = new VisorClientConfig();
-        config.enabled = false; config.proximityRange = 96;
+		config.enabled = false; config.airspaceMapEnabled = false; config.proximityRange = 96;
         var draft = new VisorClientConfig.Presentation(VisorClientConfig.Density.MINIMAL, 80, true);
         assertTrue(config.persist(directory.resolve("visor.properties"), draft));
         assertEquals(VisorClientConfig.Presentation.DEFAULT, config.presentation());
@@ -45,6 +46,7 @@ class VisorClientConfigTest {
         try (var input = Files.newInputStream(directory.resolve("visor.properties"))) { properties.load(input); }
         assertEquals(draft, VisorClientConfig.parsePresentation(properties));
         assertEquals("false", properties.getProperty("enabled"));
+		assertEquals("false", properties.getProperty("airspaceMapEnabled"));
         assertEquals("96", properties.getProperty("proximityRange"));
     }
     @Test void corruptPreferencesFallBackAndFailedSaveDoesNotChangeConfig() throws Exception {

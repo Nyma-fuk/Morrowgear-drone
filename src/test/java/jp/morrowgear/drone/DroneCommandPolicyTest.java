@@ -78,6 +78,8 @@ final class DroneCommandPolicyTest {
 		assertTrue(DroneCommandPolicy.isSimpleAction("dock"));
 		assertTrue(DroneCommandPolicy.isSimpleAction("orbit"));
 		assertTrue(DroneCommandPolicy.isSimpleAction("decommission"));
+		assertTrue(DroneCommandPolicy.isSimpleAction("mesh_deploy"));
+		assertTrue(DroneCommandPolicy.isSimpleAction("mesh_withdraw"));
 		assertFalse(DroneCommandPolicy.isSimpleAction("follow"));
 		assertFalse(DroneCommandPolicy.isSimpleAction("unknown"));
 		assertTrue(DroneCommandPolicy.acceptablePayload("weapon_module:laser"));
@@ -85,5 +87,14 @@ final class DroneCommandPolicyTest {
 		assertTrue(SecurityLoadout.isValidId("laser"));
 		assertTrue(SecurityLoadout.isValidId("missile"));
 		assertFalse(SecurityLoadout.isValidId("railgun"));
+	}
+
+	@Test
+	void everyPhysicalCustodyStateBlocksUnrelatedOperatorFlightCommands() {
+		assertTrue(DroneCommandPolicy.acceptsOperatorFlightCommand(false, false, false));
+		assertFalse(DroneCommandPolicy.acceptsOperatorFlightCommand(true, false, false));
+		assertFalse(DroneCommandPolicy.acceptsOperatorFlightCommand(false, true, false));
+		assertFalse(DroneCommandPolicy.acceptsOperatorFlightCommand(false, false, true));
+		assertFalse(DroneCommandPolicy.acceptsOperatorFlightCommand(true, true, true));
 	}
 }

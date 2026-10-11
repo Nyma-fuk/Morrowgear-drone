@@ -17,6 +17,7 @@ public final class SupplyNetworkPolicy {
 	public static final int MAX_DISCOVERED_NODES = 64;
 	public static final long MISSING_DRONE_TICKS = 1200;
 	public static final long NOTICE_INTERVAL = 1200;
+	public static final long TOP_OFF_COOLDOWN_TICKS = 200;
 
 	private SupplyNetworkPolicy() {}
 
@@ -37,6 +38,11 @@ public final class SupplyNetworkPolicy {
 
 	public static int available(int stock, int reserved) {
 		return Math.max(0, stock - Math.max(0, reserved));
+	}
+
+	public static boolean topOffReady(int stock, int trigger, long now, long lastDelivery) {
+		if (stock < trigger || lastDelivery == Long.MIN_VALUE) return true;
+		return now >= lastDelivery && now - lastDelivery >= TOP_OFF_COOLDOWN_TICKS;
 	}
 
 	public static boolean dispatchable(Readiness state) {
@@ -86,5 +92,10 @@ public final class SupplyNetworkPolicy {
 				default -> false;
 			};
 		}
+	}
+
+	static boolean operatorNoticeRequired(boolean automaticSourceWithoutNodes, Status status) {
+		return status != null && status.error()
+			&& !(automaticSourceWithoutNodes && status == Status.SOURCE_LOST);
 	}
 }

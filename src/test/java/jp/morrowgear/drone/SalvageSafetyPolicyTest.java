@@ -6,6 +6,12 @@ import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 
 class SalvageSafetyPolicyTest {
+	@Test void engineerClearsTheEntireTowEnvelopeRatherThanOnlyTheDisabledAircraft() {
+		double loadWidth = 3.0;
+		double radius = SalvageClearance.corridorRadius(loadWidth);
+		assertTrue(radius >= loadWidth * 0.5 + SalvageTowPolicy.ROPE_LENGTH);
+		assertTrue(radius > loadWidth * 0.5 + 0.65);
+	}
     @Test void onlyCommittedLoadsRejectOperatorFlightChanges() {
         for (SalvageState state : SalvageState.values()) {
             assertFalse(SalvageSafetyPolicy.committed(state, false));
@@ -77,11 +83,12 @@ class SalvageSafetyPolicyTest {
 
     @Test void operatorGuardsPrecedeMutationWhileInternalRescueTransitionsStayAccessible() throws Exception {
         String source = Files.readString(Path.of("src/main/java/jp/morrowgear/drone/DroneEntity.java")).replace("\r\n", "\n");
-        for (String signature : new String[]{"public void setMode(DroneMode mode)",
+		for (String signature : new String[]{"public void setMode(DroneMode mode)",
             "public void requestManualDockReturn()",
-            "public void assignWaypoint(BlockPos pos, String missionId, int expected, int index, BlockPos origin, long assignedTick)",
             "public void assignTrackingTarget(LivingEntity target, String missionId, int expected, int index, BlockPos origin, long assignedTick)"})
-            assertTrue(source.contains(signature + " {\n\t\tif (rejectSalvageFlightCommand()) return;"), signature);
+			assertTrue(source.contains(signature + " {\n\t\tif (rejectProtectedFlightCommand()) return;"), signature);
+		assertTrue(source.contains("public void assignWaypoint(BlockPos pos, String missionId, int expected, int index, BlockPos origin, long assignedTick) {\n"
+			+ "\t\tif (!(unitId() + \"-cargo\").equals(missionId) && rejectProtectedFlightCommand()) return;"));
         assertTrue(source.contains("case HOOK -> {\n\t\t\t\tsetModeInternal(DroneMode.STANDBY)"));
         assertTrue(source.contains("setSalvageState(SalvageState.RETURN);\n\t\t\t\t\tsetModeInternal(DroneMode.DOCK)"));
         assertTrue(source.contains("assignWaypointInternal(BlockPos.containing(SalvageInterceptPolicy.approachPosition(nearest.position()"));

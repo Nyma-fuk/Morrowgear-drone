@@ -38,10 +38,12 @@ final class ControllerDisplayTextTest {
         assertEquals("北側の護衛", ControllerDisplayText.unitName("北側の護衛", "MG-DRN-0A9F"));
     }
     @Test void everyActionHasADistinctShortLabel() {
-        var actions = java.util.List.of("follow", "return", "dock", "standby", "orbit", "decommission");
+        var actions = java.util.List.of("follow", "return", "dock", "standby", "orbit", "decommission",
+			"mesh_deploy", "mesh_withdraw");
         assertEquals(actions.size(), actions.stream().map(ControllerDisplayText::action).distinct().count());
         assertEquals("追従", ControllerDisplayText.action("follow"));
         assertEquals("集合", ControllerDisplayText.action("return"));
+		assertEquals("Mesh展開", ControllerDisplayText.action("mesh_deploy"));
         assertTrue(actions.stream().map(ControllerDisplayText::action).allMatch(label -> label.length() <= 6));
     }
 }

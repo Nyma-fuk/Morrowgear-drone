@@ -61,8 +61,8 @@ public final class DroneAudioPolicy {
 	/** A recent confirmed shot, not GUN_RUN alone, holds the audible burst open. */
 	public static final class CannonGate {
 		private boolean playing;
-		public CannonChange update(CombatState state, long now, long lastShot) {
-			boolean next = state == CombatState.GUN_RUN && freshEvent(now, lastShot);
+		public CannonChange update(long now, long lastShot) {
+			boolean next = freshEvent(now, lastShot);
 			CannonChange change = new CannonChange(next, next && !playing, playing && !next);
 			playing = next;
 			return change;

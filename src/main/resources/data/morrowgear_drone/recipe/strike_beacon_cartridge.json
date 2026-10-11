@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": ["IRI", "RCR", "IRI"],
+  "key": {
+    "I": "minecraft:iron_nugget",
+    "R": "minecraft:redstone",
+    "C": "morrowgear_drone:basic_control_board"
+  },
+  "result": {"id": "morrowgear_drone:strike_beacon_cartridge", "count": 3}
+}

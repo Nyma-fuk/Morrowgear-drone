@@ -22,6 +22,7 @@ final class ControllerEquipmentData {
             case "autocannon_magazine" -> "1個あたり機関砲弾 " + DockSupplyPolicy.MAGAZINE_ROUNDS + " 発";
             case "laser_cell" -> "1個あたり兵装電力 " + DockSupplyPolicy.LASER_CELL_ENERGY;
             case "micro_missile_pack" -> "1個あたりミサイル " + DockSupplyPolicy.MISSILE_PACK_ROUNDS + " 発";
+			case "strike_beacon_cartridge" -> "1個あたり強襲ビーコン 1 発 / 装填上限 3 発";
             // DockBlockEntity's private repairValue is covered by a source contract test.
             case "morrow_alloy" -> "1個あたり修理量 20 HP";
             default -> "補給換算の対象外";

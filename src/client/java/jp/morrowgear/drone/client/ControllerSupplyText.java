@@ -13,10 +13,10 @@ final class ControllerSupplyText {
     }
     static String status(Status status) {
         return switch (status) {
-            case DISABLED -> "停止"; case READY -> "待機"; case IN_TRANSIT -> "配送中";
+			case DISABLED -> "自動復旧中"; case READY -> "待機"; case IN_TRANSIT -> "配送中";
             case RETURNING -> "帰還中"; case RECHARGING -> "充電中"; case WAIT_CHUNK -> "地域の読込待ち";
             case NO_IDLE_CARGO -> "空き輸送機なし"; case SOURCE_SHORTAGE -> "補給元の在庫不足";
-            case SOURCE_LOST -> "補給元を確認できません"; case DOCK_LOST -> "Dockを確認できません";
+			case SOURCE_LOST -> "物流ノード未登録"; case DOCK_LOST -> "Dockを確認できません";
             case DOCK_FULL -> "Dock満杯"; case RESERVATION_INVALID -> "予約無効";
             case ASSIGNMENT_LOST -> "割当なし"; case CARGO_MISMATCH -> "積荷不一致";
             case CANCELLED -> "取消"; case LOAD_RETAINED -> "積荷保持中";

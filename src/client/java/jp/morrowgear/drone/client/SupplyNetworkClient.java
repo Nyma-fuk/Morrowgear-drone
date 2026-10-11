@@ -34,6 +34,10 @@ public final class SupplyNetworkClient {
         lastRequest = now;
         ClientPlayNetworking.send(new SupplyNetworkStatusRequest(++sequence));
     }
+	public static void requestNow() {
+		lastRequest = Long.MIN_VALUE / 2;
+		request();
+	}
     public static List<SupplyNetworkStatusPayload.DockStatus> docks() {
         var player = Minecraft.getInstance().player;
         if (snapshot == null || player == null || !snapshot.owner().equals(player.getUUID())

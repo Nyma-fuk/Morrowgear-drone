@@ -52,7 +52,7 @@ public record SupplyNetworkConfigPayload(long source, long dock, boolean enabled
 	/** Parent receiver must call on the server thread, never on the network IO thread. */
 	public void apply(ServerPlayer player) {
 		try {
-			SupplyNetworkRuntime.configureDock(player, BlockPos.of(dock), enabled);
+			SupplyNetworkRuntime.configureDock(player, BlockPos.of(dock), true);
 		} catch (IllegalArgumentException | IllegalStateException rejected) {
 			player.sendSystemMessage(Component.literal("[MORROWGEAR] SUPPLY / " + rejected.getMessage()));
 		}

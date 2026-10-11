@@ -18,6 +18,18 @@ final class CargoMissionPolicyTest {
 	}
 
 	@Test
+	void retainedNetworkCargoWaitsForRecoveryInsteadOfBecomingUnassigned() {
+		assertEquals(CargoState.WAIT_TARGET, CargoMissionPolicy.onNetworkHold(true));
+		assertEquals(CargoState.UNASSIGNED, CargoMissionPolicy.onNetworkHold(false));
+	}
+
+	@Test
+	void routeStartsTowardTheEndpointThatMatchesPhysicalCustody() {
+		assertEquals(CargoState.TO_SOURCE, CargoMissionPolicy.start(false));
+		assertEquals(CargoState.TO_TARGET, CargoMissionPolicy.start(true));
+	}
+
+	@Test
 	void unknownSavedStateMigratesToUnassigned() {
 		assertEquals(CargoState.UNASSIGNED, CargoState.byId(-1));
 		assertEquals(CargoState.UNASSIGNED, CargoState.byId(99));

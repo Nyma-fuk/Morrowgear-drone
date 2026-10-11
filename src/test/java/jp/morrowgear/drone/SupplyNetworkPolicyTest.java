@@ -62,6 +62,13 @@ final class SupplyNetworkPolicyTest {
 		assertEquals(0, SupplyNetworkPolicy.demand(6, 16, 5, 1));
 	}
 
+	@Test void completedTopOffCannotImmediatelyMonopolizeTheSameCargoAircraft() {
+		assertTrue(SupplyNetworkPolicy.topOffReady(5, 6, 101, 100));
+		assertFalse(SupplyNetworkPolicy.topOffReady(6, 6, 299, 100));
+		assertTrue(SupplyNetworkPolicy.topOffReady(6, 6, 300, 100));
+		assertTrue(SupplyNetworkPolicy.topOffReady(16, 6, 0, Long.MIN_VALUE));
+	}
+
 	@Test void defaultsPrioritizeFuelAndRepairAndExposeEverySupplyKind() {
 		var defaults = SupplyNetworkPolicy.defaults();
 		assertEquals(SupplyKind.values().length, defaults.size());
@@ -76,5 +83,13 @@ final class SupplyNetworkPolicyTest {
 			assertTrue(status.error());
 		assertFalse(Status.READY.error());
 		assertFalse(Status.RECHARGING.error());
+	}
+
+	@Test void sourceAgnosticDockWaitsQuietlyUntilALogisticsNodeExists() {
+		assertFalse(SupplyNetworkPolicy.operatorNoticeRequired(true, Status.SOURCE_LOST));
+		// Once a node has been registered, losing it is an actionable route fault.
+		assertTrue(SupplyNetworkPolicy.operatorNoticeRequired(false, Status.SOURCE_LOST));
+		assertTrue(SupplyNetworkPolicy.operatorNoticeRequired(true, Status.SOURCE_SHORTAGE));
+		assertFalse(SupplyNetworkPolicy.operatorNoticeRequired(true, Status.READY));
 	}
 }

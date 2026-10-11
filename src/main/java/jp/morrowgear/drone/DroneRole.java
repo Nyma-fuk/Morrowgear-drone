@@ -30,4 +30,8 @@ public enum DroneRole {
 		return Arrays.stream(values()).filter(role -> role.id.equalsIgnoreCase(id))
 			.findFirst().orElse(FIELD);
 	}
+
+	public static boolean isValidId(String id) {
+		return id != null && Arrays.stream(values()).anyMatch(role -> role.id.equalsIgnoreCase(id));
+	}
 }

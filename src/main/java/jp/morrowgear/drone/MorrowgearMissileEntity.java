@@ -116,6 +116,32 @@ public final class MorrowgearMissileEntity extends Entity {
 		return true;
 	}
 
+	static boolean launchStrike(ServerLevel level, DroneEntity launcher, Vec3 aim, int shot) {
+		if (aim == null || !MicroMissilePolicy.finite(aim)) return false;
+		MorrowgearMissileEntity missile = MorrowgearDrone.MISSILE.create(level, EntitySpawnReason.TRIGGERED);
+		if (missile == null) return false;
+		missile.launcherId = launcher.getUUID();
+		missile.ownerId = launcher.ownerId();
+		missile.entityData.set(OWNER, missile.ownerId.toString());
+		missile.launchProfile = new MicroMissilePolicy.LaunchProfile(shot, launcher.getYRot());
+		missile.lastAim = aim;
+		ServerPlayer owner = level.getServer().getPlayerList().getPlayer(missile.ownerId);
+		if (owner != null && owner.getTeam() != null) missile.ownerTeam = owner.getTeam().getName();
+		Vec3 origin = DroneHardpoints.worldPosition(launcher, MicroMissilePolicy.launchTube(shot));
+		missile.setPos(origin);
+		missile.setXRot(-90.0f);
+		missile.xRotO = -90.0f;
+		missile.setYRot(launcher.getYRot());
+		missile.yRotO = launcher.getYRot();
+		missile.setDeltaMovement(MicroMissilePolicy.ejectionVelocity(missile.launchProfile,
+			launcher.getDeltaMovement()));
+		missile.explosionPower = MicroMissilePolicy.explosionPower(level.getRandom().nextFloat());
+		if (!level.addFreshEntity(missile)) return false;
+		level.playSound(null, origin.x, origin.y, origin.z, MorrowgearDrone.MISSILE_LAUNCH_SOUND,
+			SoundSource.PLAYERS, 0.85f, 0.94f + level.getRandom().nextFloat() * 0.08f);
+		return true;
+	}
+
 	public static boolean launchCarrier(ServerLevel level, CarrierEntity launcher, ServerPlayer owner,
 		LivingEntity target, int hardpoint, int cell) {
 		MorrowgearMissileEntity missile = MorrowgearDrone.MISSILE.create(level, EntitySpawnReason.TRIGGERED);

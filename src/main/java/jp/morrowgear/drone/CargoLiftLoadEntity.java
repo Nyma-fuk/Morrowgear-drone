@@ -26,6 +26,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
@@ -442,11 +443,17 @@ public final class CargoLiftLoadEntity extends Entity {
 
     private boolean landingClear(ServerLevel level, BlockPos pos) {
         if (!level.hasChunkAt(pos) || pos.getY() <= level.getMinY() || pos.getY() + 3 >= level.getMaxY()) return false;
-        if (!level.getBlockState(pos).canBeReplaced()) return false;
+        if (!landingAnchorClear(level.getBlockState(pos))) return false;
         BlockPos support = pos.below();
         if (!level.getBlockState(support).isFaceSturdy(level, support, Direction.UP)) return false;
         AABB box = boundsAt(Vec3.atBottomCenterOf(pos)).inflate(-.04);
         return !level.getBlockCollisions(null, box).iterator().hasNext();
+    }
+
+    static boolean landingAnchorClear(net.minecraft.world.level.block.state.BlockState state) {
+        // Aircraft ground lights are transient, non-colliding markers. They must not
+        // reserve a container landing zone or leave a four-aircraft lift in HOLD.
+        return state.canBeReplaced() || state.is(Blocks.LIGHT);
     }
 
     private BlockPos findSafeLanding(ServerLevel level, BlockPos center, int radius) {

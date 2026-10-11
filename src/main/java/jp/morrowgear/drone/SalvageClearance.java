@@ -7,10 +7,14 @@ import net.minecraft.world.phys.AABB;
 
 /** Top-down, loaded-only inspection of the load's vertical extraction corridor. */
 final class SalvageClearance {
+	private static final double WORK_MARGIN = 0.35;
+
     private SalvageClearance() {}
 
     static BlockPos obstruction(ServerLevel level, DroneEntity load) {
-        AABB box = load.getBoundingBox().inflate(0.65, 0, 0.65);
+		double radius = corridorRadius(load.getBbWidth());
+		AABB box = new AABB(load.getX() - radius, load.getY(), load.getZ() - radius,
+			load.getX() + radius, load.getBoundingBox().maxY, load.getZ() + radius);
         int minY = (int)Math.floor(load.getY() + .15);
         BlockPos highest = null;
         for (int x = (int)Math.floor(box.minX); x <= (int)Math.floor(box.maxX); x++) {
@@ -30,4 +34,8 @@ final class SalvageClearance {
         }
         return highest;
     }
+
+	static double corridorRadius(double loadWidth) {
+		return Math.max(0.0, loadWidth) * 0.5 + SalvageTowPolicy.ROPE_LENGTH + WORK_MARGIN;
+	}
 }

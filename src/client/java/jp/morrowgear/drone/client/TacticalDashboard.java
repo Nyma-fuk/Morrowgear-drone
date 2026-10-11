@@ -71,7 +71,7 @@ public final class TacticalDashboard extends AbstractWidget {
 	private static final String[] PAGE_ICONS = {"map", "layers", "list-checks", "battery-charging", "wrench", "radar", "boxes", "sliders-horizontal", "boxes", "container", "clock"};
 	private static final int[] NAV_ORDER = {0, 1, 2, 3, 8, 4, 9, 5, 6, 10, 7};
 	private final int[] pageOffsets = new int[PAGES.length];
-	private static final String[] ITEM_IDS = {"controller", "tactical_visor", "recovery_tool", "operation_marker", "field_drone_unit", "dock_item", "solar_service_station",
+	private static final String[] ITEM_IDS = {"controller", "tactical_visor", "strike_beacon_launcher", "strike_beacon_cartridge", "recovery_tool", "operation_marker", "field_drone_unit", "dock_item", "solar_service_station",
 		"scout_module", "cargo_module", "engineer_module", "security_module", "salvage_module", "power_cell", "standard_battery_pack",
 		"reinforced_battery_pack", "high_density_battery_pack", "raw_morrow_composite", "morrow_alloy", "lightweight_frame",
 		"basic_control_board", "flight_actuator", "autocannon_module", "laser_module", "missile_module",
@@ -84,7 +84,8 @@ public final class TacticalDashboard extends AbstractWidget {
 	private int inspectedEquipment = -1;
 	private int hoverX, hoverY;
 	private final VisorClientConfig visorConfig = VisorClientConfig.current();
-	private static final String[] ACTIONS = { "follow", "standby", "return", "dock", "orbit", "decommission" };
+	private static final String[] ACTIONS = { "follow", "standby", "return", "dock", "orbit", "decommission",
+		"mesh_deploy", "mesh_withdraw" };
 	private static final DroneRole[] MODULE_ROLES = { DroneRole.FIELD, DroneRole.SCOUT, DroneRole.CARGO, DroneRole.ENGINEER, DroneRole.SECURITY, DroneRole.SALVAGE };
 	private static final SecurityLoadout[] WEAPON_LOADOUTS = {
 		SecurityLoadout.AUTOCANNON, SecurityLoadout.LASER, SecurityLoadout.MISSILE
@@ -448,9 +449,13 @@ public final class TacticalDashboard extends AbstractWidget {
 		for (FleetLinkPayload.Relay relay : FleetLinkClient.relays(client)) {
 			MapPoint point = mapPoint(map, relay.x(), relay.z());
 			if (point == null) continue;
-			g.outline(point.x - 4, point.y - 4, 9, 9, CYAN);
-			g.fill(point.x - 1, point.y - 1, point.x + 2, point.y + 2, GREEN);
-			if (mapZoom >= 3.0) g.text(client.font, "R" + relay.hops(), point.x + 6, point.y - 4, MUTED);
+			int relayColor = relay.duty().equals("DYNAMIC") ? AMBER
+				: relay.duty().equals("MESH_RESERVE") ? GREEN : CYAN;
+			g.outline(point.x - 4, point.y - 4, 9, 9, relay.established() ? relayColor : MUTED);
+			g.fill(point.x - 1, point.y - 1, point.x + 2, point.y + 2,
+				relay.hops() < 255 ? relayColor : AMBER);
+			if (mapZoom >= 3.0) g.text(client.font, relay.hops() < 255
+				? "F/" + relay.hops() : "F/DEP", point.x + 6, point.y - 4, MUTED);
 		}
 		for (DroneEntity drone : foreignDrones()) {
 			MapPoint point = mapPoint(map, drone.getX(), drone.getZ());
@@ -859,12 +864,18 @@ public final class TacticalDashboard extends AbstractWidget {
 			g.text(client.font, "未受信の選択 " + selected.unavailableCount() + "機", x, y + 260, MUTED);
 		}
 		g.text(client.font, "移動・任務", x, right.y + 323 - inspectorScroll, MUTED);
+		boolean fieldSelection = units.stream().anyMatch(drone -> drone.role() == DroneRole.FIELD)
+			|| remoteUnits.stream().anyMatch(drone -> DroneRole.byId(drone.role()) == DroneRole.FIELD);
 		for (int i = 0; i < ACTIONS.length; i++) {
 			Rect button = commandRect(l, i);
 			boolean confirming = i == 5 && client.level != null && client.level.getGameTime() < confirmStoreUntil;
-			drawCargoButton(g, button, fitText(confirming ? "格納を確定" : actionLabel(i, drones), button.w - 8), false, i == 5 ? RED : CYAN, selectedCount > 0);
+			boolean meshAction = ACTIONS[i].startsWith("mesh_");
+			int tone = i == 5 ? RED : ACTIONS[i].equals("mesh_deploy") ? GREEN
+				: ACTIONS[i].equals("mesh_withdraw") ? AMBER : CYAN;
+			drawCargoButton(g, button, fitText(confirming ? "格納を確定" : actionLabel(i, drones), button.w - 8),
+				false, tone, selectedCount > 0 && (!meshAction || fieldSelection));
 		}
-		g.text(client.font, "作業地点を指定", x, right.y + 422 - inspectorScroll, MUTED);
+		g.text(client.font, "作業地点を指定", x, right.y + 449 - inspectorScroll, MUTED);
 		var available = availability(drones);
 		for (int i = 0; i < 4; i++) {
 			boolean enabled = i == 3 ? available.securityEnabled() : autoOperations ? !drones.isEmpty() : available.workEnabled(WORK_TYPES[i]);
@@ -882,10 +893,10 @@ public final class TacticalDashboard extends AbstractWidget {
 		if (page != 3) drawCargoButton(g, radiusEditorRect(l), "作業・警戒の範囲", false, CYAN,
 			armedGuard || armedWork != FieldOperationType.NONE);
 		if (page == 3) {
-			g.text(client.font, "着艦中の役割装備", x, right.y + 520 - inspectorScroll, MUTED);
+			g.text(client.font, "着艦中の役割装備", x, right.y + 547 - inspectorScroll, MUTED);
 			for (int i = 0; i < MODULE_ROLES.length; i++)
 				drawCargoButton(g, moduleRect(l, i), roleLabel(MODULE_ROLES[i]), false, CYAN, !units.isEmpty() && units.stream().allMatch(DroneEntity::isDocked));
-			g.text(client.font, "兵装", x, right.y + 608 - inspectorScroll, MUTED);
+			g.text(client.font, "兵装", x, right.y + 635 - inspectorScroll, MUTED);
 			for (int i = 0; i < WEAPON_LOADOUTS.length; i++)
 				drawCargoButton(g, weaponModuleRect(l, i), WEAPON_LABELS[i], false, AMBER, !units.isEmpty() && units.stream().allMatch(d -> d.role() == DroneRole.SECURITY));
 			drawCargoButton(g, capacityUpgradeRect(l), "搭載容量を強化", false, CYAN, unit != null && unit.isDocked() && unit.role() == DroneRole.SECURITY && unit.capacityTier() < jp.morrowgear.drone.PayloadCapacity.MAX_TIER);
@@ -898,7 +909,7 @@ public final class TacticalDashboard extends AbstractWidget {
 		}
 	}
 
-	private int inspectorHeight() { return page == 3 ? 715 : 632; }
+	private int inspectorHeight() { return page == 3 ? 742 : 659; }
 
 	private static String resourceName(String code) {
 		return switch (code) {
@@ -1011,7 +1022,7 @@ public final class TacticalDashboard extends AbstractWidget {
 				page = 0;
 			} else if (i == 1) {
 				page = 0;
-				inspectorScroll = Math.min(323, Math.max(0, inspectorHeight() - l.right.h));
+				inspectorScroll = Math.min(350, Math.max(0, inspectorHeight() - l.right.h));
 			} else if (i == 2) {
 				armedRoute = !armedRoute;
 				seedRouteDraft(drones);
@@ -1451,6 +1462,18 @@ public final class TacticalDashboard extends AbstractWidget {
 		confirmStoreSelection = Set.of();
 		if (ACTIONS[index].equals("follow")) {
 			issueFollowFormation();
+			notifyCommandResult();
+			return;
+		}
+		if (ACTIONS[index].startsWith("mesh_")) {
+			List<CommandUnit> fields = selectedCommandUnits().stream()
+				.filter(unit -> unit.role() == DroneRole.FIELD).toList();
+			if (fields.isEmpty()) {
+				notifyAction("通信メッシュにはFIELD機を選択してください");
+				return;
+			}
+			UUID commandId = UUID.randomUUID();
+			for (CommandUnit unit : fields) sendDroneCommand(commandId, unit.entityId(), ACTIONS[index]);
 			notifyCommandResult();
 			return;
 		}
@@ -2421,7 +2444,9 @@ public final class TacticalDashboard extends AbstractWidget {
 		int listWidth = Math.min(300, available / 2);
 		int capacity = Math.max(1, (l.bottomTop - l.header - 110) / 50);
 		pageScroll = clampScroll(pageScroll, routes.size(), capacity);
-		g.text(client.font, "遠隔状況 / 設定・在庫操作は現地Dock", x, l.header + 36, MUTED);
+		long registeredNodes = SupplyNetworkClient.nodes().stream().filter(node -> node.registered()).count();
+		g.text(client.font, "自動補給 常時ON / 登録物流ノード " + registeredNodes + "件", x, l.header + 36,
+			registeredNodes > 0 ? GREEN : AMBER);
 		if (routes.isEmpty()) g.text(client.font, "補給経路なし、または未受信", x, l.header + 66, MUTED);
 		for (int i = 0; i < capacity && pageScroll + i < routes.size(); i++) {
 			var dock = routes.get(pageScroll + i);
@@ -2430,7 +2455,7 @@ public final class TacticalDashboard extends AbstractWidget {
 			g.outline(x, y, listWidth, 44, dock.dock() == inspectedSupplyDock || new Rect(x, y, listWidth, 44).contains(hoverX, hoverY) ? CYAN : BORDER);
 			HmiArt.icon(g, "chevron-right", x + listWidth - 22, y + 14, 16);
 			g.text(client.font, DockBlockEntity.idFor(BlockPos.of(dock.dock())), x + 8, y + 7, TEXT);
-			g.text(client.font, (dock.enabled() ? "自動補給 ON" : "自動補給 OFF") + " / 配送 " + dock.deliveries().size(), x + 8, y + 25, CYAN);
+			g.text(client.font, "自動補給 / 配送 " + dock.deliveries().size(), x + 8, y + 25, CYAN);
 		}
 		var detail = routes.stream().filter(d -> d.dock() == inspectedSupplyDock).findFirst().orElse(null);
 		Rect open = nearbyDockButton(l);
@@ -2439,6 +2464,7 @@ public final class TacticalDashboard extends AbstractWidget {
 		drawIconButton(g, open, "dock", "現地Dock・補給経路を開く", access.isEmpty());
 		g.text(client.font, fitText(access.isEmpty() ? "Dockの補給経路から設定を編集" : access, virtualWidth() - x - 20), x, open.bottom() + 7, MUTED);
 		drawIconButton(g, deliveryListRect(l), "chevron-right", "個別配送一覧", detail != null);
+		drawIconButton(g, supplyNodeButton(l), "map", "物流ノード管理", true);
 		if (detail == null) return;
 		int dx = x + listWidth + 20;
 		int w = available - listWidth - 20;
@@ -2515,6 +2541,7 @@ public final class TacticalDashboard extends AbstractWidget {
 	}
 	private Rect carrierOpenButton(Layout l, int row) { return new Rect(virtualWidth() - 130, l.header + 63 + row * 70, 110, 22); }
 	private Rect nearbyDockButton(Layout l) { return new Rect(NAV_RAIL_WIDTH + 20, l.bottomTop - 48, 230, 22); }
+	private Rect supplyNodeButton(Layout l) { return new Rect(NAV_RAIL_WIDTH + 260, l.bottomTop - 48, 210, 22); }
 	private Rect recoveryButton(Rect row) { return new Rect(row.right() - 96, row.y + 3, 88, 18); }
 	private Rect recoveryDetailButton(Rect row) { return new Rect(row.right() - 96, row.y + 25, 88, 18); }
 	private Rect recoveryOverviewButton(Layout l) { return new Rect(l.map.right() - 152, l.map.y + 10, 140, 24); }
@@ -2587,6 +2614,10 @@ public final class TacticalDashboard extends AbstractWidget {
 				}
 			}
 			if (page == 8) {
+				if (supplyNodeButton(l).contains(x, y)) {
+					client.setScreenAndShow(new SupplyNodeMapScreen(client.gui.screen()));
+					return true;
+				}
                 if (deliveryListRect(l).contains(x, y) && SupplyNetworkClient.dock(inspectedSupplyDock).isPresent()) {
                     long dock = inspectedSupplyDock;
                     var level = client.level;
@@ -2915,17 +2946,17 @@ public final class TacticalDashboard extends AbstractWidget {
 	private Rect quickCommandRect(Layout l, int index) {
 		return rect(ControllerLayoutPolicy.quickCommand(virtualWidth(), l.bottomTop, index));
 	}
-	private Rect workRect(Layout l, int index) { return inspectorButton(l, 437, index, 2); }
-	private Rect autoOperationsRect(Layout l) { return inspectorButton(l, 492, 0, 2); }
-	private Rect forceOverrideRect(Layout l) { return inspectorButton(l, 492, 1, 2); }
-	private Rect attackTargetRect(Layout l) { return inspectorButton(l, 519, 0, 1); }
-	private Rect cargoEditorRect(Layout l) { return inspectorButton(l, 546, 0, 1); }
-	private Rect radiusEditorRect(Layout l) { return inspectorButton(l, 573, 0, 1); }
+	private Rect workRect(Layout l, int index) { return inspectorButton(l, 464, index, 2); }
+	private Rect autoOperationsRect(Layout l) { return inspectorButton(l, 519, 0, 2); }
+	private Rect forceOverrideRect(Layout l) { return inspectorButton(l, 519, 1, 2); }
+	private Rect attackTargetRect(Layout l) { return inspectorButton(l, 546, 0, 1); }
+	private Rect cargoEditorRect(Layout l) { return inspectorButton(l, 573, 0, 1); }
+	private Rect radiusEditorRect(Layout l) { return inspectorButton(l, 600, 0, 1); }
 	private boolean modulePanelVisible(Layout l) { return page == 3; }
 	private boolean dualModulePanelVisible(Layout l) { return page == 3; }
-	private Rect moduleRect(Layout l, int index) { return inspectorButton(l, 535, index, 2); }
-	private Rect capacityUpgradeRect(Layout l) { return inspectorButton(l, 679, 0, 1); }
-	private Rect weaponModuleRect(Layout l, int index) { return inspectorButton(l, 623, index, 2); }
+	private Rect moduleRect(Layout l, int index) { return inspectorButton(l, 562, index, 2); }
+	private Rect capacityUpgradeRect(Layout l) { return inspectorButton(l, 706, 0, 1); }
+	private Rect weaponModuleRect(Layout l, int index) { return inspectorButton(l, 650, index, 2); }
 
 	private static int moduleColor(DroneRole role) {
 		return switch (role) {

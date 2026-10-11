@@ -6,6 +6,7 @@ import java.util.UUID;
 
 final class DockAllocationPolicy {
 	static final long PARKED_YIELD_GRACE_TICKS = 200L;
+	static final long YIELD_INTERVAL_TICKS = 100L;
 	static final int HOLDING_RING_SIZE = 8;
 	static final double HOLDING_BASE_RADIUS = 14.0;
 	static final double HOLDING_LAYER_RADIUS = 4.0;
@@ -41,6 +42,11 @@ final class DockAllocationPolicy {
 		boolean powerLost, int batteryPercent, long parkedTicks) {
 		return docked && !activeMission && !service && !powerLost && batteryPercent >= 80
 			&& parkedTicks >= PARKED_YIELD_GRACE_TICKS;
+	}
+
+	static boolean yieldTurnAvailable(long tick, long previousTick) {
+		return previousTick < 0L || tick >= previousTick
+			&& tick - previousTick >= YIELD_INTERVAL_TICKS;
 	}
 
 	static HoldingSlot holdingSlot(int queuePosition) {

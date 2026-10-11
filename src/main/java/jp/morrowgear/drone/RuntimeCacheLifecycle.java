@@ -24,6 +24,7 @@ final class RuntimeCacheLifecycle {
 		NavigationEnvironment.clearOwner(owner);
 		DefenseAllocation.clearOwner(owner);
 		ThreatSensorRuntime.clearOwner(owner);
+		FieldRelayRuntime.clearOwner(owner);
 	}
 
 	static void clearAll() {
@@ -42,5 +43,6 @@ final class RuntimeCacheLifecycle {
 		CombatAirspaceRegistry.clear();
 		CombatTelemetry.clear();
 		CombatTheaterCoordinator.clear();
+		FieldRelayRuntime.clear();
 	}
 }

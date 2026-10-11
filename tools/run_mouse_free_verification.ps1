@@ -31,13 +31,21 @@ if ($Scenario -eq 'all') {
     $suite = @(
         'navigation',
         'field',
+        'snowfield_mining',
         'combat',
         'combat_cas',
         'adaptive_combat',
         'base_laser',
         'firing_routes',
         'regression',
+        'ui',
+        'ui_capture',
         'salvage',
+        'salvage_service',
+        'salvage_vertical',
+        'salvage_clearance',
+        'salvage_protected',
+        'salvage_late_engineer',
         'solar_service',
         'dock_exhaustion',
         'dock_allocation',
@@ -49,9 +57,18 @@ if ($Scenario -eq 'all') {
     $failed = @()
     foreach ($child in $suite) {
         Write-Host "Morrowgear isolated suite: $child"
-        & $PSCommandPath -Scenario $child -JavaHome $JavaHome -Width $Width -Height $Height
-        $exitCode = $LASTEXITCODE
+		$childStarted = [DateTime]::UtcNow
+		$childError = $null
+		try {
+			& $PSCommandPath -Scenario $child -JavaHome $JavaHome -Width $Width -Height $Height
+			$exitCode = $LASTEXITCODE
+		} catch {
+			$exitCode = 1
+			$childError = $_.Exception.Message
+			Write-Warning "Morrowgear isolated suite '$child' aborted: $childError"
+		}
         $childReport = Get-ChildItem -LiteralPath $reportDir -Filter "*-$child.json" |
+            Where-Object { $_.LastWriteTimeUtc -ge $childStarted.AddSeconds(-1) } |
             Sort-Object LastWriteTime -Descending | Select-Object -First 1
         $childResult = if ($childReport) {
             Get-Content -Raw -LiteralPath $childReport.FullName | ConvertFrom-Json
@@ -59,7 +76,7 @@ if ($Scenario -eq 'all') {
         $children += [ordered]@{
             scenario = $child
             status = if ($childResult) { $childResult.status } else { 'missing-report' }
-            detail = if ($childResult) { $childResult.detail } else { 'child report was not produced' }
+			detail = if ($childResult) { $childResult.detail } elseif ($childError) { $childError } else { 'child report was not produced' }
             report = if ($childReport) { $childReport.FullName } else { $null }
         }
         if ($exitCode -ne 0 -or -not $childResult -or $childResult.status -ne 'passed') {
@@ -139,7 +156,7 @@ $result = Get-Content -Raw -LiteralPath $report | ConvertFrom-Json
 $contactSheet = $null
 if ($Scenario -eq 'ui_capture' -and $result.status -eq 'passed') {
     $shots = @(Get-ChildItem -LiteralPath $screenshotDir -Filter '*.png' | Sort-Object Name)
-    if ($shots.Count -ne 11) { throw "Expected 11 HMI screenshots but found $($shots.Count): $screenshotDir" }
+    if ($shots.Count -ne 12) { throw "Expected 12 HMI screenshots but found $($shots.Count): $screenshotDir" }
     Add-Type -AssemblyName System.Drawing
     $thumbWidth, $thumbHeight, $labelHeight, $columns = 400, 225, 24, 3
     $rows = [Math]::Ceiling($shots.Count / $columns)

@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [" AB", "ICA", "RI "],
+  "key": {
+    "A": "morrowgear_drone:morrow_alloy",
+    "B": "minecraft:redstone_torch",
+    "C": "morrowgear_drone:basic_control_board",
+    "I": "minecraft:iron_ingot",
+    "R": "minecraft:redstone"
+  },
+  "result": {"id": "morrowgear_drone:strike_beacon_launcher", "count": 1}
+}

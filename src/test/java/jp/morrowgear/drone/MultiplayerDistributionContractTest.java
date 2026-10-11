@@ -23,6 +23,8 @@ class MultiplayerDistributionContractTest {
         assertTrue(client.contains("multiplayer_connect"));
         assertTrue(client.contains("!client.hasSingleplayerServer()"));
         assertTrue(client.contains("client.stop()"));
+        assertTrue(client.contains("MorrowgearAutomation.completionReportExists()"));
+        assertTrue(common.contains("public static boolean completionReportExists()"));
         assertTrue(common.contains("SCENARIO.equals(\"multiplayer_connect\")"));
     }
 

@@ -4,9 +4,25 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import net.minecraft.SharedConstants;
+import net.minecraft.server.Bootstrap;
+import net.minecraft.world.level.block.Blocks;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 class CargoLiftPolicyTest {
+	@BeforeAll
+	static void bootstrapMinecraft() {
+		SharedConstants.tryDetectVersion();
+		Bootstrap.bootStrap();
+	}
+
+	@Test
+	void transientAircraftLightDoesNotReserveTheLandingAnchor() {
+		assertTrue(CargoLiftLoadEntity.landingAnchorClear(Blocks.AIR.defaultBlockState()));
+		assertTrue(CargoLiftLoadEntity.landingAnchorClear(Blocks.LIGHT.defaultBlockState()));
+		assertFalse(CargoLiftLoadEntity.landingAnchorClear(Blocks.STONE.defaultBlockState()));
+	}
     private static List<CargoLiftPolicy.Aircraft> aircraft(double battery, boolean connected) {
         return Arrays.stream(CargoLiftPolicy.Corner.values()).map(corner ->
             new CargoLiftPolicy.Aircraft(UUID.randomUUID(), corner, battery, true, true, connected)).toList();

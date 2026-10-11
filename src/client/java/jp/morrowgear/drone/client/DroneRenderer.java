@@ -72,6 +72,7 @@ public final class DroneRenderer extends EntityRenderer<DroneEntity, DroneRender
 		state.combatWeapon = entity.combatWeapon();
 		state.combatCharge = entity.combatCharge();
 		state.combatShotAge = entity.combatShotAge();
+		state.gunShotAge = entity.gunShotAge();
 		state.combatStateAge = Math.max(0L, entity.level().getGameTime() - entity.combatStateTick());
 		state.salvageState = entity.salvageState();
 		state.fieldType = entity.fieldOperationType();
@@ -91,16 +92,20 @@ public final class DroneRenderer extends EntityRenderer<DroneEntity, DroneRender
 			&& liftCorner != null && load.carried()
 			? load.cableAnchor(liftCorner).subtract(entity.position()) : null;
 		net.minecraft.world.entity.Entity combatTarget = entity.level().getEntity(entity.combatTargetId());
-		state.combatTargetOffset = combatTarget == null ? null
+		state.combatTargetOffset = state.combatState == jp.morrowgear.drone.CombatState.LASER_FIRE
+			&& entity.hasValidCombatVisualAim() ? entity.combatVisualAim()
+			: combatTarget == null ? null
 			: (state.combatState == jp.morrowgear.drone.CombatState.GUN_RUN
 				&& state.combatShotAge <= 4)
-				|| (state.combatState == jp.morrowgear.drone.CombatState.LASER_FIRE
-					&& entity.hasValidCombatVisualAim())
 				? entity.combatVisualAim()
 				: state.combatState == jp.morrowgear.drone.CombatState.LASER_FIRE
 					? null
 					: combatTarget.position().add(0, combatTarget.getBbHeight() * 0.58, 0)
 						.subtract(entity.position());
+		state.gunTargetOffset = state.gunShotAge <= 4
+			? entity.position().add(entity.gunVisualAim())
+				.subtract(new Vec3(state.x, state.y, state.z))
+			: null;
 		state.heading = Mth.rotLerp(partialTick, entity.yRotO, entity.getYRot());
 		Vec3 velocity = entity.getDeltaMovement();
 		Presentation motion = presentations.computeIfAbsent(entity, ignored -> new Presentation(

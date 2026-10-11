@@ -27,6 +27,12 @@ final class DockAllocationRuntime {
 			return size() > CACHE_LIMIT;
 		}
 	};
+	private static final Map<Key, Long> LAST_YIELD = new LinkedHashMap<>(16, 0.75f, true) {
+		@Override
+		protected boolean removeEldestEntry(Map.Entry<Key, Long> eldest) {
+			return size() > CACHE_LIMIT;
+		}
+	};
 	private static boolean registered;
 
 	private DockAllocationRuntime() {
@@ -38,6 +44,7 @@ final class DockAllocationRuntime {
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			CACHE.clear();
 			COMPATIBILITY.clear();
+			LAST_YIELD.clear();
 		});
 	}
 
@@ -57,7 +64,17 @@ final class DockAllocationRuntime {
 			Key key = new Key(level, owner);
 			CACHE.remove(key);
 			COMPATIBILITY.remove(key);
+			LAST_YIELD.remove(key);
 		}
+	}
+
+	static boolean claimYieldTurn(ServerLevel level, ServerPlayer owner) {
+		Key key = new Key(level, owner.getUUID());
+		long tick = level.getGameTime();
+		long previous = LAST_YIELD.getOrDefault(key, -1L);
+		if (!DockAllocationPolicy.yieldTurnAvailable(tick, previous)) return false;
+		LAST_YIELD.put(key, tick);
+		return true;
 	}
 
 	static Set<UUID> compatible(ServerLevel level, ServerPlayer owner, List<DroneEntity> fleet,

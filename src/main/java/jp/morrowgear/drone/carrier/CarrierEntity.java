@@ -123,6 +123,9 @@ public final class CarrierEntity extends Entity {
         int stagnantTicks;
         double lastDistance=Double.POSITIVE_INFINITY;
         double approachY=Double.NaN;
+        float alignmentYaw=Float.NaN;
+        java.util.List<Vec3> route=java.util.List.of();
+        int routeIndex;
         ContainerTransfer(CarrierContainerTransferPolicy.Direction direction, BlockPos pos, int hardpoint,
                           CarrierExpansionPolicy.Type type) {
             this(direction,pos,hardpoint,type,CarrierContainerTransferPolicy.Phase.APPROACH,0);
@@ -566,7 +569,7 @@ public final class CarrierEntity extends Entity {
                     ship.stop = CarrierPolicy.Stop.UNLOADED;
                     if (++ship.navigationWaitTicks >= CarrierNavigation.LOAD_WAIT_TICKS) ship.pauseNavigation(CarrierPolicy.Stop.UNLOADED);
                 } else if (!flightSweepClear(level, position(), getYRot(), position().add(step), motion.yaw())) {
-                    if (!replanContainerTransferAltitude(level, ship)) ship.pauseNavigation(CarrierPolicy.Stop.OBSTRUCTED);
+                    if (!replanContainerTransferRoute(level, ship)) ship.pauseNavigation(CarrierPolicy.Stop.OBSTRUCTED);
                 }
                 else {
                     bayClearWait = 0;
@@ -610,6 +613,8 @@ public final class CarrierEntity extends Entity {
         container.setTransferReserved(true);
         containerTransfer=new ContainerTransfer(CarrierContainerTransferPolicy.Direction.LOAD,anchor,hardpoint,container.moduleType());
         containerTransfer.approachY=approachY;
+        containerTransfer.alignmentYaw=CarrierCargoVisualPolicy.nearestAlignmentYaw(
+            position(),anchor,hardpoint,getYRot());
         containerTransferDetail="LOAD_ACCEPTED";
         setTransferDestination(ship,containerTransfer);
         markShipDirty(); return "ACCEPTED";
@@ -629,6 +634,8 @@ public final class CarrierEntity extends Entity {
         if(!Double.isFinite(approachY))return transferRejected("NO_CLEAR_TRANSFER_ALTITUDE");
         containerTransfer=new ContainerTransfer(CarrierContainerTransferPolicy.Direction.UNLOAD,landing,hardpoint,identity.type());
         containerTransfer.approachY=approachY;
+        containerTransfer.alignmentYaw=CarrierCargoVisualPolicy.nearestAlignmentYaw(
+            position(),landing,hardpoint,getYRot());
         containerTransferDetail="UNLOAD_ACCEPTED";
         setTransferDestination(ship,containerTransfer);
         markShipDirty(); return "ACCEPTED";
@@ -656,7 +663,11 @@ public final class CarrierEntity extends Entity {
     private String transferRejected(String detail){containerTransferDetail=detail;markShipDirty();return detail;}
 
     private void setTransferDestination(CarrierShip ship, ContainerTransfer transfer) {
-        Vec3 target=transferCarrierPosition(transfer);
+        transfer.route=java.util.List.of(); transfer.routeIndex=0;
+        setTransferNavigationDestination(ship,transferCarrierPosition(transfer));
+    }
+
+    private void setTransferNavigationDestination(CarrierShip ship, Vec3 target) {
         ship.destination=new CarrierAnchor(level().dimension().identifier().toString(),
             (int)Math.round(target.x-.5), (int)Math.round(target.y), (int)Math.round(target.z-.5));
         ship.arrivalOperation=CarrierPolicy.Mode.IDLE; ship.navigationPaused=false; ship.stop=CarrierPolicy.Stop.RUNNING;
@@ -670,33 +681,57 @@ public final class CarrierEntity extends Entity {
 
     private Vec3 transferCarrierPosition(ContainerTransfer transfer) {
         if(!Double.isFinite(transfer.approachY))transfer.approachY=initialTransferAltitude(transfer.containerPos);
+        if(!Float.isFinite(transfer.alignmentYaw))
+            transfer.alignmentYaw=CarrierCargoVisualPolicy.nearestAlignmentYaw(
+                position(),transfer.containerPos,transfer.hardpoint,getYRot());
         return CarrierCargoVisualPolicy.alignedCarrierPosition(transfer.containerPos,transfer.approachY,
-            getYRot(),transfer.hardpoint);
+            transfer.alignmentYaw,transfer.hardpoint);
     }
 
-    private boolean replanContainerTransferAltitude(ServerLevel level,CarrierShip ship){
+    private boolean replanContainerTransferRoute(ServerLevel level,CarrierShip ship){
         if(containerTransfer==null||switch(containerTransfer.phase){
             case APPROACH,ALIGN,HOLD -> false; default -> true;
         })return false;
         ContainerTransfer transfer=containerTransfer;
-        double candidate=CarrierContainerTransferPolicy.nextApproachAltitude(
-            Math.max(getY(),Double.isFinite(transfer.approachY)?transfer.approachY:getY()),level.getMaxY());
-        while(Double.isFinite(candidate)){
-            Vec3 climb=new Vec3(getX(),candidate,getZ());
-            if(flightSweepClear(level,position(),getYRot(),climb,getYRot())){
-                transfer.approachY=candidate;
-                transfer.phase=CarrierContainerTransferPolicy.Phase.APPROACH;
-                transfer.ticks=0;transfer.stagnantTicks=0;transfer.lastDistance=Double.POSITIVE_INFINITY;
-                ship.destination=new CarrierAnchor(level.dimension().identifier().toString(),
-                    blockPosition().getX(),(int)Math.round(candidate),blockPosition().getZ());
-                ship.navigationPaused=false;ship.navigationWaitTicks=0;ship.stop=CarrierPolicy.Stop.RUNNING;
-                containerTransferDetail="ALTITUDE_REPLAN_"+(int)Math.round(candidate);
-                CarrierChunkLeases.requestResume(getUUID());markShipDirty();return true;
-            }
-            candidate=CarrierContainerTransferPolicy.nextApproachAltitude(candidate,level.getMaxY());
+        double ceiling=level.getMaxY()-CarrierPolicy.HEIGHT-2.0;
+        var plan=CarrierTransferRoutePlanner.plan(position(),transferCarrierPosition(transfer),ceiling,getYRot(),
+            (from,to)->transferCorridorClear(level,from,to));
+        if(plan.isEmpty()){
+            containerTransferDetail="NO_CLEAR_TRANSFER_ROUTE";
+            return false;
         }
-        containerTransferDetail="NO_CLEAR_TRANSFER_ALTITUDE";
-        return false;
+        var route=plan.orElseThrow();
+        transfer.approachY=route.approachY();
+        transfer.route=route.waypoints(); transfer.routeIndex=0;
+        transfer.phase=CarrierContainerTransferPolicy.Phase.APPROACH;
+        transfer.ticks=0;transfer.stagnantTicks=0;transfer.lastDistance=Double.POSITIVE_INFINITY;
+        ship.navigationWaitTicks=0;
+        setTransferNavigationDestination(ship,transfer.route.getFirst());
+        containerTransferDetail="ROUTE_"+route.strategy()+"_"+route.waypoints().size();
+        markShipDirty();return true;
+    }
+
+    private boolean transferCorridorClear(ServerLevel level,Vec3 from,Vec3 to){
+        Vec3 delta=to.subtract(from);
+        float yaw=CarrierNavigation.heading(delta,getYRot());
+        if(from.distanceToSqr(position())<1.0e-8){
+            float error=CarrierNavigation.angleDifference(yaw,getYRot());
+            float next=getYRot()+Math.clamp(error,-CarrierNavigation.YAW_SLEW,CarrierNavigation.YAW_SLEW);
+            if(!flightSweepClear(level,from,getYRot(),from,next))return false;
+        }
+        return flightSweepClear(level,from,yaw,to,yaw);
+    }
+
+    private boolean advanceTransferRoute(CarrierShip ship,ContainerTransfer transfer){
+        if(transfer.route.isEmpty())return false;
+        transfer.routeIndex++;
+        if(transfer.routeIndex>=transfer.route.size()){
+            transfer.route=java.util.List.of();transfer.routeIndex=0;
+            return false;
+        }
+        setTransferNavigationDestination(ship,transfer.route.get(transfer.routeIndex));
+        transfer.lastDistance=Double.POSITIVE_INFINITY;transfer.stagnantTicks=0;
+        return true;
     }
 
     /** Horizontal crane error used by runtime verification and the controller telemetry. */
@@ -744,19 +779,36 @@ public final class CarrierEntity extends Entity {
                 transfer.phase=CarrierContainerTransferPolicy.Phase.HOLD;transfer.ticks=0;return;
             }
             if(ship.destination!=null)return;
+            if(advanceTransferRoute(ship,transfer))return;
             if(position().distanceToSqr(target)>CarrierContainerTransferPolicy.CARRIER_ALIGNMENT_TOLERANCE
                 *CarrierContainerTransferPolicy.CARRIER_ALIGNMENT_TOLERANCE){
-                setTransferDestination(ship,transfer);return;
+                if(position().distanceToSqr(target)>CarrierContainerTransferPolicy.NAVIGATION_SNAP_TOLERANCE
+                    *CarrierContainerTransferPolicy.NAVIGATION_SNAP_TOLERANCE){
+                    setTransferDestination(ship,transfer);return;
+                }
             }
             transfer.phase=CarrierContainerTransferPolicy.Phase.ALIGN; transfer.ticks=0; transfer.stagnantTicks=0;
             transfer.lastDistance=Double.POSITIVE_INFINITY; markShipDirty(); return;
         }
         if(transfer.phase==CarrierContainerTransferPolicy.Phase.ALIGN) {
             Vec3 target=transferCarrierPosition(transfer);
+            float yawError=CarrierNavigation.angleDifference(transfer.alignmentYaw,getYRot());
+            if(Math.abs(yawError)>.05f){
+                float nextYaw=getYRot()+Math.clamp(yawError,-CarrierNavigation.YAW_SLEW,CarrierNavigation.YAW_SLEW);
+                if(!flightSweepClear(level,position(),getYRot(),position(),nextYaw)){
+                    containerTransferDetail="CARRIER_ALIGNMENT_TURN_BLOCKED";
+                    if(!replanContainerTransferRoute(level,ship)){
+                        transfer.phase=CarrierContainerTransferPolicy.Phase.HOLD;transfer.ticks=0;
+                    }
+                    return;
+                }
+                setYRot(nextYaw);setDeltaMovement(Vec3.ZERO);transfer.stagnantTicks=0;
+                ship.stop=CarrierPolicy.Stop.RUNNING;markShipDirty();return;
+            }
             Vec3 correction=target.subtract(position());
             if(correction.lengthSqr()<=CarrierContainerTransferPolicy.CONTAINER_ALIGNMENT_TOLERANCE
                 * CarrierContainerTransferPolicy.CONTAINER_ALIGNMENT_TOLERANCE){
-                setPos(target); setDeltaMovement(Vec3.ZERO);
+                setPos(target); setYRot(transfer.alignmentYaw); setDeltaMovement(Vec3.ZERO);
                 transfer.phase=CarrierContainerTransferPolicy.Phase.HATCH_OPEN; transfer.ticks=0;
                 ship.stop=CarrierPolicy.Stop.RUNNING; markShipDirty(); return;
             }
@@ -767,7 +819,7 @@ public final class CarrierEntity extends Entity {
             Vec3 step=correction.length()<=.18?correction:correction.normalize().scale(.18);
             if(!flightSweepClear(level,position(),getYRot(),position().add(step),getYRot())){
                 containerTransferDetail="CARRIER_ALIGNMENT_BLOCKED";
-                if(!replanContainerTransferAltitude(level,ship)){
+                if(!replanContainerTransferRoute(level,ship)){
                     transfer.phase=CarrierContainerTransferPolicy.Phase.HOLD;transfer.ticks=0;
                 }
                 return;
@@ -814,7 +866,7 @@ public final class CarrierEntity extends Entity {
                 ((CarrierExpansionContainer)level.getBlockEntity(transfer.containerPos)).setTransferReserved(true);
                 transfer.phase=CarrierContainerTransferPolicy.Phase.APPROACH;transfer.ticks=0;
                 transfer.stagnantTicks=0;transfer.lastDistance=Double.POSITIVE_INFINITY;
-                if(!replanContainerTransferAltitude(level,ship))setTransferDestination(ship,transfer);return;
+                if(!replanContainerTransferRoute(level,ship))setTransferDestination(ship,transfer);return;
             }
         }else{
             if(placed){transfer.phase=CarrierContainerTransferPolicy.Phase.GROUND_CONTACT;transfer.ticks=0;transfer.stagnantTicks=0;return;}
@@ -1135,6 +1187,7 @@ public final class CarrierEntity extends Entity {
             output.putInt("CarrierTransferTicks",containerTransfer.ticks);
             output.putInt("CarrierTransferRetries",containerTransfer.recoveryAttempts);
             output.putDouble("CarrierTransferApproachY",containerTransfer.approachY);
+            output.putFloat("CarrierTransferAlignmentYaw",containerTransfer.alignmentYaw);
         }
         output.putString("CarrierTransferDetail",containerTransferDetail);
     }
@@ -1150,6 +1203,9 @@ public final class CarrierEntity extends Entity {
             if(!stack.isEmpty()&&legacySlot<modules.size())modules.set(legacySlot++,stack);
         expansionBay=new CarrierExpansionBay(modules,this::markShipDirty);
         containerTransfer=readContainerTransfer(input);
+        if(containerTransfer!=null&&!Float.isFinite(containerTransfer.alignmentYaw))
+            containerTransfer.alignmentYaw=CarrierCargoVisualPolicy.nearestAlignmentYaw(
+                position(),containerTransfer.containerPos,containerTransfer.hardpoint,getYRot());
         containerTransferDetail=input.getStringOr("CarrierTransferDetail",containerTransfer==null?"READY":"RELOADED");
         heavyMissileQueue.clear();
         for(SavedMissileLaunch launch:input.listOrEmpty("CarrierMissileQueue",SavedMissileLaunch.CODEC))
@@ -1195,6 +1251,7 @@ public final class CarrierEntity extends Entity {
             transfer.recoveryAttempts=Math.clamp(input.getIntOr("CarrierTransferRetries",0),0,
                 CarrierContainerTransferPolicy.MAX_RECOVERY_ATTEMPTS);
             transfer.approachY=input.getDoubleOr("CarrierTransferApproachY",Double.NaN);
+            transfer.alignmentYaw=input.getFloatOr("CarrierTransferAlignmentYaw",Float.NaN);
             return transfer;
         }catch(IllegalArgumentException malformed){
             return null;

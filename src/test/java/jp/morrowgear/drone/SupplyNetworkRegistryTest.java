@@ -134,21 +134,55 @@ final class SupplyNetworkRegistryTest {
 		Job held = registry.job(job.token()).orElseThrow();
 		assertEquals(Stage.HELD, held.stage());
 		assertEquals(11, held.remaining());
-		assertEquals(0, registry.incoming(route, SupplyKind.FUEL));
+		assertEquals(11, registry.incoming(route, SupplyKind.FUEL));
 		assertFalse(registry.dockReserved(route));
 		assertFalse(registry.delivered(job.token(), 11));
 		assertFalse(registry.loaded(job.token(), 16));
 	}
 
-	@Test void configureInvalidatesGenerationWithoutErasingCargo() {
+	@Test void configurationChangesDoNotInterruptAnAirborneManifest() {
 		Configuration old = configure(route);
 		Job job = reserve(old);
 		registry.loaded(job.token(), 16);
 		Configuration updated = registry.configure(route, old.rules(), false);
 		assertTrue(updated.revision() > old.revision());
-		assertEquals(16, registry.job(job.token()).orElseThrow().remaining());
-		assertFalse(registry.current(job));
+		Job airborne = registry.job(job.token()).orElseThrow();
+		assertEquals(16, airborne.remaining());
+		assertEquals(Stage.LOADED, airborne.stage());
+		assertTrue(registry.current(airborne));
 		assertTrue(registry.reserve(old, UUID.randomUUID(), SupplyKind.FUEL, "minecraft:coal", 16, 64, 64, 1).isEmpty());
+	}
+
+	@Test void removingDockReleasesItsRouteAndEmptyReservation() {
+		Configuration removed = configure(route);
+		Job reservation = reserve(removed);
+		assertTrue(registry.removeDock(route));
+		assertTrue(registry.configurations().isEmpty());
+		assertTrue(registry.job(reservation.token()).isEmpty());
+		assertFalse(registry.removeDock(route));
+	}
+
+	@Test void removingDockRetainsPhysicalManifestForFallback() {
+		Job loaded = reserve(configure(route));
+		assertTrue(registry.loaded(loaded.token(), 16));
+		assertTrue(registry.removeDock(route));
+		Job held = registry.job(loaded.token()).orElseThrow();
+		assertEquals(Stage.HELD, held.stage());
+		assertEquals(Status.DOCK_LOST, held.status());
+		assertEquals(16, held.remaining());
+	}
+
+	@Test void removingOneDockDoesNotAffectManifestRedirectedToAnotherDock() {
+		Job loaded = reserve(configure(route));
+		assertTrue(registry.loaded(loaded.token(), 16));
+		registry.cancel(loaded.token(), Status.DOCK_LOST);
+		Route alternate = new Route(owner, route.dimension(), Route.AUTO_SOURCE, 21);
+		configure(alternate);
+		assertTrue(registry.redirectRetained(loaded.token(), alternate.dock(), false).isPresent());
+		assertTrue(registry.removeDock(route));
+		Job redirected = registry.job(loaded.token()).orElseThrow();
+		assertEquals(Stage.RETURN_DOCK, redirected.stage());
+		assertEquals(alternate.dock(), redirected.deliveryTarget());
 	}
 
 	@Test void unchangedConfigurationDoesNotCancelAnActiveTrip() {
@@ -215,6 +249,43 @@ final class SupplyNetworkRegistryTest {
 		SupplyNetworkSavedData restored = SupplyNetworkSavedData.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow();
 		assertEquals(List.of(1234L), restored.nodes(owner, route.dimension()));
 		assertTrue(restored.nodes(UUID.randomUUID(), route.dimension()).isEmpty());
+	}
+
+	@Test void fairnessHistoryIsBoundedToConfiguredDocks() {
+		SupplyNetworkSavedData data = new SupplyNetworkSavedData();
+		Configuration config = data.registry().configure(route, SupplyNetworkPolicy.defaults(), true);
+		data.recordDelivery(route, SupplyKind.FUEL, 200L);
+		assertEquals(200L, data.lastDelivery(route, SupplyKind.FUEL));
+		data.retainDeliveryHistory(List.of(config));
+		assertEquals(200L, data.lastDelivery(route, SupplyKind.FUEL));
+		data.retainDeliveryHistory(List.of());
+		assertEquals(Long.MIN_VALUE, data.lastDelivery(route, SupplyKind.FUEL));
+	}
+
+	@Test void heldPhysicalCargoRemainsIncomingButAnEmptyFailedReservationDoesNot() {
+		Configuration config = configure(route);
+		Job empty = reserve(config);
+		registry.cancel(empty.token(), Status.SOURCE_LOST);
+		assertEquals(0, registry.incoming(route, SupplyKind.FUEL));
+		registry.release(empty.token());
+
+		Job loaded = reserve(config);
+		assertTrue(registry.loaded(loaded.token(), 16));
+		registry.cancel(loaded.token(), Status.DOCK_FULL);
+		assertEquals(16, registry.incoming(route, SupplyKind.FUEL));
+	}
+
+	@Test void removingANodeStopsFutureDiscoveryWithoutDestroyingAnActiveManifest() {
+		SupplyNetworkSavedData data = new SupplyNetworkSavedData();
+		data.registerNode(owner, route.dimension(), route.source());
+		Configuration config = data.registry().configure(route, SupplyNetworkPolicy.defaults(), true);
+		Job job = data.registry().reserve(config, UUID.randomUUID(), SupplyKind.FUEL,
+			"minecraft:coal", 16, 64, 64, 0).orElseThrow();
+		assertTrue(data.unregisterNode(owner, route.dimension(), route.source()));
+		assertFalse(data.unregisterNode(owner, route.dimension(), route.source()));
+		assertTrue(data.nodes(owner, route.dimension()).isEmpty());
+		assertTrue(data.registry().current(job));
+		assertEquals(job, data.registry().job(job.token()).orElseThrow());
 	}
 
 	@Test void reloadWithReconfiguredRouteHoldsOldJobInsteadOfReassigningIt() {

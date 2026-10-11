@@ -61,9 +61,11 @@ class CarrierContainerTransferPolicyTest {
         String entity=Files.readString(Path.of("src/main/java/jp/morrowgear/drone/carrier/CarrierEntity.java"));
         for(String key:new String[]{"CarrierTransferActive","CarrierTransferDirection","CarrierTransferPhase",
             "CarrierTransferPosition","CarrierTransferHardpoint","CarrierTransferType","CarrierTransferTicks",
-            "CarrierTransferRetries","CarrierTransferApproachY","CarrierTransferDetail"})
+            "CarrierTransferRetries","CarrierTransferApproachY","CarrierTransferAlignmentYaw","CarrierTransferDetail"})
             assertTrue(entity.contains(key),key);
         assertTrue(entity.contains("recoverContainerTransfer"));
+        assertTrue(entity.contains("replanContainerTransferRoute"));
+        assertTrue(entity.contains("CarrierTransferRoutePlanner.plan"));
         assertTrue(entity.contains("releaseContainerReservation"));
         assertTrue(entity.contains("HOLD_RETRY_TICKS"));
         assertTrue(entity.contains("APPROACH_STALL_TICKS"));

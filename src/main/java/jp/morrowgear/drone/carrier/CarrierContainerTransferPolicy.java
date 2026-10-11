@@ -8,6 +8,7 @@ public final class CarrierContainerTransferPolicy {
     public static final double CONTAINER_HEIGHT = 2.4;
     public static final double CARRIER_ALIGNMENT_TOLERANCE = .35;
     public static final double CONTAINER_ALIGNMENT_TOLERANCE = .18;
+    public static final double NAVIGATION_SNAP_TOLERANCE = .8;
     public static final double CLEARANCE_MARGIN = 1.0;
     public static final int HATCH_TICKS = 24;
     public static final int WINCH_DEPLOY_TICKS = 30;

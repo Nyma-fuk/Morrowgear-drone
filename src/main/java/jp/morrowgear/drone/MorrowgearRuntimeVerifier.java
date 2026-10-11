@@ -494,6 +494,12 @@ final class MorrowgearRuntimeVerifier {
 		return drone;
 	}
 
+	private static BlockPos verificationBase(ServerLevel level, BlockPos requested, int overhead) {
+		int minimum = level.getMinY() + 4;
+		int maximum = level.getMaxY() - Math.max(8, overhead) - 1;
+		return new BlockPos(requested.getX(), Mth.clamp(requested.getY(), minimum, maximum), requested.getZ());
+	}
+
 	private static int checkPersistence(ServerPlayer player) {
 		ServerLevel level = player.level();
 		List<DroneEntity> probes = level.getEntitiesOfClass(DroneEntity.class,
@@ -561,8 +567,19 @@ final class MorrowgearRuntimeVerifier {
 				+ solarServiceVerification.progress()));
 			return 0;
 		}
+		if (MorrowgearAutomation.requested()) isolateSolarAutomation(player);
 		solarServiceVerification = new SolarServiceVerificationSession(player);
 		return Command.SINGLE_SUCCESS;
+	}
+
+	private static void isolateSolarAutomation(ServerPlayer player) {
+		ServerLevel level = player.level();
+		List<Entity> stale = new ArrayList<>();
+		for (Entity entity : level.getAllEntities()) if (entity instanceof DroneEntity
+			|| entity instanceof SolarServiceStationEntity || entity instanceof ChargingRelayEntity) stale.add(entity);
+		stale.forEach(Entity::discard);
+		SolarServiceRegistry.clearForTests();
+		FieldRelayRuntime.invalidate(player);
 	}
 
 	private static int startDockExhaustion(ServerPlayer player) {
@@ -649,7 +666,7 @@ final class MorrowgearRuntimeVerifier {
 		private CargoLiftVerificationSession(ServerPlayer player) {
 			this.player=player;
 			this.level=player.level();
-			BlockPos base=player.blockPosition().below().offset(42,0,34);
+			BlockPos base=verificationBase(level, player.blockPosition().below().offset(42,0,34), 32);
 			platformBase=base;
 			source=base.above();
 			destination=base.offset(32,1,0);
@@ -662,7 +679,7 @@ final class MorrowgearRuntimeVerifier {
 			prepareSite(base);
 			var ledger=jp.morrowgear.drone.carrier.CarrierExpansionLedger.get(level.getServer());
 			for(BlockPos pos:List.of(source,destination)){
-				level.removeBlock(pos,false);
+				jp.morrowgear.drone.carrier.CarrierContainerFootprint.removeContainer(level,pos);
 				ledger.releaseMissingPlaced(level.dimension().identifier().toString(),pos.asLong(),
 					"cargo-lift-verification-reset",level.getGameTime());
 			}
@@ -704,9 +721,14 @@ final class MorrowgearRuntimeVerifier {
 		}
 
 		private void prepareSite(BlockPos base){
+			int clearHeight=Math.max(1,Math.min(48,level.getMaxY()-base.getY()-1));
 			for(int x=-24;x<=42;x++)for(int z=-10;z<=10;z++){
 				level.setBlockAndUpdate(base.offset(x,0,z),Blocks.SMOOTH_STONE.defaultBlockState());
-				for(int y=1;y<=24;y++)level.setBlockAndUpdate(base.offset(x,y,z),Blocks.AIR.defaultBlockState());
+				// A reused verification world may place the player beneath a mountain or
+				// an older fixture. Cargo lift clearance uses the heightmap, so leaving a
+				// single block above this arena can create an impossible world-height
+				// target and strand the mission in LIFT.
+				for(int y=1;y<=clearHeight;y++)level.setBlockAndUpdate(base.offset(x,y,z),Blocks.AIR.defaultBlockState());
 			}
 		}
 
@@ -844,7 +866,7 @@ final class MorrowgearRuntimeVerifier {
 		private void cleanupCompletedFixture(){
 			var ledger=jp.morrowgear.drone.carrier.CarrierExpansionLedger.get(level.getServer());
 			for(BlockPos pos:List.of(source,destination)){
-				level.removeBlock(pos,false);
+				jp.morrowgear.drone.carrier.CarrierContainerFootprint.removeContainer(level,pos);
 				ledger.releaseMissingPlaced(level.dimension().identifier().toString(),pos.asLong(),
 					"cargo-lift-verification-complete",level.getGameTime());
 			}
@@ -879,7 +901,7 @@ final class MorrowgearRuntimeVerifier {
 		private DynamicDockVerificationSession(ServerPlayer player) {
 			this.player = player;
 			this.level = player.level();
-			BlockPos base = player.blockPosition().below().offset(0, 0, 18);
+			BlockPos base = verificationBase(level, player.blockPosition().below().offset(0, 0, 18), 24);
 			// This dedicated verification world is reused between command-only runs.
 			// Remove stale probes and Docks so they cannot satisfy a reservation before
 			// this scenario has observed its required no-Dock and queue phases.
@@ -908,9 +930,11 @@ final class MorrowgearRuntimeVerifier {
 
 		private void createDock(BlockPos pos) {
 			for (int index = 0; index < MorrowgearDrone.DOCK_PARTS.length; index++) {
+				if (index == 4) continue;
 				BlockPos part = pos.offset(index % 3 - 1, 0, index / 3 - 1);
 				level.setBlockAndUpdate(part, MorrowgearDrone.DOCK_PARTS[index].defaultBlockState());
 			}
+			level.setBlockAndUpdate(pos, MorrowgearDrone.DOCK_PARTS[4].defaultBlockState());
 			if (!(level.getBlockEntity(pos) instanceof DockBlockEntity dock))
 				throw new IllegalStateException("dynamic Dock verifier Dock was not created");
 			dock.initialize(player);
@@ -1015,16 +1039,18 @@ final class MorrowgearRuntimeVerifier {
 		private DockExhaustionVerificationSession(ServerPlayer player) {
 			this.player = player;
 			this.level = player.level();
-			BlockPos base = player.blockPosition().below().offset(-14, 0, 0);
+			BlockPos base = verificationBase(level, player.blockPosition().below().offset(-14, 0, 0), 16);
 			dockPos = base.above();
 			for (int x = -4; x <= 20; x++) for (int z = -6; z <= 6; z++) {
 				level.setBlockAndUpdate(base.offset(x, 0, z), Blocks.SMOOTH_STONE.defaultBlockState());
 				for (int y = 1; y <= 8; y++) level.setBlockAndUpdate(base.offset(x, y, z), Blocks.AIR.defaultBlockState());
 			}
 			for (int index = 0; index < MorrowgearDrone.DOCK_PARTS.length; index++) {
+				if (index == 4) continue;
 				BlockPos part = dockPos.offset(index % 3 - 1, 0, index / 3 - 1);
 				level.setBlockAndUpdate(part, MorrowgearDrone.DOCK_PARTS[index].defaultBlockState());
 			}
+			level.setBlockAndUpdate(dockPos, MorrowgearDrone.DOCK_PARTS[4].defaultBlockState());
 			if (!(level.getBlockEntity(dockPos) instanceof DockBlockEntity dock))
 				throw new IllegalStateException("dock exhaustion verifier Dock was not created");
 			dock.initialize(player);
@@ -1090,7 +1116,7 @@ final class MorrowgearRuntimeVerifier {
 	}
 
 	private static final class SolarServiceVerificationSession {
-		private static final long TIMEOUT_TICKS = 1600L;
+		private static final long TIMEOUT_TICKS = 2400L;
 		private static final String RESUME_MISSION = "VERIFY-SOLAR-RESUME";
 		private final ServerPlayer player;
 		private final ServerLevel level;
@@ -1098,6 +1124,7 @@ final class MorrowgearRuntimeVerifier {
 		private final DroneEntity drone;
 		private final DroneEntity relayDrone;
 		private final long startedTick;
+		private final Vec3 playerAnchor;
 		private final Vec3 initialDronePosition;
 		private final int initialBattery;
 		private Vec3 resumePosition;
@@ -1111,6 +1138,15 @@ final class MorrowgearRuntimeVerifier {
 		private boolean relayAircraftObserved;
 		private boolean relayCommandIssued;
 		private boolean relayCommandObserved;
+		private String relayLoiterSlot = "";
+		private double relayPreviousAngle = Double.NaN;
+		private double relayAngularTravel;
+		private int relayLoiterSamples;
+		private boolean relayServiceInjected;
+		private boolean relaySolarObserved;
+		private boolean relaySolarCompletionObserved;
+		private boolean relayMeshRejoinObserved;
+		private int relayPostServiceLoiterSamples;
 		private final Vec3 relayStart;
 		private final BlockPos relayDestination;
 		private boolean complete;
@@ -1119,11 +1155,20 @@ final class MorrowgearRuntimeVerifier {
 		private SolarServiceVerificationSession(ServerPlayer player) {
 			this.player = player;
 			this.level = player.level();
+			playerAnchor = player.position();
+			player.setDeltaMovement(Vec3.ZERO);
 			Vec3 forward = player.getLookAngle().multiply(1, 0, 1);
 			if (forward.lengthSqr() < 0.01) forward = new Vec3(0, 0, 1);
 			forward = forward.normalize();
 			Vec3 right = new Vec3(-forward.z, 0, forward.x);
 			Vec3 center = player.position().add(forward.scale(22.0)).add(0, 10.0, 0);
+			// This scenario reuses the automation world. Previous obstacle, carrier, or
+			// excavation fixtures may occupy the high-altitude test cell, so isolate the
+			// station and both initial aircraft positions before entities are created.
+			BlockPos airspace = BlockPos.containing(center);
+			for (int x = -18; x <= 18; x++) for (int z = -18; z <= 18; z++)
+				for (int y = -4; y <= 12; y++)
+					level.setBlockAndUpdate(airspace.offset(x, y, z), Blocks.AIR.defaultBlockState());
 			station = MorrowgearDrone.SOLAR_SERVICE_STATION.create(level, EntitySpawnReason.TRIGGERED);
 			drone = MorrowgearDrone.DRONE.create(level, EntitySpawnReason.TRIGGERED);
 			relayDrone = MorrowgearDrone.DRONE.create(level, EntitySpawnReason.TRIGGERED);
@@ -1138,10 +1183,14 @@ final class MorrowgearRuntimeVerifier {
 			drone.assignRole(DroneRole.SCOUT);
 			drone.assignWaypoint(BlockPos.containing(center.add(forward.scale(36.0))), RESUME_MISSION,
 				1, 0, drone.blockPosition(), level.getGameTime());
-			drone.setPowerForVerification(200, 1000);
+			// Allow the station to publish its first heartbeat before forcing diversion.
+			drone.setPowerForVerification(400, 1000);
 			level.addFreshEntity(drone);
-			relayStart = center.add(forward.scale(240.0));
-			relayDestination = BlockPos.containing(relayStart.add(right.scale(20.0)));
+			// Deploy from the loaded base area. Teleporting the relay directly into an
+			// unloaded remote chunk only tests chunk resurrection, not mesh formation.
+			relayStart = center.add(right.scale(-10.0));
+			relayDestination = BlockPos.containing(center.add(forward.scale(240.0))
+				.add(right.scale(20.0)));
 			BlockPos relayBlock = BlockPos.containing(relayStart);
 			OperationChunkLeaseRuntime.refreshDataLink(level, new net.minecraft.world.level.ChunkPos(
 				relayBlock.getX() >> 4, relayBlock.getZ() >> 4));
@@ -1149,6 +1198,7 @@ final class MorrowgearRuntimeVerifier {
 			relayDrone.initializeOwner(player);
 			relayDrone.assignGroup("VERIFY-SOLAR-RELAY");
 			relayDrone.assignRole(DroneRole.FIELD);
+			relayDrone.setFieldMeshAuthorized(true);
 			relayDrone.setPowerForVerification(1000, 1000);
 			level.addFreshEntity(relayDrone);
 			startedTick = level.getGameTime();
@@ -1163,24 +1213,58 @@ final class MorrowgearRuntimeVerifier {
 				return;
 			}
 			long elapsed = level.getGameTime() - startedTick;
-			Vec3 outward = station.position().subtract(player.position());
-			if (outward.lengthSqr() > 0.01) {
-				Vec3 remotePoint = station.position().add(outward.normalize().scale(250.0));
-				DataLinkRelayPolicy.Link link = DataLinkRelayNetwork.link(player, remotePoint);
-				relayExtensionObserved |= link.connected() && link.hops() == 1
-					&& player.position().distanceTo(remotePoint) > DataLinkRelayPolicy.DIRECT_RANGE;
+			player.setDeltaMovement(Vec3.ZERO);
+			if (player.position().distanceToSqr(playerAnchor) > 0.01)
+				player.teleportTo(playerAnchor.x, playerAnchor.y, playerAnchor.z);
+			if (elapsed == 5) drone.setPowerForVerification(200, 1000);
+			DataLinkRelayPolicy.Coverage relayCoverage = DataLinkRelayNetwork.coverage(player);
+			relayAircraftObserved |= relayDrone.isAlive() && relayCoverage.relays().stream()
+				.anyMatch(node -> node.node().id().equals(relayDrone.getUUID()));
+				if (relayAircraftObserved) {
+					Vec3 outward = relayDrone.position().subtract(player.position()).multiply(1, 0, 1);
+					if (outward.lengthSqr() > 0.01) {
+						Vec3 remotePoint = relayDrone.position().add(outward.normalize().scale(80.0));
+						DataLinkRelayPolicy.Link link = DataLinkRelayNetwork.link(player, remotePoint);
+						relayExtensionObserved |= link.connected() && link.hops() == 1;
+					}
 			}
-			DataLinkRelayPolicy.Link aircraftLink = DataLinkRelayNetwork.link(player, relayDrone.position());
-			relayAircraftObserved |= relayDrone.isAlive() && aircraftLink.connected()
-				&& aircraftLink.hops() == 1
-				&& player.position().distanceTo(relayDrone.position()) > DataLinkRelayPolicy.DIRECT_RANGE;
-			if (relayAircraftObserved && !relayCommandIssued && elapsed >= 80) {
-				relayCommandIssued = true;
-				relayDrone.assignWaypoint(relayDestination, "VERIFY-RELAY-COMMAND", 1, 0,
-					relayDrone.blockPosition(), level.getGameTime());
+				if (!relayCommandIssued && elapsed >= 80) {
+					relayCommandIssued = true;
+					DataLinkRelayNetwork.canReach(player, Vec3.atCenterOf(relayDestination));
+				}
+			FieldRelayRuntime.Assignment currentRelayAssignment = FieldRelayRuntime.assignment(player, relayDrone);
+				relayCommandObserved |= relayCommandIssued
+					&& relayDrone.dataLinkStatus().startsWith("FIELD MESH /")
+					&& currentRelayAssignment != null;
+			if (currentRelayAssignment != null) {
+				if (!currentRelayAssignment.slotId().equals(relayLoiterSlot)) {
+					relayLoiterSlot = currentRelayAssignment.slotId();
+					relayPreviousAngle = Double.NaN;
+					relayAngularTravel = 0.0;
+					relayLoiterSamples = 0;
+				}
+				Vec3 relayRadial = relayDrone.position().subtract(currentRelayAssignment.target()).multiply(1, 0, 1);
+				if (FieldRelayFlightPolicy.established(relayDrone.position(), currentRelayAssignment.target())
+					&& relayRadial.length() >= 4.0 && relayRadial.length() <= 10.5) {
+					double relayAngle = Math.atan2(relayRadial.z, relayRadial.x);
+					if (Double.isFinite(relayPreviousAngle)) relayAngularTravel += Math.abs(Mth.wrapDegrees(
+						(float)Math.toDegrees(relayAngle - relayPreviousAngle))) * Math.PI / 180.0;
+					relayPreviousAngle = relayAngle;
+					relayLoiterSamples++;
+					if (relaySolarCompletionObserved) {
+						relayPostServiceLoiterSamples++;
+						relayMeshRejoinObserved |= relayPostServiceLoiterSamples >= 20
+							&& relayDrone.dataLinkStatus().startsWith("FIELD MESH /");
+					}
+				}
 			}
-			relayCommandObserved |= relayCommandIssued && relayDrone.mode() == DroneMode.WAYPOINT
-				&& relayDrone.position().distanceTo(relayStart) >= 2.0;
+			if (!relayServiceInjected && relayLoiterSamples >= 40) {
+				relayServiceInjected = true;
+				relayDrone.setPowerForVerification(340, 1000);
+			}
+			relaySolarObserved |= relayServiceInjected && relayDrone.solarServiceAssignedForVerification();
+			relaySolarCompletionObserved |= relaySolarObserved
+				&& !relayDrone.solarServiceAssignedForVerification();
 			if (drone.dataLinkStatus().startsWith("SOLAR ")) solarAssignmentObserved = true;
 			Vec3 radial = drone.position().subtract(station.position()).multiply(1, 0, 1);
 			double radius = radial.length();
@@ -1204,19 +1288,40 @@ final class MorrowgearRuntimeVerifier {
 			missionResumeObserved |= linkCompletionObserved && drone.mode() == DroneMode.WAYPOINT
 				&& RESUME_MISSION.equals(drone.missionId()) && resumePosition != null
 				&& drone.position().distanceTo(resumePosition) >= 2.0;
+			boolean relayLoitering = relayLoiterSamples >= 30 && relayAngularTravel >= 0.25;
 			if (moved && orbiting && charging && missionResumeObserved && relayExtensionObserved
-				&& relayAircraftObserved && relayCommandObserved) {
+				&& relayAircraftObserved && relayCommandObserved && relayLoitering
+				&& relaySolarObserved && relayMeshRejoinObserved) {
 				finish(true, "WAYPOINT>SOLAR DIVERT>CAPTURE>ORBIT>WAYPOINT RESUME / charge gained / samples="
-					+ stableOrbitSamples + " / DATA LINK RELAY EXTENDED / REMOTE COMMAND MOVED");
+						+ stableOrbitSamples + " / FIELD MESH RELAY EXTENDED / TERRAIN-PLANE LOITER "
+						+ relayLoiterSamples + " samples / FIELD SOLAR>REJOIN "
+						+ relayPostServiceLoiterSamples + " samples");
 				return;
 			}
-			if (elapsed >= TIMEOUT_TICKS) finish(false, "timeout / assigned=" + solarAssignmentObserved
+			if (elapsed >= TIMEOUT_TICKS) {
+				FieldRelayRuntime.Snapshot relaySnapshot = FieldRelayRuntime.snapshot(player);
+				FieldRelayRuntime.Assignment relayAssignment = FieldRelayRuntime.assignment(player, relayDrone);
+				finish(false, "timeout / assigned=" + solarAssignmentObserved
 				+ " moved=" + moved + " samples=" + stableOrbitSamples + " travel="
 				+ String.format("%.2f", angularTravel) + " charge=" + drone.batteryPercent()
 				+ "% linkEnd=" + linkCompletionObserved + " resumed=" + missionResumeObserved
 				+ " relay=" + relayExtensionObserved + " aircraft=" + relayAircraftObserved
 				+ " command=" + relayCommandObserved
+					+ " relayLoiter=" + relayLoiterSamples + "/" + String.format("%.2f", relayAngularTravel)
+					+ " relaySolar=" + relaySolarObserved + "/" + relaySolarCompletionObserved
+					+ " relayRejoin=" + relayMeshRejoinObserved
+					+ " relayPostService=" + relayPostServiceLoiterSamples
+				+ " eligible=" + relayDrone.fieldRelayAvailableForMesh()
+				+ " relayAssigned=" + (relayAssignment != null)
+				+ " playerPos=" + player.position()
+				+ " meshOrigin=" + relaySnapshot.origin()
+				+ " relayTarget=" + (relayAssignment == null ? "none" : relayAssignment.target())
+				+ " relayDemand=" + (relayAssignment == null ? "none" : relayAssignment.demandId())
+				+ " relayPos=" + relayDrone.position()
+				+ " relayMotion=" + relayDrone.getDeltaMovement()
+				+ " relayStatus=" + relayDrone.dataLinkStatus()
 				+ " mode=" + drone.mode() + " mission=" + drone.missionId());
+			}
 		}
 
 		private void finish(boolean pass, String detail) {
@@ -1307,11 +1412,12 @@ final class MorrowgearRuntimeVerifier {
 			this.clearanceScenario = clearanceScenario;
 			this.protectedScenario = protectedScenario;
 			this.lateEngineerScenario = lateEngineerScenario;
-			this.base = player.blockPosition().below().offset(14, 0, 0);
+			this.base = verificationBase(level, player.blockPosition().below().offset(14, 0, 0), 32);
 			this.dockPos = base.offset(0, verticalScenario ? 12 : 1, 0);
 			for (DroneEntity existing : level.getEntitiesOfClass(DroneEntity.class,
 				new AABB(base).inflate(64), drone -> drone.isOwnedBy(player)
-					&& drone.groupId().startsWith("VERIFY-SALVAGE"))) existing.discard();
+					&& (MorrowgearAutomation.requested()
+						|| drone.groupId().startsWith("VERIFY-SALVAGE")))) existing.discard();
 			prepareSite();
 			placeDock();
 			carrier = createDrone(dockPos.getX() + .5, dockPos.getY() + .29,
@@ -1359,15 +1465,20 @@ final class MorrowgearRuntimeVerifier {
 			}
 			for (int x = -4; x <= 22; x++) for (int z = -6; z <= 6; z++) {
 				level.setBlockAndUpdate(base.offset(x, 0, z), Blocks.SMOOTH_STONE.defaultBlockState());
-				for (int y = 1; y <= 9; y++) level.setBlockAndUpdate(base.offset(x, y, z), Blocks.AIR.defaultBlockState());
+				// The automated world is intentionally reused between runs. Clear the full
+				// extraction corridor so an old roof or carrier fixture cannot silently turn
+				// the standard open-air case into an Engineer-clearance scenario.
+				for (int y = 1; y <= 40; y++) level.setBlockAndUpdate(base.offset(x, y, z), Blocks.AIR.defaultBlockState());
 			}
 		}
 
 		private void placeDock() {
 			for (int index = 0; index < MorrowgearDrone.DOCK_PARTS.length; index++) {
+				if (index == 4) continue;
 				BlockPos part = dockPos.offset(index % 3 - 1, 0, index / 3 - 1);
 				level.setBlockAndUpdate(part, MorrowgearDrone.DOCK_PARTS[index].defaultBlockState());
 			}
+			level.setBlockAndUpdate(dockPos, MorrowgearDrone.DOCK_PARTS[4].defaultBlockState());
 			if (!(level.getBlockEntity(dockPos) instanceof DockBlockEntity dock)) {
 				throw new IllegalStateException("salvage verifier Dock was not created");
 			}
@@ -1497,7 +1608,8 @@ final class MorrowgearRuntimeVerifier {
 			if (loadRestoredObserved && carrier.salvageState() == SalvageState.IDLE) {
 				boolean transitions = observed.containsAll(EnumSet.allOf(SalvageState.class));
 				boolean finalState = carrier.salvageState() == SalvageState.IDLE
-					&& carrier.hasDock() && carrier.mode() == DroneMode.DOCK;
+					&& carrier.mode() == DroneMode.DOCK
+					&& (carrier.hasDock() || carrier.dockHolding());
 				boolean servicePass = !serviceScenario || serviceInjected && serviceReturnObserved
 					&& serviceDockedObserved && serviceResumeObserved;
 				boolean verticalPass = !verticalScenario || verticalEscapeObserved;
@@ -1520,6 +1632,8 @@ final class MorrowgearRuntimeVerifier {
 						+ " cruise=" + returnCruiseObserved
 						+ " entity=" + load.isAlive() + "/" + loadRestoredObserved
 						+ " resumed=" + loadMissionResumedObserved + " final=" + finalState
+						+ "/mode=" + carrier.mode() + "/dock=" + carrier.hasDock()
+						+ "/queue=" + carrier.dockHolding()
 						+ " engineerResumed=" + engineerResumed
 						+ " vertical=" + verticalPass + "/" + verticalEscapeObserved
 						+ " service=" + servicePass + "/" + serviceReturnObserved
@@ -1753,7 +1867,13 @@ final class MorrowgearRuntimeVerifier {
 		private DroneEntity supplyContinuityProbe;
 		private boolean supplyImmediateRedispatchObserved;
 		private boolean supplyIdleReturnObserved;
+		private boolean supplyLoadedCommandAttempted;
+		private boolean supplyLoadedCommandRejectedObserved;
 		private LivingEntity operatorAttackProbe;
+		private DroneEntity fieldRelayObstacleProbe;
+		private String fieldRelayObstacleSlot = "";
+		private Vec3 fieldRelayObstacleTarget;
+		private final List<BlockPos> fieldRelayObstacleBlocks = new ArrayList<>();
 
 		RuntimeSession(ServerPlayer player) {
 			this(player, VerificationScope.ALL);
@@ -1767,9 +1887,10 @@ final class MorrowgearRuntimeVerifier {
 			this.scope = scope;
 			this.player = player;
 			this.level = player.level();
-			this.base = scope == VerificationScope.ADAPTIVE_COMBAT || scope == VerificationScope.FIRING_ROUTES
+			BlockPos requested = scope == VerificationScope.ADAPTIVE_COMBAT || scope == VerificationScope.FIRING_ROUTES
 				? player.blockPosition().below().offset(72, 0, 0)
 				: player.blockPosition().below();
+			this.base = verificationBase(level, requested, 48);
 			buildCases();
 			if (scope != VerificationScope.ALL) cases.removeIf(step -> !step.includedIn(scope));
 		}
@@ -1942,12 +2063,14 @@ final class MorrowgearRuntimeVerifier {
 				.scopedTo(VerificationScope.COMBAT, VerificationScope.COMBAT_CAS));
 			cases.add(new CaseStep("cave laser acquires an individual firing aperture", 900,
 				this::assignCaveLaserRoute, this::assertCaveLaserRoute,
-				() -> firingRouteShotUnits.size() >= 2 && combatProbe != null
+				() -> firingRouteAlternativeUnits.size() >= 2 && firingRouteShotUnits.size() >= 2 && combatProbe != null
 					&& combatProbe.getHealth() < firingRouteInitialTargetHealth)
 				.scopedTo(VerificationScope.FIRING_ROUTES));
 			cases.add(new CaseStep("cave autocannon uses a forward alternate ingress", 1100,
 				this::assignCaveGunRoute, this::assertCaveGunRoute,
-				() -> !firingRouteShotUnits.isEmpty()).scopedTo(VerificationScope.FIRING_ROUTES));
+				() -> !firingRouteAlternativeUnits.isEmpty() && !firingRouteShotUnits.isEmpty()
+					&& combatProbe != null && combatProbe.getHealth() < firingRouteInitialTargetHealth)
+				.scopedTo(VerificationScope.FIRING_ROUTES));
 			cases.add(new CaseStep("shaft laser engages vertically without clipping", 900,
 				this::assignShaftLaserRoute, this::assertShaftLaserRoute,
 				() -> !firingRouteShotUnits.isEmpty() && combatProbe != null
@@ -1958,7 +2081,8 @@ final class MorrowgearRuntimeVerifier {
 				() -> firingRouteSuppressionObserved).scopedTo(VerificationScope.FIRING_ROUTES));
 			cases.add(new CaseStep("multi-Wing wall routes remain independent", 1200,
 				this::assignMultiWingWallRoutes, this::assertMultiWingWallRoutes,
-				() -> firingRouteShotUnits.size() >= 4).scopedTo(VerificationScope.FIRING_ROUTES));
+				() -> firingRouteAlternativeUnits.size() >= 4 && firingRouteShotUnits.size() >= 4)
+				.scopedTo(VerificationScope.FIRING_ROUTES));
 			cases.add(new CaseStep("adaptive multi-group laser reservation", 360,
 				this::assignAdaptiveLaserGroups, this::assertAdaptiveLaserGroups)
 				.scopedTo(VerificationScope.ADAPTIVE_COMBAT));
@@ -2038,6 +2162,9 @@ final class MorrowgearRuntimeVerifier {
 			cases.add(new CaseStep("large obstacle strategic reroute", 1200,
 				this::assignLargeObstacleRoute, this::assertLargeObstacleRoute)
 				.scopedTo(VerificationScope.NAVIGATION));
+			cases.add(new CaseStep("field relay obstacle reroute and slot retention", 1200,
+				this::assignFieldRelayObstacleRoute, this::assertFieldRelayObstacleRoute,
+				this::fieldRelayObstacleRouteReady).scopedTo(VerificationScope.NAVIGATION));
 			cases.add(new CaseStep("field work obstacle reroute", 700,
 				this::assignObstructedFieldWork, this::assertObstructedFieldWork)
 				.scopedTo(VerificationScope.NAVIGATION));
@@ -2167,10 +2294,27 @@ final class MorrowgearRuntimeVerifier {
 			supplyContinuityProbe.setPos(Vec3.atCenterOf(remoteSource).add(0, 4, 0));
 			supplyImmediateRedispatchObserved = false;
 			supplyIdleReturnObserved = false;
+			supplyLoadedCommandAttempted = false;
+			supplyLoadedCommandRejectedObserved = false;
 		}
 
 		private void observeSupplyContinuity() {
 			if (supplyContinuityProbe == null || !supplyContinuityProbe.isAlive() || docks.size() < 2) return;
+			if (!supplyLoadedCommandAttempted && supplyContinuityProbe.supplyNetworkAssignedForVerification()
+				&& supplyContinuityProbe.cargoItemCount() > 0) {
+				supplyLoadedCommandAttempted = true;
+				String mission = supplyContinuityProbe.missionId();
+				BlockPos waypoint = supplyContinuityProbe.waypointPos();
+				DroneMode mode = supplyContinuityProbe.mode();
+				int cargo = supplyContinuityProbe.cargoItemCount();
+				supplyContinuityProbe.assignWaypoint(base.offset(-24, 1, -24),
+					"verify-illegal-loaded-cargo-preemption", 1, 0, base, level.getGameTime());
+				supplyLoadedCommandRejectedObserved = mission.equals(supplyContinuityProbe.missionId())
+					&& waypoint.equals(supplyContinuityProbe.waypointPos())
+					&& mode == supplyContinuityProbe.mode()
+					&& cargo == supplyContinuityProbe.cargoItemCount()
+					&& supplyContinuityProbe.dataLinkStatus().startsWith("COMMAND REJECTED / SUPPLY LOAD SAFETY");
+			}
 			int supplied = 0;
 			for (int i = 0; i < 2; i++) if (level.getBlockEntity(docks.get(i)) instanceof DockBlockEntity dock
 				&& dock.supplyCount(DockSupplyPolicy.SupplyKind.GUN) > 0) supplied++;
@@ -2201,6 +2345,10 @@ final class MorrowgearRuntimeVerifier {
 						+ "/assigned=" + supplyContinuityProbe.supplyNetworkAssignedForVerification()));
 			require(supplyImmediateRedispatchObserved,
 				"cargo aircraft entered idle between consecutive network deliveries");
+			require(supplyLoadedCommandAttempted,
+				"loaded supply cargo was not observed during continuous dispatch");
+			require(supplyLoadedCommandRejectedObserved,
+				"loaded supply cargo accepted a conflicting flight command or lost custody state");
 			require(supplyIdleReturnObserved,
 				"cargo aircraft did not enter dynamic Dock return after final delivery");
 		}
@@ -3076,6 +3224,7 @@ final class MorrowgearRuntimeVerifier {
 		}
 
 		private void assertCaveLaserRoute() {
+			if (firingRouteShotUnits.size() < 2) logFiringRouteDiagnostics("CAVE");
 			require(firingRouteAlternativeUnits.size() >= 2,
 				"laser element did not leave the roof-blocked formation geometry");
 			require(firingRouteShotUnits.size() >= 2,
@@ -3143,15 +3292,16 @@ final class MorrowgearRuntimeVerifier {
 					player.getLastHurtByMob()), firingRouteShotUnits.size(),
 				firingRouteAlternativeUnits.size(), firingRouteObservedWeapons);
 			for (DroneEntity drone : drones.stream().filter(DroneEntity::isAlive)
-				.filter(unit -> unit.groupId().startsWith("VERIFY-ROUTE-SHAFT")).toList()) {
+				.filter(unit -> unit.groupId().startsWith("VERIFY-ROUTE-")).toList()) {
 				MorrowgearDrone.LOGGER.info(
-					"[MORROWGEAR VERIFY] ROUTE-{} unit={} pos={} role={} mode={} state={} weapon={} emergency={}:{} active={} target={} route={}:{} recovery={} service={} power={}/{}",
+					"[MORROWGEAR VERIFY] ROUTE-{} unit={} pos={} role={} mode={} state={} weapon={} emergency={}:{} active={} target={} route={}:{} recovery={} service={} power={}/{} laser={}",
 					label, drone.unitId(), drone.position(), drone.role(), drone.mode(), drone.combatState(),
 					drone.combatWeapon(), drone.emergencyInterceptActive(),
 					drone.emergencyTargetIdForVerification(), drone.combatActive(), drone.combatTargetId(),
 					drone.combatFiringRouteActiveForVerification(),
 					drone.combatRouteSuppressedWeaponForVerification(), drone.recoveryLevel(),
-					drone.serviceReturnActive(), drone.batteryPercent(), drone.weaponPowerPercent());
+					drone.serviceReturnActive(), drone.batteryPercent(), drone.weaponPowerPercent(),
+					drone.laserDiagnosticForVerification(level));
 			}
 		}
 
@@ -4237,6 +4387,8 @@ final class MorrowgearRuntimeVerifier {
 		private void prepareUiScenario() {
 			drones.clear();
 			docks.clear();
+			player.setItemSlot(net.minecraft.world.entity.EquipmentSlot.HEAD,
+				new ItemStack(MorrowgearDrone.TACTICAL_VISOR));
 			cleanupVerifierDrones();
 			clearHostiles(64);
 			preparePlatform(base);
@@ -4296,6 +4448,7 @@ final class MorrowgearRuntimeVerifier {
 				drone.assignGroup("WING-PATROL");
 			}
 			assignWaypoint(patrol, base.offset(34, 0, 10), "verify-ui-patrol-" + level.getGameTime());
+			patrol.forEach(drone -> drone.setFieldMeshAuthorized(true));
 
 			for (int i = 22; i < drones.size(); i++) {
 				DroneEntity drone = drones.get(i);
@@ -4402,6 +4555,7 @@ final class MorrowgearRuntimeVerifier {
 			for (int i = 0; i < wing.size(); i++) {
 				DroneEntity drone = wing.get(i);
 				reset(drone);
+				drone.assignRole(DroneRole.FIELD);
 				drone.assignGroup("WING-OBSTACLE");
 				drone.setPos(wall.getX() - 6.5, wall.getY() + 2.0, wall.getZ() - 3.0 + i * 2.0);
 			}
@@ -4456,6 +4610,73 @@ final class MorrowgearRuntimeVerifier {
 			clearGiantWall(wall);
 			require(crossed == wing.size(), "large obstacle trapped formation: " + crossed + "/" + wing.size());
 			require(alive == wing.size(), "large obstacle destroyed formation members: " + alive + "/" + wing.size());
+		}
+
+		private void assignFieldRelayObstacleRoute() {
+			clearHostiles(128.0);
+			for (DroneEntity drone : drones) {
+				reset(drone);
+				drone.setFieldMeshAuthorized(false);
+			}
+			FieldRelayRuntime.clearOwner(player.getUUID());
+			fieldRelayObstacleBlocks.clear();
+			fieldRelayObstacleProbe = drones.get(17);
+			fieldRelayObstacleProbe.assignRole(DroneRole.FIELD);
+			fieldRelayObstacleProbe.assignGroup("FIELD-OBSTACLE-RELAY");
+			fieldRelayObstacleProbe.setPos(base.getX() + 4.5, base.getY() + 29.0, base.getZ() + 0.5);
+			fieldRelayObstacleProbe.setFieldMeshAuthorized(true);
+			FieldRelayRuntime.Assignment assignment = FieldRelayRuntime.assignment(player, fieldRelayObstacleProbe);
+			if (assignment == null) throw new IllegalStateException("FIELD relay received no mesh slot");
+			fieldRelayObstacleSlot = assignment.slotId();
+			fieldRelayObstacleTarget = assignment.target();
+			buildFieldRelayObstacle(fieldRelayObstacleProbe.position(), fieldRelayObstacleTarget);
+		}
+
+		private void buildFieldRelayObstacle(Vec3 from, Vec3 target) {
+			Vec3 horizontal = target.subtract(from).multiply(1, 0, 1);
+			if (horizontal.lengthSqr() < 1.0) throw new IllegalStateException("FIELD relay slot is too close");
+			Vec3 forward = horizontal.normalize();
+			Vec3 right = new Vec3(-forward.z, 0, forward.x);
+			Vec3 center = from.add(horizontal.scale(0.42));
+			for (int thickness = -1; thickness <= 1; thickness++) {
+				for (int lateral = -12; lateral <= 12; lateral++) {
+					for (int vertical = -8; vertical <= 8; vertical++) {
+						Vec3 point = center.add(forward.scale(thickness)).add(right.scale(lateral))
+							.add(0, vertical, 0);
+						BlockPos block = BlockPos.containing(point);
+						if (!fieldRelayObstacleBlocks.contains(block)) fieldRelayObstacleBlocks.add(block);
+						level.setBlockAndUpdate(block, Blocks.SMOOTH_STONE.defaultBlockState());
+					}
+				}
+			}
+		}
+
+		private boolean fieldRelayObstacleRouteReady() {
+			if (fieldRelayObstacleProbe == null || !fieldRelayObstacleProbe.isAlive()) return true;
+			FieldRelayRuntime.Assignment assignment = FieldRelayRuntime.assignment(player, fieldRelayObstacleProbe);
+			return assignment != null && assignment.slotId().equals(fieldRelayObstacleSlot)
+				&& FieldRelayFlightPolicy.established(fieldRelayObstacleProbe.position(), assignment.target())
+				&& fieldRelayObstacleProbe.recoveryLevel() == 0;
+		}
+
+		private void assertFieldRelayObstacleRoute() {
+			DroneEntity probe = fieldRelayObstacleProbe;
+			FieldRelayRuntime.Assignment assignment = probe == null ? null
+				: FieldRelayRuntime.assignment(player, probe);
+			boolean linked = probe != null && DataLinkRelayNetwork.coverage(player).relays().stream()
+				.anyMatch(node -> node.node().id().equals(probe.getUUID()));
+			for (BlockPos block : fieldRelayObstacleBlocks) level.removeBlock(block, false);
+			fieldRelayObstacleBlocks.clear();
+			require(probe != null && probe.isAlive(), "FIELD relay was removed during obstacle reroute");
+			require(assignment != null && assignment.slotId().equals(fieldRelayObstacleSlot),
+				"FIELD relay lost or changed its reserved mesh slot during obstacle recovery");
+			require(fieldRelayObstacleTarget != null
+				&& FieldRelayFlightPolicy.established(probe.position(), assignment.target()),
+				"FIELD relay did not route around the wall to its mesh slot; "
+					+ probe.navigationDiagnosticForVerification());
+			require(probe.recoveryLevel() == 0, "FIELD relay retained recovery level " + probe.recoveryLevel());
+			require(linked, "FIELD relay did not re-enter the data-link graph after arrival");
+			probe.setFieldMeshAuthorized(false);
 		}
 
 		private void assignObstructedFieldWork() {
@@ -4524,6 +4745,11 @@ final class MorrowgearRuntimeVerifier {
 					MorrowgearDrone.LOGGER.info("[MORROWGEAR VERIFY] NAV DIAG t={} large {} {}",
 						elapsed, drone.unitId(), drone.navigationDiagnosticForVerification());
 				}
+			} else if (caseName.equals("field relay obstacle reroute and slot retention")
+				&& fieldRelayObstacleProbe != null) {
+				MorrowgearDrone.LOGGER.info("[MORROWGEAR VERIFY] NAV DIAG t={} FIELD relay slot={} target={} {}",
+					elapsed, fieldRelayObstacleSlot, fieldRelayObstacleTarget,
+					fieldRelayObstacleProbe.navigationDiagnosticForVerification());
 			}
 		}
 
@@ -4667,9 +4893,11 @@ final class MorrowgearRuntimeVerifier {
 
 		private void placeDock(BlockPos center) {
 			for (int i = 0; i < MorrowgearDrone.DOCK_PARTS.length; i++) {
+				if (i == 4) continue;
 				BlockPos part = center.offset(i % 3 - 1, 0, i / 3 - 1);
 				level.setBlockAndUpdate(part, MorrowgearDrone.DOCK_PARTS[i].defaultBlockState());
 			}
+			level.setBlockAndUpdate(center, MorrowgearDrone.DOCK_PARTS[4].defaultBlockState());
 			if (level.getBlockEntity(center) instanceof DockBlockEntity dock) dock.initialize(player);
 		}
 

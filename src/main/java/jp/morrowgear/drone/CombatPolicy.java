@@ -290,6 +290,18 @@ public final class CombatPolicy {
 			|| trackingError >= 2.5;
 	}
 
+	static Vec3 casAttackAxis(Vec3 strategicAxis, Vec3 aircraftToTarget, int seed) {
+		Vec3 axis = strategicAxis == null ? Vec3.ZERO : strategicAxis.multiply(1, 0, 1);
+		if (axis.lengthSqr() >= 1.0) return axis;
+		// When a threat is directly on the defended anchor, the strategic vector is
+		// zero. Enter along the aircraft's real inbound line instead of choosing an
+		// entity-id-dependent random axis that the moving CAS slot may never catch.
+		Vec3 inbound = aircraftToTarget == null ? Vec3.ZERO : aircraftToTarget.multiply(1, 0, 1);
+		if (inbound.lengthSqr() >= 0.001) return inbound;
+		double angle = Math.floorMod(seed * 47, 360) * Mth.DEG_TO_RAD;
+		return new Vec3(Math.sin(angle), 0, Math.cos(angle));
+	}
+
 	static Vec3 casFormationVelocity(Vec3 target, Vec3 attackAxis, int elementIndex,
 		int elementCount, long passTicks, AirspaceSlot airspace) {
 		return casFormation(target, attackAxis, elementIndex, elementCount, passTicks + 1, airspace)

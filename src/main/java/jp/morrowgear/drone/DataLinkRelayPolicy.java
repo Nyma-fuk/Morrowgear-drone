@@ -1,6 +1,5 @@
 package jp.morrowgear.drone;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -8,46 +7,69 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-/** Bounded, owner-scoped radio graph used by controller telemetry and commands. */
+/** Bounded owner-scoped relay graph used by controller telemetry and commands. */
 public final class DataLinkRelayPolicy {
-	public static final double DIRECT_RANGE = 256.0;
-	public static final double RELAY_RANGE = 256.0;
 	public static final int MAX_RELAY_NODES = 64;
-	public static final int MAX_HOPS = 16;
+	public static final double DIRECT_RANGE = 128.0;
+	public static final double FIELD_RANGE = 128.0;
 
 	private DataLinkRelayPolicy() {}
 
 	public static Coverage coverage(Point origin, List<Node> candidates) {
 		List<Node> nodes = candidates.stream()
-			.sorted(Comparator.comparingDouble(node -> origin.distanceTo(node.point())))
+			.sorted(Comparator.comparingDouble((Node node) -> node.point().distanceTo(origin))
+				.thenComparing(Comparator.comparingInt(Node::energyPercent).reversed())
+				.thenComparing(node -> node.id().toString()))
 			.limit(MAX_RELAY_NODES).toList();
-		Map<UUID, Integer> hops = new HashMap<>();
-		ArrayDeque<Node> open = new ArrayDeque<>();
-		for (Node node : nodes) {
-			if (origin.distanceTo(node.point()) <= RELAY_RANGE) {
-				hops.put(node.id(), 1);
-				open.addLast(node);
+		Map<UUID, ReachableNode> reached = new HashMap<>();
+		while (true) {
+			ReachableNode best = null;
+			for (Node node : nodes) {
+				if (reached.containsKey(node.id())) continue;
+				ReachableNode candidate = candidateFromOrigin(origin, node);
+				for (ReachableNode parent : reached.values()) {
+					ReachableNode via = candidateFromRelay(parent, node);
+					if (better(via, candidate)) candidate = via;
+				}
+				if (better(candidate, best)) best = candidate;
 			}
+			if (best == null) break;
+			reached.put(best.node().id(), best);
 		}
-		while (!open.isEmpty()) {
-			Node current = open.removeFirst();
-			int nextHop = hops.get(current.id()) + 1;
-			if (nextHop > MAX_HOPS) continue;
-			for (Node candidate : nodes) {
-				if (hops.containsKey(candidate.id())) continue;
-				if (current.point().distanceTo(candidate.point()) > RELAY_RANGE) continue;
-				hops.put(candidate.id(), nextHop);
-				open.addLast(candidate);
-			}
-		}
-		List<ReachableNode> reachable = new ArrayList<>();
-		for (Node node : nodes) {
-			Integer hop = hops.get(node.id());
-			if (hop != null) reachable.add(new ReachableNode(node, hop));
-		}
-		reachable.sort(Comparator.comparingInt(ReachableNode::hops)
+		List<ReachableNode> ordered = new ArrayList<>(reached.values());
+		ordered.sort(Comparator.comparingInt(ReachableNode::hops)
 			.thenComparing(entry -> entry.node().id().toString()));
-		return new Coverage(origin, List.copyOf(reachable));
+		return new Coverage(origin, List.copyOf(ordered));
+	}
+
+	private static ReachableNode candidateFromOrigin(Point origin, Node node) {
+		int quality = linkQuality(origin.distanceTo(node.point()));
+		return quality <= 0 ? null : new ReachableNode(node, 1, quality, null);
+	}
+
+	private static ReachableNode candidateFromRelay(ReachableNode parent, Node node) {
+		int edgeQuality = linkQuality(parent.node().point().distanceTo(node.point()));
+		if (edgeQuality <= 0) return null;
+		int quality = Math.max(0, Math.min(parent.quality(), edgeQuality) - 3);
+		return quality <= 0 ? null : new ReachableNode(node, parent.hops() + 1,
+			quality, parent.node().id());
+	}
+
+	private static boolean better(ReachableNode candidate, ReachableNode current) {
+		if (candidate == null) return false;
+		if (current == null) return true;
+		if (candidate.quality() != current.quality()) return candidate.quality() > current.quality();
+		if (candidate.hops() != current.hops()) return candidate.hops() < current.hops();
+		return candidate.node().id().toString().compareTo(current.node().id().toString()) < 0;
+	}
+
+	static int linkQuality(double distance) {
+		if (!Double.isFinite(distance) || distance > FIELD_RANGE) return 0;
+		if (distance <= 64.0) return 100;
+		if (distance <= 96.0) return 90;
+		if (distance <= 112.0) return 75;
+		if (distance <= 120.0) return 55;
+		return 30;
 	}
 
 	public record Point(double x, double y, double z) {
@@ -58,32 +80,29 @@ public final class DataLinkRelayPolicy {
 	}
 
 	public record Node(UUID id, Point point, int energyPercent) {}
-	public record ReachableNode(Node node, int hops) {}
+	public record ReachableNode(Node node, int hops, int quality, UUID parentId) {
+		public ReachableNode(Node node, int hops) { this(node, hops, 100, null); }
+	}
 	public record Link(boolean connected, int hops, int quality, UUID relayId) {
 		static Link disconnected() { return new Link(false, -1, 0, null); }
 	}
 
 	public record Coverage(Point origin, List<ReachableNode> relays) {
 		public Link link(Point target) {
-			double direct = origin.distanceTo(target);
-			if (direct <= DIRECT_RANGE) return new Link(true, 0, quality(direct, DIRECT_RANGE, 0), null);
-			ReachableNode best = null;
-			double bestDistance = Double.MAX_VALUE;
+			int directQuality = linkQuality(origin.distanceTo(target));
+			Link best = directQuality <= 0 ? Link.disconnected()
+				: new Link(true, 0, directQuality, null);
 			for (ReachableNode relay : relays) {
-				double distance = relay.node().point().distanceTo(target);
-				if (distance <= RELAY_RANGE && (best == null || relay.hops() < best.hops()
-					|| relay.hops() == best.hops() && distance < bestDistance)) {
-					best = relay;
-					bestDistance = distance;
-				}
+				int edgeQuality = linkQuality(relay.node().point().distanceTo(target));
+				if (edgeQuality <= 0) continue;
+				int quality = Math.max(0, Math.min(relay.quality(), edgeQuality) - 3);
+				Link candidate = new Link(true, relay.hops(), quality, relay.node().id());
+				if (!best.connected() || candidate.quality() > best.quality()
+					|| candidate.quality() == best.quality() && candidate.hops() < best.hops()
+					|| candidate.quality() == best.quality() && candidate.hops() == best.hops()
+						&& candidate.relayId().toString().compareTo(best.relayId().toString()) < 0) best = candidate;
 			}
-			return best == null ? Link.disconnected()
-				: new Link(true, best.hops(), quality(bestDistance, RELAY_RANGE, best.hops()), best.node().id());
-		}
-
-		private static int quality(double distance, double range, int hops) {
-			int segment = (int)Math.round(100.0 - Math.min(1.0, distance / range) * 45.0);
-			return Math.max(20, Math.min(100, segment - Math.max(0, hops - 1) * 4));
+			return best;
 		}
 	}
 }

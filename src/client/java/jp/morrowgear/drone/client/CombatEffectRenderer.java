@@ -27,10 +27,13 @@ final class CombatEffectRenderer {
 
 	static void render(DroneRenderState state, PoseStack poseStack, SubmitNodeCollector collector,
 		Vec3 cameraOffset) {
-		if (!state.combatState.active()) return;
+		boolean gunVisible = state.gunShotAge <= 3 && state.gunTargetOffset != null;
+		boolean laserVisible = state.combatState == CombatState.LASER_FIRE
+			&& state.combatTargetOffset != null;
+		if (!state.combatState.active() && !gunVisible) return;
 		Vec3 forward = rotated(state, new Vec3(0, 0, 1));
 		Vec3 right = rotated(state, new Vec3(1, 0, 0));
-		Vec3 gunOutlet = rotated(state, ((int)(state.ageInTicks - state.combatShotAge) & 1) == 0
+		Vec3 gunOutlet = rotated(state, ((int)(state.ageInTicks - state.gunShotAge) & 1) == 0
 			? DroneHardpoints.GUN_LEFT : DroneHardpoints.GUN_RIGHT);
 		Vec3 laserOutlet = rotated(state, DroneHardpoints.LASER);
 		if (state.combatState == CombatState.LASER_FIRE && state.combatTargetOffset != null) {
@@ -58,38 +61,30 @@ final class CombatEffectRenderer {
 						state.combatTargetOffset, state.ageInTicks);
 				}
 			});
-		if ((state.combatState == CombatState.GUN_RUN && state.combatShotAge <= 3
-			&& state.combatTargetOffset != null)
-			|| (state.combatState == CombatState.LASER_FIRE && state.combatTargetOffset != null)) {
-			collector.submitCustomGeometry(poseStack, state.combatState == CombatState.LASER_FIRE
-				? MorrowgearRenderTypes.condensedBeam() : MorrowgearRenderTypes.energyBeam(),
-				(pose, consumer) -> {
-					if (state.combatState == CombatState.GUN_RUN) {
-						renderAutocannonTracer(pose, consumer, gunOutlet,
-							state.combatTargetOffset, state.combatShotAge, cameraOffset);
-					} else {
-						renderHighOutputLaser(pose, consumer, laserOutlet,
-							state.combatTargetOffset, state.ageInTicks, cameraOffset, pixels, beamDetail);
-					}
-				});
-			if (state.combatState == CombatState.LASER_FIRE) {
-				List<BeamSpan> visibleSpans = visibleBeamSpans(state, laserOutlet,
-					state.combatTargetOffset, cameraOffset);
-				if (!visibleSpans.isEmpty()) {
-					collector.submitCustomGeometry(poseStack, MorrowgearRenderTypes.condensedCore(),
-						(pose, consumer) -> renderVisibleLaser(pose, consumer, visibleSpans,
-							state.ageInTicks, cameraOffset, pixels, beamDetail));
-				}
-			} else {
-				jp.morrowgear.drone.CombatPolicy.TracerSegment tracer =
-					jp.morrowgear.drone.CombatPolicy.tracerSegment(gunOutlet,
-						state.combatTargetOffset, state.combatShotAge);
-				List<BeamSpan> visibleSpans = visibleBeamSpans(state, tracer.start(),
-					tracer.end(), cameraOffset);
-				if (!visibleSpans.isEmpty()) {
-					collector.submitCustomGeometry(poseStack, MorrowgearRenderTypes.visibleEnergyCore(),
-						(pose, consumer) -> renderVisibleTracer(pose, consumer, visibleSpans, cameraOffset));
-				}
+		if (gunVisible) {
+			collector.submitCustomGeometry(poseStack, MorrowgearRenderTypes.energyBeam(),
+				(pose, consumer) -> renderAutocannonTracer(pose, consumer, gunOutlet,
+					state.gunTargetOffset, state.gunShotAge, cameraOffset));
+			jp.morrowgear.drone.CombatPolicy.TracerSegment tracer =
+				jp.morrowgear.drone.CombatPolicy.tracerSegment(gunOutlet,
+					state.gunTargetOffset, state.gunShotAge);
+			List<BeamSpan> visibleSpans = visibleBeamSpans(state, tracer.start(),
+				tracer.end(), cameraOffset);
+			if (!visibleSpans.isEmpty()) {
+				collector.submitCustomGeometry(poseStack, MorrowgearRenderTypes.visibleEnergyCore(),
+					(pose, consumer) -> renderVisibleTracer(pose, consumer, visibleSpans, cameraOffset));
+			}
+		}
+		if (laserVisible) {
+			collector.submitCustomGeometry(poseStack, MorrowgearRenderTypes.condensedBeam(),
+				(pose, consumer) -> renderHighOutputLaser(pose, consumer, laserOutlet,
+					state.combatTargetOffset, state.ageInTicks, cameraOffset, pixels, beamDetail));
+			List<BeamSpan> visibleSpans = visibleBeamSpans(state, laserOutlet,
+				state.combatTargetOffset, cameraOffset);
+			if (!visibleSpans.isEmpty()) {
+				collector.submitCustomGeometry(poseStack, MorrowgearRenderTypes.condensedCore(),
+					(pose, consumer) -> renderVisibleLaser(pose, consumer, visibleSpans,
+						state.ageInTicks, cameraOffset, pixels, beamDetail));
 			}
 		}
 	}

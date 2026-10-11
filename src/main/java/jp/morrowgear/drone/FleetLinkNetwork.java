@@ -1,6 +1,8 @@
 package jp.morrowgear.drone;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.WeakHashMap;
 import jp.morrowgear.drone.network.FleetLinkPayload;
 import jp.morrowgear.drone.network.FleetLinkRequest;
@@ -25,6 +27,8 @@ final class FleetLinkNetwork {
 		if (previous != null && clock - previous < 10L) return;
 		LAST.put(player, clock);
 		long tick = player.level().getGameTime();
+		var meshSnapshot = FieldRelayRuntime.snapshot(player);
+		var meshStatus = FieldRelayRuntime.status(player);
 		var coverage = DataLinkRelayNetwork.coverage(player);
 		var all = MorrowgearDrone.ownedDrones(player.level(), player, 512);
 		var units = new ArrayList<FleetLinkPayload.Unit>();
@@ -38,14 +42,28 @@ final class FleetLinkNetwork {
 			units.add(new FleetLinkPayload.Unit(drone.getId(), drone.getUUID(), drone.unitId(),
 				drone.getName().getString(), drone.groupId(), drone.role().id(), drone.mode().id(),
 				drone.getX(), drone.getY(), drone.getZ(), drone.batteryPercent(), drone.isDocked(),
-				status, drone.missionId(), link.hops(), link.quality()));
+				status, drone.missionId(), link.hops(), link.quality(), link.relayId()));
 		}
-		var relays = coverage.relays().stream().limit(FleetLinkPayload.MAX_RELAYS)
-			.map(entry -> new FleetLinkPayload.Relay(entry.node().id(), entry.node().point().x(),
-				entry.node().point().y(), entry.node().point().z(), entry.node().energyPercent(), entry.hops()))
-			.toList();
+		Map<java.util.UUID, DroneEntity> byId = new HashMap<>();
+		for (DroneEntity drone : all) byId.put(drone.getUUID(), drone);
+		Map<java.util.UUID, DataLinkRelayPolicy.ReachableNode> reached = new HashMap<>();
+		for (var entry : coverage.relays()) reached.put(entry.node().id(), entry);
+		var relays = meshSnapshot.assignments().values().stream().limit(FleetLinkPayload.MAX_RELAYS)
+			.map(assignment -> {
+				DroneEntity drone = byId.get(assignment.fieldId());
+				if (drone == null) return null;
+				var link = reached.get(assignment.fieldId());
+				boolean established = FieldRelayFlightPolicy.established(drone.position(), assignment.target());
+				return new FleetLinkPayload.Relay(drone.getUUID(), drone.getX(), drone.getY(), drone.getZ(),
+					drone.batteryPercent(), link == null ? 255 : link.hops(), link == null ? 0 : link.quality(),
+					assignment.duty().name(), assignment.target().x, assignment.target().y, assignment.target().z,
+					established, link == null ? null : link.parentId());
+			}).filter(java.util.Objects::nonNull).toList();
+		var mesh = new FleetLinkPayload.Mesh(meshStatus.state(), meshStatus.assigned(), meshStatus.established(),
+			meshStatus.baseline(), meshStatus.reserve(), meshStatus.dynamic(), meshStatus.shortage(),
+			meshStatus.minX(), meshStatus.maxX(), meshStatus.minZ(), meshStatus.maxZ());
 		if (ServerPlayNetworking.canSend(player, FleetLinkPayload.TYPE))
 			ServerPlayNetworking.send(player, new FleetLinkPayload(player.getUUID(), token, tick,
-				player.level().dimension().toString(), truncated, units, relays));
+				player.level().dimension().toString(), truncated, units, relays, mesh));
 	}
 }

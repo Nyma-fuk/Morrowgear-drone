@@ -14,7 +14,7 @@ import net.minecraft.client.Screenshot;
 final class MorrowgearAutomationClient {
     private static final String[] PAGE_NAMES = {
         "operations-map", "wing-formation", "missions", "dock-supply", "supply-network",
-        "recovery", "equipment", "carrier", "visor", "reports", "history"
+        "recovery", "equipment", "carrier", "visor", "reports", "history", "visor-worn"
     };
     private static int ticks;
     private static boolean uiStarted;
@@ -54,7 +54,7 @@ final class MorrowgearAutomationClient {
             MorrowgearAutomation.completeClientScenario(result.passed(), result.detail());
         }
         if (capture && uiStarted && !MorrowgearAutomation.finished()) capture(client);
-        if (!MorrowgearAutomation.finished()) return;
+        if (!MorrowgearAutomation.finished() && !MorrowgearAutomation.completionReportExists()) return;
         if (++exitDelay >= 40) client.stop();
     }
 
@@ -76,6 +76,15 @@ final class MorrowgearAutomationClient {
             return;
         }
         if (capturePage >= PAGE_NAMES.length) return;
+        if (capturePage == PAGE_NAMES.length - 1) {
+            client.setScreenAndShow(null);
+			MorrowgearDroneClient.enableAirspaceMapForAutomation();
+            selectedCapturePage = capturePage++;
+			// Let the dedicated FIELD fixture reach its slots so the capture exercises
+			// the established aggregate dome, not only the deployment vectors.
+			captureDelay = 180;
+            return;
+        }
         if (!(client.gui.screen() instanceof TacticalScreen screen)) {
             MorrowgearAutomation.completeClientScenario(false, "controller screen unavailable before page " + capturePage);
             return;

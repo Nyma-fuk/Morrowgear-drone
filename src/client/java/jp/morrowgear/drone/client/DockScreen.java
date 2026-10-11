@@ -55,7 +55,7 @@ public final class DockScreen extends DockCarrierHmiScreen<DockMenu> {
             button("次の備蓄", "chevron-right", width - 26, 44, 20, () -> { stockPage++; build(); })
                 .active = stockPage + 1 < DockStockViewPolicy.pageCount(height);
         }
-        networkButton = button("自動補給", "route", x, height - 24, w - 26, () -> {
+		networkButton = button("補給状況", "route", x, height - 24, w - 26, () -> {
             if (!menu.getCarried().isEmpty()) return;
             cancelSlotGesture(); network = new SupplyNetworkPanel(this); build();
         });
@@ -69,7 +69,7 @@ public final class DockScreen extends DockCarrierHmiScreen<DockMenu> {
         if (network != null) network.tick();
         else if (networkButton != null && networkButton.active != menu.getCarried().isEmpty()) {
             networkButton.active = menu.getCarried().isEmpty();
-            networkButton.setTooltip(Tooltip.create(Component.literal(networkButton.active ? "自動補給 ON/OFF" : "持っているアイテムを枠へ戻してください")));
+			networkButton.setTooltip(Tooltip.create(Component.literal(networkButton.active ? "自動補給は常時ONです" : "持っているアイテムを枠へ戻してください")));
         }
     }
     @Override public boolean keyPressed(KeyEvent event) {

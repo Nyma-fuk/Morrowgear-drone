@@ -86,10 +86,18 @@ public final class OperatorCommandTransactions {
         if (action.equals("standby")) return drone.mode() == DroneMode.STANDBY;
         if (action.equals("return")) return drone.mode() == DroneMode.RETURN || drone.isDocked();
         if (action.equals("orbit")) return drone.mode() == DroneMode.ORBIT;
+		if (action.equals("mesh_deploy")) return drone.fieldMeshAuthorized();
+		if (action.equals("mesh_withdraw")) return !drone.fieldMeshAuthorized() && drone.isDocked();
+		if (action.startsWith("guard:")) return drone.hasSecurityPatrol()
+			&& drone.securityOrderId().equals(active.missionId);
+		if (action.startsWith("patrol:")) return drone.hasPatrolRoute()
+			&& drone.missionId().equals(active.missionId);
+		if (action.startsWith("follow:")) return drone.mode() == DroneMode.FOLLOW
+			&& drone.missionId().equals(active.missionId);
         if (action.startsWith("work:")) return drone.fieldOperationState() == FieldOperationState.COMPLETE;
         if (action.startsWith("move:")) return !drone.hasWaypoint() && drone.missionId().equals(active.missionId);
         if (action.startsWith("track:")) return !drone.hasTrackingTarget() && drone.missionId().equals(active.missionId);
-        if (action.startsWith("attack:")) return !drone.operatorAttackActive() && drone.missionId().equals(active.missionId);
+		if (action.startsWith("attack:")) return !drone.operatorAttackActive();
         return false;
     }
 
@@ -102,6 +110,11 @@ public final class OperatorCommandTransactions {
     }
     private static String completionReason(Active active) {
         if (active.action.equals("dock")) return "Dockへ着艦";
+		if (active.action.equals("mesh_deploy")) return "通信メッシュへの展開を開始";
+		if (active.action.equals("mesh_withdraw")) return "通信メッシュから撤収しDockへ帰還";
+		if (active.action.startsWith("guard:")) return "警戒任務を設定";
+		if (active.action.startsWith("patrol:")) return "巡回経路を設定";
+		if (active.action.startsWith("follow:")) return "編隊追従を設定";
         if (active.action.startsWith("work:")) return "作業完了";
         if (active.action.startsWith("attack:")) return "指定目標への攻撃完了";
         return "命令目標へ到達";

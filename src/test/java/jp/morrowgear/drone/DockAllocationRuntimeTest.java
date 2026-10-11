@@ -22,9 +22,16 @@ final class DockAllocationRuntimeTest {
 		assertTrue(runtime.contains("ServerLifecycleEvents.SERVER_STOPPED.register"));
 		assertTrue(runtime.contains("CACHE.clear()"));
 		assertTrue(runtime.contains("COMPATIBILITY.clear()"));
+		assertTrue(runtime.contains("LAST_YIELD.clear()"));
 		assertFalse(runtime.contains("level.dimension().toString()"));
 		String initializer = Files.readString(Path.of("src/main/java/jp/morrowgear/drone/MorrowgearDrone.java"));
 		assertTrue(initializer.contains("DockAllocationRuntime.register()"));
+	}
+
+	@Test void onlyOneDockYieldTurnCanBeClaimedInsideTheCooldown() throws Exception {
+		String runtime = Files.readString(Path.of("src/main/java/jp/morrowgear/drone/DockAllocationRuntime.java"));
+		assertTrue(runtime.contains("DockAllocationPolicy.yieldTurnAvailable"));
+		assertTrue(runtime.contains("LAST_YIELD.put(key, tick)"));
 	}
 
 	@Test void compatibilityChecksAreSharedForAllAircraftInTheOwnerTick() throws Exception {

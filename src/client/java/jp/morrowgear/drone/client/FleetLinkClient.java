@@ -30,6 +30,11 @@ final class FleetLinkClient {
 		return current(client) ? snapshot.relays() : List.of();
 	}
 
+	static FleetLinkPayload.Mesh mesh(Minecraft client) {
+		request(client);
+		return current(client) ? snapshot.mesh() : FleetLinkPayload.Mesh.empty();
+	}
+
 	private static boolean current(Minecraft client) {
 		return client.level != null && client.player != null && snapshot != null
 			&& snapshot.owner().equals(client.player.getUUID())

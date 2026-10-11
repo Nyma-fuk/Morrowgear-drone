@@ -19,11 +19,14 @@ import jp.morrowgear.drone.item.DroneUnitItem;
 import jp.morrowgear.drone.item.RecoveryToolItem;
 import jp.morrowgear.drone.item.OperationMarkerItem;
 import jp.morrowgear.drone.item.SolarServiceStationItem;
+import jp.morrowgear.drone.item.StrikeBeaconLauncherItem;
 import jp.morrowgear.drone.network.DroneCommandPayload;
 import jp.morrowgear.drone.network.DroneCommandResultPayload;
 import jp.morrowgear.drone.network.FleetOperationPayload;
 import jp.morrowgear.drone.network.PowerLostBeaconPayload;
 import jp.morrowgear.drone.network.SupplyNetworkConfigPayload;
+import jp.morrowgear.drone.network.SupplyNodeConfigPayload;
+import jp.morrowgear.drone.network.StrikeBeaconLaunchPayload;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
@@ -110,6 +113,11 @@ public final class MorrowgearDrone implements ModInitializer {
 		EntityType.Builder.<CargoLiftLoadEntity>of(CargoLiftLoadEntity::new, MobCategory.MISC)
 			.sized(5.0f, 2.4f).clientTrackingRange(20).updateInterval(1)
 	);
+	public static final EntityType<StrikeBeaconEntity> STRIKE_BEACON = registerEntity(
+		"strike_beacon",
+		EntityType.Builder.<StrikeBeaconEntity>of(StrikeBeaconEntity::new, MobCategory.MISC)
+			.sized(0.32f, 0.32f).clientTrackingRange(16).updateInterval(1)
+	);
 
 	public static final Item CONTROLLER = registerItem("controller", Item::new, new Item.Properties().stacksTo(1));
 	public static final Item SCOUT_MODULE = registerItem("scout_module", Item::new, new Item.Properties().stacksTo(16));
@@ -121,6 +129,10 @@ public final class MorrowgearDrone implements ModInitializer {
 		new Item.Properties().stacksTo(1).durability(192));
 	public static final Item OPERATION_MARKER = registerItem("operation_marker", OperationMarkerItem::new,
 		new Item.Properties().stacksTo(1));
+	public static final Item STRIKE_BEACON_CARTRIDGE = registerItem("strike_beacon_cartridge", Item::new,
+		new Item.Properties().stacksTo(16));
+	public static final Item STRIKE_BEACON_LAUNCHER = registerItem("strike_beacon_launcher", StrikeBeaconLauncherItem::new,
+		new Item.Properties().stacksTo(1).durability(96));
 	public static final Item POWER_CELL = registerItem("power_cell", Item::new, new Item.Properties().stacksTo(16));
 	public static final Item RAW_MORROW_COMPOSITE = registerItem("raw_morrow_composite", Item::new, new Item.Properties());
 	public static final Item MORROW_ALLOY = registerItem("morrow_alloy", Item::new, new Item.Properties());
@@ -229,10 +241,12 @@ public final class MorrowgearDrone implements ModInitializer {
 		ManagedLightRuntime.register();
 		MissileDetonationRuntime.register();
 		RuntimeCacheLifecycle.register();
+		FieldRelayRuntime.register();
 		jp.morrowgear.drone.carrier.CarrierModule.register();
 		CarrierRuntimeVerification.register();
 		OperationCommunicationsServer.register();
 		CargoLiftNetwork.register();
+		SupplyNetworkRuntime.register();
 		SupplyNetworkTransport.register();
 		CarrierDroneServiceAdapter.install();
 		MissileAudioController.register();
@@ -249,6 +263,8 @@ public final class MorrowgearDrone implements ModInitializer {
 			entries.accept(SALVAGE_MODULE);
 			entries.accept(RECOVERY_TOOL);
 			entries.accept(OPERATION_MARKER);
+			entries.accept(STRIKE_BEACON_CARTRIDGE);
+			entries.accept(STRIKE_BEACON_LAUNCHER);
 			entries.accept(POWER_CELL);
 			entries.accept(SupplyItems.AUTOCANNON_MAGAZINE);
 			entries.accept(SupplyItems.LASER_CELL);
@@ -276,8 +292,41 @@ public final class MorrowgearDrone implements ModInitializer {
 		TacticalContactNetwork.register();
 		FleetLinkNetwork.register();
 		PayloadTypeRegistry.serverboundPlay().register(SupplyNetworkConfigPayload.TYPE, SupplyNetworkConfigPayload.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(SupplyNodeConfigPayload.TYPE, SupplyNodeConfigPayload.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(StrikeBeaconLaunchPayload.TYPE, StrikeBeaconLaunchPayload.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(SupplyNetworkConfigPayload.TYPE, (payload, context) ->
 			context.server().execute(() -> payload.apply(context.player())));
+		ServerPlayNetworking.registerGlobalReceiver(SupplyNodeConfigPayload.TYPE, (payload, context) ->
+			context.server().execute(() -> payload.apply(context.player())));
+		ServerPlayNetworking.registerGlobalReceiver(StrikeBeaconLaunchPayload.TYPE, (payload, context) ->
+			context.server().execute(() -> {
+				ServerPlayer player = context.player();
+				net.minecraft.world.InteractionHand hand = payload.offhand()
+					? net.minecraft.world.InteractionHand.OFF_HAND : net.minecraft.world.InteractionHand.MAIN_HAND;
+				ItemStack stack = player.getItemInHand(hand);
+				if (!stack.is(STRIKE_BEACON_LAUNCHER) || player.isSpectator()
+					|| player.getCooldowns().isOnCooldown(stack)) return;
+				if (StrikeBeaconLauncherItem.rounds(stack) <= 0) {
+					player.sendSystemMessage(Component.literal("[MORROWGEAR] BEACON MAGAZINE EMPTY / USE TO RELOAD"));
+					return;
+				}
+				if (player.level() instanceof ServerLevel level
+					&& StrikeBeaconEntity.activeCount(level, player.getUUID()) >= StrikeBeaconPolicy.MAX_ACTIVE_BEACONS) {
+					player.sendSystemMessage(Component.literal("[MORROWGEAR] ACTIVE BEACON LIMIT 3/3"));
+					return;
+				}
+				if (player.level() instanceof ServerLevel level && StrikeBeaconEntity.launch(level, player)) {
+					player.getCooldowns().addCooldown(stack, 12);
+					int remaining = StrikeBeaconLauncherItem.rounds(stack);
+					if (!player.isCreative()) {
+						StrikeBeaconLauncherItem.consumeRound(stack);
+						remaining = StrikeBeaconLauncherItem.rounds(stack);
+						stack.hurtAndBreak(1, player, hand.asEquipmentSlot());
+					}
+					player.sendSystemMessage(Component.literal("[MORROWGEAR] BEACON AWAY / MAGAZINE "
+						+ remaining + "/" + StrikeBeaconLauncherItem.CAPACITY));
+				}
+			}));
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
 			ServerPlayer player = handler.getPlayer();
 			for (PowerLostBeaconData.Beacon beacon : PowerLostBeaconData.get(server).forOwner(player.getUUID())) {
@@ -302,12 +351,17 @@ public final class MorrowgearDrone implements ModInitializer {
 			transaction.identify(drone, action);
 			if (!drone.isOwnedBy(player)) { transaction.rejected("他ユーザーの機体は操作できません"); return; }
 			if (!DataLinkRelayNetwork.canReach(player, drone.position())) {
-				transaction.rejected("データリンク圏外 / ソーラー中継局を配置してください"); return;
+					transaction.rejected("データリンク圏外 / FIELDメッシュ展開中 / 接続後に再実行してください"); return;
 			}
 			if (!allowOperatorCommand(player, drone)) { transaction.rejected(drone.operatorFlightCommandRejection()); return; }
+			if (forced && drone.strikeBeaconActive()) drone.cancelStrikeBeaconForOperator();
 			if (action.startsWith("capacity_upgrade:")) {
 				if (forced) { transaction.rejected("容量変更は強制介入の対象外です"); return; }
-				try { upgradeCapacity(player, drone, Integer.parseInt(action.substring(17))); transaction.accepted(drone, action); }
+				try {
+					if (upgradeCapacity(player, drone, Integer.parseInt(action.substring(17))))
+						transaction.accepted(drone, action);
+					else transaction.rejected("容量拡張の条件または必要素材を満たしていません");
+				}
 				catch (NumberFormatException ignored) { transaction.rejected("容量設定が不正です"); }
 				return;
 			}
@@ -315,41 +369,45 @@ public final class MorrowgearDrone implements ModInitializer {
 				if (forced) { transaction.rejected("兵装変更は強制介入の対象外です"); return; }
 				String loadoutId = action.substring("weapon_module:".length());
 				if (SecurityLoadout.isValidId(loadoutId)) {
-					changeSecurityLoadout(player, drone, SecurityLoadout.byId(loadoutId));
-					transaction.accepted(drone, action);
+					if (changeSecurityLoadout(player, drone, SecurityLoadout.byId(loadoutId)))
+						transaction.accepted(drone, action);
+					else transaction.rejected("兵装変更の条件または必要モジュールを満たしていません");
 				} else transaction.rejected("兵装IDが不正です");
 				return;
 			}
 			if (action.startsWith("module:")) {
 				if (forced) { transaction.rejected("役割変更は強制介入の対象外です"); return; }
-				changeRoleModule(player, drone, DroneRole.byId(action.substring("module:".length())));
-				transaction.accepted(drone, action);
+				String roleId = action.substring("module:".length());
+				if (!DroneRole.isValidId(roleId)) { transaction.rejected("役割IDが不正です"); return; }
+				if (changeRoleModule(player, drone, DroneRole.byId(roleId))) transaction.accepted(drone, action);
+				else transaction.rejected("役割変更の条件または必要モジュールを満たしていません");
 				return;
 			}
 			if (action.startsWith("wing_join:") || action.startsWith("wing_create:")) {
 				if (forced) { transaction.rejected("Wing変更は強制介入の対象外です"); return; }
 				String target = action.substring(action.indexOf(':') + 1);
-				moveToWing(player, drone, target);
-				transaction.accepted(drone, action);
+				if (moveToWing(player, drone, target)) transaction.accepted(drone, action);
+				else transaction.rejected("Wingへ参加できません");
 				return;
 			}
 			if (action.equals("wing_leave")) {
 				if (forced) { transaction.rejected("Wing変更は強制介入の対象外です"); return; }
-				leaveWing(player, drone);
-				transaction.accepted(drone, action);
+				if (leaveWing(player, drone)) transaction.accepted(drone, action);
+				else transaction.rejected("現在Wingに所属していません、または離脱できません");
 				return;
 			}
 			if (action.startsWith("group:")) {
 				if (forced) { transaction.rejected("Wing変更は強制介入の対象外です"); return; }
-				moveToWing(player, drone, action.substring("group:".length()));
-				transaction.accepted(drone, action);
+				if (moveToWing(player, drone, action.substring("group:".length()))) transaction.accepted(drone, action);
+				else transaction.rejected("Wing変更を適用できません");
 				return;
 			}
 			if (action.startsWith("assign_dock:")) {
 				if (forced) { transaction.rejected("Dock割当は強制介入の対象外です"); return; }
 				try {
-					assignDock(player, drone, BlockPos.of(Long.parseLong(action.substring("assign_dock:".length()))));
-					transaction.accepted(drone, action);
+					if (assignDock(player, drone, BlockPos.of(Long.parseLong(action.substring("assign_dock:".length())))))
+						transaction.accepted(drone, action);
+					else transaction.rejected("指定Dockを割り当てられません");
 				} catch (NumberFormatException ignored) {
 					transaction.rejected("Dock座標が不正です");
 					LOGGER.warn("Rejected malformed dock assignment from {}", player.getScoreboardName());
@@ -547,6 +605,20 @@ public final class MorrowgearDrone implements ModInitializer {
 			}
 			if (!DroneCommandPolicy.isSimpleAction(action)) return;
 			if (forced && !applyForcedOperatorCommand(player, drone)) return;
+			if (action.equals("mesh_deploy") || action.equals("mesh_withdraw")) {
+				if (drone.role() != DroneRole.FIELD) {
+					transaction.rejected("通信メッシュ命令はFIELD機専用です");
+					return;
+				}
+				boolean deployMesh = action.equals("mesh_deploy");
+				Vec3 deploymentAnchor = deployMesh ? FieldRelayRuntime.deploymentAnchor(player) : null;
+				if (deployMesh) drone.setFieldMeshAuthorized(true, deploymentAnchor);
+				else drone.requestFieldMeshWithdrawal();
+				transaction.accepted(drone, action);
+				player.sendSystemMessage(Component.literal("[MORROWGEAR] " + drone.unitId()
+					+ (deployMesh ? " / FIELD MESH DEPLOY AUTHORIZED" : " / FIELD MESH WITHDRAW / RTB")));
+				return;
+			}
 			// Return is also a request for a free berth; an existing reservation is not required.
 			if (action.equals("standby") || action.equals("return")
 				|| action.equals("dock") || action.equals("orbit")) {
@@ -659,24 +731,24 @@ public final class MorrowgearDrone implements ModInitializer {
 			drone.isDocked(), drone.batteryPercent(), health, drone.distanceToSqr(Vec3.atCenterOf(anchor)));
 	}
 
-	private static void moveToWing(ServerPlayer player, DroneEntity drone, String targetGroup) {
-		if (!allowOperatorCommand(player, drone)) return;
+	private static boolean moveToWing(ServerPlayer player, DroneEntity drone, String targetGroup) {
+		if (!allowOperatorCommand(player, drone)) return false;
 		ServerLevel level = player.level();
 		List<DroneEntity> fleet = ownedDrones(level, player, 512);
 		int targetSize = (int) fleet.stream().filter(member -> member.groupId().equals(targetGroup)).count();
 		WingMembershipPolicy.Result result = WingMembershipPolicy.evaluate(drone.groupId(), targetGroup, targetSize);
-		if (result == WingMembershipPolicy.Result.UNCHANGED) return;
+		if (result == WingMembershipPolicy.Result.UNCHANGED) return true;
 		if (result != WingMembershipPolicy.Result.ACCEPTED) {
 			String reason = result == WingMembershipPolicy.Result.WING_FULL ? "WING FULL 8/8" : "INVALID WING";
 			player.sendSystemMessage(Component.literal("[MORROWGEAR] " + reason));
-			return;
+			return false;
 		}
 
 		String sourceGroup = drone.groupId();
 		List<DroneEntity> affected = fleet.stream().filter(member -> member == drone
 			|| member.groupId().equals(targetGroup)
 			|| sourceGroup.startsWith("WING-") && member.groupId().equals(sourceGroup)).toList();
-		if (!allowOperatorCommands(player, affected)) return;
+		if (!allowOperatorCommands(player, affected)) return false;
 		drone.assignGroup(targetGroup);
 		List<DroneEntity> sourceMembers = fleet.stream()
 			.filter(member -> member != drone && member.groupId().equals(sourceGroup)).toList();
@@ -686,21 +758,23 @@ public final class MorrowgearDrone implements ModInitializer {
 		reslotWingMission(level, player, targetMembers, drone);
 		player.sendSystemMessage(Component.literal("[MORROWGEAR] " + drone.unitId() + " JOIN "
 			+ targetGroup + " " + targetMembers.size() + "/" + WingMembershipPolicy.MAX_MEMBERS));
+		return true;
 	}
 
-	private static void leaveWing(ServerPlayer player, DroneEntity drone) {
-		if (!allowOperatorCommand(player, drone)) return;
-		if (!drone.groupId().startsWith("WING-")) return;
+	private static boolean leaveWing(ServerPlayer player, DroneEntity drone) {
+		if (!allowOperatorCommand(player, drone)) return false;
+		if (!drone.groupId().startsWith("WING-")) return false;
 		ServerLevel level = player.level();
 		String sourceGroup = drone.groupId();
 		List<DroneEntity> remaining = ownedDrones(level, player, 512).stream()
 			.filter(member -> member != drone && member.groupId().equals(sourceGroup)).toList();
-		if (!allowOperatorCommands(player, remaining)) return;
+		if (!allowOperatorCommands(player, remaining)) return false;
 		drone.assignGroup("ALPHA");
 		drone.clearFieldOperation();
 		drone.setMode(DroneMode.STANDBY);
 		reslotWingMission(level, player, remaining, null);
 		player.sendSystemMessage(Component.literal("[MORROWGEAR] " + drone.unitId() + " LEFT " + sourceGroup));
+		return true;
 	}
 
 	private static void reslotWingMission(ServerLevel level, ServerPlayer player, List<DroneEntity> members,
@@ -788,6 +862,7 @@ public final class MorrowgearDrone implements ModInitializer {
 			.findFirst()
 			.ifPresent(dock -> drone.assignDock(dock.getBlockPos()));
 		level.addFreshEntity(drone);
+		drone.prepareForCommissioningReturn();
 		player.sendSystemMessage(Component.literal("[MORROWGEAR] " + drone.unitId()
 			+ (stored == null ? " を展開しました。" : " を再展開しました。")));
 		return true;
@@ -844,21 +919,22 @@ public final class MorrowgearDrone implements ModInitializer {
 			false, server.overworld().getGameTime()));
 	}
 
-	public static void assignDock(ServerPlayer player, DroneEntity drone, BlockPos pos) {
-		if (!allowOperatorCommand(player, drone)) return;
-		if (!(player.level() instanceof ServerLevel level)) return;
+	public static boolean assignDock(ServerPlayer player, DroneEntity drone, BlockPos pos) {
+		if (!allowOperatorCommand(player, drone)) return false;
+		if (!(player.level() instanceof ServerLevel level)) return false;
 		BlockEntity blockEntity = level.getBlockEntity(pos);
-		if (!(blockEntity instanceof DockBlockEntity dock) || !dock.isOwnedBy(player)) return;
+		if (!(blockEntity instanceof DockBlockEntity dock) || !dock.isOwnedBy(player)) return false;
 		List<DroneEntity> displaced = ownedDrones(level, player, 512).stream()
 			.filter(other -> other != drone && other.hasDock() && other.dockPos().equals(pos)).toList();
-		if (!allowOperatorCommands(player, displaced)) return;
+		if (!allowOperatorCommands(player, displaced)) return false;
 		for (DroneEntity other : displaced) other.clearDock();
 		drone.assignDock(pos);
 		player.sendSystemMessage(Component.literal("[MORROWGEAR] " + drone.unitId() + " に " + dock.dockId() + " を割り当てました。"));
+		return drone.hasDock() && drone.dockPos().equals(pos);
 	}
 
-	public static void changeRoleModule(ServerPlayer player, DroneEntity drone, DroneRole requestedRole) {
-		if (!allowOperatorCommand(player, drone)) return;
+	public static boolean changeRoleModule(ServerPlayer player, DroneEntity drone, DroneRole requestedRole) {
+		if (!allowOperatorCommand(player, drone)) return false;
 		boolean validDock = drone.isDocked() && drone.hasDock()
 			&& player.level().getBlockEntity(drone.dockPos()) instanceof DockBlockEntity dock
 			&& dock.isOwnedBy(player);
@@ -868,12 +944,12 @@ public final class MorrowgearDrone implements ModInitializer {
 			drone.role(), requestedRole);
 		if (result == RoleModulePolicy.Result.NOT_DOCKED) {
 			player.sendSystemMessage(Component.literal("[MORROWGEAR] Module Bay is available only while docked."));
-			return;
+			return false;
 		}
-		if (result == RoleModulePolicy.Result.UNCHANGED) return;
+		if (result == RoleModulePolicy.Result.UNCHANGED) return true;
 		if (result == RoleModulePolicy.Result.MODULE_MISSING) {
 			player.sendSystemMessage(Component.literal("[MORROWGEAR] Required " + requestedRole.displayName() + " module was not found."));
-			return;
+			return false;
 		}
 		DroneRole currentRole = drone.role();
 		if (currentRole == DroneRole.CARGO && requestedRole != DroneRole.CARGO) returnCargo(player, drone);
@@ -885,11 +961,12 @@ public final class MorrowgearDrone implements ModInitializer {
 		if (!player.isCreative()) giveModule(player, moduleForRole(currentRole));
 		drone.assignRole(requestedRole);
 		player.sendSystemMessage(Component.literal("[MORROWGEAR] " + drone.unitId() + " / MODULE " + requestedRole.displayName()));
+		return drone.role() == requestedRole;
 	}
 
-	public static void changeSecurityLoadout(ServerPlayer player, DroneEntity drone,
+	public static boolean changeSecurityLoadout(ServerPlayer player, DroneEntity drone,
 		SecurityLoadout requestedLoadout) {
-		if (!allowOperatorCommand(player, drone)) return;
+		if (!allowOperatorCommand(player, drone)) return false;
 		boolean validDock = drone.isDocked() && drone.hasDock()
 			&& player.level().getBlockEntity(drone.dockPos()) instanceof DockBlockEntity dock
 			&& dock.isOwnedBy(player);
@@ -899,21 +976,21 @@ public final class MorrowgearDrone implements ModInitializer {
 			drone.securityLoadout(), requestedLoadout);
 		if (result == WeaponModulePolicy.Result.NOT_SECURITY) {
 			player.sendSystemMessage(Component.literal("[MORROWGEAR] Weapon module requires a Security unit."));
-			return;
+			return false;
 		}
 		if (result == WeaponModulePolicy.Result.NOT_DOCKED) {
 			player.sendSystemMessage(Component.literal("[MORROWGEAR] Weapon Bay is available only while docked."));
-			return;
+			return false;
 		}
 		if (result == WeaponModulePolicy.Result.MODULE_MISSING) {
 			player.sendSystemMessage(Component.literal("[MORROWGEAR] Required weapon module was not found."));
-			return;
+			return false;
 		}
 		if (result == WeaponModulePolicy.Result.PHYSICAL_MODULE_REQUIRED) {
 			player.sendSystemMessage(Component.literal("[MORROWGEAR] Select an installed physical weapon module."));
-			return;
+			return false;
 		}
-		if (result == WeaponModulePolicy.Result.UNCHANGED) return;
+		if (result == WeaponModulePolicy.Result.UNCHANGED) return true;
 		if (!player.isCreative()) {
 			consumeOne(player, requestedModule);
 			giveModule(player, moduleForLoadout(drone.securityLoadout()));
@@ -922,14 +999,15 @@ public final class MorrowgearDrone implements ModInitializer {
 		CombatTheaterCoordinator.clear();
 		player.sendSystemMessage(Component.literal("[MORROWGEAR] " + drone.unitId()
 			+ " / WEAPON " + requestedLoadout.displayName()));
+		return drone.securityLoadout() == requestedLoadout;
 	}
 
-	public static void upgradeCapacity(ServerPlayer player, DroneEntity drone, int expectedTier) {
-		if (!allowOperatorCommand(player, drone)) return;
+	public static boolean upgradeCapacity(ServerPlayer player, DroneEntity drone, int expectedTier) {
+		if (!allowOperatorCommand(player, drone)) return false;
 		if (!drone.isOwnedBy(player) || drone.role() != DroneRole.SECURITY || !drone.isDocked()
 			|| !drone.hasDock() || drone.capacityTier() != expectedTier || expectedTier >= PayloadCapacity.MAX_TIER
 			|| !(player.level().getBlockEntity(drone.dockPos()) instanceof DockBlockEntity dock)
-			|| !dock.isOwnedBy(player)) return;
+			|| !dock.isOwnedBy(player)) return false;
 		int alloy = expectedTier == 0 ? 8 : 16;
 		int diamonds = expectedTier == 0 ? 1 : 4;
 		int redstone = expectedTier == 0 ? 2 : 4;
@@ -946,7 +1024,7 @@ public final class MorrowgearDrone implements ModInitializer {
 		})) {
 			player.sendSystemMessage(Component.literal("[MORROWGEAR] CAPACITY / 合金 " + alloy
 				+ " / ダイヤ " + diamonds + " / レッドストーンブロック " + redstone + " / ネザライトの欠片 " + scrap));
-			return;
+			return false;
 		}
 		if (!player.isCreative()) cost.forEach((item, count) -> {
 			for (int i = 0; i < count; i++) consumeOne(player, item);
@@ -955,6 +1033,7 @@ public final class MorrowgearDrone implements ModInitializer {
 		player.sendSystemMessage(Component.literal("[MORROWGEAR] " + drone.unitId() + " / CAPACITY "
 			+ drone.capacityTier() + " / GUN " + drone.gunCapacity() + " / MSL " + drone.missileCapacity()
 			+ " / ENERGY " + drone.weaponCapacity() + " / 残量は補給してください"));
+		return drone.capacityTier() == expectedTier + 1;
 	}
 
 	private static void returnInstalledModule(ServerPlayer player, DroneEntity drone) {
@@ -1271,6 +1350,7 @@ public final class MorrowgearDrone implements ModInitializer {
 		Block[] parts = wide ? WIDE_DOCK_PARTS : DOCK_PARTS;
 		int side = wide ? 5 : 3;
 		if (level.getBlockEntity(center) instanceof DockBlockEntity dock) {
+			SupplyNetworkRuntime.removeDock(level, dock.ownerId(), center);
 			dockTopologyChanged(level, dock.ownerId());
 			for (int slot = 0; slot < dock.getContainerSize(); slot++) {
 				ItemStack stack = dock.removeItemNoUpdate(slot);

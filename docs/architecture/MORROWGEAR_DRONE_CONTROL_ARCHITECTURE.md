@@ -26,6 +26,7 @@
 - [サービス帰還ポリシー](../design/AUTO_COMBAT_SERVICE_POLICY.md)
 - [ライフサイクル・物流仕様](../design/MORROWGEAR_LIFECYCLE_LOGISTICS_SPEC.md)
 - [自律運用・Task Force仕様](../design/MORROWGEAR_AUTONOMOUS_OPERATIONS_SPEC.md)
+- [FIELD動的データリンク網 設計・検証仕様](../design/MORROWGEAR_DYNAMIC_FIELD_DATALINK_SPEC_JA.md)
 
 ### 目次
 

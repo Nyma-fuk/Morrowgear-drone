@@ -22,8 +22,10 @@ final class OperatorMissionControlContractTest {
 		assertTrue(override.contains("clearCombatState()"));
 		assertTrue(override.contains("clearEmergencyInterception()"));
 		assertTrue(override.contains("taskStack.clear()"));
-		assertTrue(override.contains("cargo.stream().anyMatch"));
+		assertTrue(override.contains("!acceptsOperatorFlightCommand()"));
+		assertTrue(entity.contains("supplyLoadCommitted()"));
 		assertTrue(entity.contains("salvageTowCommitted()"));
+		assertTrue(entity.contains("cargoLiftMissionId != null"));
 	}
 
 	@Test void explicitTargetCommandIsValidatedServerSideAndPersistsAcrossReload() throws Exception {

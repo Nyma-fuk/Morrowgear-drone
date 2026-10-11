@@ -280,6 +280,17 @@ final class CombatPolicyTest {
 	}
 
 	@Test
+	void threatOnPatrolAnchorUsesThePhysicalInboundCasAxis() {
+		Vec3 fromWest = CombatPolicy.casAttackAxis(Vec3.ZERO, new Vec3(54, 0, 0), 1);
+		Vec3 fromNorth = CombatPolicy.casAttackAxis(Vec3.ZERO, new Vec3(0, 0, 54), 999);
+		assertTrue(fromWest.normalize().dot(new Vec3(1, 0, 0)) > 0.999);
+		assertTrue(fromNorth.normalize().dot(new Vec3(0, 0, 1)) > 0.999);
+		Vec3 strategic = CombatPolicy.casAttackAxis(new Vec3(-20, 0, 4),
+			new Vec3(54, 0, 0), 7);
+		assertTrue(strategic.normalize().dot(new Vec3(-20, 0, 4).normalize()) > 0.999);
+	}
+
+	@Test
 	void laserClimbsAsChargeCompletes() {
 		Vec3 target = new Vec3(0, 64, 0);
 		Vec3 empty = CombatPolicy.laserOrbit(target, 0, 4, 0, 0);

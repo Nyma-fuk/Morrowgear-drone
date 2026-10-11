@@ -103,13 +103,13 @@ public final class DroneAudioController {
 
 	private static void updateCannons(Minecraft client, List<DroneEntity> nearby, Vec3 listener, long now) {
 		List<DroneEntity> candidates = nearby.stream().filter(drone ->
-			(drone.combatState() == CombatState.GUN_RUN && DroneAudioPolicy.freshEvent(now, drone.combatShotTick()))
+			DroneAudioPolicy.freshEvent(now, drone.gunShotTick())
 				|| CANNONS.containsKey(drone.getUUID())).toList();
 		List<DroneEntity> emitters = nearest(candidates, listener, DroneAudioPolicy.WEAPON_RANGE,
 			DroneAudioPolicy.MAX_CANNON_EMITTERS, CANNONS.keySet());
 		Set<UUID> ids = new HashSet<>();
-		int firing = (int)emitters.stream().filter(drone -> drone.combatState() == CombatState.GUN_RUN
-			&& DroneAudioPolicy.freshEvent(now, drone.combatShotTick())).count();
+		int firing = (int)emitters.stream().filter(drone ->
+			DroneAudioPolicy.freshEvent(now, drone.gunShotTick())).count();
 		for (DroneEntity drone : emitters) {
 			ids.add(drone.getUUID());
 			CANNONS.computeIfAbsent(drone.getUUID(), ignored -> new Cannon(drone))
@@ -280,7 +280,7 @@ public final class DroneAudioController {
 		private final DroneAudioPolicy.CannonGate gate = new DroneAudioPolicy.CannonGate();
 		private Cannon(DroneEntity drone) { fire = new Loop(drone, MorrowgearDrone.AUTOCANNON_FIRE_SOUND); }
 		private void update(Minecraft client, DroneEntity drone, int count, long now) {
-			var change = gate.update(drone.combatState(), now, drone.combatShotTick());
+			var change = gate.update(now, drone.gunShotTick());
 			playing = change.playing();
 			float gain = DroneAudioPolicy.fleetGain(count);
 			if (change.started()) tail(client, oneShot(client, drone, MorrowgearDrone.AUTOCANNON_START_SOUND,

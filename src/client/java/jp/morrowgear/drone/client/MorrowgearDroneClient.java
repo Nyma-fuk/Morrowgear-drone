@@ -5,6 +5,7 @@ import jp.morrowgear.drone.MorrowgearDrone;
 import jp.morrowgear.drone.network.PowerLostBeaconPayload;
 import jp.morrowgear.drone.network.DroneCommandResultPayload;
 import jp.morrowgear.drone.network.CargoLiftStatusPayload;
+import jp.morrowgear.drone.network.StrikeBeaconLaunchPayload;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
@@ -13,6 +14,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
+import net.fabricmc.fabric.api.event.client.player.ClientPreAttackCallback;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.EntityRenderers;
@@ -34,6 +36,7 @@ public final class MorrowgearDroneClient implements ClientModInitializer {
 	private static final KeyMapping VISOR_PIN = key("key.morrowgear_drone.visor_pin", InputConstants.KEY_G);
 	private static final KeyMapping VISOR_CONTEXT = key("key.morrowgear_drone.visor_context", InputConstants.KEY_H);
 	private static final KeyMapping VISOR_RANGE = key("key.morrowgear_drone.visor_range", InputConstants.KEY_J);
+	private static final KeyMapping VISOR_AIRSPACE_MAP = key("key.morrowgear_drone.visor_airspace_map", InputConstants.KEY_M);
 
 	@Override
 	public void onInitializeClient() {
@@ -72,6 +75,7 @@ public final class MorrowgearDroneClient implements ClientModInitializer {
 		EntityRenderers.register(MorrowgearDrone.SOLAR_SERVICE_STATION, SolarServiceStationRenderer::new);
 		EntityRenderers.register(MorrowgearDrone.CHARGING_RELAY, ChargingRelayRenderer::new);
 		EntityRenderers.register(MorrowgearDrone.CARGO_LIFT_LOAD, CargoLiftLoadRenderer::new);
+		EntityRenderers.register(MorrowgearDrone.STRIKE_BEACON, StrikeBeaconRenderer::new);
 		HudElementRegistry.attachElementAfter(VanillaHudElements.CROSSHAIR,
 			Identifier.fromNamespaceAndPath(MorrowgearDrone.MOD_ID, "tactical_visor"), VISOR_HUD);
 		HudElementRegistry.attachElementAfter(VanillaHudElements.CROSSHAIR,
@@ -96,6 +100,14 @@ public final class MorrowgearDroneClient implements ClientModInitializer {
 			Minecraft.getInstance().setScreenAndShow(new TacticalScreen());
 			return InteractionResult.SUCCESS;
 		});
+		ClientPreAttackCallback.EVENT.register((client, player, clickCount) -> {
+			boolean main = player.getMainHandItem().is(MorrowgearDrone.STRIKE_BEACON_LAUNCHER);
+			boolean off = !main && player.getOffhandItem().is(MorrowgearDrone.STRIKE_BEACON_LAUNCHER);
+			if (!main && !off) return false;
+			if (clickCount > 0)
+				ClientPlayNetworking.send(new StrikeBeaconLaunchPayload(off));
+			return true;
+		});
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			FormationTrailController.tick(client);
@@ -109,11 +121,20 @@ public final class MorrowgearDroneClient implements ClientModInitializer {
 			while (VISOR_PIN.consumeClick()) VISOR_HUD.togglePin(client);
 			while (VISOR_CONTEXT.consumeClick()) VISOR_HUD.cycleContext(client);
 			while (VISOR_RANGE.consumeClick()) VISOR_HUD.cycleRange(client);
+			while (VISOR_AIRSPACE_MAP.consumeClick()) VISOR_HUD.toggleAirspaceMap(client);
 		});
 	}
 
 	private static KeyMapping key(String translationKey, int keyCode) {
 		return KeyMappingHelper.registerKeyMapping(new KeyMapping(translationKey,
 			InputConstants.Type.KEYSYM, keyCode, CATEGORY));
+	}
+
+	static void enableAirspaceMapForAutomation() {
+		VISOR_HUD.enableAirspaceMapForAutomation();
+	}
+
+	static int operationSubtitleY(Minecraft client, int boxHeight) {
+		return VISOR_HUD.operationSubtitleY(client, boxHeight);
 	}
 }

@@ -179,10 +179,25 @@ class FlightDynamicsTest {
 			new Vec3(-8, 6, 0), Vec3.ZERO, 0.8);
 		assertTrue(urgent.x < 0);
 		assertTrue(urgent.y > 0);
-		assertEquals(urgent, motion.step(new Vec3(0.5, 0, 0), urgent, 1, true));
-		assertEquals(Vec3.ZERO, motion.step(urgent, Vec3.ZERO, 2, true));
-		Vec3 resumed = motion.step(Vec3.ZERO, new Vec3(1, 0, 0), 3, false);
+		Vec3 recovered = motion.step(new Vec3(0.5, 0, 0), urgent, 1, true);
+		assertTrue(recovered.subtract(new Vec3(0.5, 0, 0)).length()
+			<= FlightDynamics.SAFETY_RECOVERY_ACCELERATION + 1e-9);
+		Vec3 braking = motion.step(recovered, Vec3.ZERO, 2, true);
+		assertTrue(braking.subtract(recovered).length()
+			<= FlightDynamics.SAFETY_RECOVERY_ACCELERATION + 1e-9);
+		Vec3 resumed = motion.step(braking, new Vec3(1, 0, 0), 3, false);
 		assertTrue(resumed.x <= FlightDynamics.HORIZONTAL_JERK);
+	}
+
+	@Test
+	void safetyRecoveryRemainsBoundedAcrossAnOppositeDirectionEscape() {
+		FlightDynamics.Motion motion = new FlightDynamics.Motion();
+		Vec3 current = new Vec3(0.8, 0.0, 0.0);
+		Vec3 next = motion.step(current, new Vec3(-0.8, 0.25, 0.0), 0, true);
+		assertTrue(next.subtract(current).length()
+			<= FlightDynamics.SAFETY_RECOVERY_ACCELERATION + 1e-9);
+		assertTrue(next.x < current.x);
+		assertTrue(next.y > current.y);
 	}
 
 	@Test

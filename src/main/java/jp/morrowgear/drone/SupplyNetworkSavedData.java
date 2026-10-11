@@ -83,7 +83,9 @@ public final class SupplyNetworkSavedData extends SavedData {
 	final java.util.Map<Route, Notice> notices = new java.util.HashMap<>();
 	final java.util.Map<java.util.UUID, Long> ownerNoticeTicks = new java.util.HashMap<>();
 	final java.util.LinkedHashMap<java.util.UUID, java.lang.ref.WeakReference<DroneEntity>> candidates = new java.util.LinkedHashMap<>();
+	private final java.util.Map<DemandKey, Long> lastDeliveries = new java.util.HashMap<>();
 	long lastTick = Long.MIN_VALUE;
+	private boolean evaluationRequested = true;
 
 	public SupplyNetworkSavedData() {}
 
@@ -98,6 +100,22 @@ public final class SupplyNetworkSavedData extends SavedData {
 	}
 
 	public SupplyNetworkRegistry registry() { return registry; }
+	long lastDelivery(Route route, SupplyKind kind) {
+		return lastDeliveries.getOrDefault(DemandKey.of(route, kind), Long.MIN_VALUE);
+	}
+	void recordDelivery(Route route, SupplyKind kind, long tick) {
+		lastDeliveries.put(DemandKey.of(route, kind), tick);
+		requestEvaluation();
+	}
+	void retainDeliveryHistory(List<Configuration> configurations) {
+		java.util.Set<DemandKey> active = new java.util.HashSet<>();
+		for (Configuration configuration : configurations) for (SupplyKind kind : SupplyKind.values())
+			active.add(DemandKey.of(configuration.route(), kind));
+		lastDeliveries.keySet().retainAll(active);
+	}
+	void requestEvaluation() { evaluationRequested = true; }
+	boolean evaluationRequested() { return evaluationRequested; }
+	void consumeEvaluationRequest() { evaluationRequested = false; }
 	public void registerNode(java.util.UUID owner, String dimension, long position) {
 		LogisticsNode node = new LogisticsNode(owner, dimension, position);
 		if (nodes.contains(node)) return;
@@ -106,7 +124,15 @@ public final class SupplyNetworkSavedData extends SavedData {
 		if (count >= SupplyNetworkPolicy.MAX_DISCOVERED_NODES)
 			throw new IllegalStateException("Logistics node limit reached");
 		nodes.add(node);
+		requestEvaluation();
 		setDirty();
+	}
+	public boolean unregisterNode(java.util.UUID owner, String dimension, long position) {
+		boolean removed = nodes.remove(new LogisticsNode(owner, dimension, position));
+		if (!removed) return false;
+		requestEvaluation();
+		setDirty();
+		return true;
 	}
 	public List<Long> nodes(java.util.UUID owner, String dimension) {
 		return nodes.stream().filter(node -> node.owner().equals(owner) && node.dimension().equals(dimension))
@@ -124,6 +150,11 @@ public final class SupplyNetworkSavedData extends SavedData {
 	}
 
 	record Notice(Status status, long tick) {}
+	private record DemandKey(java.util.UUID owner, String dimension, long dock, SupplyKind kind) {
+		static DemandKey of(Route route, SupplyKind kind) {
+			return new DemandKey(route.owner(), route.dimension(), route.dock(), kind);
+		}
+	}
 	public record LogisticsNode(java.util.UUID owner, String dimension, long position) {
 		public LogisticsNode {
 			if (owner == null || dimension == null || dimension.isBlank())

@@ -57,4 +57,14 @@ public final class CarrierCargoVisualPolicy {
         Vec3 center = Vec3.atBottomCenterOf(container);
         return new Vec3(center.x - horizontalOffset.x, carrierY, center.z - horizontalOffset.z);
     }
+
+    /** Yaw that places the selected hardpoint on the nearest side of the load. */
+    public static float nearestAlignmentYaw(Vec3 carrierPosition, BlockPos container, int slot, float fallbackYaw) {
+        Pod pod = hardpoint(slot);
+        Vec3 delta = Vec3.atBottomCenterOf(container).subtract(carrierPosition);
+        if (delta.x * delta.x + delta.z * delta.z < 1.0e-8) return fallbackYaw;
+        double localAngle = Math.atan2(pod.z(), pod.x());
+        double worldAngle = Math.atan2(delta.z, delta.x);
+        return (float) Math.toDegrees(localAngle - worldAngle);
+    }
 }

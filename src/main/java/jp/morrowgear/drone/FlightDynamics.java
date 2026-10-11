@@ -20,6 +20,7 @@ final class FlightDynamics {
 	static final double VERTICAL_ACCELERATION = 0.035;
 	static final double HORIZONTAL_JERK = 0.014;
 	static final double VERTICAL_JERK = 0.009;
+	static final double SAFETY_RECOVERY_ACCELERATION = 0.30;
 	// Transient state must survive mission changes without changing saved entity data.
 	private static final Map<DroneEntity, Motion> MOTION = Collections.synchronizedMap(new WeakHashMap<>());
 
@@ -277,9 +278,11 @@ final class FlightDynamics {
 			current = finite(current);
 			requested = finite(requested);
 			if (safetyOverride) {
-				// Collision/fluid recovery and hard terrain stops cannot inherit turn inertia.
+				// Collision/fluid recovery drops turn inertia, but must not teleport the
+				// aircraft between velocities. A bounded emergency correction is still
+				// fast enough to clear terrain while preserving a readable flight path.
 				acceleration = Vec3.ZERO;
-				return requested;
+				return current.add(limit(requested.subtract(current), SAFETY_RECOVERY_ACCELERATION));
 			}
 			// Limit the requested curvature before the jerk filter, never snap an existing turn.
 			requested = FlightAttitude.coordinatedVelocity(current, requested);

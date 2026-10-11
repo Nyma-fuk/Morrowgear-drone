@@ -10,7 +10,7 @@
 | Java | 25以上（64 bit） |
 | Fabric Loader | 0.19.3以上 |
 | Fabric API | 0.156.0+26.2 |
-| Morrowgear: Drone Command | 0.20.5 |
+| Morrowgear: Drone Command | 0.20.6 |
 
 Minecraft、Fabric API、Morrowgearのバージョンは、サーバーと参加者全員で一致させてください。Morrowgearはサーバーだけでなく、画面表示、機体描画、サウンドを担当する各参加者のクライアントにも必要です。
 
@@ -87,7 +87,7 @@ op PlayerName
 
 ```text
 fabric-api-0.156.0+26.2.jar
-morrowgear-drone-0.20.5.jar
+morrowgear-drone-0.20.6.jar
 ```
 
 ## 5. マルチプレイ上の動作

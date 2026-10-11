@@ -30,6 +30,8 @@ public final class TacticalUiPolicy {
 			case "dock" -> "DOCK";
 			case "orbit" -> "ORBIT";
 			case "decommission" -> "STORE";
+			case "mesh_deploy" -> "MESH DEPLOY";
+			case "mesh_withdraw" -> "MESH RTB";
 			default -> "UNKNOWN";
 		};
 	}

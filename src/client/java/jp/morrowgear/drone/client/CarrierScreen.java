@@ -732,12 +732,19 @@ public final class CarrierScreen extends DockCarrierHmiScreen<CarrierMenu> {
     }
 
     private static String transferDetail(String detail){
+        if(detail==null||detail.isBlank())return "進行中";
+        if(detail!=null&&detail.startsWith("ROUTE_DIRECT"))return "最短直行経路";
+        if(detail!=null&&detail.startsWith("ROUTE_LEVEL"))return "低高度迂回経路";
+        if(detail!=null&&detail.startsWith("ROUTE_ALTITUDE"))return "最小上昇経路";
+        if(detail!=null&&detail.startsWith("ROUTE_ELEVATED"))return "上昇迂回経路";
         return switch(detail){
             case "LOAD_ACCEPTED" -> "搭載先を確保"; case "UNLOAD_ACCEPTED" -> "接地点を確保";
             case "CARRIER_APPROACH_BLOCKED" -> "接近経路を再計画"; case "CARRIER_ALIGNMENT_BLOCKED" -> "位置合わせを再試行";
+            case "CARRIER_ALIGNMENT_TURN_BLOCKED" -> "最終方位を再計画";
+            case "NO_CLEAR_TRANSFER_ROUTE" -> "通行可能な荷役経路なし";
             case "TRANSFER_RECOVERY_EXHAUSTED" -> "経路を確保できません"; case "TRANSFER_CANCELLED" -> "中止済み";
             case "LOAD_COMPLETE" -> "搭載完了"; case "UNLOAD_COMPLETE" -> "荷下ろし完了";
-            default -> detail==null||detail.isBlank()?"進行中":detail.replace('_',' ');
+            default -> detail.replace('_',' ');
         };
     }
     private void drawPower(GuiGraphicsExtractor g, String label, int amount, int x, int y, int w, int color) {

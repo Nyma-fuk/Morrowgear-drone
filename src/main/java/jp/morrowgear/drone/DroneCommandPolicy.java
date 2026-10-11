@@ -8,7 +8,8 @@ public final class DroneCommandPolicy {
 	public static final int MAX_MISSION_SIZE = 128;
 	public static final int MAX_MISSION_ID_LENGTH = 96;
 	private static final Pattern MISSION_ID = Pattern.compile("[A-Za-z0-9._#-]{1," + MAX_MISSION_ID_LENGTH + "}");
-	private static final Set<String> SIMPLE_ACTIONS = Set.of("standby", "return", "dock", "orbit", "decommission");
+	private static final Set<String> SIMPLE_ACTIONS = Set.of("standby", "return", "dock", "orbit", "decommission",
+		"mesh_deploy", "mesh_withdraw");
 
 	private DroneCommandPolicy() {
 	}
@@ -34,5 +35,11 @@ public final class DroneCommandPolicy {
 
 	public static boolean validSecurityRadius(int radius) {
 		return radius == DroneStatePolicy.securityRadius(radius);
+	}
+
+	/** Physical custody cannot be replaced by an unrelated flight command. */
+	public static boolean acceptsOperatorFlightCommand(boolean salvageTow, boolean cargoLift,
+		boolean supplyLoad) {
+		return !salvageTow && !cargoLift && !supplyLoad;
 	}
 }

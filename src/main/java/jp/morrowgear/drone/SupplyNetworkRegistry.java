@@ -40,8 +40,8 @@ public final class SupplyNetworkRegistry {
 		if (old != null && old.route().equals(route) && old.rules().equals(checked) && old.enabled() == enabled)
 			return old;
 		if (old != null) {
-			for (Job job : List.copyOf(jobs.values())) if (sameDock(job.route(), old.route()))
-				cancel(job.token(), Status.CANCELLED);
+			for (Job job : List.copyOf(jobs.values())) if (sameDock(job.route(), old.route())
+				&& job.stage() == Stage.RESERVED) cancel(job.token(), Status.CANCELLED);
 			routes.remove(old.route());
 			statuses.remove(old.route());
 			refilling.removeIf(key -> key.route().equals(old.route()));
@@ -79,7 +79,9 @@ public final class SupplyNetworkRegistry {
 	}
 
 	private boolean configured(Job job) {
-		if (job.returning()) return true;
+		// A loaded manifest is a physical custody contract. Configuration changes
+		// affect future dispatches, not cargo already airborne.
+		if (job.stage() == Stage.LOADED || job.returning()) return true;
 		Configuration c = configuration(job.route());
 		return c != null && c.enabled() && c.revision() == job.revision() && job.stage() != Stage.HELD;
 	}
@@ -93,6 +95,32 @@ public final class SupplyNetworkRegistry {
 		return config == null ? route : config.route();
 	}
 
+	/**
+	 * Removes one physical Dock endpoint without discarding cargo already in flight.
+	 * Empty reservations are cancelled outright; a manifest still carried by an
+	 * aircraft is held so the runtime can redirect it to another owned Dock or back
+	 * to its source.
+	 */
+	public boolean removeDock(Route route) {
+		Configuration config = configuration(route);
+		if (config == null) return false;
+		for (Job job : List.copyOf(jobs.values())) {
+			if (!job.route().owner().equals(config.route().owner())
+				|| !job.route().dimension().equals(config.route().dimension())
+				|| job.deliveryTarget() != config.route().dock()) continue;
+			if (job.remaining() > 0) {
+				jobs.put(job.drone(), job.withProgress(job.loaded(), job.delivered(),
+					Stage.HELD, Status.DOCK_LOST, job.seenTick()));
+			} else jobs.remove(job.drone());
+		}
+		routes.remove(config.route());
+		statuses.remove(config.route());
+		refilling.removeIf(key -> sameDock(key.route(), config.route()));
+		evaluated.removeIf(key -> sameDock(key.route(), config.route()));
+		dirty.run();
+		return true;
+	}
+
 	public int reservedSource(Route route, String item) {
 		return jobs.values().stream().filter(j -> j.stage() == Stage.RESERVED
 			&& j.route().owner().equals(route.owner()) && j.route().dimension().equals(route.dimension())
@@ -104,7 +132,10 @@ public final class SupplyNetworkRegistry {
 		return jobs.values().stream().filter(j -> j.route().owner().equals(route.owner())
 			&& j.route().dimension().equals(route.dimension()) && j.deliveryTarget() == route.dock()
 			&& j.stage() != Stage.RETURN_SOURCE && j.kind() == kind
-			&& j.stage() != Stage.HELD).mapToInt(j -> j.stage() == Stage.RESERVED
+			// A HELD manifest with physical cargo is still inbound inventory. Ignoring it
+			// reissues the same demand every evaluation while that aircraft awaits a
+			// usable Dock. Empty failed reservations must not suppress replacement work.
+			&& (j.stage() != Stage.HELD || j.remaining() > 0)).mapToInt(j -> j.stage() == Stage.RESERVED
 				? j.requested() : j.remaining()).sum();
 	}
 

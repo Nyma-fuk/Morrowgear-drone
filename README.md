@@ -4,6 +4,8 @@
 
 制御アーキテクチャ、Waypoint/Wing同期、通信断時の挙動、および実ドローンへ展開する場合の設計差分は、[Morrowgear Drone 制御アーキテクチャ・実機化設計指針](docs/architecture/MORROWGEAR_DRONE_CONTROL_ARCHITECTURE.md)を参照してください。
 
+Minecraft 26.2 Fabric版を維持しながらMinecraft 1.21.1 NeoForge版へ移植する方針、性能・互換性リスク、段階移行、試験、配布条件は、[Minecraft 1.21.1 NeoForge 移植計画](docs/architecture/MORROWGEAR_MC1211_NEOFORGE_PORTING_PLAN_JA.md)を参照してください。
+
 ## v0.19.1 Autonomous Operations
 
 - 戦術画面へ`AUTO OPS`を追加した。作業種別と地点だけを指定すると、serverが待機・着艦中の適格機から最大8機の一時Task Forceを編成する。

@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/handheld",
+  "textures": {
+    "layer0": "morrowgear_drone:item/strike_beacon_launcher"
+  }
+}

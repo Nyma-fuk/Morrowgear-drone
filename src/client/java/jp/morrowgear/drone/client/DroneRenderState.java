@@ -24,8 +24,10 @@ public final class DroneRenderState extends EntityRenderState {
 	public CombatWeapon combatWeapon = CombatWeapon.NONE;
 	public int combatCharge;
 	public int combatShotAge = 1000;
+	public int gunShotAge = 1000;
 	public long combatStateAge;
 	public Vec3 combatTargetOffset;
+	public Vec3 gunTargetOffset;
 	public SalvageState salvageState = SalvageState.IDLE;
 	public Vec3 salvageTargetOffset;
 	public Vec3 cargoLiftAnchorOffset;

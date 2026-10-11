@@ -59,6 +59,14 @@ class VisorHudPerformanceTest {
                             for (var segment : segments) check(Double.isFinite(segment.x1()) && Double.isFinite(segment.y2()));
                         }
                     }
+					int[] horizontal = VisorHudCache.clipLine(Integer.MIN_VALUE, 40,
+						Integer.MAX_VALUE, 40, 1920, 1080, 32);
+					check(horizontal != null && horizontal[0] == -32 && horizontal[2] == 1952);
+					int[] diagonal = VisorHudCache.clipLine(-1000000, -1000000,
+						1000000, 1000000, 1280, 720, 32);
+					check(diagonal != null && diagonal[0] >= -32 && diagonal[0] <= 1312);
+					check(diagonal[2] >= -32 && diagonal[2] <= 1312);
+					check(VisorHudCache.clipLine(-100, -100, -80, -80, 1920, 1080, 32) == null);
                 }
                 private static void check(boolean condition) { if (!condition) throw new AssertionError(); }
             }
@@ -83,7 +91,13 @@ class VisorHudPerformanceTest {
         assertTrue(source.contains("drawProximity(g, client, contacts, clusters"));
         String dashed = source.substring(source.indexOf("private void drawDashedLine("), source.indexOf("private void drawText("));
         assertTrue(dashed.contains("VisorHudCache.dashes("));
+		assertTrue(dashed.contains("VisorHudCache.clipLine("));
         assertFalse(dashed.contains("i <="));
         assertTrue(dashed.contains("1, color)"));
+		String solid = source.substring(source.indexOf("private void drawLine("),
+			source.indexOf("private void drawFastLine("));
+		assertTrue(solid.contains("VisorHudCache.clipLine("));
+		assertTrue(solid.contains("drawFastLine("));
+		assertFalse(solid.contains("for ("));
     }
 }

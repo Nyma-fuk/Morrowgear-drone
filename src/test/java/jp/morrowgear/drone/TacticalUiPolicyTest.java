@@ -18,8 +18,8 @@ final class TacticalUiPolicyTest {
 	void everyControllerRoleAndCommandHasAnIntrinsicLabel() {
 		assertEquals(List.of("FIELD", "SCT", "CRG", "ENG", "SEC", "SLV"),
 			Stream.of(DroneRole.values()).map(TacticalUiPolicy::moduleLabel).toList());
-		assertEquals(List.of("FOLLOW", "STANDBY", "RETURN", "DOCK", "ORBIT", "STORE"),
-			Stream.of("follow", "standby", "return", "dock", "orbit", "decommission")
+		assertEquals(List.of("FOLLOW", "STANDBY", "RETURN", "DOCK", "ORBIT", "STORE", "MESH DEPLOY", "MESH RTB"),
+			Stream.of("follow", "standby", "return", "dock", "orbit", "decommission", "mesh_deploy", "mesh_withdraw")
 				.map(TacticalUiPolicy::actionLabel).toList());
 		assertEquals("---", TacticalUiPolicy.moduleLabel(null));
 		assertEquals("UNKNOWN", TacticalUiPolicy.actionLabel(null));

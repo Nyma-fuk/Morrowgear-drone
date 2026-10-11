@@ -7,34 +7,31 @@ final class DroneAudioPolicyTest {
 	@Test void cannonRequiresActualRecentShotsNotJustAnAttackState() {
 		var gate = new DroneAudioPolicy.CannonGate();
 		assertEquals(new DroneAudioPolicy.CannonChange(false, false, false),
-			gate.update(CombatState.GUN_RUN, 100, -1));
-		assertFalse(gate.update(CombatState.GUN_RUN, 100, 96).playing());
-		assertFalse(gate.update(CombatState.GUN_RUN, 100, 101).playing());
-		assertTrue(gate.update(CombatState.GUN_RUN, 100, 100).started());
+			gate.update(100, -1));
+		assertFalse(gate.update(100, 96).playing());
+		assertFalse(gate.update(100, 101).playing());
+		assertTrue(gate.update(100, 100).started());
 	}
 
 	@Test void cannonTwoTickCadenceHoldsOneBurstAndStopsAfterTheLastRound() {
 		var gate = new DroneAudioPolicy.CannonGate();
 		for (int tick = 100; tick <= 123; tick++) {
 			long shot = Math.min(120, tick - tick % 2);
-			var change = gate.update(CombatState.GUN_RUN, tick, shot);
+			var change = gate.update(tick, shot);
 			assertTrue(change.playing());
 			assertEquals(tick == 100, change.started());
 			assertFalse(change.stopped());
 		}
-		assertTrue(gate.update(CombatState.GUN_RUN, 124, 120).stopped());
-		assertFalse(gate.update(CombatState.GUN_RUN, 125, 120).stopped());
-		assertTrue(gate.update(CombatState.GUN_RUN, 126, 126).started());
+		assertTrue(gate.update(124, 120).stopped());
+		assertFalse(gate.update(125, 120).stopped());
+		assertTrue(gate.update(126, 126).started());
 	}
 
-	@Test void leavingCannonPassStopsImmediatelyEvenIfTheLastShotIsFresh() {
-		for (CombatState state : CombatState.values()) {
-			if (state == CombatState.GUN_RUN) continue;
-			var gate = new DroneAudioPolicy.CannonGate();
-			gate.update(CombatState.GUN_RUN, 100, 100);
-			assertTrue(gate.update(state, 101, 100).stopped(), state.name());
-			assertFalse(gate.update(state, 102, 100).playing(), state.name());
-		}
+	@Test void weaponStateChangesCannotMuteAConfirmedAutocannonBurst() {
+		var gate = new DroneAudioPolicy.CannonGate();
+		assertTrue(gate.update(100, 100).started());
+		assertTrue(gate.update(101, 100).playing());
+		assertTrue(gate.update(104, 100).stopped());
 	}
 
 	@Test void missileMotorOnlyRunsBetweenIgnitionAndImpact() {

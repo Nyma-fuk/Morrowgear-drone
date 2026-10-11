@@ -40,6 +40,7 @@ final class ControllerDisplayText {
         return switch (action) {
             case "follow" -> "追従"; case "return" -> "集合"; case "dock" -> "Dock帰還";
             case "standby" -> "任務中止"; case "orbit" -> "旋回"; case "decommission" -> "格納";
+			case "mesh_deploy" -> "Mesh展開"; case "mesh_withdraw" -> "Mesh撤収";
             default -> "操作不明";
         };
     }
